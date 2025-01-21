@@ -1,0 +1,43 @@
+.game-page {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.left-panel,
+.chat,
+.right-panel {
+  width: 30%;
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  height: 300px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.chat-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+button {
+  padding: 10px;
+  cursor: pointer;
+}
+
+input[type='text'] {
+  padding: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  border: 1px solid #ddd;
+}
