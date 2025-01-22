@@ -45,6 +45,7 @@ import Notifier from 'components/Notifier'
 import Leaderboard from './pages/Leaderboard'
 import ChatApp from 'pages/ChatApp'
 import GamePage from 'pages/Game'
+import { SocketProvider } from 'context/SocketContext'
 
 const theme = {
   colors: {
@@ -123,11 +124,13 @@ const App: React.FC = () => {
       <ErrorProvider>
         <AuthProvider>
           <UserProvider>
-            <GoogleTagManager />
-            <Notifier />
-            <AppContent />
-            <ScrollToTop />
-            <ThemeSwitcher />
+            <SocketProvider>
+              <GoogleTagManager />
+              <Notifier />
+              <AppContent />
+              <ScrollToTop />
+              <ThemeSwitcher />
+            </SocketProvider>
           </UserProvider>
         </AuthProvider>
       </ErrorProvider>

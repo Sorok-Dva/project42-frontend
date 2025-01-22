@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 import MainBanner from 'components/HomePage/MainBanner'
-import Features from 'components/HomePage/Features'
 import CreateGame from 'components/Game/Create'
+import RoomList from 'components/Game/Rooms'
 
 const DashboardContainer = styled.div`
   padding: 2rem;
@@ -29,6 +29,9 @@ const HomePage = () => {
           <h2>Trouver une partie.</h2>
         </WelcomeMessage>
 
+        <GridContainer>
+          <RoomList />
+        </GridContainer>
         <GridContainer>
           <CreateGame />
         </GridContainer>
