@@ -5,6 +5,8 @@ import { useSocket } from 'context/SocketContext'
 import { Box, Typography, TextField, Button, List, ListItem, ListItemText } from '@mui/material'
 import axios from 'axios'
 import 'styles/GamePage.css'
+import { Container, Spinner } from 'reactstrap'
+import { useAuth } from '../context/AuthContext'
 
 interface RoomData {
   id: number;
@@ -31,6 +33,7 @@ export const GAME_TYPES: Record<number, string> = {
 const GamePage = () => {
   const { id: gameId } = useParams<{ id: string }>()
   const { user } = useUser()
+  const { token } = useAuth()
   const socket = useSocket().socket
   const playerId = user?.id
 
@@ -40,7 +43,9 @@ const GamePage = () => {
     type: 0,
     maxPlayers: 6,
   })
+  const [loading, setLoading] = useState(true)
   const [isCreator, setIsCreator] = useState(false) // Si l'utilisateur est le créateur
+  const [player, setPlayer] = useState<any>([]) // Info du joueur
   const [players, setPlayers] = useState<any[]>([]) // Liste des joueurs
   const [hasJoined, setHasJoined] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -56,11 +61,20 @@ const GamePage = () => {
   useEffect(() => {
     const fetchRoomData = async () => {
       try {
-        const response = await axios(`/api/games/room/${gameId}`)
+        const response = await axios(`/api/games/room/${gameId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         if (response.data.error) {
           return setGameError(response.data.error)
         }
-        setRoomData(response.data)
+        const { creator } = response.data.room
+        if (creator === response.data.player.nickname) {
+          setIsCreator(true)
+        }
+        setRoomData(response.data.room)
+        setPlayer(response.data.player)
       } catch (err) {
         console.error('Failed to fetch room data', err)
       }
@@ -188,6 +202,7 @@ const GamePage = () => {
     try {
       const { data } = await axios.get(`/api/games/room/${gameId}/tchat`)
       setMessages(data)
+      setLoading(false)
     } catch (error) {
       console.error('Erreur lors du chargement du chat:', error)
     }
@@ -209,8 +224,7 @@ const GamePage = () => {
 
   const handleClearChat = async () => {
     try {
-      await axios.delete(`/api/games/${gameId}/chat`)
-      fetchChatMessages()
+      setMessages([])
     } catch (error) {
       console.error('Erreur lors de l\'effacement du chat:', error)
     }
@@ -220,7 +234,7 @@ const GamePage = () => {
     try {
       const response = await axios.post('/api/games/players/room/leave', {}, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
       })
       if (response.data.message) {
@@ -265,15 +279,45 @@ const GamePage = () => {
         <Typography variant="h6" gutterBottom>
           [{GAME_TYPES[roomData.type]}] Partie : {roomData.name} ({players.length}/{roomData.maxPlayers})
         </Typography>
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleClearChat()}
+        >
+          ♻️
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleLeaveGame()}
+        >
+          Quitter la partie
+        </Button>
       </Box>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => handleLeaveGame()}
-      >
-        Quitter la partie
-      </Button>
+      <Box>
+        {isCreator && (
+          <>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleStartGame()}
+            >
+              Lancer la partie
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleTransferCreator('1')}
+            >
+
+              Léguer les droits du salon
+            </Button>
+          </>
+        )}
+      </Box>
+
 
       <Typography variant="h6" gutterBottom>
         Joueurs ({players.length}/{roomData.maxPlayers})
@@ -295,6 +339,16 @@ const GamePage = () => {
 
       {/* Affichage des messages */}
       <Box flex={1} bgcolor="#f5f5f5" p={2} overflow="auto" minHeight="400px">
+        {loading && (
+          <Container className="loader-container">
+            <div className="spinner-wrapper">
+              <Spinner animation="border" role="status" className="custom-spinner">
+                <span className="sr-only">Loading...</span>
+              </Spinner>
+              <div className="loading-text">Loading...</div>
+            </div>
+          </Container>
+        )}
         {messages.map((msg, index) => (
           <Typography key={index} variant="body1">
             <small>[{new Date(msg.createdAt).toLocaleTimeString()}]</small>
