@@ -239,11 +239,12 @@ const GamePage = () => {
         const text = rest.join(' ')
 
         socket.emit('moderationCommand', {
-          command,   // ex. "kick" | "warn" | ...
-          arg,    // ex. "pseudo"
-          text,    // ex. "Raison de l'avertissement"
+          command,
+          arg,
+          text,
           roomId: gameId,
-          playerId,  // Joueur qui lance la commande
+          playerId,
+          currentUserRole: user?.role,
         })
 
         setNewMessage('')
