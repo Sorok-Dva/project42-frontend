@@ -7,6 +7,7 @@ import axios from 'axios'
 import 'styles/GamePage.css'
 import { Container, Spinner } from 'reactstrap'
 import { useAuth } from '../context/AuthContext'
+import Controls from '../components/Game/Controls'
 
 interface RoomData {
   id: number;
@@ -249,23 +250,7 @@ const GamePage = () => {
     }
   }
 
-  const handleStartGame = async () => {
-    try {
-      await axios.post(`/api/games/${gameId}/start`)
-      fetchGameDetails() // Actualiser les détails
-    } catch (error) {
-      console.error('Erreur lors du lancement de la partie:', error)
-    }
-  }
 
-  const handleTransferCreator = async (newCreatorId: string) => {
-    try {
-      await axios.post(`/api/games/${gameId}/transfer`, { newCreatorId })
-      fetchGameDetails() // Actualiser les détails
-    } catch (error) {
-      console.error('Erreur lors du transfert des droits de créateur:', error)
-    }
-  }
 
   if (gameError) {
     return (
@@ -298,23 +283,7 @@ const GamePage = () => {
 
       <Box>
         {isCreator && (
-          <>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => handleStartGame()}
-            >
-              Lancer la partie
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => handleTransferCreator('1')}
-            >
-
-              Léguer les droits du salon
-            </Button>
-          </>
+          <Controls gameId={gameId} fetchGameDetails={fetchGameDetails}/>
         )}
       </Box>
 
