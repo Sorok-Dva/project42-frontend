@@ -1,5 +1,3 @@
-import { Role } from '../context/UserContext'
-
 export const ROLE_PERMISSIONS = {
   SuperAdmin: {
     game: ['create', 'edit', 'delete', 'view'],
