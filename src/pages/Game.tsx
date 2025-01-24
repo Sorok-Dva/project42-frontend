@@ -11,6 +11,7 @@ import Controls from '../components/Game/Controls'
 
 interface RoomData {
   id: number;
+  creator: string;
   name: string;
   type: number;
   maxPlayers: number;
@@ -40,6 +41,7 @@ const GamePage = () => {
 
   const [roomData, setRoomData] = useState<RoomData>({
     id: 0,
+    creator: '',
     name: 'Chargement...',
     type: 0,
     maxPlayers: 6,
@@ -167,6 +169,7 @@ const GamePage = () => {
     // }
   }, [socket, gameId, user, hasJoined])
 
+
   useEffect(() => {
     if (!socket) return
 
@@ -175,16 +178,23 @@ const GamePage = () => {
       setMessages((prev) => [...prev, message])
     })
 
+    // user kicked
+    socket.on('playerKicked', (nickname) => {
+      console.log(nickname, player?.nickname)
+      if (nickname === player?.nickname) {
+        setGameError('Vous avez été expulsé de la partie.')
+      }
+    })
+
     return () => {
       socket.off('newMessage')
     }
-  }, [socket])
+  }, [socket, player])
 
   const fetchGameDetails = async () => {
     try {
       const { data } = await axios.get(`/api/games/room/${gameId}`)
       setGameDetails(data)
-      setIsCreator(data.creatorId === playerId) // Vérifie si l'utilisateur est le créateur
     } catch (error) {
       console.error('Erreur lors du chargement des détails de la partie:', error)
     }
@@ -214,12 +224,25 @@ const GamePage = () => {
     try {
       socket.emit('sendMessage', {
         roomId: gameId,
-        playerId: user?.id,
+        playerId: playerId,
         content: newMessage,
       })
       setNewMessage('')
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message:', error)
+    }
+  }
+
+  const handleKickPlayer = async (nickname: string) => {
+    try {
+      if (isCreator) {
+        socket.emit('kickPlayer', {
+          roomId: gameId,
+          nickname,
+        })
+      } else throw new Error('Droits insuffisants pour expulser un joueur.')
+    } catch (error) {
+      console.error('Erreur lors du kick:', error)
     }
   }
 
@@ -241,7 +264,7 @@ const GamePage = () => {
       if (response.data.message) {
         socket.emit('leaveRoom', {
           roomId: gameId,
-          player: { id: user?.id, nickname: user?.nickname },
+          player: { id: playerId, nickname: user?.nickname },
         })
         setGameError('Vous avez bien quitter votre partie. Vous pouvez fermer cet onglet.')
       }
@@ -282,9 +305,10 @@ const GamePage = () => {
       </Box>
 
       <Box>
-        {isCreator && (
-          <Controls gameId={gameId} fetchGameDetails={fetchGameDetails}/>
-        )}
+        <Controls
+          gameId={gameId}
+          fetchGameDetails={fetchGameDetails}
+          isCreator={isCreator} />
       </Box>
 
 
@@ -302,6 +326,15 @@ const GamePage = () => {
                   : 'Non prêt'
               }
             />
+            { isCreator && roomData.creator !== player.nickname && (
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => handleKickPlayer(player.nickname)}
+              >
+                Kick
+              </Button>
+            )}
           </ListItem>
         ))}
       </List>
