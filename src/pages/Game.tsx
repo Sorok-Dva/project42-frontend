@@ -7,6 +7,7 @@ import axios from 'axios'
 import 'styles/GamePage.css'
 import { Container, Spinner } from 'reactstrap'
 import { useAuth } from '../context/AuthContext'
+import { initModeration} from '../core/moderation'
 import Controls from '../components/Game/Controls'
 
 interface RoomData {
@@ -60,6 +61,11 @@ const GamePage = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
+
+  useEffect(() => {
+    if (!user) return
+    const { handleChatCommand, getUserPermissions } = initModeration(user.role)
+  }, [user])
 
   useEffect(() => {
     const fetchRoomData = async () => {
@@ -220,16 +226,36 @@ const GamePage = () => {
   }
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return
+    const trimmedMessage = newMessage.trim()
+    if (!trimmedMessage) return
+
     try {
-      socket.emit('sendMessage', {
-        roomId: gameId,
-        playerId: playerId,
-        content: newMessage,
-      })
-      setNewMessage('')
+      if (trimmedMessage.startsWith('/')) {
+        const commandString = trimmedMessage.slice(1).trim()
+
+        const [command, arg, ...rest] = commandString.split(' ')
+
+        const text = rest.join(' ')
+
+        socket.emit('moderationCommand', {
+          command,   // ex. "kick" | "warn" | ...
+          arg,    // ex. "pseudo"
+          text,    // ex. "Raison de l'avertissement"
+          roomId: gameId,
+          playerId,  // Joueur qui lance la commande
+        })
+
+        setNewMessage('')
+      } else {
+        socket.emit('sendMessage', {
+          roomId: gameId,
+          playerId: playerId,
+          content: trimmedMessage,
+        })
+        setNewMessage('')
+      }
     } catch (error) {
-      console.error('Erreur lors de l\'envoi du message:', error)
+      console.error('Erreur lors de l\'envoi du message ou de la commande:', error)
     }
   }
 
@@ -272,8 +298,6 @@ const GamePage = () => {
       console.error('Erreur lors de la sortie de la partie:', error)
     }
   }
-
-
 
   if (gameError) {
     return (
