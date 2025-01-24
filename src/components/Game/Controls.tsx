@@ -13,7 +13,18 @@ const GameControls: React.FC<GameControlsProps> = ({ gameId, fetchGameDetails })
 
   const canEditGame = checkPermission('game', 'edit')
   const canSendMessage = checkPermission('gamePowers', 'message')
-  const canUseGodPowers = checkPermission('godPowers', 'addBot')
+  const canAddBot = checkPermission('godPowers', 'addBot')
+
+  const handleAddBot = async () => {
+    try {
+      if (canAddBot) {
+        await axios.post(`/api/admin/games/rooms/${gameId}/add-bot`)
+        fetchGameDetails()
+      } else throw new Error('Vous n\'avez pas la permission d\'ajouter un bot')
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout du bot:', error)
+    }
+  }
 
   const handleStartGame = async () => {
     try {
@@ -52,12 +63,18 @@ const GameControls: React.FC<GameControlsProps> = ({ gameId, fetchGameDetails })
 
       <div>
         <h1>Contrôles du jeu</h1>
-        { canEditGame ? <button>Modifier le jeu</button> :
-          <p>Vous ne pouvez pas modifier le jeu.</p> }
-        { canSendMessage ? <button>Envoyer un message</button> :
-          <p>Vous ne pouvez pas envoyer de message.</p> }
-        { canUseGodPowers ? <button>Ajouter un bot</button> :
-          <p>Vous ne pouvez pas ajouter de bot.</p> }
+        { checkPermission('game', 'edit')
+          && (<button>Modifier le salon</button>) }
+        { canAddBot
+          && (
+            <Button
+              variant="outlined"
+              color="warning"
+              onClick={ () => handleAddBot() }
+            >
+              Ajouter un bot
+            </Button>
+          ) }
       </div>
     </>
   )
