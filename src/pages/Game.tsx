@@ -4,6 +4,7 @@ import { useUser } from 'context/UserContext'
 import { useSocket } from 'context/SocketContext'
 import { Box, Typography, TextField, Button, List, ListItem, ListItemText } from '@mui/material'
 import axios from 'axios'
+import DOMPurify from 'dompurify'
 import 'styles/GamePage.css'
 import { Container, Spinner } from 'reactstrap'
 import { useAuth } from '../context/AuthContext'
@@ -375,13 +376,20 @@ const GamePage = () => {
             </div>
           </Container>
         )}
-        {messages.map((msg, index) => (
-          <Typography key={index} variant="body1">
-            <small>[{new Date(msg.createdAt).toLocaleTimeString()}]</small>
-            {' '}
-            <strong>{msg.nickname}:</strong> {msg.message}
-          </Typography>
-        ))}
+        {messages.map((msg, index) => {
+          const htmlContent = DOMPurify.sanitize(`
+            <small>[${new Date(msg.createdAt).toLocaleTimeString()}]</small>
+            <strong>${msg.nickname}:</strong> ${msg.message}
+          `)
+
+          return (
+            <Typography
+              key={index}
+              variant="body1"
+              dangerouslySetInnerHTML={{ __html: htmlContent }}
+            />
+          )
+        })}
         <div ref={messagesEndRef} />
       </Box>
 
