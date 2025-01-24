@@ -2,13 +2,18 @@ import React from 'react'
 import { usePermissions } from '../../hooks/usePermissions'
 import { Button } from '@mui/material'
 import axios from 'axios'
+import { useAuth } from '../../context/AuthContext'
+import { useUser } from '../../context/UserContext'
 
 interface GameControlsProps {
   gameId: string | undefined;
+  isCreator: boolean;
   fetchGameDetails: () => void;
 }
 
-const GameControls: React.FC<GameControlsProps> = ({ gameId, fetchGameDetails }) => {
+const GameControls: React.FC<GameControlsProps> = ({ isCreator, gameId, fetchGameDetails }) => {
+  const { token } = useAuth()
+  const { user } = useUser()
   const { checkPermission } = usePermissions()
 
   const canEditGame = checkPermission('game', 'edit')
@@ -18,7 +23,11 @@ const GameControls: React.FC<GameControlsProps> = ({ gameId, fetchGameDetails })
   const handleAddBot = async () => {
     try {
       if (canAddBot) {
-        await axios.post(`/api/admin/games/rooms/${gameId}/add-bot`)
+        await axios.post(`/api/admin/games/room/${gameId}/add-bot`, {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         fetchGameDetails()
       } else throw new Error('Vous n\'avez pas la permission d\'ajouter un bot')
     } catch (error) {
@@ -45,37 +54,54 @@ const GameControls: React.FC<GameControlsProps> = ({ gameId, fetchGameDetails })
   }
   return (
     <>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={ () => handleStartGame() }
-      >
-        Lancer la partie
-      </Button>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={ () => handleTransferCreator('1') }
-      >
+      {isCreator && (
+        <>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={ () => handleStartGame() }
+          >
+          Lancer la partie
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={ () => handleTransferCreator('1') }
+          >
 
-        Léguer les droits du salon
-      </Button>
+          Léguer les droits du salon
+          </Button>
+        </>
+      )}
 
-      <div>
-        <h1>Contrôles du jeu</h1>
-        { checkPermission('game', 'edit')
-          && (<button>Modifier le salon</button>) }
-        { canAddBot
-          && (
-            <Button
-              variant="outlined"
-              color="warning"
-              onClick={ () => handleAddBot() }
-            >
-              Ajouter un bot
-            </Button>
-          ) }
-      </div>
+      { [
+        'SuperAdmin',
+        'Admin',
+        'Developers',
+        'Moderator',
+        'ModeratorTest',
+        'Animator'
+      ].includes(user?.role as string) && (
+        <div>
+          <h1>Contrôles du jeu</h1>
+          { checkPermission('game', 'edit')
+            && (
+              <>
+                <button>Modifier le salon</button>
+              </>
+            ) }
+          { canAddBot
+            && (
+              <Button
+                variant="outlined"
+                color="warning"
+                onClick={ () => handleAddBot() }
+              >
+                Ajouter un bot
+              </Button>
+            ) }
+        </div>
+      ) }
     </>
   )
 }
