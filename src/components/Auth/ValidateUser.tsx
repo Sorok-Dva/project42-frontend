@@ -36,6 +36,7 @@ const ValidateUser: React.FC = () => {
               oldEmail: payload.oldEmail,
               nickname: payload.nickname,
               avatar: payload.avatar,
+              role: payload.role,
               roleId: payload.roleId,
               isAdmin: payload.isAdmin,
               validated: payload.validated,

@@ -4,12 +4,23 @@ import { useAuth } from './AuthContext'
 import { useError } from './ErrorContext'
 import useApi from '../hooks/useApi'
 
+export type Role =
+  'SuperAdmin'
+  | 'Admin'
+  | 'Developer'
+  | 'Moderator'
+  | 'ModeratorTest'
+  | 'Animator'
+  | 'User'
+  | 'Banned'
+
 export interface User {
   id : number;
   email : string;
   oldEmail : string;
   nickname : string;
   avatar : string;
+  role : Role;
   roleId : number;
   isAdmin : boolean;
   validated : boolean;
