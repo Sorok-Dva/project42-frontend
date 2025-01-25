@@ -1,6 +1,7 @@
 import 'react-toastify/dist/ReactToastify.css'
 import 'assets/vendor/nucleo/css/nucleo.css'
 import 'assets/vendor/font-awesome/css/fa.all.css'
+import 'animate.css'
 import 'styles/index.scss'
 import 'index.css'
 import 'styles/Toastify.css'
