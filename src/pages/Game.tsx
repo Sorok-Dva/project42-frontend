@@ -8,23 +8,23 @@ import DOMPurify from 'dompurify'
 import 'styles/GamePage.css'
 import { Container, Spinner } from 'reactstrap'
 import { useAuth } from '../context/AuthContext'
-import { initModeration} from '../core/moderation'
+import { initModeration } from '../core/moderation'
 import Controls from '../components/Game/Controls'
 
 interface RoomData {
-  id: number;
-  creator: string;
-  name: string;
-  type: number;
-  maxPlayers: number;
+  id: number
+  creator: string
+  name: string
+  type: number
+  maxPlayers: number
 }
 
 interface Message {
-  nickname: string;
-  message: string;
-  playerId: number;
-  channel: number;
-  createdAt: Date;
+  nickname: string
+  message: string
+  playerId: number
+  channel: number
+  createdAt: Date
 }
 
 export const GAME_TYPES: Record<number, string> = {
@@ -49,15 +49,15 @@ const GamePage = () => {
     maxPlayers: 6,
   })
   const [loading, setLoading] = useState(true)
-  const [isCreator, setIsCreator] = useState(false) // Si l'utilisateur est le créateur
-  const [player, setPlayer] = useState<any>([]) // Info du joueur
-  const [players, setPlayers] = useState<any[]>([]) // Liste des joueurs
+  const [isCreator, setIsCreator] = useState(false)
+  const [player, setPlayer] = useState<any>([])
+  const [players, setPlayers] = useState<any[]>([])
   const [hasJoined, setHasJoined] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
-  const [newMessage, setNewMessage] = useState('') // Nouveau message du chat
-  const [gameDetails, setGameDetails] = useState<any>(null) // Détails de la partie
+  const [newMessage, setNewMessage] = useState('')
+  const [gameDetails, setGameDetails] = useState<any>(null)
   const [gameError, setGameError] = useState<string | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null) // Référence pour scroller en bas
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -119,7 +119,6 @@ const GamePage = () => {
     if (!socket || !user) return
 
     const handlePlayerLeft = (data: { message: string }) => {
-      console.log('Événement playerLeft reçu:', data) // Debug
       setMessages((prev) => [
         ...prev,
         {
@@ -159,7 +158,7 @@ const GamePage = () => {
           message: data.message,
           playerId: -1,
           channel: 0,
-          createdAt: new Date()
+          createdAt: new Date(),
         },
       ])
     })
@@ -169,25 +168,16 @@ const GamePage = () => {
     })
 
     setHasJoined(true)
-
-    // return () => {
-    //   socket.off('playerJoined')
-    //   socket.off('updatePlayers')
-    // }
   }, [socket, gameId, user, hasJoined])
-
 
   useEffect(() => {
     if (!socket) return
 
-    // Recevoir les messages
     socket.on('newMessage', (message) => {
       setMessages((prev) => [...prev, message])
     })
 
-    // user kicked
     socket.on('playerKicked', (nickname) => {
-      console.log(nickname, player?.nickname)
       if (nickname === player?.nickname) {
         setGameError('Vous avez été expulsé de la partie.')
       }
@@ -233,9 +223,7 @@ const GamePage = () => {
     try {
       if (trimmedMessage.startsWith('/')) {
         const commandString = trimmedMessage.slice(1).trim()
-
         const [command, arg, ...rest] = commandString.split(' ')
-
         const text = rest.join(' ')
 
         socket.emit('moderationCommand', {
@@ -245,6 +233,10 @@ const GamePage = () => {
           roomId: gameId,
           playerId,
           currentUserRole: user?.role,
+          moderator: {
+            id: user?.id,
+            username: user?.nickname,
+          },
         })
 
         setNewMessage('')
@@ -308,109 +300,143 @@ const GamePage = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column" flex={1} p={2}>
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h6" gutterBottom>
+    <Box display="flex" flexDirection="column" height="100vh">
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        px={2}
+        py={1}
+        bgcolor="#f0f0f0"
+      >
+        <Typography variant="h6">
           [{GAME_TYPES[roomData.type]}] Partie : {roomData.name} ({players.length}/{roomData.maxPlayers})
         </Typography>
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleClearChat()}
-        >
-          ♻️
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleLeaveGame()}
-        >
-          Quitter la partie
-        </Button>
+        <Box display="flex" gap={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleClearChat}
+          >
+            ♻️
+          </Button>
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleLeaveGame}
+          >
+            Quitter
+          </Button>
+        </Box>
       </Box>
 
-      <Box>
-        <Controls
-          gameId={gameId}
-          fetchGameDetails={fetchGameDetails}
-          isCreator={isCreator} />
-      </Box>
-
-
-      <Typography variant="h6" gutterBottom>
-        Joueurs ({players.length}/{roomData.maxPlayers})
-      </Typography>
-      <List>
-        {players.map((player, index) => (
-          <ListItem key={index}>
-            <ListItemText
-              primary={player.nickname}
-              secondary={
-                player.ready
-                  ? 'Prêt'
-                  : 'Non prêt'
-              }
+      <Box display="flex" flex={1} p={2} className="game-page-container">
+        <Box
+          display="flex"
+          flexDirection="column"
+          width="25%"
+          className="left-column"
+          mr={2}
+        >
+          <Box mb={2}>
+            <Controls
+              gameId={gameId}
+              fetchGameDetails={fetchGameDetails}
+              isCreator={isCreator}
             />
-            { isCreator && roomData.creator !== player.nickname && (
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() => handleKickPlayer(player.nickname)}
-              >
-                Kick
-              </Button>
+          </Box>
+        </Box>
+
+        <Box
+          display="flex"
+          flexDirection="column"
+          width="50%"
+          className="chat-column"
+          mr={2}
+          height="90vh"
+        >
+          <Box flex={1} bgcolor="#f5f5f5" p={2} overflow="auto">
+            {loading && (
+              <Container className="loader-container">
+                <div className="spinner-wrapper">
+                  <Spinner animation="border" role="status" className="custom-spinner">
+                    <span className="sr-only">Loading...</span>
+                  </Spinner>
+                  <div className="loading-text">Loading...</div>
+                </div>
+              </Container>
             )}
-          </ListItem>
-        ))}
-      </List>
+            {messages.map((msg, index) => {
+              const htmlContent = DOMPurify.sanitize(`
+                <small>[${new Date(msg.createdAt).toLocaleTimeString()}]</small>
+                <strong>${msg.nickname}:</strong> ${msg.message}
+              `)
 
-      {/* Affichage des messages */}
-      <Box flex={1} bgcolor="#f5f5f5" p={2} overflow="auto" minHeight="400px">
-        {loading && (
-          <Container className="loader-container">
-            <div className="spinner-wrapper">
-              <Spinner animation="border" role="status" className="custom-spinner">
-                <span className="sr-only">Loading...</span>
-              </Spinner>
-              <div className="loading-text">Loading...</div>
-            </div>
-          </Container>
-        )}
-        {messages.map((msg, index) => {
-          const htmlContent = DOMPurify.sanitize(`
-            <small>[${new Date(msg.createdAt).toLocaleTimeString()}]</small>
-            <strong>${msg.nickname}:</strong> ${msg.message}
-          `)
-
-          return (
-            <Typography
-              key={index}
-              variant="body1"
-              dangerouslySetInnerHTML={{ __html: htmlContent }}
+              return (
+                <Typography
+                  key={index}
+                  variant="body1"
+                  dangerouslySetInnerHTML={{ __html: htmlContent }}
+                />
+              )
+            })}
+            <div ref={messagesEndRef} />
+          </Box>
+          <Box mt={2} display="flex">
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Saisir un message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleSendMessage()
+                }
+              }}
             />
-          )
-        })}
-        <div ref={messagesEndRef} />
-      </Box>
+            <Button variant="contained" color="primary" onClick={handleSendMessage}>
+              Envoyer
+            </Button>
+          </Box>
+        </Box>
 
-      {/* Zone de saisie des messages */}
-      <Box mt={2} display="flex">
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Saisir un message..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              handleSendMessage()
-            }
-          }}
-        />
-        <Button variant="contained" color="primary" onClick={handleSendMessage}>
-          Envoyer
-        </Button>
+        {/* Colonne droite: Liste des joueurs */}
+        <Box
+          display="flex"
+          flexDirection="column"
+          width="25%"
+          className="right-column"
+        >
+          <Typography variant="h6" gutterBottom>
+            Joueurs ({players.length}/{roomData.maxPlayers})
+          </Typography>
+          <List>
+            {players.map((player, index) => (
+              <ListItem key={index}>
+                <ListItemText
+                  primary={player.nickname}
+                  secondary={
+                    player.ready
+                      ? 'Prêt'
+                      : 'Non prêt'
+                  }
+                />
+                {isCreator && roomData.creator !== player.nickname && (
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => handleKickPlayer(player.nickname)}
+                  >
+                    Kick
+                  </Button>
+                )}
+              </ListItem>
+            ))}
+          </List>
+        </Box>
       </Box>
     </Box>
   )
