@@ -24,6 +24,7 @@ interface Message {
   message: string
   playerId: number
   channel: number
+  icon: string | null
   createdAt: Date
 }
 
@@ -118,7 +119,9 @@ const GamePage = () => {
   useEffect(() => {
     if (!socket || !user) return
 
-    const handlePlayerLeft = (data: { message: string, sound?: string }) => {
+    const handlePlayerLeft = (data: {
+      message: string, sound?: string, icon?: string
+    }) => {
       if (data.sound) {
         const audio = new Audio(`/assets/sounds/${data.sound}.mp3`)
         audio.play()
@@ -130,6 +133,7 @@ const GamePage = () => {
           message: data.message,
           playerId: -1,
           channel: 0,
+          icon: data.icon ?? '',
           createdAt: new Date(),
         },
       ])
@@ -166,6 +170,7 @@ const GamePage = () => {
           message: data.message,
           playerId: -1,
           channel: 0,
+          icon: data.icon,
           createdAt: new Date(),
         },
       ])
@@ -288,17 +293,19 @@ const GamePage = () => {
 
   const handleLeaveGame = async () => {
     try {
-      const response = await axios.post('/api/games/players/room/leave', {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      if (response.data.message) {
-        socket.emit('leaveRoom', {
-          roomId: gameId,
-          player: { id: playerId, nickname: user?.nickname },
+      if (confirm('Êtes-vous sûr de vouloir quitter la partie ?')) {
+        const response = await axios.post('/api/games/players/room/leave', {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         })
-        setGameError('Vous avez bien quitter votre partie. Vous pouvez fermer cet onglet.')
+        if (response.data.message) {
+          socket.emit('leaveRoom', {
+            roomId: gameId,
+            player: { id: playerId, nickname: user?.nickname },
+          })
+          setGameError('Vous avez bien quitter votre partie. Vous pouvez fermer cet onglet.')
+        }
       }
     } catch (error) {
       console.error('Erreur lors de la sortie de la partie:', error)
@@ -383,6 +390,7 @@ const GamePage = () => {
             {messages.map((msg, index) => {
               const htmlContent = DOMPurify.sanitize(`
                 <small>[${new Date(msg.createdAt).toLocaleTimeString()}]</small>
+                ${msg.icon ? `<img src="/assets/images/${msg.icon}" class="msg-icon" />` : ''}
                 <strong>${msg.nickname}:</strong> ${msg.message}
               `)
 
