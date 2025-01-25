@@ -53,6 +53,7 @@ const GamePage = () => {
   const [isCreator, setIsCreator] = useState(false)
   const [player, setPlayer] = useState<any>([])
   const [players, setPlayers] = useState<any[]>([])
+  const [canBeReady, setCanBeReady] = useState(false)
   const [hasJoined, setHasJoined] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
@@ -113,6 +114,40 @@ const GamePage = () => {
 
     return () => {
       socket.offAny()
+    }
+  }, [socket])
+
+  useEffect(() => {
+    if (!socket) return
+
+    socket.on('error', (error => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          nickname: 'Système',
+          message: error.message,
+          playerId: -1,
+          channel: 0,
+          icon: '',
+          createdAt: new Date(),
+        },
+      ])
+    }))
+
+    return () => {
+      socket.off('error')
+    }
+  }, [socket])
+
+  useEffect(() => {
+    if (!socket) return
+
+    socket.on('enableReadyOption', (state => {
+      setCanBeReady(state)
+    }))
+
+    return () => {
+      socket.off('enableReadyOption')
     }
   }, [socket])
 
@@ -178,6 +213,7 @@ const GamePage = () => {
 
     socket.on('updatePlayers', (updatedPlayers) => {
       setPlayers(updatedPlayers)
+      if (updatedPlayers.length >= roomData.maxPlayers) setCanBeReady(true)
     })
 
     setHasJoined(true)
@@ -364,6 +400,7 @@ const GamePage = () => {
               gameId={gameId}
               fetchGameDetails={fetchGameDetails}
               isCreator={isCreator}
+              canBeReady={canBeReady}
             />
           </Box>
         </Box>
