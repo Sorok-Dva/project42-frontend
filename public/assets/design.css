@@ -1,0 +1,820 @@
+/**
+ * Ancien design du jeu (pré-featureJeu)
+ * Gardé pour que les anciennes archives fonctionnent encore
+ */
+
+
+/*
+    Document   : design
+    Created on : 1 mars 2012, 20:18:55
+    Author     : Loïck
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+
+body {
+
+    background-color: #0a1239;
+    color: white;
+    font-family: Verdana;
+    font-size: 12px;
+    background-image: url("../../stuff/jeu/background.jpg?5");
+	background-repeat: repeat-x;
+    background-position: bottom;
+    background-attachment: fixed;
+    overflow: hidden;
+}
+
+h3 {
+    text-align: center;
+    color: orange;
+
+}
+
+#jeu {
+
+    position: absolute;
+    top: 20px;
+    bottom: 20px;
+    left: 20px;
+    right:20px;
+    background-image: url("../../stuff/jeu/background_jeu.png");
+    border: solid black 5px;
+    z-index: 4;
+
+}
+
+#CONTENTchat {
+
+    position: absolute;
+    top: 40px;
+    left: 25%;
+    right: 23%;
+    bottom: 60px;
+    background-color: silver;
+    z-index: 1;
+    color: black;
+    border: solid black 1px;
+	overflow-y: auto;
+	overflow-x: hidden;
+    font-size:11px;
+    padding: 5px;
+}
+.small {
+     font-size: 70%;
+}
+#colonneGauche {
+
+    position: absolute;
+    top: 20px;
+    left: 10px;
+    right: 76%;
+    bottom: 20px;
+    z-index: 5;
+    overflow-x: hidden;
+
+}
+
+#colonneDroite {
+
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    left: 77.5%;
+    bottom: 20px;
+    z-index: 5;
+    overflow: auto;
+
+}
+
+#pub {
+	/*background-color: rgba(0, 0, 0, 0.14);*/
+	padding: 10px;
+    position: absolute;
+    height: 60px;
+	/*width: 100%;*/
+	text-align: center;
+    /*background-color: #ba3b3b;*/
+
+}
+
+#historique {
+	border-radius: 3px;
+	padding: 5px;
+	height: 255px;
+	border: 1px solid #C9C9C9;
+    position: absolute;
+    width: 95%;
+    top: 20px;
+    background-color: orange;
+    background-image: url(images/historique.png);
+    overflow: auto;
+    color: black;
+    font-size: 12px;
+
+}
+
+#actions {
+
+    position: absolute;
+
+    top: 360px;
+    width: 100%;
+    overflow: auto;
+    text-align: center;
+
+}
+
+#chrono {
+
+    position: absolute;
+    top: 290px;
+    height: 40px;
+    width: 80%;
+    left: 10%;
+    right: 10%;
+    font-size: 20px;
+    text-align: center;
+
+}
+
+#joueurs {
+
+    position: absolute;
+    width: 100%;
+    top: 0px;
+    bottom: 10px;
+    overflow: auto;
+    line-height: 18px;
+
+}
+
+#titre {
+    position: absolute;
+    top: 5px;
+    left: 20%;
+    right: 20%;
+    height: 20px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+	color: white;
+}
+
+#postChat {
+    position: absolute;
+    bottom: 20px;
+    left: 20%;
+    right: 20%;
+    height: 20px;
+    text-align: center;
+}
+
+#erreur {
+    background-color: #6c2b3c;
+    border: 1px solid white;
+    color: #fcff73;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    outline: 1px solid black;
+    padding: 3px 3px 3px 3px;
+    font-size: 10pt;
+    text-align: left;
+    font-weight: bold;
+    position: absolute;
+    left: 20%;
+    right: 20%;
+    top: 40%;
+    bottom: 40%;
+}
+
+#barreEtat {
+    position: absolute;
+    z-index: 10;
+    bottom: 0px;
+    right: 10px;
+    height: 30px;
+
+}
+
+#chargement {
+
+    background-color: #f6f6f6;
+    border: 1px solid white;
+    color: black;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    outline: 1px solid black;
+    padding: 3px 3px 3px 3px;
+    font-size: 10pt;
+    text-align: center;
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    top: 20%;
+    bottom: 20%;
+    display: none;
+
+}
+
+.tchatIcon {
+    vertical-align: text-bottom;
+}
+
+.canal_meneur {
+    color: purple;
+    /*font-size: 13px;*/
+}
+
+.canal_joueurs {
+
+    font-size: 13px;
+}
+
+.canal_1 { /* Spectateurs */
+    color: blue;
+}
+
+.canal_2 { /* Morts */
+    color: #808080;
+}
+
+.canal_3 { /* Loups */
+    color: #ba3b3b;
+}
+
+.canal_4 { /* Soeurs */
+    color: #906;
+}
+
+.canal_5 { /* Frères */
+    color: #069;
+}
+
+.canal_guide { /* Guide/Disciple */
+    color: #0a7b1a;
+}
+
+
+.tinyTip						{ width: 325px; padding: 17px 0px 0px 0px; display: block; background: url(images/tinyTip-top.png) 0px 0px no-repeat; }
+.tinyTip .content				{ padding: 0px 15px 0px 15px; font-size: 14px; font-family: "Lucida Sans Unicode"; color: #010101;  background: url(images/tinyTip-content.png) 0px 0px repeat-y; }
+.tinyTip .bottom				{ height: 47px; background: url(images/tinyTip-bottom.png) 0px 0px no-repeat; font: 0px/0px sans-serif; }
+
+.displayTip {
+    cursor: help;
+}
+
+.infobulle{
+	z-index: 9999;
+	position: absolute;
+	visibility : hidden;
+	text-align: center;
+	border: 1px solid black;
+	padding: 10px;
+	font-family: Verdana, Arial;
+	font-size: 10px;
+	background-color: #C4C8D0;
+    color: black;
+}
+
+
+#createurPopup {
+    background-color: #6c2b3c;
+    border: 1px solid white;
+    color: #fcff73;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    outline: 1px solid black;
+    padding: 3px 15px 3px 10px;
+    font-size: 10pt;
+    text-align: left;
+    font-weight: bold;
+    position: absolute;
+    left: -230px;
+    top: 20%;
+    height: 60%;
+    width: 230px;
+    z-index: 20;
+    background-image: url("images/gestionSalon.png");
+    background-position : right bottom;
+    background-repeat: no-repeat;
+    overflow: auto;
+}
+
+#viewerPopup {
+    background-color: #0a4b8f;
+    border: 1px solid white;
+    color: #fcff73;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    outline: 1px solid black;
+    padding: 3px 3px 3px 3px;
+    font-size: 10pt;
+    text-align: center;
+    position: absolute;
+    right: 20px;
+    top: 0px;
+    width: 200px;
+    z-index: 20;
+    overflow: auto;
+}
+
+#couplePopup {
+    background-color: #1A4602;
+    border: 1px solid white;
+    color: #fcff73;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    outline: 1px solid black;
+    padding: 5px 5px 5px 5px;
+    font-size: 10pt;
+    text-align: left;
+    position: absolute;
+    left: 20px;
+    top: -70px;
+    width: 500px;
+    height: 40px;
+    z-index: 30;
+    overflow: hidden;
+    cursor: move;
+
+    /* Navigateurs récents */
+    background: -webkit-gradient(linear,left top, left bottom,from(#00BF20),to(#1A4602));
+    background: -webkit-linear-gradient(top,#00BF20,#1A4602);
+    background: -moz-linear-gradient(top,#00BF20,#1A4602);
+    background: -o-linear-gradient(top,#00BF20,#1A4602);
+    background: linear-gradient(top,#00BF20,#1A4602);
+}
+
+
+#viewerContent {
+    display: none;
+	overflow: auto;
+	max-height: 400px;
+	text-align: left;
+}
+
+#premiumPopup {
+    background-color: #0a4b8f;
+    border: 1px solid white;
+    color: white;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    outline: 1px solid black;
+    padding: 3px 3px 3px 3px;
+    font-size: 10pt;
+    text-align: left;
+    position: absolute;
+    right: -380px;
+    top: 10%;
+    height: 80%;
+    width: 400px;
+    z-index: 17;
+    overflow: auto;
+}
+
+#lien {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+#lien:hover {
+    color: orange;
+}
+
+a {
+    cursor: pointer;
+    color: #fcff73;
+    text-decoration: underline;
+}
+
+a:hover {
+    color: orange;
+}
+
+#compoEdit  {
+
+    position: absolute;
+    top: 15%;
+    left: 25%;
+    right: 25%;
+    bottom: 10%;
+    background-color: silver;
+    z-index: 18;
+    background-color: #6c2b3c;
+    border: 1px solid white;
+    color: #fcff73;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    outline: 1px solid black;
+    overflow: auto;
+    display: none;
+    padding: 5px;
+}
+
+/* Ads */
+#immViewer {
+    position: absolute;
+    width: 18%;
+    left: 5px;
+    bottom: 10%;
+    background-color: #C0C0C0;
+    z-index: 18;
+    background-color: #6C2B3C;
+    border: 1px solid #FFF;
+    color: #FCFF73;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    outline: 1px solid #000;
+    overflow: auto;
+    display: none;
+    padding: 10px 50px 10px 50px;
+    z-index:  19 !important;
+    background-color: #036054;
+}
+
+#ayl_0_root {
+    width: 0 !important;
+}
+#ayl_0_root #ayl_0_positioner.ayl_0_noquirks {
+    left: 250px !important;
+}
+#selfpromoteWrapper {
+    display: none;
+    z-index: 5;
+    position: absolute;
+    margin-top: 30px;
+    margin-left: 35px;
+    width: 500px;
+    height: 300px;
+    background-color: #FFF;
+}
+
+#videoPlace {
+
+  z-index:  65536 !important;
+  opacity: .0;
+  position: absolute;
+  background-color: #6c2b3c;
+  top : 0px;
+  left : 0px;
+  width : 350px;
+  height:  280px;
+  visibility : hidden;
+}
+
+#jourFrame {
+
+    position : absolute;
+    top:0px;
+    bottom:0px;
+    left:0px;
+    right:0px;
+    z-index:1;
+    background-color: #0a1239;
+    background-image: url('images/fondJour.jpg?2');
+    background-repeat: repeat-x;
+    background-position: bottom;
+
+}
+
+.importantChat {
+    font-size: 13px;
+}
+
+.canal_perso {
+    color: blue;
+	user-select: none;
+	-khtml-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+	-moz-user-select: -moz-none;
+	-webkit-user-select: none;
+}
+
+.pseudoChat {
+    cursor:pointer;
+}
+
+.pseudoChat:hover {
+    text-decoration: underline;
+}
+
+#joueursTableau {
+    font-size:12px;
+}
+
+#dialog table {
+	color: black;
+}
+
+#barre_spoiler {
+    background-color: #F7F6F2;
+	border-radius: 3px;
+	padding: 10px;
+	cursor: pointer;
+}
+
+.img_card {
+    width: 30px;
+	padding: 1px;
+}
+
+/* Facebook */
+.fb_edge_widget_with_comment span.fb_edge_comment_widget iframe.fb_ltr {
+	display: none !important;
+}
+
+div#facebook_button_wrapper i {
+	width: 25px;
+	height: 25px;
+	margin-top: -4px;
+	position: absolute;
+	margin-left: -35px;
+	background-image: url("images/facebook.png");
+}
+
+div#facebook_button_wrapper {
+	cursor: pointer;
+	margin-top: 20px;
+	font-size: 12px;
+	position: relative;
+	background-color: #F8F8F8;
+	background-image: -webkit-gradient(linear,left top,left bottom,from(#FFF),to(#DEDEDE));
+	background-image: -moz-linear-gradient(top,#FFF,#DEDEDE);
+	background-image: -o-linear-gradient(top,#FFF,#DEDEDE);
+	background-image: -ms-linear-gradient(top,#FFF,#DEDEDE);
+	background-image: linear-gradient(top,#FFF,#DEDEDE);
+	border: 2px solid #BBB;
+	font-weight: bold;
+	text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+	-webkit-user-select: none;
+	cursor: pointer;
+	padding: 6px 0;
+	overflow: hidden;
+	text-decoration: none;
+	color: #284DAD !important;
+}
+
+div#facebook_button_wrapper:hover {
+	background-color: #F8F8F8;
+	background-image: -webkit-gradient(linear,left top,left bottom,from(#ccc),to(#fff));
+	background-image: -moz-linear-gradient(top,#ccc,#fff);
+	background-image: -o-linear-gradient(top,#ccc,#fff);
+	background-image: -ms-linear-gradient(top,#ccc,#fff);
+	background-image: linear-gradient(top,#ccc,#fff);
+}
+
+.invite-friends-link .fb_invite_text {
+	padding-left: 30px;
+}
+
+.invitations_type {
+	font-size: 25px;
+	color: #C71212;
+	margin: 10px 10px 20px 10px;
+}
+
+.twitter_button_wrapper {
+	margin-top: 10px;
+}
+
+select.colorSosoVie {
+    background:#8FEF6C;
+}
+
+select.colorSosoMort {
+    background:#F57F8E;
+}
+
+#chrono img {
+	height: 30px;
+	width: 30px;
+	margin-top: 5px;
+}
+
+#chrono input[type="submit"] {
+    font-size: 10px;
+}
+div#facebook_button_wrapper {
+    font-size: 10px;
+}
+
+@media all and (min-height: 855px) {
+	#chrono img {
+		height: 75px;
+		width: 75px;
+		margin-top: 100px;
+	}
+	#chrono {
+		top: 330px;
+	}
+        #historique {
+		top: 60px;
+        }
+        #chrono input[type="submit"] {
+            font-size: 12px;
+        }
+        div#facebook_button_wrapper {
+            font-size: 12px;
+        }
+}
+
+#chrono .login_block {
+	margin-top: 20px;
+	background-color: #A50000;
+	border: 1px solid #7A4141;
+	font-size: 11px;
+	padding: 5px;
+}
+
+#chrono .login_block .catchphrase {
+	margin-bottom: 20px;
+}
+
+#chrono .login_block input[type=text],
+#chrono .login_block input[type=password] {
+	width: 125px;
+}
+
+#chrono .login_block_facebook {
+	margin-top: 20px;
+	background-color: #215394;
+	color: white;
+	border: 1px solid #7A4141;
+	font-size: 11px;
+	padding: 5px;
+}
+
+#blackout {
+    display: none;
+    position: absolute;
+    left:0px;
+    top:0px;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: 0.8;
+    z-index: 9000;
+}
+
+#params {
+    display: none;
+    position: absolute;
+    top: 15%;
+    left: 25%;
+    right: 25%;
+    bottom: 10%;
+    z-index: 9001;
+    border: 1px solid white;
+    background: rgba(0, 0, 0, 0.9);
+    opacity: 0.9;
+    padding: 10px;
+}
+
+/*
+	Tuto
+*/
+.tutoTooltipWrapper {
+	display:none;
+	position: absolute;
+	bottom: 50%;
+	left: 50%;
+	width:600px;
+}
+
+.tutoTooltip {
+	position: relative;
+	left: -50%;
+	padding: 10px 50px;
+	text-align: center;
+	color: black;
+	background-color: white;
+	border: 1px solid black;
+	z-index: 9001;
+	max-width: 500px;
+}
+
+.tutoTooltipButton {
+	margin-top: 30px;
+	padding: 7px;
+	background-color: #8D2121;
+	cursor: pointer;
+	color: #FFF;
+	border: 1px solid #A00101;
+}
+
+.tutoTooltipButton:hover {
+	background-color: #974D4D;
+}
+
+#tchatError {
+
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 100%;
+    height: 100px;
+    display: none;
+}
+
+#musicPlayer {
+
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 32px;
+    height: 32px;
+    background-color: black;
+    opacity: 0.8;
+    z-index: 21;
+    border: solid white 1px;
+    padding: 5px;
+    display: none;
+
+}
+
+.achievementBar {
+    position: relative;
+    top: 0px;
+    width: 200px;
+    border: 1px solid #A20909;
+    height: 5px;
+    padding: 2px;
+}
+
+.achievementProgress {
+    position: absolute;
+    top:2px;
+    left:2px;
+    height: 5px;
+    background-color: #A20909;
+}
+
+#achievementsData {
+    display: none;
+    background-color: #F7E5E5;
+    border: 1px solid black;
+    color: black !important;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    padding: 10px;
+    font-size: 12px !important;
+    text-align: left;
+    position: absolute;
+    right: 20px;
+    top: 0px;
+    width: 400px;
+    z-index: 20;
+    overflow: auto;
+
+}
+
+.selectiveEnter {
+    background-color: #6c2b3c;
+    border: 1px solid white;
+    color: #fcff73;
+    margin-bottom: 0px;
+    margin-top: 5px;
+    outline: 1px solid black;
+    padding: 3px 3px 3px 3px;
+    text-align: left;
+    width: 95%;
+    z-index: 2;
+    overflow: auto;
+}
+
+#ayl_0_root #ayl_0_fixed.ayl_0_noquirks {
+	width: 470px;
+	height: 580px;
+}
+
+.pubButton {
+    margin-top: 40px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+    background: #347E85;
+    background: -moz-linear-gradient(90deg, #347E85, #325045);
+    background: -webkit-gradient(linear, left top, left bottom, from(#347E85), to(#325045));
+    padding: 7px;
+    border: 1px solid #FFF;
+    color: #FFF;
+    font-weight: bold;
+}
+
+.pubButton:hover {
+    background: #4E949B;
+    background: -moz-linear-gradient(90deg, #4E949B, #326351);
+    background: -webkit-gradient(linear, left top, left bottom, from(#4E949B), to(#326351));
+}
+
+.langHelper {
+    border-bottom: 1px dotted grey;
+    cursor: pointer;
+}
+
+#buzzPlayer0 {
+    z-index: 10;
+}
