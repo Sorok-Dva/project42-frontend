@@ -118,7 +118,11 @@ const GamePage = () => {
   useEffect(() => {
     if (!socket || !user) return
 
-    const handlePlayerLeft = (data: { message: string }) => {
+    const handlePlayerLeft = (data: { message: string, sound?: string }) => {
+      if (data.sound) {
+        const audio = new Audio(`/assets/sounds/${data.sound}.mp3`)
+        audio.play()
+      }
       setMessages((prev) => [
         ...prev,
         {
@@ -151,6 +155,10 @@ const GamePage = () => {
     })
 
     socket.on('playerJoined', (data) => {
+      if (data.sound) {
+        const audio = new Audio(`/assets/sounds/${data.sound}.mp3`)
+        audio.play()
+      }
       setMessages((prev) => [
         ...prev,
         {
@@ -177,9 +185,13 @@ const GamePage = () => {
       setMessages((prev) => [...prev, message])
     })
 
-    socket.on('playerKicked', (nickname) => {
-      if (nickname === player?.nickname) {
-        setGameError('Vous avez été expulsé de la partie.')
+    socket.on('playerKicked', (data : { nickname: string, sound: string }) => {
+      if (data.nickname === player?.nickname) {
+        return setGameError('Vous avez été expulsé de la partie.')
+      }
+      if (data.sound) {
+        const audio = new Audio(`/assets/sounds/${data.sound}.mp3`)
+        audio.play()
       }
     })
 
