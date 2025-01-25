@@ -1,6 +1,6 @@
 import React from 'react'
 import { usePermissions } from '../../hooks/usePermissions'
-import { Button } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import axios from 'axios'
 import { useAuth } from '../../context/AuthContext'
 import { useUser } from '../../context/UserContext'
@@ -8,10 +8,11 @@ import { useUser } from '../../context/UserContext'
 interface GameControlsProps {
   gameId: string | undefined;
   isCreator: boolean;
+  canBeReady: boolean;
   fetchGameDetails: () => void;
 }
 
-const GameControls: React.FC<GameControlsProps> = ({ isCreator, gameId, fetchGameDetails }) => {
+const GameControls: React.FC<GameControlsProps> = ({ isCreator, gameId, fetchGameDetails, canBeReady }) => {
   const { token } = useAuth()
   const { user } = useUser()
   const { checkPermission } = usePermissions()
@@ -44,6 +45,14 @@ const GameControls: React.FC<GameControlsProps> = ({ isCreator, gameId, fetchGam
     }
   }
 
+  const handleBeReady = async () => {
+    try {
+      await axios.post(`/api/games/room/${gameId}/ready`)
+    } catch (error) {
+      console.error('Erreur lors du set ready:', error)
+    }
+  }
+
   const handleTransferCreator = async (newCreatorId: string) => {
     try {
       await axios.post(`/api/games/${gameId}/transfer`, { newCreatorId })
@@ -55,13 +64,15 @@ const GameControls: React.FC<GameControlsProps> = ({ isCreator, gameId, fetchGam
   return (
     <>
       {isCreator && (
-        <>
+        <Box>
+          <h3>Configurer la partie</h3>
+
           <Button
             variant="contained"
             color="primary"
             onClick={ () => handleStartGame() }
           >
-          Lancer la partie
+            Lancer la partie
           </Button>
           <Button
             variant="contained"
@@ -69,39 +80,53 @@ const GameControls: React.FC<GameControlsProps> = ({ isCreator, gameId, fetchGam
             onClick={ () => handleTransferCreator('1') }
           >
 
-          Léguer les droits du salon
+            Léguer les droits du salon
           </Button>
-        </>
+
+          { [
+            'SuperAdmin',
+            'Admin',
+            'Developers',
+            'Moderator',
+            'ModeratorTest',
+            'Animator'
+          ].includes(user?.role as string) && (
+            <div>
+              { checkPermission('game', 'edit')
+              && (
+                <>
+                  <button>Modifier le salon</button>
+                </>
+              ) }
+              { canAddBot
+              && (
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  onClick={ () => handleAddBot() }
+                >
+                  Ajouter un bot
+                </Button>
+              ) }
+            </div>
+          ) }
+        </Box>
       )}
 
-      { [
-        'SuperAdmin',
-        'Admin',
-        'Developers',
-        'Moderator',
-        'ModeratorTest',
-        'Animator'
-      ].includes(user?.role as string) && (
-        <div>
-          <h1>Contrôles du jeu</h1>
-          { checkPermission('game', 'edit')
-            && (
-              <>
-                <button>Modifier le salon</button>
-              </>
-            ) }
-          { canAddBot
-            && (
-              <Button
-                variant="outlined"
-                color="warning"
-                onClick={ () => handleAddBot() }
-              >
-                Ajouter un bot
-              </Button>
-            ) }
-        </div>
-      ) }
+      {!isCreator && (
+        <Box>
+          {canBeReady && (
+            <Button
+              variant="contained"
+              color="success"
+              className="animate__animated animate__bounce animate__infinite"
+              onClick={ () => handleBeReady() }
+            >
+              Je suis prêt(e) !
+            </Button>
+          )}
+        </Box>
+      )}
     </>
   )
 }
