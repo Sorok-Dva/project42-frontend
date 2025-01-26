@@ -45,7 +45,6 @@ import ValidateUser from 'pages/ValidateUser'
 import { ToastContainer } from 'react-toastify'
 import Notifier from 'components/Notifier'
 import Leaderboard from './pages/Leaderboard'
-import ChatApp from 'pages/ChatApp'
 import GamePage from 'pages/Game'
 import { SocketProvider } from 'context/SocketContext'
 
@@ -78,8 +77,6 @@ const AppContent: React.FC = () => {
           </>
         ) : (
           <>
-            <Route path="/tchat" element={<ChatApp />} />
-
             {user ? (
               <>
                 <Route path="/" element={<HomePage />} />
