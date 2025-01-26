@@ -110,110 +110,126 @@ const GamePage = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column" height="100vh">
-      {/* Header */}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        px={2}
-        py={1}
-        bgcolor="#f0f0f0"
-      >
-        <Typography variant="h6">
-          [{GAME_TYPES[roomData.type]}] Partie : {roomData.name} ({players.length}/{roomData.maxPlayers})
-        </Typography>
-
-        <Box display="flex" gap={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleClearChat}
-          >
-            ♻️
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleLeaveGame}
-          >
-            Quitter
-          </Button>
-        </Box>
-      </Box>
-
-      {/* Contenu principal */}
-      <Box display="flex" flex={1} p={2} className="game-page-container">
-        {/* Colonne gauche : Controls */}
+    <>
+      <Box display="flex" flexDirection="column" height="100vh">
+        {/* Header */}
         <Box
           display="flex"
-          flexDirection="column"
-          width="25%"
-          className="left-column"
-          mr={2}
+          alignItems="center"
+          justifyContent="space-between"
+          px={2}
+          py={1}
+          bgcolor="#f0f0f0"
         >
-          <Box mb={2}>
-            {player && (
-              <Controls
-                gameId={gameId}
-                fetchGameDetails={handleFetchGameDetails}
-                isCreator={isCreator}
-                canBeReady={canBeReady}
-                canStartGame={canStartGame}
-                player={player}
-              />
-            )}
+          <Typography variant="h6">
+            [{GAME_TYPES[roomData.type]}] Partie : {roomData.name} ({players.length}/{roomData.maxPlayers})
+          </Typography>
+
+          <Box display="flex" gap={2}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleClearChat}
+            >
+              ♻️
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleLeaveGame}
+            >
+              Quitter
+            </Button>
           </Box>
         </Box>
 
-        {/* Colonne centrale : Chat */}
-        <Box
-          display="flex"
-          flexDirection="column"
-          width="50%"
-          className="chat-column"
-          mr={2}
-          height="90vh"
-        >
-          {loading ? (
-            <Container className="loader-container">
-              <div className="spinner-wrapper">
-                <Spinner className="custom-spinner" />
-                <div className="loading-text">Chargement du chat...</div>
-              </div>
-            </Container>
-          ) : (
-            <Chat
-              gameId={gameId!}
-              playerId={user?.id}
-              player={player ?? undefined}
+        {/* Contenu principal */}
+        <Box display="flex" flex={1} p={2} className="game-page-container">
+          {/* Colonne gauche : Controls */}
+          <Box
+            display="flex"
+            flexDirection="column"
+            width="25%"
+            className="left-column"
+            mr={2}
+          >
+            <Box mb={2}>
+              {player && (
+                <Controls
+                  gameId={gameId}
+                  fetchGameDetails={handleFetchGameDetails}
+                  isCreator={isCreator}
+                  canBeReady={canBeReady}
+                  canStartGame={canStartGame}
+                  player={player}
+                />
+              )}
+            </Box>
+          </Box>
+
+          {/* Colonne centrale : Chat */}
+          <Box
+            display="flex"
+            flexDirection="column"
+            width="50%"
+            className="chat-column"
+            mr={2}
+            height="85vh"
+          >
+            {loading ? (
+              <Container className="loader-container">
+                <div className="spinner-wrapper">
+                  <Spinner className="custom-spinner" />
+                  <div className="loading-text">Chargement du chat...</div>
+                </div>
+              </Container>
+            ) : (
+              <Chat
+                gameId={gameId!}
+                playerId={user?.id}
+                player={player ?? undefined}
+                players={players}
+                user={user ?? undefined}
+                userRole={user?.role}
+                messages={messages}
+                messagesEndRef={messagesEndRef}
+                socket={socket}
+              />
+            )}
+          </Box>
+
+          {/* Colonne droite : Liste des joueurs */}
+          <Box
+            display="flex"
+            flexDirection="column"
+            width="25%"
+            className="right-column"
+          >
+            <PlayersList
               players={players}
-              user={user ?? undefined}
-              userRole={user?.role}
-              messages={messages}
-              messagesEndRef={messagesEndRef}
+              isCreator={isCreator}
+              creatorNickname={roomData.creator}
+              gameId={gameId!}
               socket={socket}
             />
-          )}
-        </Box>
-
-        {/* Colonne droite : Liste des joueurs */}
-        <Box
-          display="flex"
-          flexDirection="column"
-          width="25%"
-          className="right-column"
-        >
-          <PlayersList
-            players={players}
-            isCreator={isCreator}
-            creatorNickname={roomData.creator}
-            gameId={gameId!}
-            socket={socket}
-          />
+          </Box>
         </Box>
       </Box>
-    </Box>
+
+      <Box
+        position="fixed"
+        bottom={0}
+        left={0}
+        p={1}
+        bgcolor="#f0f0f0"
+        borderTop="1px solid #ccc"
+        width="100%"
+      >
+        <Typography variant="caption">
+          Partie #{gameId} - v{process.env.REACT_APP_GAME_VERSION}
+        </Typography>
+      </Box>
+    </>
   )
 }
 
