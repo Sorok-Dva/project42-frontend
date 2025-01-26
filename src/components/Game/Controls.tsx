@@ -16,6 +16,7 @@ interface GameControlsProps {
   player: Player
   isCreator: boolean
   canBeReady: boolean
+  canStartGame: boolean
   fetchGameDetails: () => void
 }
 
@@ -27,6 +28,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   gameId,
   fetchGameDetails,
   canBeReady,
+  canStartGame,
   player,
 }) => {
   const { token } = useAuth()
@@ -91,6 +93,7 @@ const GameControls: React.FC<GameControlsProps> = ({
             variant="contained"
             color="primary"
             onClick={handleStartGame}
+            disabled={!canStartGame}
           >
             Lancer la partie
           </Button>

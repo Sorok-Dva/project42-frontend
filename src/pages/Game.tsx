@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Box, Typography, Button } from '@mui/material'
 import { Container, Spinner } from 'reactstrap'
 import { useParams } from 'react-router-dom'
@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom'
 import { useAuth } from 'context/AuthContext'
 import { useUser } from 'context/UserContext'
 import { useSocket } from 'context/SocketContext'
-import { useGame } from 'hooks/useGame'
+import { PlayerType, useGame } from 'hooks/useGame'
 import {
   fetchGameDetails,
   leaveGame,
@@ -33,16 +33,19 @@ const GamePage = () => {
     roomData,
     player,
     players,
+    creator,
+    isCreator,
     messages,
     canBeReady,
+    canStartGame,
     gameError,
     loading,
     messagesEndRef,
     setGameError,
     setRoomData,
     setMessages,
+    setIsCreator,
   } = useGame(gameId, user, token, socket)
-
 
   // temp - debug
   useEffect(() => {
@@ -57,8 +60,9 @@ const GamePage = () => {
     }
   }, [socket])
 
-  // Pour savoir si c'est le créateur
-  const isCreator = player?.nickname === roomData.creator
+  useEffect(() => {
+    setIsCreator(player?.nickname === creator?.nickname)
+  }, [creator])
 
   /**
    * Requête pour recharger certains détails du jeu (ex : titre, etc.)
@@ -155,6 +159,7 @@ const GamePage = () => {
                 fetchGameDetails={handleFetchGameDetails}
                 isCreator={isCreator}
                 canBeReady={canBeReady}
+                canStartGame={canStartGame}
                 player={player}
               />
             )}
@@ -181,6 +186,8 @@ const GamePage = () => {
             <Chat
               gameId={gameId!}
               playerId={user?.id}
+              player={player ?? undefined}
+              user={user ?? undefined}
               userRole={user?.role}
               messages={messages}
               messagesEndRef={messagesEndRef}

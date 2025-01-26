@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { Box, TextField, Button, Typography } from '@mui/material'
 import DOMPurify from 'dompurify'
 import { Socket } from 'socket.io-client'
+import { PlayerType } from 'hooks/useGame'
+import { User } from 'context/UserContext'
 
 interface Message {
   nickname: string
@@ -15,6 +17,8 @@ interface Message {
 interface ChatProps {
   gameId: string
   playerId?: string | number
+  player?: PlayerType
+  user?: User
   userRole?: string
   messages: Message[]
   messagesEndRef: React.RefObject<HTMLDivElement>
@@ -24,6 +28,8 @@ interface ChatProps {
 const Chat: React.FC<ChatProps> = ({
   gameId,
   playerId,
+  player,
+  user,
   userRole,
   messages,
   messagesEndRef,
@@ -49,13 +55,9 @@ const Chat: React.FC<ChatProps> = ({
           roomId: gameId,
           playerId,
           currentUserRole: userRole,
-          moderator: {
-            id: playerId,
-            username: '', // Au besoin, tu peux récupérer la valeur dans les props
-          },
+          moderator: user,
         })
       } else {
-        // Message normal
         socket.emit('sendMessage', {
           roomId: gameId,
           playerId,
