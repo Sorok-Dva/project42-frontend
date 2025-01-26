@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Socket } from 'socket.io-client'
 import { fetchRoomData, fetchPlayers, fetchChatMessages } from '../services/gameService'
 
-interface Message {
+export interface Message {
   nickname: string
   message: string
   playerId: number
@@ -11,13 +11,18 @@ interface Message {
   createdAt: Date
 }
 
-interface PlayerType {
+export interface UserType {
+  id: string
+  nickname: string
+}
+
+export interface PlayerType {
   id: string
   nickname: string
   ready: boolean
 }
 
-interface RoomData {
+export interface RoomData {
   id: number
   creator: string
   name: string
@@ -43,8 +48,11 @@ export const useGame = (
   })
   const [player, setPlayer] = useState<PlayerType | null>(null)
   const [players, setPlayers] = useState<PlayerType[]>([])
+  const [creator, setCreator] = useState<UserType | null>(null)
+  const [isCreator, setIsCreator] = useState<boolean>(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [canBeReady, setCanBeReady] = useState(false)
+  const [canStartGame, setCanStartGame] = useState(false)
   const [hasJoined, setHasJoined] = useState(false)
   const [gameError, setGameError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -59,7 +67,7 @@ export const useGame = (
   }
 
   /**
-   * Chargement initial des données de la room + player
+   * Chargement initial des données de la room + player + creator
    */
   useEffect(() => {
     const loadRoomData = async () => {
@@ -69,9 +77,9 @@ export const useGame = (
         if (data.error) {
           setGameError(data.error)
         } else {
-          const { creator } = data.room
           setRoomData(data.room)
           setPlayer(data.player)
+          setCreator(data.creator)
         }
       } catch (err) {
         console.error('Erreur lors du fetchRoomData : ', err)
@@ -94,6 +102,16 @@ export const useGame = (
         setPlayers(playersData)
         setMessages(chatData)
         setLoading(false)
+
+        const allPlayersReady = playersData
+          .filter((player: PlayerType) => player.id !== creator?.id)
+          .every((player: PlayerType) => player.ready)
+
+        if (allPlayersReady && playersData.length === roomData.maxPlayers) {
+          setCanStartGame(true)
+        } else {
+          setCanStartGame(false)
+        }
       } catch (error) {
         console.error('Erreur lors du chargement initial :', error)
       }
@@ -181,6 +199,15 @@ export const useGame = (
       setCanBeReady(state)
     })
 
+    socket.on('enableStartGame', (state: boolean) => {
+      setCanStartGame(state)
+    })
+
+    socket.on('newCreator', (creatorData: PlayerType) => {
+      console.log('newCreator', creatorData)
+      setCreator(creatorData)
+    })
+
     socket.on('error', (error: any) => {
       setMessages((prev) => [
         ...prev,
@@ -203,6 +230,7 @@ export const useGame = (
       socket.off('playerLeft')
       socket.off('playerKicked')
       socket.off('enableReadyOption')
+      socket.off('enableStartGame')
       socket.off('error')
     }
   }, [socket, gameId, user, player, hasJoined, roomData.maxPlayers])
@@ -218,13 +246,17 @@ export const useGame = (
     roomData,
     player,
     players,
+    creator,
+    isCreator,
     messages,
     canBeReady,
+    canStartGame,
     gameError,
     loading,
     messagesEndRef,
     setGameError,
     setRoomData,
     setMessages,
+    setIsCreator,
   }
 }
