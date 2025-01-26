@@ -187,6 +187,7 @@ const GamePage = () => {
               gameId={gameId!}
               playerId={user?.id}
               player={player ?? undefined}
+              players={players}
               user={user ?? undefined}
               userRole={user?.role}
               messages={messages}
