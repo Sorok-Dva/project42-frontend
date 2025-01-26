@@ -50,20 +50,22 @@ const Chat: React.FC<ChatProps> = ({
 
     try {
       if (trimmedMessage.startsWith('/')) {
-        // Commande de modération
-        const commandString = trimmedMessage.slice(1).trim()
-        const [command, arg, ...rest] = commandString.split(' ')
-        const text = rest.join(' ')
+        if (userRole !== 'User') {
+          // Commande de modération
+          const commandString = trimmedMessage.slice(1).trim()
+          const [command, arg, ...rest] = commandString.split(' ')
+          const text = rest.join(' ')
 
-        socket.emit('moderationCommand', {
-          command,
-          arg,
-          text,
-          roomId: gameId,
-          playerId,
-          currentUserRole: userRole,
-          moderator: user,
-        })
+          socket.emit('moderationCommand', {
+            command,
+            arg,
+            text,
+            roomId: gameId,
+            playerId,
+            currentUserRole: userRole,
+            moderator: user,
+          })
+        }
       } else {
         socket.emit('sendMessage', {
           roomId: gameId,
@@ -81,6 +83,7 @@ const Chat: React.FC<ChatProps> = ({
   const handleInputChange = (value: string) => {
     setNewMessage(value)
 
+    if (userRole === 'User') return
     if (value.startsWith('/')) {
       const command = value.split(' ')[0].slice(1) // Extrait la commande sans le "/"
       setCurrentCommand(command)
