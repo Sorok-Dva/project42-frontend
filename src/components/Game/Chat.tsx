@@ -175,55 +175,57 @@ const Chat: React.FC<ChatProps> = ({
 
         <div ref={messagesEndRef} />
       </Box>
-      <Box mt={2} display="flex" flexDirection="column" position="relative">
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Saisir un message..."
-          value={newMessage}
-          inputRef={inputRef}
-          onChange={(e) => handleInputChange(e.target.value)}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              handleSendMessage()
-            }
-          }}
-          inputProps={{
-            style: { zIndex: 1 }, // Mettre l'input au-dessus si nécessaire
-          }}
-        />
-        {suggestions.length > 0 && (
-          <List
-            sx={{
-              position: 'absolute',
-              bottom: '100%', // Positionner au-dessus de l'input
-              left: 0,
-              width: '100%', // Correspondre à la largeur de l'input
-              bgcolor: 'white',
-              border: '1px solid #ccc',
-              maxHeight: '150px',
-              overflowY: 'auto',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-              zIndex: 1000,
+      { player && (
+        <Box mt={2} display="flex" flexDirection="column" position="relative">
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Saisir un message..."
+            value={newMessage}
+            inputRef={inputRef}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleSendMessage()
+              }
             }}
-          >
-            {suggestions.map((nickname, index) => (
-              <ListItem
-                key={index}
-                component="li"
-                onClick={() => handleSuggestionClick(currentCommand, nickname)}
-                sx={{
-                  cursor: 'pointer',
-                  padding: '8px 16px',
-                  ':hover': { bgcolor: '#f0f0f0' },
-                }}
-              >
-                <ListItemText primary={nickname} />
-              </ListItem>
-            ))}
-          </List>
-        )}
-      </Box>
+            inputProps={{
+              style: { zIndex: 1 },
+            }}
+          />
+          {suggestions.length > 0 && (
+            <List
+              sx={{
+                position: 'absolute',
+                bottom: '100%',
+                left: 0,
+                width: '100%',
+                bgcolor: 'white',
+                border: '1px solid #ccc',
+                maxHeight: '150px',
+                overflowY: 'auto',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                zIndex: 1000,
+              }}
+            >
+              {suggestions.map((nickname, index) => (
+                <ListItem
+                  key={index}
+                  component="li"
+                  onClick={() => handleSuggestionClick(currentCommand, nickname)}
+                  sx={{
+                    cursor: 'pointer',
+                    padding: '8px 16px',
+                    ':hover': { bgcolor: '#f0f0f0' },
+                  }}
+                >
+                  <ListItemText primary={nickname} />
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Box>
+      )}
     </Box>
   )
 }
