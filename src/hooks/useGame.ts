@@ -162,6 +162,10 @@ export const useGame = (
 
     socket.on('newMessage', (message) => {
       setMessages((prev) => [...prev, message])
+      if (message.message.toLowerCase().includes(player?.nickname.toLowerCase())) {
+        const audio = new Audio('/assets/sounds/sos.mp3')
+        audio.play()
+      }
     })
 
     socket.on('playerLeft', (data) => {
