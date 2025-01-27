@@ -32,6 +32,7 @@ const Chat: React.FC<ChatProps> = ({
   gameId,
   playerId,
   players,
+  player,
   user,
   userRole,
   messages,
@@ -112,24 +113,66 @@ const Chat: React.FC<ChatProps> = ({
     inputRef.current?.focus()
   }
 
+  const handleMentionClick = (nickname: string) => {
+    setNewMessage((prevMessage) => `${prevMessage.trim()} @${nickname} `)
+    inputRef.current?.focus()
+  }
+
+  const stripHTML = (input: string) => {
+    const tempDiv = document.createElement('div')
+    tempDiv.innerHTML = input
+    return tempDiv.textContent || tempDiv.innerText || ''
+  }
+
   return (
     <Box display="flex" flexDirection="column" height="100%">
       <Box flex={1} bgcolor="#f5f5f5" p={2} overflow="auto">
         {messages.map((msg, index) => {
-          const htmlContent = DOMPurify.sanitize(`
-            <small>[${new Date(msg.createdAt).toLocaleTimeString()}]</small>
-            ${msg.icon ? `<img src="/assets/images/${msg.icon}" class="msg-icon" />` : ''}
-            <strong>${msg.nickname}:</strong> ${msg.message}
-          `)
+          const cleanNickname = stripHTML(msg.nickname)
+          const escapedMessage = stripHTML(msg.message)
+
+          const highlightMention = (message: string, nickname?: string) => {
+            const regex = new RegExp(`\\b${nickname}\\b`, 'gi')
+            return message.replace(
+              regex,
+              `<span style="background-color: #ff9100">${nickname}</span>`
+            )
+          }
+
+          const shouldHighlight =
+            cleanNickname !== 'Système' && cleanNickname !== 'Modération'
+
+          let processedMessage
+          if (cleanNickname === 'Modération') {
+            processedMessage = msg.message
+          } else if (shouldHighlight) {
+            processedMessage = highlightMention(escapedMessage, player?.nickname)
+          } else {
+            processedMessage = escapedMessage
+          }
 
           return (
             <Typography
               key={index}
               variant="body1"
-              dangerouslySetInnerHTML={{ __html: htmlContent }}
-            />
+              onClick={(e) => {
+                const target = e.target as HTMLElement
+                if (target.classList.contains('msg-nickname')) {
+                  const nickname = target.getAttribute('data-nickname')
+                  if (nickname) handleMentionClick(nickname)
+                }
+              }}
+            >
+              <small>[{new Date(msg.createdAt).toLocaleTimeString()}]</small>{' '}
+              {msg.icon && <img src={`/assets/images/${msg.icon}`} className="msg-icon" alt="icon" />}
+              <strong className="msg-nickname" data-nickname={cleanNickname}
+                dangerouslySetInnerHTML={{ __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname }}>
+              </strong>:{' '}
+              <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
+            </Typography>
           )
         })}
+
         <div ref={messagesEndRef} />
       </Box>
       <Box mt={2} display="flex" flexDirection="column" position="relative">
