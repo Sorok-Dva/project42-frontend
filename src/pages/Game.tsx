@@ -68,6 +68,7 @@ const GamePage = () => {
     canBeReady,
     canStartGame,
     gameError,
+    error,
     loading,
     messagesEndRef,
     passwordRequired,
@@ -143,7 +144,35 @@ const GamePage = () => {
   }
 
   if (gameError) {
-    return <div className="alert alert-danger">{gameError}</div>
+    return (
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        height="100vh"
+        bgcolor="#f0f0f5"
+      >
+        <Paper
+          elevation={4}
+          sx={{
+            padding: '2rem',
+            borderRadius: '10px',
+            textAlign: 'center',
+            backgroundColor: '#ffffff',
+            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)'
+          }}
+        >
+          <Typography variant="h5" gutterBottom>
+            ❌Erreur
+          </Typography>
+          <div className="alert alert-danger mt-2">
+            <Typography variant="body1" sx={{ marginBottom: '1rem' }}>
+              {gameError}
+            </Typography>
+          </div>
+        </Paper>
+      </Box>
+    )
   }
 
   if (passwordRequired && !isAuthorized) {
@@ -191,6 +220,7 @@ const GamePage = () => {
           >
             Valider
           </Button>
+          { error && <div className="alert alert-danger mt-2">{error}</div>}
         </Paper>
       </Box>
     )
