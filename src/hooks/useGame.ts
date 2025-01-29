@@ -19,6 +19,7 @@ export interface UserType {
 
 export interface PlayerType {
   id: string
+  playerId: string
   nickname: string
   ready: boolean
 }
@@ -152,7 +153,7 @@ export const useGame = (
       setLoading(false)
 
       const allPlayersReady = playersData
-        .filter((player: PlayerType) => player.id !== creator?.id)
+        .filter((player: PlayerType) => player.playerId !== creator?.id)
         .every((player: PlayerType) => player.ready)
 
       if (allPlayersReady && playersData.length === roomData.maxPlayers) {
@@ -192,9 +193,6 @@ export const useGame = (
         if (data.error) {
           setGameError(data.error)
         } else {
-          console.log('loading room data : ', data.room)
-          console.log('Authorized : ', data.room.password ? localStorage.getItem(`game_auth_${gameId}`) === 'true' : false)
-          console.log('password required : ', !!data.room.password)
           const authorized = data.room.password ? localStorage.getItem(`game_auth_${gameId}`) === 'true' : false
           setIsAuthorized(authorized)
           setPasswordRequired(!!data.room.password)
@@ -254,9 +252,7 @@ export const useGame = (
 
     socket.on('updatePlayers', (updatedPlayers: PlayerType[]) => {
       setPlayers(updatedPlayers)
-      // Exemple de logique : autoriser le "ready" si le nombre de joueurs max est atteint
-      // if (updatedPlayers.length >= roomData.maxPlayers) setCanBeReady(true)
-      // Pour l'instant on le laisse tel quel :
+      if (updatedPlayers.length >= roomData.maxPlayers) setCanBeReady(true)
     })
 
     socket.on('newMessage', (message) => {
