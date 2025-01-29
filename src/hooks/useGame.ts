@@ -212,15 +212,19 @@ export const useGame = (
       setCreator(creatorData)
     })
 
+    socket.on('nicknameChanged', (newNickname: string) => {
+      setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, nickname: newNickname } : null)
+    })
+
     socket.on('error', (error: any) => {
       setMessages((prev) => [
         ...prev,
         {
           nickname: 'Système',
           message: error.message,
+          icon: error.icon,
           playerId: -1,
           channel: 0,
-          icon: '',
           createdAt: new Date(),
         },
       ])
