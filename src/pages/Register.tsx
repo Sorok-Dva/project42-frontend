@@ -18,6 +18,8 @@ import PageBanner from 'components/Common/PageBanner'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { ThemeContext } from 'context/ThemeContext'
+import axios, { AxiosError } from 'axios'
+import { isForbiddenNickname } from 'utils/forbiddenNicknames'
 
 const Register : React.FC = () => {
   const navigate = useNavigate()
@@ -54,7 +56,7 @@ const Register : React.FC = () => {
   }
 
   const validateUsername = (username : string) => {
-    return username.length > 4 && username.length < 15
+    return username.length > 4 && username.length < 15 && !isForbiddenNickname(username)
   }
 
   const validatePassword = (password : string) => {
@@ -82,24 +84,18 @@ const Register : React.FC = () => {
     }
 
     try {
-      const response = await fetch('/api/users/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, nickname }),
-      })
-
-      if (!response.ok) {
-        toast.success('Une erreur est survenue lors de votre inscription. Veuillez réessayer.',
-          ToastDefaultOptions)
-      }
+      await axios.post(
+        '/api/users/register',
+        { email, password, nickname },
+      )
 
       toast.success('Inscription réussie ! Veuillez vérifier votre email pour valider votre compte et finaliser la connexion.',
         ToastDefaultOptions)
       navigate('/')
-    } catch (err) {
-      setError('Email in use or invalid data')
+    } catch (err: any) {
+      toast.error('Une erreur est survenue lors de votre inscription. Veuillez réessayer.',
+        ToastDefaultOptions)
+      setError(err.response.data.error)
     }
   }
 
