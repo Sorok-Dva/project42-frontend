@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { ListItem, ListItemText } from '@mui/material'
-import { Box, TextField, Button, Typography } from '@mui/material'
+import { Box, TextField, Typography } from '@mui/material'
 import { List } from '@mui/material'
-import DOMPurify from 'dompurify'
 import { Socket } from 'socket.io-client'
 import { PlayerType } from 'hooks/useGame'
 import { User } from 'context/UserContext'
@@ -26,6 +25,7 @@ interface ChatProps {
   messages: Message[]
   messagesEndRef: React.RefObject<HTMLDivElement>
   socket: Socket | null
+  highlightedPlayers: { [nickname: string]: string }
 }
 
 const Chat: React.FC<ChatProps> = ({
@@ -38,10 +38,12 @@ const Chat: React.FC<ChatProps> = ({
   messages,
   messagesEndRef,
   socket,
+  highlightedPlayers,
 }) => {
   const [newMessage, setNewMessage] = useState('')
   const [currentCommand, setCurrentCommand] = useState('')
   const [suggestions, setSuggestions] = useState<string[]>([])
+  const [selectedIndex, setSelectedIndex] = useState(-1)
 
   const inputRef = React.useRef<HTMLInputElement>(null)
 
@@ -85,18 +87,24 @@ const Chat: React.FC<ChatProps> = ({
     setNewMessage(value)
 
     if (userRole === 'User') return
-    if (value.startsWith('/')) {
-      const command = value.split(' ')[0].slice(1) // Extrait la commande sans le "/"
-      setCurrentCommand(command)
-    }
+
+    const words = value.trim().split(' ')
+    const command = words[0]?.startsWith('/') ? words[0].slice(1) : ''
+    const arg = words[1] || ''
+    const hasAdditionalArgs = words.length > 2
+
+    setCurrentCommand(command)
 
     if (
-      value.startsWith('/kick ') ||
-      value.startsWith('/ban ') ||
-      value.startsWith('/mute ') ||
-      value.startsWith('/unmute ')
+      (
+        command === 'kick' ||
+        command === 'ban' ||
+        command === 'mute' ||
+        command === 'unmute' ||
+        command === 'nick'
+      ) && !hasAdditionalArgs
     ) {
-      const searchQuery = value.split(' ')[1]?.toLowerCase() || ''
+      const searchQuery = arg.toLowerCase()
       const filteredSuggestions = players
         ?.filter((p) => p.nickname.toLowerCase().includes(searchQuery) && p.id !== playerId)
         .map((p) => p.nickname) || []
@@ -106,6 +114,7 @@ const Chat: React.FC<ChatProps> = ({
       setSuggestions([])
     }
   }
+
 
   const handleSuggestionClick = (command: string, nickname: string) => {
     setNewMessage(`/${command} ${nickname} `)
@@ -131,6 +140,8 @@ const Chat: React.FC<ChatProps> = ({
           const cleanNickname = stripHTML(msg.nickname)
           const escapedMessage = stripHTML(msg.message)
 
+          const highlightColor = highlightedPlayers[cleanNickname] || 'transparent'
+
           const highlightMention = (message: string, nickname?: string) => {
             const regex = new RegExp(`\\b${nickname}\\b`, 'gi')
             return message.replace(
@@ -155,6 +166,11 @@ const Chat: React.FC<ChatProps> = ({
             <Typography
               key={index}
               variant="body1"
+              sx={{
+                backgroundColor: highlightColor,
+                padding: '4px',
+                borderRadius: '4px',
+              }}
               onClick={(e) => {
                 const target = e.target as HTMLElement
                 if (target.classList.contains('msg-nickname')) {
@@ -184,11 +200,35 @@ const Chat: React.FC<ChatProps> = ({
             value={newMessage}
             inputRef={inputRef}
             onChange={(e) => handleInputChange(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
+            onKeyDown={(e) => {
+              if (suggestions.length > 0) {
+                if (e.key === 'ArrowDown') {
+                  setSelectedIndex((prev) => (prev + 1) % suggestions.length)
+                  e.preventDefault()
+                } else if (e.key === 'ArrowUp') {
+                  setSelectedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length)
+                  e.preventDefault()
+                } else if (e.key === 'Enter') {
+                  if (selectedIndex === -1) {
+                    // Si aucune sélection, on prend la première suggestion
+                    setSelectedIndex(0)
+                    setNewMessage(`/${currentCommand} ${suggestions[0]} `)
+                    setSuggestions([])
+                    e.preventDefault()
+                  } else if (selectedIndex >= 0) {
+                    // Si une suggestion est sélectionnée, l'insérer
+                    const chosenNickname = suggestions[selectedIndex]
+                    setNewMessage(`/${currentCommand} ${chosenNickname} `)
+                    setSelectedIndex(-1) // Réinitialise l'index sélectionné
+                    setSuggestions([]) // Cache les suggestions
+                    e.preventDefault() // Empêche l'envoi immédiat du message
+                  }
+                }
+              } else if (e.key === 'Enter') {
                 handleSendMessage()
               }
             }}
+
             inputProps={{
               style: { zIndex: 1 },
             }}
@@ -216,6 +256,7 @@ const Chat: React.FC<ChatProps> = ({
                   sx={{
                     cursor: 'pointer',
                     padding: '8px 16px',
+                    bgcolor: selectedIndex === index ? '#ddd' : 'white',
                     ':hover': { bgcolor: '#f0f0f0' },
                   }}
                 >
