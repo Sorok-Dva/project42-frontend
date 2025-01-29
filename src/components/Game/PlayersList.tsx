@@ -9,19 +9,25 @@ interface Player {
 
 interface PlayersListProps {
   players: Player[]
+  player: Player | null
   isCreator: boolean
   creatorNickname: string
   gameId: string
   socket: Socket | null
   onKick?: (nickname: string) => void
+  toggleHighlightPlayer: (nickname: string) => void
+  highlightedPlayers: { [nickname: string]: string }
 }
 
 const PlayersList: React.FC<PlayersListProps> = ({
   players,
-  isCreator,
+  player,
+  isCreator = false,
   creatorNickname,
   gameId,
   socket,
+  toggleHighlightPlayer,
+  highlightedPlayers,
 }) => {
   const handleKickPlayer = (nickname: string) => {
     if (!isCreator || !socket) return
@@ -42,17 +48,31 @@ const PlayersList: React.FC<PlayersListProps> = ({
         Liste des joueurs
       </Typography>
       <List>
-        {players.map((player, index) => (
+        {players.map((_player, index) => (
           <ListItem key={index}>
             <ListItemText
-              primary={player.nickname}
-              secondary={player.ready ? 'Prêt' : 'Non prêt'}
+              primary={_player.nickname}
+              secondary={_player.ready ? 'Prêt' : 'Non prêt'}
             />
-            {isCreator && creatorNickname !== player.nickname && (
+            <button
+              onClick={() => toggleHighlightPlayer(_player.nickname)}
+              style={{
+                marginLeft: '8px',
+                padding: '4px 8px',
+                backgroundColor: highlightedPlayers[_player.nickname] || '#ccc',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              {highlightedPlayers[_player.nickname] ? 'Désélectionner' : 'Surligner'}
+            </button>
+            {player && isCreator && creatorNickname !== _player.nickname && (
               <Button
                 variant="outlined"
                 color="error"
-                onClick={() => handleKickPlayer(player.nickname)}
+                onClick={() => handleKickPlayer(_player.nickname)}
               >
                 Kick
               </Button>

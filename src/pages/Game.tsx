@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom'
 import { useAuth } from 'context/AuthContext'
 import { useUser } from 'context/UserContext'
 import { useSocket } from 'context/SocketContext'
-import { PlayerType, useGame } from 'hooks/useGame'
+import { useGame } from 'hooks/useGame'
 import {
   fetchGameDetails,
   leaveGame,
@@ -14,6 +14,7 @@ import {
 import Controls from '../components/Game/Controls'
 import Chat from '../components/Game/Chat'
 import PlayersList from '../components/Game/PlayersList'
+import { getRandomColor } from 'utils/getRandomColor'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -28,6 +29,19 @@ const GamePage = () => {
   const { token } = useAuth()
   const { socket } = useSocket()
 
+  const [highlightedPlayers, setHighlightedPlayers] = useState<{ [nickname: string]: string }>({})
+
+  const toggleHighlightPlayer = (nickname: string) => {
+    setHighlightedPlayers((prev) => {
+      if (prev[nickname]) {
+        const newState = { ...prev }
+        delete newState[nickname]
+        return newState
+      } else {
+        return { ...prev, [nickname]: getRandomColor() }
+      }
+    })
+  }
   // Hook custom "useGame"
   const {
     roomData,
@@ -91,14 +105,16 @@ const GamePage = () => {
     if (!socket || !gameId) return
     if (confirm('Êtes-vous sûr de vouloir quitter la partie ?')) {
       try {
-        const response = await leaveGame(token)
-        if (response.message) {
-          socket.emit('leaveRoom', {
-            roomId: gameId,
-            player: { id: user?.id, nickname: user?.nickname },
-          })
-          setGameError('Vous avez bien quitté la partie. Vous pouvez fermer cet onglet.')
+        if (player) {
+          const response = await leaveGame(token)
+          if (response.message) {
+            socket.emit('leaveRoom', {
+              roomId: gameId,
+              player: { id: user?.id, nickname: user?.nickname },
+            })
+          }
         }
+        setGameError('Vous avez bien quitté la partie. Vous pouvez fermer cet onglet.')
       } catch (error) {
         console.error('Erreur lors de la sortie de la partie:', error)
       }
@@ -194,6 +210,7 @@ const GamePage = () => {
                 messages={messages}
                 messagesEndRef={messagesEndRef}
                 socket={socket}
+                highlightedPlayers={highlightedPlayers}
               />
             )}
           </Box>
@@ -207,10 +224,13 @@ const GamePage = () => {
           >
             <PlayersList
               players={players}
+              player={player}
               isCreator={isCreator}
               creatorNickname={roomData.creator}
               gameId={gameId!}
               socket={socket}
+              toggleHighlightPlayer={toggleHighlightPlayer}
+              highlightedPlayers={highlightedPlayers}
             />
           </Box>
         </Box>
@@ -226,7 +246,7 @@ const GamePage = () => {
         width="100%"
       >
         <Typography variant="caption">
-          Partie #{gameId} - v{process.env.REACT_APP_GAME_VERSION}
+          Partie #{gameId} - v{process.env.REACT_APP_GAME_VERSION} || {player?.nickname}
         </Typography>
       </Box>
     </>
