@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Box, Typography, Button } from '@mui/material'
+import { Box, Typography, Button, Paper, TextField } from '@mui/material'
 import { Container, Spinner } from 'reactstrap'
 import { useParams } from 'react-router-dom'
 
@@ -148,16 +148,51 @@ const GamePage = () => {
 
   if (passwordRequired && !isAuthorized) {
     return (
-      <div className="password-modal">
-        <h2>Cette partie est protégée</h2>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Entrez le mot de passe"
-        />
-        <button onClick={handlePasswordSubmit}>Valider</button>
-      </div>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        height="100vh"
+        bgcolor="#f0f0f5"
+      >
+        <Paper
+          elevation={4}
+          sx={{
+            padding: '2rem',
+            borderRadius: '10px',
+            textAlign: 'center',
+            backgroundColor: '#ffffff',
+            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)'
+          }}
+        >
+          <Typography variant="h5" gutterBottom>
+            🔒 Partie protégée
+          </Typography>
+          <Typography variant="body1" sx={{ marginBottom: '1rem' }}>
+            Entrez le mot de passe pour rejoindre la partie.
+          </Typography>
+          <TextField
+            type="password"
+            label="Mot de passe"
+            variant="outlined"
+            fullWidth
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            sx={{ marginBottom: '1rem' }}
+            autoFocus
+            onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            onClick={handlePasswordSubmit}
+          >
+            Valider
+          </Button>
+        </Paper>
+      </Box>
     )
   }
 
