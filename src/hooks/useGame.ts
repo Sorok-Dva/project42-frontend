@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Socket } from 'socket.io-client'
 import { fetchRoomData, fetchPlayers, fetchChatMessages } from '../services/gameService'
+import axios from 'axios'
 
 export interface Message {
   nickname: string
@@ -28,6 +29,8 @@ export interface RoomData {
   name: string
   type: number
   maxPlayers: number
+  isPrivate: boolean
+  password?: string
 }
 
 /**
@@ -45,7 +48,11 @@ export const useGame = (
     name: 'Chargement...',
     type: 0,
     maxPlayers: 6,
+    isPrivate: true
   })
+  const [passwordRequired, setPasswordRequired] = useState(false)
+  const [password, setPassword] = useState('')
+  const [isAuthorized, setIsAuthorized] = useState(false)
   const [player, setPlayer] = useState<PlayerType | null>(null)
   const [players, setPlayers] = useState<PlayerType[]>([])
   const [creator, setCreator] = useState<UserType | null>(null)
@@ -60,11 +67,81 @@ export const useGame = (
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   /**
-   * Scrolle automatiquement en bas de la liste des messages
+   * scrollToBottom is a function that scrolls the view to the bottom of a container.
+   * It ensures that the UI automatically scrolls to the most recent content,
+   * providing a smooth scrolling effect.
+   *
+   * The function utilizes a reference (messagesEndRef) to the DOM element
+   * and invokes the scrollIntoView method with the 'smooth' behavior.
    */
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
+
+  const joinGame = async () => {
+    try {
+      const response = await axios.post(`/api/games/room/${gameId}/join`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      localStorage.setItem(`game_auth_${gameId}`, 'true')
+      setIsAuthorized(true)
+    } catch (error) {
+      console.error('Erreur lors de la tentative de rejoindre la partie :', error)
+    }
+  }
+
+  /**
+   * Asynchronously handles the submission of a password for game authentication.
+   * Sends an HTTP POST request to validate the password associated with a specific game.
+   * If the validation is successful, updates the authorization state and local storage.
+   * If the validation fails, displays an incorrect password alert.
+   * In case of any errors during the request, displays an error alert.
+   *
+   * The function performs the following steps:
+   * - Sends a POST request to the server with the game ID and password.
+   * - If the response indicates success, stores authorization status in localStorage and updates the state.
+   * - If the validation fails (e.g., wrong password), alerts the user about the issue.
+   * - Handles errors gracefully by alerting the user about a validation error.
+   */
+  const handlePasswordSubmit = async () => {
+    try {
+      const response = await axios.post('/api/games/validate-password', {
+        gameId,
+        password,
+      })
+
+      if (response.data.success) {
+        localStorage.setItem(`game_auth_${gameId}`, 'true')
+        setIsAuthorized(true)
+        setPasswordRequired(false)
+      } else {
+        alert('Mot de passe incorrect')
+      }
+    } catch (error) {
+      alert('Erreur lors de la validation du mot de passe')
+    }
+  }
+
+  useEffect(() => {
+    const checkPasswordRequirement = async () => {
+      try {
+        const { data: roomData } = await axios.get(`/api/games/room/${gameId}`)
+        if (roomData.password) {
+          const storedAuth = localStorage.getItem(`game_auth_${gameId}`)
+          if (!storedAuth) {
+            setPasswordRequired(true) // Demander le mot de passe
+          } else {
+            joinGame() // Joindre directement si déjà validé
+          }
+        } else {
+          joinGame() // Joindre directement si pas de mot de passe
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du mot de passe :', error)
+      }
+    }
+    checkPasswordRequirement()
+  }, [gameId])
 
   /**
    * Chargement initial des données de la room + player + creator
@@ -87,6 +164,17 @@ export const useGame = (
     }
     loadRoomData()
   }, [gameId, token])
+
+  useEffect(() => {
+    if (roomData?.password) {
+      const storedAuth = localStorage.getItem(`game_auth_${gameId}`)
+      if (!storedAuth) {
+        setPasswordRequired(true)
+      } else {
+        setIsAuthorized(true)
+      }
+    }
+  }, [roomData, gameId])
 
   /**
    * Charge la liste des joueurs + messages de chat
@@ -262,6 +350,11 @@ export const useGame = (
     gameError,
     loading,
     messagesEndRef,
+    passwordRequired,
+    isAuthorized,
+    password,
+    handlePasswordSubmit,
+    setPassword,
     setGameError,
     setRoomData,
     setMessages,

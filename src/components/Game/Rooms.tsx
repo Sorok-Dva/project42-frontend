@@ -92,6 +92,30 @@ const RoomList = () => {
       return
     }
     try {
+      const { data } = await axios.get(`/api/games/room/${roomId}`)
+
+      if (data.room.password) {
+        const password = prompt('Cette partie est protégée. Entrez le mot de passe :')
+
+        if (!password) {
+          alert('Mot de passe requis pour rejoindre cette partie.')
+          return
+        }
+
+        const passwordValidation = await axios.post('/api/games/validate-password', {
+          gameId: roomId,
+          password,
+        })
+
+        if (!passwordValidation.data.success) {
+          alert('Mot de passe incorrect.')
+          return
+        }
+
+        localStorage.setItem(`game_auth_${roomId}`, 'true')
+      }
+
+
       const response = await axios.post(`/api/games/room/${roomId}/join`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -134,6 +158,7 @@ const RoomList = () => {
           player: { id: user?.id, nickname: user?.nickname },
         })
         setPlayerRoomId(null)
+        localStorage.removeItem(`game_auth_${playerRoomId}`)
         alert('Vous avez bien quitter votre partie.')
         fetchRooms()
       }

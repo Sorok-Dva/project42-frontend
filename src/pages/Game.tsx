@@ -23,6 +23,12 @@ export const GAME_TYPES: Record<number, string> = {
   3: 'Carnage',
 }
 
+/**
+ * The GamePage component manages and renders the game interface, user interactions, and real-time updates.
+ * It integrates various elements like player controls, chat, and a list of players.
+ *
+ * @return {JSX.Element} The rendered JSX for the main game interface, including headers, chat, controls, and player list.
+ */
 const GamePage = () => {
   const { id: gameId } = useParams<{ id: string }>()
   const { user } = useUser()
@@ -31,6 +37,14 @@ const GamePage = () => {
 
   const [highlightedPlayers, setHighlightedPlayers] = useState<{ [nickname: string]: string }>({})
 
+  /**
+   * Toggles the highlighting of a player based on their nickname.
+   * If the player is already highlighted, they will be removed from the highlighted list.
+   * If the player is not highlighted, they will be added with a random color.
+   *
+   * @param {string} nickname - The nickname of the player to toggle highlighting for.
+   * @returns {void}
+   */
   const toggleHighlightPlayer = (nickname: string) => {
     setHighlightedPlayers((prev) => {
       if (prev[nickname]) {
@@ -42,6 +56,7 @@ const GamePage = () => {
       }
     })
   }
+
   // Hook custom "useGame"
   const {
     roomData,
@@ -55,6 +70,11 @@ const GamePage = () => {
     gameError,
     loading,
     messagesEndRef,
+    passwordRequired,
+    isAuthorized,
+    password,
+    handlePasswordSubmit,
+    setPassword,
     setGameError,
     setRoomData,
     setMessages,
@@ -114,6 +134,7 @@ const GamePage = () => {
             })
           }
         }
+        localStorage.removeItem(`game_auth_${gameId}`)
         setGameError('Vous avez bien quitté la partie. Vous pouvez fermer cet onglet.')
       } catch (error) {
         console.error('Erreur lors de la sortie de la partie:', error)
@@ -125,7 +146,22 @@ const GamePage = () => {
     return <div className="alert alert-danger">{gameError}</div>
   }
 
-  return (
+  if (passwordRequired && !isAuthorized) {
+    return (
+      <div className="password-modal">
+        <h2>Cette partie est protégée</h2>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Entrez le mot de passe"
+        />
+        <button onClick={handlePasswordSubmit}>Valider</button>
+      </div>
+    )
+  }
+
+  return isAuthorized ? (
     <>
       <Box display="flex" flexDirection="column" height="100vh">
         {/* Header */}
@@ -250,6 +286,13 @@ const GamePage = () => {
         </Typography>
       </Box>
     </>
+  ): (
+    <Container className="loader-container">
+      <div className="spinner-wrapper">
+        <Spinner className="custom-spinner" />
+        <div className="loading-text">Chargement de la partie...</div>
+      </div>
+    </Container>
   )
 }
 
