@@ -62,6 +62,7 @@ export const useGame = (
   const [canStartGame, setCanStartGame] = useState(false)
   const [hasJoined, setHasJoined] = useState(false)
   const [gameError, setGameError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -104,10 +105,12 @@ export const useGame = (
         setPasswordRequired(false)
         loadPlayersAndMessages(true)
       } else {
-        alert('Mot de passe incorrect')
+        setError('Mot de passe incorrect')
       }
-    } catch (error) {
-      alert('Erreur lors de la validation du mot de passe')
+    } catch (error: any) {
+      if (error.response.data.error) {
+        setError(error.response.data.error)
+      } else setError('Une erreur est survenue lors de la validation du mot de passe')
     }
   }
 
@@ -356,6 +359,7 @@ export const useGame = (
     canBeReady,
     canStartGame,
     gameError,
+    error,
     loading,
     messagesEndRef,
     passwordRequired,
