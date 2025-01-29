@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Socket } from 'socket.io-client'
-import { fetchRoomData, fetchPlayers, fetchChatMessages } from '../services/gameService'
+import { fetchGameDetails, fetchPlayers, fetchChatMessages } from '../services/gameService'
 import axios from 'axios'
 
 export interface Message {
@@ -78,15 +78,6 @@ export const useGame = (
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const joinProtectedGame = async () => {
-    try {
-      localStorage.setItem(`game_auth_${gameId}`, 'true')
-      setIsAuthorized(true)
-    } catch (error) {
-      console.error('Erreur lors de la tentative de rejoindre la partie :', error)
-    }
-  }
-
   /**
    * Asynchronously handles the submission of a password for game authentication.
    * Sends an HTTP POST request to validate the password associated with a specific game.
@@ -111,6 +102,7 @@ export const useGame = (
         localStorage.setItem(`game_auth_${gameId}`, 'true')
         setIsAuthorized(true)
         setPasswordRequired(false)
+        loadPlayersAndMessages(true)
       } else {
         alert('Mot de passe incorrect')
       }
@@ -119,26 +111,56 @@ export const useGame = (
     }
   }
 
-  useEffect(() => {
-    const checkPasswordRequirement = async () => {
-      try {
-        const { data } = await axios.get(`/api/games/room/${gameId}`)
-        if (data.room.password) {
-          const storedAuth = localStorage.getItem(`game_auth_${gameId}`)
-          if (!storedAuth) {
-            setPasswordRequired(true)
-          } else {
-            joinProtectedGame()
-          }
-        } else {
-          joinProtectedGame()
-        }
-      } catch (error) {
-        console.error('Erreur lors de la vérification du mot de passe :', error)
+  /**
+   * Asynchronously loads players and chat messages data for a game.
+   *
+   * This function fetches the list of players and chat messages for a given game ID
+   * if the `gameId` is valid and the user is authorized. It updates the state with
+   * the fetched players and messages data, sets the loading state to `false`,
+   * and determines whether the game can be started based on the readiness of players.
+   *
+   * The game can start if all players (excluding the creator) are marked as ready
+   * and the total number of players matches the maximum allowed for the game room.
+   *
+   * Handles errors during the data fetching process by logging them to the console.
+   *
+   * Preconditions:
+   * - `gameId` must be defined and valid.
+   * - The user must be authorized.
+   *
+   * State Updates:
+   * - Updates the players state with the fetched players data.
+   * - Updates the messages state with the fetched chat messages data.
+   * - Updates the loading state to `false`.
+   * - Sets the ability to start the game (`canStartGame`) based on readiness and player count.
+   *
+   * Error Handling:
+   * Logs any errors encountered during the fetching process to the console.
+   */
+  const loadPlayersAndMessages = async (authorized?: boolean) => {
+    if (!gameId || !authorized) return
+    try {
+      const [playersData, chatData] = await Promise.all([
+        fetchPlayers(gameId),
+        fetchChatMessages(gameId),
+      ])
+      setPlayers(playersData)
+      setMessages(chatData)
+      setLoading(false)
+
+      const allPlayersReady = playersData
+        .filter((player: PlayerType) => player.id !== creator?.id)
+        .every((player: PlayerType) => player.ready)
+
+      if (allPlayersReady && playersData.length === roomData.maxPlayers) {
+        setCanStartGame(true)
+      } else {
+        setCanStartGame(false)
       }
+    } catch (error) {
+      console.error('Erreur lors du chargement initial :', error)
     }
-    checkPasswordRequirement()
-  }, [gameId])
+  }
 
   /**
    * Chargement initial des données de la room + player + creator
@@ -147,64 +169,34 @@ export const useGame = (
     const loadRoomData = async () => {
       if (!gameId || !token) return
       try {
-        const data = await fetchRoomData(gameId, token)
+        const data = await fetchGameDetails(gameId, token)
         if (data.error) {
           setGameError(data.error)
         } else {
-          setIsAuthorized(
-            data.room.password ? localStorage.getItem(`game_auth_${gameId}`) === 'true' : false)
+          console.log('loading room data : ', data.room)
+          console.log('Authorized : ', data.room.password ? localStorage.getItem(`game_auth_${gameId}`) === 'true' : false)
+          console.log('password required : ', !!data.room.password)
+          const authorized = data.room.password ? localStorage.getItem(`game_auth_${gameId}`) === 'true' : false
+          setIsAuthorized(authorized)
           setPasswordRequired(!!data.room.password)
           setRoomData(data.room)
           setPlayer(data.player)
           setCreator(data.creator)
+
+          loadPlayersAndMessages(authorized)
         }
       } catch (err) {
-        console.error('Erreur lors du fetchRoomData : ', err)
+        console.error('Erreur lors du fetchGameDetails : ', err)
       }
     }
     loadRoomData()
-  }, [gameId, token])
-
-  useEffect(() => {
-    if (roomData?.password) {
-      const storedAuth = localStorage.getItem(`game_auth_${gameId}`)
-      if (!storedAuth) {
-        setPasswordRequired(true)
-      } else {
-        setIsAuthorized(true)
-      }
-    }
-  }, [roomData, gameId])
+  }, [gameId, token, isAuthorized])
 
   /**
    * Charge la liste des joueurs + messages de chat
    */
   useEffect(() => {
-    const loadPlayersAndMessages = async () => {
-      if (!gameId) return
-      try {
-        const [playersData, chatData] = await Promise.all([
-          fetchPlayers(gameId),
-          fetchChatMessages(gameId),
-        ])
-        setPlayers(playersData)
-        setMessages(chatData)
-        setLoading(false)
-
-        const allPlayersReady = playersData
-          .filter((player: PlayerType) => player.id !== creator?.id)
-          .every((player: PlayerType) => player.ready)
-
-        if (allPlayersReady && playersData.length === roomData.maxPlayers) {
-          setCanStartGame(true)
-        } else {
-          setCanStartGame(false)
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement initial :', error)
-      }
-    }
-    loadPlayersAndMessages()
+    loadPlayersAndMessages(isAuthorized)
   }, [gameId])
 
   /**

@@ -1,22 +1,14 @@
 import axios from 'axios'
 
 /**
- * Récupère les informations globales d'une salle/room (roomData + player courant)
+ * Récupère les détails d'une partie (gameDetails) (roomData + player courant)
  */
-export const fetchRoomData = async (gameId: string, token?: string) => {
+export const fetchGameDetails = async (gameId: string, token?: string) => {
   const response = await axios.get(`/api/games/room/${gameId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   })
-  return response.data
-}
-
-/**
- * Récupère les détails d'une partie (gameDetails)
- */
-export const fetchGameDetails = async (gameId: string) => {
-  const response = await axios.get(`/api/games/room/${gameId}`)
   return response.data
 }
 

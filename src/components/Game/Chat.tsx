@@ -115,7 +115,6 @@ const Chat: React.FC<ChatProps> = ({
     }
   }
 
-
   const handleSuggestionClick = (command: string, nickname: string) => {
     setNewMessage(`/${command} ${nickname} `)
     setSuggestions([])
