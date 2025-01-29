@@ -166,6 +166,22 @@ export const useGame = (
    * Chargement initial des données de la room + player + creator
    */
   useEffect(() => {
+    /**
+     * Asynchronously loads the room data for the specified game by fetching its details
+     * and updating the relevant state variables. It includes handling authorization,
+     * password requirements, and player data initialization.
+     *
+     * This function will not proceed if gameId or token are not defined.
+     * Upon successful data fetch, it sets the following:
+     * - Authentication status based on password protection.
+     * - Password requirement flag.
+     * - Room details, player information, and creator information.
+     * - Player and message data if authorized.
+     *
+     * Handles any errors during the fetch process by logging them to the console.
+     *
+     * @returns {Promise<void>} A promise that resolves when the room data is successfully loaded or stops due to invalid conditions.
+     */
     const loadRoomData = async () => {
       if (!gameId || !token) return
       try {
@@ -206,7 +222,7 @@ export const useGame = (
     if (!socket || !gameId || !user) return
 
     // 1) Rejoint la room si pas déjà fait
-    if (!hasJoined) {
+    if (!hasJoined && isAuthorized) {
       socket.emit('joinRoom', {
         roomId: gameId,
         player: { id: user.id, nickname: user.nickname },
@@ -321,7 +337,7 @@ export const useGame = (
       socket.off('enableStartGame')
       socket.off('error')
     }
-  }, [socket, gameId, user, player, hasJoined, roomData.maxPlayers])
+  }, [socket, gameId, user, player, hasJoined, isAuthorized, roomData.maxPlayers])
 
   /**
    * Scroll auto en bas des messages à chaque nouveau message
