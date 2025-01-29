@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Button } from '@mui/material'
+import { Box, Button, Paper, Typography } from '@mui/material'
 import { usePermissions } from '../../hooks/usePermissions'
 import { addBotToGame, startGame, setPlayerReady, transferCreatorRights } from '../../services/gameService'
 import { useAuth } from '../../context/AuthContext'
@@ -85,26 +85,43 @@ const GameControls: React.FC<GameControlsProps> = ({
 
   return (
     <>
-      {isCreator && (
-        <Box>
-          <h3>Configurer la partie</h3>
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleStartGame}
-            disabled={!canStartGame}
-          >
-            Lancer la partie
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleTransferCreator('1')}
-          >
-            Léguer les droits du salon
-          </Button>
-
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Paper
+          elevation={4}
+          sx={{
+            padding: '2rem',
+            borderRadius: '10px',
+            textAlign: 'center',
+            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)'
+          }}
+        >
+          {isCreator && (
+            <>
+              <Typography variant="h5" gutterBottom>
+                Configurer la partie
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleStartGame}
+                disabled={!canStartGame}
+              >
+                Lancer la partie
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleTransferCreator('1')}
+              >
+                Léguer les droits du salon
+              </Button>
+              <hr/>
+            </>
+          )}
           {[ 'SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator' ]
             .includes(user?.role as string) && (
             <div>
@@ -124,23 +141,22 @@ const GameControls: React.FC<GameControlsProps> = ({
               )}
             </div>
           )}
-        </Box>
-      )}
-
-      {!isCreator && (
-        <Box>
-          {canBeReady && !player.ready && (
-            <Button
-              variant="contained"
-              color="success"
-              className="animate__animated animate__bounce animate__infinite"
-              onClick={handleBeReady}
-            >
-              Je suis prêt(e) !
-            </Button>
+          {!isCreator && (
+            <Box>
+              {canBeReady && !player.ready && (
+                <Button
+                  variant="contained"
+                  color="success"
+                  className="animate__animated animate__bounce animate__infinite"
+                  onClick={handleBeReady}
+                >
+                Je suis prêt(e) !
+                </Button>
+              )}
+            </Box>
           )}
-        </Box>
-      )}
+        </Paper>
+      </Box>
     </>
   )
 }
