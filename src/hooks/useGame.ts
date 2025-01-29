@@ -78,11 +78,8 @@ export const useGame = (
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const joinGame = async () => {
+  const joinProtectedGame = async () => {
     try {
-      const response = await axios.post(`/api/games/room/${gameId}/join`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
       localStorage.setItem(`game_auth_${gameId}`, 'true')
       setIsAuthorized(true)
     } catch (error) {
@@ -125,16 +122,16 @@ export const useGame = (
   useEffect(() => {
     const checkPasswordRequirement = async () => {
       try {
-        const { data: roomData } = await axios.get(`/api/games/room/${gameId}`)
-        if (roomData.password) {
+        const { data } = await axios.get(`/api/games/room/${gameId}`)
+        if (data.room.password) {
           const storedAuth = localStorage.getItem(`game_auth_${gameId}`)
           if (!storedAuth) {
-            setPasswordRequired(true) // Demander le mot de passe
+            setPasswordRequired(true)
           } else {
-            joinGame() // Joindre directement si déjà validé
+            joinProtectedGame()
           }
         } else {
-          joinGame() // Joindre directement si pas de mot de passe
+          joinProtectedGame()
         }
       } catch (error) {
         console.error('Erreur lors de la vérification du mot de passe :', error)
@@ -154,6 +151,9 @@ export const useGame = (
         if (data.error) {
           setGameError(data.error)
         } else {
+          setIsAuthorized(
+            data.room.password ? localStorage.getItem(`game_auth_${gameId}`) === 'true' : false)
+          setPasswordRequired(!!data.room.password)
           setRoomData(data.room)
           setPlayer(data.player)
           setCreator(data.creator)
