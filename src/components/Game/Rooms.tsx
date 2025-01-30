@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useUser } from 'context/UserContext'
 import { useSocket } from 'context/SocketContext'
-import { Box, Typography, Button, Card, CardContent, CardActions } from '@mui/material'
+import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Tooltip, Button } from '@mui/material'
 import axios from 'axios'
+import { PlayerType } from 'hooks/useGame'
 
 interface Room {
   id: number
   name: string
+  creator: string
   maxPlayers: number
   currentPlayers: number
+  players: PlayerType[]
   status: 'waiting' | 'in_progress'
 }
 
@@ -18,6 +21,7 @@ const RoomList = () => {
   const [roomsWaiting, setRoomsWaiting] = useState<Room[]>([]) // Rooms en attente
   const [roomsInProgress, setRoomsInProgress] = useState<Room[]>([]) // Rooms en cours
   const [playerRoomId, setPlayerRoomId] = useState<number | null>(null) // Room actuelle du joueur
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null) // Ligne survolée
 
   useEffect(() => {
     fetchRooms()
@@ -167,68 +171,143 @@ const RoomList = () => {
           </Button>
         </>
       )}
-      <Typography variant="h4" gutterBottom>
-        Liste des parties
+      <Typography variant="h4" gutterBottom className='mt-2'>
+        Liste des parties en attente
       </Typography>
 
-      <Box mb={4}>
-        <Typography variant="h5" gutterBottom>
-          Parties en attente de lancement
-        </Typography>
-        <Box display="flex" flexWrap="wrap" gap={2}>
-          {roomsWaiting.length > 0 ? (
-            roomsWaiting.map((room) => (
-              <Card key={room.id} sx={{ width: 300 }}>
-                <CardContent>
-                  <Typography variant="h6">{room.name}</Typography>
-                  <Typography variant="body2">
-                    {room.currentPlayers}/{room.maxPlayers} joueurs
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleJoinRoom(room.id)}
-                    disabled={!!playerRoomId}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow style={{ backgroundColor: '#1976d2', color: 'white' }}>
+              <TableCell style={{ color: 'white' }}>Nom</TableCell>
+              <TableCell style={{ color: 'white' }}>Créateur</TableCell>
+              <TableCell style={{ color: 'white' }}>Places</TableCell>
+              <TableCell style={{ color: 'white' }}>Options</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {roomsWaiting.length > 0 ? (
+              roomsWaiting.map((room) => (
+                <Tooltip
+                  key={room.id}
+                  title={
+                    <Box>
+                      <Typography variant="subtitle1">Joueurs :</Typography>
+                      {room.players.map((player) => (
+                        <Typography variant="body2" key={player.nickname}>
+                          {player.nickname}
+                        </Typography>
+                      ))}
+                    </Box>
+                  }
+                  placement="top"
+                  arrow
+                >
+                  <TableRow
+                    hover
+                    onMouseEnter={() => setHoveredRow(room.id)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                    style={{
+                      cursor: 'pointer',
+                      backgroundColor: hoveredRow === room.id ? '#e3f2fd' : 'white',
+                    }}
                   >
-                    Rejoindre
-                  </Button>
-                </CardActions>
-              </Card>
-            ))
-          ) : (
-            <Typography variant="body1">Aucune partie en attente.</Typography>
-          )}
-        </Box>
-      </Box>
+                    <TableCell>{room.name}</TableCell>
+                    <TableCell>{room.creator}</TableCell>
+                    <TableCell>{`${room.currentPlayers}/${room.maxPlayers}`}</TableCell>
+                    <TableCell>
+                      {hoveredRow === room.id && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleJoinRoom(room.id)}
+                          disabled={!!playerRoomId}
+                        >
+                          Jouer
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                </Tooltip>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  Aucune partie en attente.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      <Box>
-        <Typography variant="h5" gutterBottom>
-          Parties en cours
-        </Typography>
-        <Box display="flex" flexWrap="wrap" gap={2}>
-          {roomsInProgress.length > 0 ? (
-            roomsInProgress.map((room) => (
-              <Card key={room.id} sx={{ width: 300 }}>
-                <CardContent>
-                  <Typography variant="h6">{room.name}</Typography>
-                  <Typography variant="body2">
-                    {room.currentPlayers}/{room.maxPlayers} joueurs
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button variant="contained" disabled>
-                    En cours
-                  </Button>
-                </CardActions>
-              </Card>
-            ))
-          ) : (
-            <Typography variant="body1">Aucune partie en cours.</Typography>
-          )}
-        </Box>
-      </Box>
+      <Typography variant="h4" gutterBottom className='mt-4'>
+        Parties en cours
+      </Typography>
+
+      {/* Parties en cours */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow style={{ backgroundColor: '#2e7d32', color: 'white' }}>
+              <TableCell style={{ color: 'white' }}>Nom</TableCell>
+              <TableCell style={{ color: 'white' }}>Créateur</TableCell>
+              <TableCell style={{ color: 'white' }}>Places</TableCell>
+              <TableCell style={{ color: 'white' }}>Options</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {roomsInProgress.length > 0 ? (
+              roomsInProgress.map((room) => (
+                <Tooltip
+                  key={room.id}
+                  title={
+                    room.players && room.players.length > 0 ? (
+                      <Box>
+                        <Typography variant="subtitle1">Joueurs :</Typography>
+                        {room.players.map((player) => (
+                          <Typography variant="body2" key={player.id}>
+                            {player.nickname}
+                          </Typography>
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2">Aucun joueur dans cette partie</Typography>
+                    )
+                  }
+                  placement="top"
+                  arrow
+                >
+                  <TableRow
+                    hover
+                    onMouseEnter={() => setHoveredRow(room.id)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                    style={{
+                      cursor: 'pointer',
+                      backgroundColor: hoveredRow === room.id ? '#e8f5e9' : 'white',
+                    }}
+                  >
+                    <TableCell>{room.name}</TableCell>
+                    <TableCell>{room.creator}</TableCell>
+                    <TableCell>{`${room.currentPlayers}/${room.maxPlayers}`}</TableCell>
+                    <TableCell>
+                      <Button variant="contained" disabled>
+                        En cours
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                </Tooltip>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  Aucune partie en cours.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   )
 }
