@@ -4,7 +4,7 @@ export const ROLE_PERMISSIONS = {
     gamePowers: [
       'message', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'giveRole', 'removeRole', 'editRole', 'seeRole',
-      'addTimer', 'removeTimer', 'nick',
+      'addTimer', 'removeTimer', 'nick', 'crea',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
@@ -17,7 +17,7 @@ export const ROLE_PERMISSIONS = {
     gamePowers: [
       'message', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'giveRole', 'removeRole', 'editRole', 'seeRole',
-      'addTimer', 'removeTimer', 'nick',
+      'addTimer', 'removeTimer', 'nick', 'crea',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
@@ -30,7 +30,7 @@ export const ROLE_PERMISSIONS = {
     gamePowers: [
       'message', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'giveRole', 'removeRole', 'editRole', 'seeRole',
-      'addTimer', 'removeTimer', 'nick',
+      'addTimer', 'removeTimer', 'nick', 'crea',
     ],
     godPowers: [],
     animationPowers: [
@@ -43,7 +43,7 @@ export const ROLE_PERMISSIONS = {
     gamePowers: [
       'message', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'giveRole', 'removeRole', 'editRole', 'seeRole',
-      'addTimer', 'removeTimer',
+      'addTimer', 'removeTimer', 'crea',
     ],
     godPowers: [],
     animationPowers: [],
