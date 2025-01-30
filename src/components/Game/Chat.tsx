@@ -227,10 +227,10 @@ const Chat: React.FC<ChatProps> = ({
                 handleSendMessage()
               }
             }}
-
             inputProps={{
               style: { zIndex: 1 },
             }}
+            autoComplete="off"
           />
           {suggestions.length > 0 && (
             <List
