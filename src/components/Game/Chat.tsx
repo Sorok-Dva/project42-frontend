@@ -96,13 +96,8 @@ const Chat: React.FC<ChatProps> = ({
     setCurrentCommand(command)
 
     if (
-      (
-        command === 'kick' ||
-        command === 'ban' ||
-        command === 'mute' ||
-        command === 'unmute' ||
-        command === 'nick'
-      ) && !hasAdditionalArgs
+      ['kick', 'ban', 'mute', 'unmute', 'nick', 'crea'].includes(command)
+      && !hasAdditionalArgs
     ) {
       const searchQuery = arg.toLowerCase()
       const filteredSuggestions = players
