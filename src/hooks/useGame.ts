@@ -257,29 +257,18 @@ export const useGame = (
 
     socket.on('newMessage', (message) => {
       setMessages((prev) => [...prev, message])
+      if (message.sound) {
+        const audio = new Audio(`/assets/sounds/${message.sound}.mp3`)
+        audio.play()
+      }
       if (message.message.toLowerCase().includes(player?.nickname.toLowerCase())) {
         const audio = new Audio('/assets/sounds/sos.mp3')
         audio.play()
       }
     })
 
-    socket.on('playerLeft', (data) => {
-      if (data.sound) {
-        const audio = new Audio(`/assets/sounds/${data.sound}.mp3`)
-        audio.play()
-      }
-      setMessages((prev) => [
-        ...prev,
-        {
-          nickname: 'Système',
-          message: data.message,
-          playerId: -1,
-          channel: 0,
-          icon: data.icon ?? '',
-          createdAt: new Date(),
-        },
-      ])
-      if (data.message.includes(user.nickname)) {
+    socket.on('playerLeft', (player) => {
+      if (player === user.nickname) {
         setGameError('Vous avez quitté la partie. Vous pouvez fermer cet onglet.')
       }
     })
