@@ -327,7 +327,7 @@ const GamePage = () => {
               players={players}
               player={player}
               isCreator={isCreator}
-              creatorNickname={roomData.creator}
+              creatorNickname={creator!.nickname}
               gameId={gameId!}
               socket={socket}
               toggleHighlightPlayer={toggleHighlightPlayer}
