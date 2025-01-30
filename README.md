@@ -1,14 +1,14 @@
 <div align="center">
-    <img src="https://raw.githubusercontent.com/Sorok-Dva/sdr-frontend/main/public/img/logo.png" alt="sdr-frontend Logo">
-  <h1>Le Sentier des Rêves</h1>
-  <blockquote>Réveillez le rêveur en vous.</blockquote>
-  <img src="https://hits.dwyl.com/Sorok-Dva/sdr-frontend.svg?style=flat-square" alt="Views"><br />
-  <img src="https://img.shields.io/github/downloads/Sorok-Dva/sdr-frontend/total.svg?style=for-the-badge" alt="Total downloads">
+    <img src="https://raw.githubusercontent.com/Sorok-Dva/project42-frontend/refs/heads/main/public/img/logo.png" alt="project42-frontend Logo">
+  <h1>Project 42 (LGeL-Like)</h1>
+  <blockquote>Revival of LGeL but in a different universe.</blockquote>
+  <img src="https://hits.dwyl.com/Sorok-Dva/project-42.svg?style=flat-square" alt="Views"><br />
+  <img src="https://img.shields.io/github/downloads/Sorok-Dva/project42-frontend/total.svg?style=for-the-badge" alt="Total downloads">
   <!--<a href="https://shields.io/community#sponsors" alt="Sponsors">
     <img src="https://img.shields.io/opencollective/sponsors/Sorok-Dva.svg?style=for-the-badge" />
   </a>-->
-  <a href="https://github.com/Sorok-Dva/sdr-frontend/pulse" alt="Activity">
-    <img src="https://img.shields.io/github/commit-activity/m/Sorok-Dva/sdr-frontend.svg?style=for-the-badge" />
+  <a href="https://github.com/Sorok-Dva/project42-frontend/pulse" alt="Activity">
+    <img src="https://img.shields.io/github/commit-activity/m/Sorok-Dva/project42-frontend.svg?style=for-the-badge" />
   </a>
   <br />
   <a href="https://github.com/sponsors/Sorok-Dva">
@@ -19,10 +19,11 @@
   </a>
 </div>
 
-# Le Sentier des Rêves - frontend app
+# Project 42 - frontend app
 
-This project is the frontend of a dream journaling and tutorial platform called "Le Sentier des Rêves".
-It is built using React and is designed to provide a user-friendly interface for interacting with the backend services.
+Project 42 is a **multiplayer strategy game** inspired by *Werewolf (Loups-Garous de Thiercelieux)* and *Mafia*, but set in a **unique universe**. Players take on different roles, collaborate, and deceive each other to achieve their objectives. The game blends social deduction mechanics with strategic gameplay elements, offering a fresh take on the genre.
+
+This repository contains the **frontend** of Project 42, built with **React, TypeScript, and Material-UI**, providing an engaging and responsive user experience.
 
 ## Table of Contents
 
@@ -55,21 +56,29 @@ npm start
 yarn start
 ```
 
-The application will be available at `http://localhost:3000`.
+The application will be available at `http://localhost:3010`.
 
 ## Project Structure
+The project follows a modular structure for better maintainability:
 
-- **public/**: Contains the static assets, such as `index.html` and images.
-- **src/**: Contains the source code for the React application.
-    - **components/**: Reusable components used across the application.
-    - **pages/**: The main pages/routes of the application.
-    - **context/**: Context providers for global state management.
-    - **assets/**: Images, icons, and other static resources.
-    - **styles/**: Global and component-specific styles.
-    - **utils/**: Utility functions and helpers.
-    - **App.tsx**: The main component that sets up the routes.
-    - **index.tsx**: The entry point for the React application.
+```
+project-42-frontend/
+│── src/
+│   ├── assets/            # Static assets (images, icons, etc.)
+│   ├── components/        # Reusable UI components
+│   ├── config/            # Game configuration like users permissions
+│   ├── context/           # Global context providers
+│   ├── pages/             # Application pages/views
+│   ├── services/          # API calls and business logic
+│   ├── hooks/             # Custom hooks for state management
+│   ├── styles/            # Global and component-specific styles
+│   ├── utils/             # Utility functions
+│── public/
+│── .env                   # Environment variables
+│── package.json
+│── README.md
 
+```
 ## Available Scripts
 
 In the project directory, you can run:
@@ -83,20 +92,19 @@ In the project directory, you can run:
 
 The following environment variables are used in the project:
 
-- **REACT_APP_API_URL**: The base URL for the backend API.
-- **REACT_APP_TINYMCE_API_KEY**: The API key for TinyMCE editor.
+- **REACT_APP_SENTRY_DSN**: Sentry DSN configuration.
+- **REACT_APP_GAME_VERSION**: The API key for TinyMCE editor.
 
 You can create a `.env` file in the root of the project to define these variables.
 
 ## Technologies Used
 
-![langs](https://skillicons.dev/icons?i=typescript,react,mysql,ubuntu,docker,sass&perline=)
+![langs](https://skillicons.dev/icons?i=typescript,react,mui,ubuntu,docker,sass&perline=)
 
 - **React**: A JavaScript library for building user interfaces.
 - **TypeScript**: A superset of JavaScript that adds static typing.
 - **React Router**: A library for managing navigation in React applications.
-- **Styled Components**: A library for styling React components using tagged template literals.
-- **TinyMCE**: A WYSIWYG editor for rich text editing.
+- **Material-UI**: A library for UI components.
 - **React Toastify**: A library for displaying notifications and alerts.
 
 ## Contributing
@@ -116,15 +124,15 @@ If you'd like to contribute to this project, please follow these steps:
 
 ### License
 
-This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ## Contributors
 
-<a href="https://github.com/sorok-dva/sdr-frontend/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=sorok-dva/sdr-frontend" />
+<a href="https://github.com/sorok-dva/project42-frontend/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=sorok-dva/project42-frontend" />
 </a>
 
 ## Contact
 
-For any inquiries or feedback, please visit our [GitHub Repository](https://github.com/Sorok-Dva/sdr-frontend) or contact the developers directly.
+For any inquiries or feedback, please visit our [GitHub Repository](https://github.com/Sorok-Dva/project42-frontend) or contact the developers directly.
 
