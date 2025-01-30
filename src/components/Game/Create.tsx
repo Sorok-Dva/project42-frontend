@@ -92,7 +92,7 @@ const CreateGame = () => {
                 name="maxPlayers"
                 value={formData.maxPlayers}
                 onChange={handleChange}
-                inputProps={{ min: 3, max: 12 }}
+                inputProps={{ min: 6, max: 50 }}
                 required
               />
             </Box>
