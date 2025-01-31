@@ -151,6 +151,10 @@ const GamePage = () => {
         justifyContent="center"
         height="100vh"
         bgcolor="#f0f0f5"
+        sx={{
+          backgroundImage: 'url(/assets/images/games/background2.png)',
+          backgroundSize: 'cover',
+        }}
       >
         <Paper
           elevation={4}
@@ -183,6 +187,10 @@ const GamePage = () => {
         justifyContent="center"
         height="100vh"
         bgcolor="#f0f0f5"
+        sx={{
+          backgroundImage: 'url(/assets/images/games/background2.png)',
+          backgroundSize: 'cover',
+        }}
       >
         <Paper
           elevation={4}
@@ -228,7 +236,12 @@ const GamePage = () => {
 
   return isAuthorized ? (
     <>
-      <Box display="flex" flexDirection="column" height="100vh">
+      <Box display="flex" flexDirection="column" height="100vh"
+        sx={{
+          backgroundImage: 'url(/assets/images/games/background2.png)',
+          backgroundSize: 'cover',
+        }}
+      >
         {/* Header */}
         <Box
           display="flex"
@@ -237,6 +250,7 @@ const GamePage = () => {
           px={2}
           py={1}
           bgcolor="#f0f0f0"
+
         >
           <Typography variant="h6">
             [{GAME_TYPES[roomData.type]}] Partie : {roomData.name} ({players.length}/{roomData.maxPlayers})
