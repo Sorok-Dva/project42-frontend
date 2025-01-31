@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { useAuth } from 'context/AuthContext'
+import { useAuth } from 'contexts/AuthContext'
 import PageBanner from 'components/Common/PageBanner'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
@@ -54,15 +54,15 @@ const AddCategory: React.FC = () => {
   const { token } = useAuth()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     const categoryData = {
       title,
       description,
     }
-    
+
     try {
       const response = await fetch('/api/tutorials/categories', {
         method: 'POST',
@@ -72,7 +72,7 @@ const AddCategory: React.FC = () => {
         },
         body: JSON.stringify(categoryData),
       })
-      
+
       if (response.ok) {
         setTitle('')
         setDescription('')
@@ -85,7 +85,7 @@ const AddCategory: React.FC = () => {
       toast.error('Erreur lors de la requête', ToastDefaultOptions)
     }
   }
-  
+
   return (
     <>
       <PageBanner
@@ -109,7 +109,7 @@ const AddCategory: React.FC = () => {
                   required
                 />
               </FormGroup>
-              
+
               <FormGroup>
                 <Label htmlFor="description">Description de la Catégorie</Label>
                 <TextArea
@@ -119,7 +119,7 @@ const AddCategory: React.FC = () => {
                   required
                 />
               </FormGroup>
-              
+
               <Button type="submit">Ajouter la Catégorie</Button>
             </form>
           </AdminContainer>

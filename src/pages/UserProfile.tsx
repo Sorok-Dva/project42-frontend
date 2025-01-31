@@ -10,7 +10,7 @@ import PageBanner from 'components/Common/PageBanner'
 import type { UserProfile } from 'types/user'
 import type { Level } from 'types/level'
 import type { PointHistory } from 'types/pointHistory'
-import { ThemeContext } from 'context/ThemeContext'
+import { ThemeContext } from 'contexts/ThemeContext'
 
 const Profile: React.FC = () => {
   const { nickname } = useParams<{ nickname: string }>()

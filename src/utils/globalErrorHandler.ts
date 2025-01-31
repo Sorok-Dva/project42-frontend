@@ -1,8 +1,8 @@
-import { useError } from '../context/ErrorContext'
+import { useError } from '../contexts/ErrorContext'
 
 const useGlobalErrorHandler = () => {
   const { setServerError } = useError()
-  
+
   const handleError = (error: Error) => {
     const errorCode = error.message.includes('503')
     if (errorCode) {
@@ -11,7 +11,7 @@ const useGlobalErrorHandler = () => {
       setServerError(false)
     }
   }
-  
+
   return handleError
 }
 

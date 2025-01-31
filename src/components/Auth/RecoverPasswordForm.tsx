@@ -4,7 +4,7 @@ import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
-import { ThemeContext } from 'context/ThemeContext'
+import { ThemeContext } from 'contexts/ThemeContext'
 
 const RecoverPasswordForm: React.FC = () => {
   const [email, setEmail] = useState('')

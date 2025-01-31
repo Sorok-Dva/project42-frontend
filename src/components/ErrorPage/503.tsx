@@ -4,7 +4,7 @@ import React, { useContext } from 'react'
 import { Button, Col, Row } from 'reactstrap'
 import { FaDiscord, FaRotateRight } from 'react-icons/fa6'
 import PageBanner from 'components/Common/PageBanner'
-import { ThemeContext } from 'context/ThemeContext'
+import { ThemeContext } from 'contexts/ThemeContext'
 
 const CustomErrorContent: React.FC = () => {
   const themeContext = useContext(ThemeContext)

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useAuth } from 'context/AuthContext'
+import { useAuth } from 'contexts/AuthContext'
 import { Editor } from '@tinymce/tinymce-react'
 import PageBanner from 'components/Common/PageBanner'
 import { Link, useNavigate, useParams } from 'react-router-dom'

@@ -1,5 +1,5 @@
 import { ROLE_PERMISSIONS } from '../config/permissions'
-import { Role } from '../context/UserContext'
+import { Role } from '../contexts/UserContext'
 
 export function initModeration(currentUserRole: Role) {
   const userPermissions = ROLE_PERMISSIONS[currentUserRole]

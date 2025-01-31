@@ -18,7 +18,7 @@ import ScrollToTopHook from 'hooks/scrollToTop'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
 import * as Sentry from '@sentry/react'
-import { ThemeProvider } from 'context/ThemeContext'
+import { ThemeProvider } from 'contexts/ThemeContext'
 
 if (process.env.REACT_APP_SENTRY_DSN) Sentry.init({
   dsn: process.env.REACT_APP_SENTRY_DSN,

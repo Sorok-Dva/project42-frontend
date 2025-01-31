@@ -61,7 +61,7 @@ const menus = [
 
 
 import logo from '../../assets/img/logo.png'
-import { useUser } from 'context/UserContext'
+import { useUser } from 'contexts/UserContext'
 import styled from 'styled-components'
 
 const Navbar: React.FC = () => {

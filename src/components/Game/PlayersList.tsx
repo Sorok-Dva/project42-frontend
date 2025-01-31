@@ -51,6 +51,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
         {players.map((_player, index) => (
           <ListItem key={index}>
             <ListItemText
+              data-nickname={_player.nickname}
               primary={_player.nickname}
               secondary={_player.ready ? 'Prêt' : 'Non prêt'}
             />

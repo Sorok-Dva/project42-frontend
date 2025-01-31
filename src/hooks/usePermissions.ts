@@ -1,4 +1,4 @@
-import { Role, useUser } from '../context/UserContext'
+import { Role, useUser } from '../contexts/UserContext'
 import { hasPermission } from '../helpers/permissionHelper'
 import { Categories } from '../config/permissions'
 

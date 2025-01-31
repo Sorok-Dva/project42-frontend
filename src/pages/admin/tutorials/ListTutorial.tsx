@@ -7,7 +7,7 @@ import {
   Row,
   Table,
 } from 'reactstrap'
-import { useAuth } from 'context/AuthContext'
+import { useAuth } from 'contexts/AuthContext'
 import { Link } from 'react-router-dom'
 import { FaEye, FaPencil } from 'react-icons/fa6'
 import PageBanner from 'components/Common/PageBanner'

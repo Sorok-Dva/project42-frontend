@@ -6,11 +6,11 @@ import {
   Row,
   Table,
 } from 'reactstrap'
-import { useAuth } from 'context/AuthContext'
+import { useAuth } from 'contexts/AuthContext'
 import { Link } from 'react-router-dom'
 import PageBanner from 'components/Common/PageBanner'
 import type { UserProfile } from 'types/user'
-import { useUser } from 'context/UserContext'
+import { useUser } from 'contexts/UserContext'
 
 const UserList: React.FC = () => {
   const { token } = useAuth()

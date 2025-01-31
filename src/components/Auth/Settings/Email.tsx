@@ -2,13 +2,13 @@
 
 import React, { useState } from 'react'
 import { Img as Image } from 'react-image'
-import { useAuth } from 'context/AuthContext'
+import { useAuth } from 'contexts/AuthContext'
 
 import illustrationImg from '../../../assets/images/changeEmail.png'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import styled from 'styled-components'
-import { useUser } from 'context/UserContext'
+import { useUser } from 'contexts/UserContext'
 
 const FormGroup = styled.div`
   margin-bottom: 1rem;

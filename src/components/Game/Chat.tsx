@@ -4,7 +4,7 @@ import { Box, TextField, Typography } from '@mui/material'
 import { List } from '@mui/material'
 import { Socket } from 'socket.io-client'
 import { PlayerType } from 'hooks/useGame'
-import { User } from 'context/UserContext'
+import { User } from 'contexts/UserContext'
 
 interface Message {
   nickname: string
@@ -168,14 +168,14 @@ const Chat: React.FC<ChatProps> = ({
               onClick={(e) => {
                 const target = e.target as HTMLElement
                 if (target.classList.contains('msg-nickname')) {
-                  const nickname = target.getAttribute('data-nickname')
+                  const nickname = target.getAttribute('data-highlight-nickname')
                   if (nickname) handleMentionClick(nickname)
                 }
               }}
             >
               <small>[{new Date(msg.createdAt).toLocaleTimeString()}]</small>{' '}
               {msg.icon && <img src={`/assets/images/${msg.icon}`} className="msg-icon" alt="icon" />}
-              <strong className="msg-nickname" data-nickname={cleanNickname}
+              <strong className="msg-nickname" data-highlight-nickname={cleanNickname}
                 dangerouslySetInnerHTML={{ __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname }}>
               </strong>:{' '}
               <span dangerouslySetInnerHTML={{ __html: processedMessage }} />

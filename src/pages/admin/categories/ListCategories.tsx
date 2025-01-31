@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useAuth } from 'context/AuthContext'
+import { useAuth } from 'contexts/AuthContext'
 import PageBanner from 'components/Common/PageBanner'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
@@ -73,7 +73,7 @@ const CategoryList: React.FC = () => {
   const { token } = useAuth()
   const [categories, setCategories] = useState<{ id: number; title: string; description: string }[]>([])
   // const navigate = useNavigate()
-  
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -91,10 +91,10 @@ const CategoryList: React.FC = () => {
         toast.error('Erreur lors de la récupération des catégories', ToastDefaultOptions)
       }
     }
-    
+
     fetchCategories()
   }, [token])
-  
+
   const handleDelete = async (categoryId: number) => {
     if (window.confirm('Voulez-vous vraiment supprimer cette catégorie?')) {
       try {
@@ -104,7 +104,7 @@ const CategoryList: React.FC = () => {
             Authorization: `Bearer ${token}`,
           },
         })
-        
+
         if (response.ok) {
           setCategories(categories.filter(category => category.id !== categoryId))
           toast.success('Catégorie supprimée avec succès', ToastDefaultOptions)
@@ -117,11 +117,11 @@ const CategoryList: React.FC = () => {
       }
     }
   }
-  
+
   /*  const handleEdit = (categoryId: number) => {
     navigate(`/admin/categories/${categoryId}/edit`)
   }*/
-  
+
   return (
     <>
       <PageBanner

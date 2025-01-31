@@ -6,8 +6,8 @@ import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import PasswordStrengthChecker from 'components/Common/PasswordStrengthChecker'
 import { Button } from 'reactstrap'
-import { useUser } from 'context/UserContext'
-import { ThemeContext } from 'context/ThemeContext'
+import { useUser } from 'contexts/UserContext'
+import { ThemeContext } from 'contexts/ThemeContext'
 
 const ResetPassword: React.FC = () => {
   const { user } = useUser()

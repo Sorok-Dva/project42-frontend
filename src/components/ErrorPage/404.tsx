@@ -3,7 +3,7 @@
 import React, { useContext } from 'react'
 import { FaHome } from 'react-icons/fa'
 import { Button } from 'reactstrap'
-import { ThemeContext } from 'context/ThemeContext'
+import { ThemeContext } from 'contexts/ThemeContext'
 
 const CustomErrorContent: React.FC = () => {
   const themeContext = useContext(ThemeContext)

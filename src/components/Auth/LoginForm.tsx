@@ -2,12 +2,12 @@
 
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useUser } from 'context/UserContext'
+import { useUser } from 'contexts/UserContext'
 import { toast } from 'react-toastify'
 import { Button, Form, FormGroup, Input, InputGroup, InputGroupText } from 'reactstrap'
 import PageBanner from '../Common/PageBanner'
 import { ToastDefaultOptions } from 'utils/toastOptions'
-import { ThemeContext } from 'context/ThemeContext'
+import { ThemeContext } from 'contexts/ThemeContext'
 
 const LoginForm: React.FC = () => {
   const { login } = useUser()

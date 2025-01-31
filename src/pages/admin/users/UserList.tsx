@@ -6,7 +6,7 @@ import {
   Row,
   Table,
 } from 'reactstrap'
-import { useAuth } from 'context/AuthContext'
+import { useAuth } from 'contexts/AuthContext'
 import { Link } from 'react-router-dom'
 import PageBanner from 'components/Common/PageBanner'
 import type { User } from 'types/user'

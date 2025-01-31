@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { useUser } from 'context/UserContext'
-import { useSocket } from 'context/SocketContext'
+import { useUser } from 'contexts/UserContext'
+import { useSocket } from 'contexts/SocketContext'
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Tooltip, Button } from '@mui/material'
 import axios from 'axios'
 import { PlayerType } from 'hooks/useGame'

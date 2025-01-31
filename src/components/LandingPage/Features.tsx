@@ -3,7 +3,7 @@
 import React, { useContext, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Img as Image } from 'react-image'
-import { ThemeContext } from 'context/ThemeContext'
+import { ThemeContext } from 'contexts/ThemeContext'
 
 import shapeImg1 from '../../assets/images/shape/services-shape/1.png'
 import shapeImg2 from '../../assets/images/shape/services-shape/2.png'

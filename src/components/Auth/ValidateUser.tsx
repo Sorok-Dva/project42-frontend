@@ -5,7 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { Container, Spinner } from 'reactstrap'
-import { useUser } from 'context/UserContext'
+import { useUser } from 'contexts/UserContext'
 
 const ValidateUser: React.FC = () => {
   const { token } = useParams<{ token: string }>()

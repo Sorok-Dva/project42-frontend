@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { Img as Image } from 'react-image'
 import { toast } from 'react-toastify'
-import { useUser } from 'context/UserContext'
+import { useUser } from 'contexts/UserContext'
 import illustrationImg from '../../../assets/images/resetPassword.png'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 

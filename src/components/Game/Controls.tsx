@@ -2,8 +2,8 @@ import React from 'react'
 import { Box, Button, Paper, Typography } from '@mui/material'
 import { usePermissions } from '../../hooks/usePermissions'
 import { addBotToGame, startGame, setPlayerReady, transferCreatorRights } from '../../services/gameService'
-import { useAuth } from '../../context/AuthContext'
-import { useUser } from '../../context/UserContext'
+import { useAuth } from '../../contexts/AuthContext'
+import { useUser } from '../../contexts/UserContext'
 
 interface Player {
   id: string

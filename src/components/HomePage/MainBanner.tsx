@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useUser } from 'context/UserContext'
+import { useUser } from 'contexts/UserContext'
 
 const MainBanner: React.FC = () => {
   const { user } = useUser()

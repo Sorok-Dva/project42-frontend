@@ -17,7 +17,7 @@ import {
   Spinner,
   Table,
 } from 'reactstrap'
-import { useAuth } from 'context/AuthContext'
+import { useAuth } from 'contexts/AuthContext'
 import { FaArrowLeft, FaXmark } from 'react-icons/fa6'
 import { FaTrashAlt } from 'react-icons/fa'
 import { toast } from 'react-toastify'
@@ -47,16 +47,16 @@ const ReportDetails : React.FC = () => {
   const [mostInvokedReason, setMostInvokedReason] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
- 
+
   const [closeModal, setCloseModal] = useState<boolean>(false)
   const toggleCloseModal = () => setCloseModal(!closeModal)
- 
+
   const [deleteModal, setDeleteModal] = useState<boolean>(false)
   const toggleDeleteModal = () => setDeleteModal(!deleteModal)
- 
+
   const [selectedReason, setSelectedReason] = useState<string>('')
   const [uniqueReasons, setUniqueReasons] = useState<string[]>([])
- 
+
   useEffect(() => {
     const fetchReportDetails = async () => {
       try {
@@ -65,16 +65,16 @@ const ReportDetails : React.FC = () => {
             Authorization: `Bearer ${ token }`,
           },
         })
-    
+
         if (!response.ok) {
           throw new Error('Failed to fetch report details')
         }
-    
+
         const data = await response.json()
         setMostInvokedReason(data.mostInvokedReason)
         setReportDetails(data.reportDetails)
         setDream(data.dream)
-    
+
         const reasons = data.reportDetails.map((detail : ReportDetail) => detail.reason)
         setUniqueReasons(Array.from(new Set(reasons)))
       } catch (err : any) {
@@ -83,10 +83,10 @@ const ReportDetails : React.FC = () => {
         setLoading(false)
       }
     }
-  
+
     fetchReportDetails()
   }, [dreamId, token])
- 
+
   const handleCloseReport = async () => {
     try {
       const response = await fetch(`/api/admin/reports/${ dreamId }/resolve`, {
@@ -96,7 +96,7 @@ const ReportDetails : React.FC = () => {
           Authorization: `Bearer ${ token }`,
         },
       })
-   
+
       if (!response.ok) {
         toast.error(`Failed to close report. Please try again later (${response.statusText}).`,
           ToastDefaultOptions
@@ -106,13 +106,13 @@ const ReportDetails : React.FC = () => {
           ToastDefaultOptions
         )
       }
-   
+
       navigate('/admin/reports')
     } catch (err : any) {
       setError(err.message)
     }
   }
- 
+
   const handleDeleteScreenshot = async () => {
     if (!selectedReason) {
       toast.error('Please select a reason to resolve the report.',
@@ -120,7 +120,7 @@ const ReportDetails : React.FC = () => {
       )
       return
     }
-  
+
     try {
       const response = await fetch(`/api/admin/reports/${ dreamId }`, {
         method: 'DELETE',
@@ -130,7 +130,7 @@ const ReportDetails : React.FC = () => {
         },
         body: JSON.stringify({ solvedReason: selectedReason }),
       })
-   
+
       if (!response.ok) {
         toast.error(`Failed to delete the dream. (${response.statusText}).`,
           ToastDefaultOptions
@@ -140,13 +140,13 @@ const ReportDetails : React.FC = () => {
           ToastDefaultOptions
         )
       }
-   
+
       navigate('/admin/reports')
     } catch (err : any) {
       setError(err.message)
     }
   }
- 
+
   if (loading) {
     return (
       <Container className="loader-container">
@@ -159,7 +159,7 @@ const ReportDetails : React.FC = () => {
       </Container>
     )
   }
- 
+
   if (!dream) {
     return (
       <Container className="loader-container">
@@ -172,7 +172,7 @@ const ReportDetails : React.FC = () => {
       </Container>
     )
   }
- 
+
   if (error) {
     return (
       <Container className="text-center pt-5 mt-6">
@@ -180,7 +180,7 @@ const ReportDetails : React.FC = () => {
       </Container>
     )
   }
- 
+
   return (
     <Container className="mt-6 pt-5">
       <Button variant="default" className="mb-3" href="/admin/reports/">
@@ -231,7 +231,7 @@ const ReportDetails : React.FC = () => {
           )) }
         </tbody>
       </Table>
-   
+
       <Modal isOpen={ closeModal } toggle={ toggleCloseModal }>
         <ModalHeader toggle={ toggleCloseModal }>Confirm Close Report</ModalHeader>
         <ModalBody>
@@ -247,7 +247,7 @@ const ReportDetails : React.FC = () => {
           </Button>
         </ModalFooter>
       </Modal>
-   
+
       <Modal isOpen={ deleteModal } toggle={ toggleDeleteModal }>
         <ModalHeader toggle={ toggleDeleteModal }>Confirm Delete Screenshot</ModalHeader>
         <ModalBody>

@@ -3,9 +3,9 @@ import { Box, Typography, Button, Paper, TextField } from '@mui/material'
 import { Container, Spinner } from 'reactstrap'
 import { useParams } from 'react-router-dom'
 
-import { useAuth } from 'context/AuthContext'
-import { useUser } from 'context/UserContext'
-import { useSocket } from 'context/SocketContext'
+import { useAuth } from 'contexts/AuthContext'
+import { useUser } from 'contexts/UserContext'
+import { useSocket } from 'contexts/SocketContext'
 import { useGame } from 'hooks/useGame'
 import {
   fetchGameDetails,

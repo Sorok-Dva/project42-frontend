@@ -1,13 +1,13 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { useAuth } from 'context/AuthContext'
+import { useAuth } from 'contexts/AuthContext'
 import { Img as Image } from 'react-image'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import illustrationImg from '../../../assets/images/changeNickname.png'
 import styled from 'styled-components'
-import { useUser } from 'context/UserContext'
+import { useUser } from 'contexts/UserContext'
 import { Row } from 'reactstrap'
 
 const FormGroup = styled.div`

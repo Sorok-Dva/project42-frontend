@@ -17,7 +17,7 @@ import PasswordStrengthChecker from '../components/Common/PasswordStrengthChecke
 import PageBanner from 'components/Common/PageBanner'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
-import { ThemeContext } from 'context/ThemeContext'
+import { ThemeContext } from 'contexts/ThemeContext'
 import axios, { AxiosError } from 'axios'
 import { isForbiddenNickname } from 'utils/forbiddenNicknames'
 

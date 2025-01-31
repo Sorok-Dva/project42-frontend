@@ -1,12 +1,12 @@
 import '../styles/Spinner.css'
 import { Navigate, Outlet } from 'react-router-dom'
-import { useUser } from 'context/UserContext'
+import { useUser } from 'contexts/UserContext'
 import React from 'react'
 import { Container, Spinner } from 'reactstrap'
 
 const AdminRoute : React.FC = () => {
   const { user, isAdmin } = useUser()
-  
+
   if (user === null) {
     return <Container className="loader-container">
       <div className="spinner-wrapper">
@@ -17,11 +17,11 @@ const AdminRoute : React.FC = () => {
       </div>
     </Container>
   }
-  
+
   if (!isAdmin) {
     return <Navigate to="/" replace/>
   }
-  
+
   return <Outlet/>
 }
 
