@@ -2,12 +2,24 @@ import axios from 'axios'
 import React, { FC, useEffect, useState } from 'react'
 import { Spinner } from 'reactstrap'
 
+import '../styles/ProfileModal.css'
+
 interface UserData {
   nickname: string;
   points: number;
   level: number;
   title: string;
   avatar: string;
+  createdAt: Date;
+  registrationDate: string;
+  quote: string;
+  rank: string;
+  gamesPlayed: number;
+  matchHistory: [{
+    mode: string;
+    date: string;
+    result: string;
+  }];
 }
 
 interface ProfileModalProps {
@@ -15,35 +27,9 @@ interface ProfileModalProps {
   onClose: () => void;
 }
 
-const styles: Record<string, React.CSSProperties> = {
-  overlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  modal: {
-    backgroundColor: '#fff',
-    padding: '2rem',
-    position: 'relative',
-    maxWidth: '500px',
-    width: '100%'
-  },
-  closeBtn: {
-    position: 'absolute',
-    top: '1rem',
-    right: '1rem',
-    cursor: 'pointer'
-  }
-}
-
 const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
   const [userData, setUserData] = useState<UserData | null>(null)
+  const [selfProfile, setSelfProfile] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -51,6 +37,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
       try {
         const response = await axios.get(`/api/users/${nickname}`)
         setUserData(response.data.user)
+        setSelfProfile(response.data.self)
       } catch (e: any) {
         if (e.response?.data.error) {
           setError(e.response.data.error)
@@ -72,33 +59,92 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
   }
 
   return (
-    <div style={styles.overlay} onClick={handleOverlayClick}>
-      <div style={styles.modal}>
-        <button onClick={onClose} style={styles.closeBtn}>
-          ⛌
-        </button>
-        <h2>Profil de {nickname}</h2>
-        {error ? (
-          <div className="alert alert-danger">{error}</div>
-        ) : userData ? (
-          <div>
-            <p>Nom : {userData.nickname}</p>
-            <p>Titre : {userData.title}</p>
-          </div>
-        ) : (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: '200px',
-            }}
-          >
-            <Spinner className="custom-spinner" />
-            <div style={{ marginTop: '1rem' }}>Chargement du profil...</div>
-          </div>
-        )}
+    <div className="modal-overlay" onClick={handleOverlayClick}>
+      {/*
+        Empêcher la fermeture si on clique à l’intérieur :
+        (si vous le souhaitez, vous pouvez faire un check
+        event.target === event.currentTarget pour fermer).
+      */}
+      <div className="modal-container" onClick={e => e.stopPropagation()}>
+        {/* Header avec le titre et le bouton de fermeture */}
+        <div className="modal-header">
+          <h2>Profil de {nickname}</h2>
+          <button className="close-btn" onClick={onClose}>
+            &times;
+          </button>
+        </div>
+
+        {/* Contenu principal */}
+        <div className="modal-content">
+          {error ? (
+            <div className="alert alert-danger">{error}</div>
+          ) : userData ? (
+            <>
+              <div className="profile-top">
+                <div className="avatar">
+                  <img src={ userData.avatar } alt="avatar"/>
+                </div>
+                <div className="profile-info">
+                  <h3>{ nickname }</h3>
+                  <div className="quote">{ userData.quote }</div>
+                  <div className="profile-stats">
+                    <span>Niveau <b>{ userData.level }</b></span>
+                    <span><b>{ userData.gamesPlayed }</b> parties jouées</span>
+                    <span><b>{ userData.points }</b> points</span>
+                    <small>Inscrit le { new Date(userData.createdAt).toLocaleDateString('fr-FR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                    }) }</small>
+                  </div>
+                </div>
+              </div>
+
+              <div className="section-middle">
+                <div className="hameau-block">
+                  { selfProfile && (
+                    <>
+                      <p>Tu n&apos;as pas de hameau. Rejoins-en un dès
+                        maintenant
+                        pour faire de nouvelles rencontres !</p>
+                      <button>Voir les hameaux</button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Historique des dernières parties */ }
+              <div className="match-history">
+                { userData.matchHistory.map((match, idx) => (
+                  <div key={ idx } className="match-row">
+                    <span>{ match.mode }</span>
+                    <span>{ match.date }</span>
+                    <span>{ match.result }</span>
+                  </div>
+                )) }
+              </div>
+
+              {/* Bouton masquer/fermer ou autres actions */ }
+              <div className="actions">
+                <button onClick={ onClose }>Masquer les détails</button>
+              </div>
+            </>
+          ): (
+            <div
+              style={ {
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '200px',
+              } }
+            >
+              <Spinner className="custom-spinner"/>
+              <div style={ { marginTop: '1rem' } }>Chargement du profil...
+              </div>
+            </div>
+          ) }
+        </div>
       </div>
     </div>
   )
