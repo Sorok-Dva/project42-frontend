@@ -11,9 +11,9 @@ import React from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { ThemeProvider as SCThemeProvider } from 'styled-components'
 
-import { UserProvider, useUser } from 'context/UserContext'
-import { AuthProvider } from 'context/AuthContext'
-import { ErrorProvider, useError } from 'context/ErrorContext'
+import { UserProvider, useUser } from 'contexts/UserContext'
+import { AuthProvider } from 'contexts/AuthContext'
+import { ErrorProvider, useError } from 'contexts/ErrorContext'
 
 import GoogleTagManager from 'components/GoogleTagManager'
 import Navbar from 'components/Layouts/Navbar'
@@ -46,7 +46,9 @@ import { ToastContainer } from 'react-toastify'
 import Notifier from 'components/Notifier'
 import Leaderboard from './pages/Leaderboard'
 import GamePage from 'pages/Game'
-import { SocketProvider } from 'context/SocketContext'
+import { SocketProvider } from 'contexts/SocketContext'
+import ProfileModalProvider from 'contexts/ProfileModalProvider'
+import GlobalClickListener from 'components/GlobalClickListener'
 
 const theme = {
   colors: {
@@ -124,11 +126,14 @@ const App: React.FC = () => {
         <AuthProvider>
           <UserProvider>
             <SocketProvider>
-              <GoogleTagManager />
-              <Notifier />
-              <AppContent />
-              <ScrollToTop />
-              <ThemeSwitcher />
+              <ProfileModalProvider>
+                <GlobalClickListener />
+                <GoogleTagManager />
+                <Notifier />
+                <AppContent />
+                <ScrollToTop />
+                <ThemeSwitcher />
+              </ProfileModalProvider>
             </SocketProvider>
           </UserProvider>
         </AuthProvider>
