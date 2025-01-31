@@ -70,6 +70,7 @@ const GamePage = () => {
     gameError,
     error,
     loading,
+    isNight,
     messagesEndRef,
     passwordRequired,
     isAuthorized,
@@ -152,7 +153,9 @@ const GamePage = () => {
         height="100vh"
         bgcolor="#f0f0f5"
         sx={{
-          backgroundImage: 'url(/assets/images/games/background2.png)',
+          backgroundImage: isNight ?
+            'url(/assets/images/games/background2-night.png)'
+            : 'url(/assets/images/games/background2.png)',
           backgroundSize: 'cover',
         }}
       >
