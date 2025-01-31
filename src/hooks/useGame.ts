@@ -65,6 +65,7 @@ export const useGame = (
   const [gameError, setGameError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isNight, setIsNight] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -300,6 +301,10 @@ export const useGame = (
       setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, nickname: newNickname } : null)
     })
 
+    socket.on('nightStarted', (nightStarted: boolean) => {
+      setIsNight(nightStarted)
+    })
+
     socket.on('error', (error: any) => {
       setMessages((prev) => [
         ...prev,
@@ -323,6 +328,7 @@ export const useGame = (
       socket.off('playerKicked')
       socket.off('enableReadyOption')
       socket.off('enableStartGame')
+      socket.off('nightStarted')
       socket.off('error')
     }
   }, [socket, gameId, user, player, hasJoined, isAuthorized, roomData.maxPlayers])
@@ -346,6 +352,7 @@ export const useGame = (
     gameError,
     error,
     loading,
+    isNight,
     messagesEndRef,
     passwordRequired,
     isAuthorized,
@@ -356,5 +363,6 @@ export const useGame = (
     setRoomData,
     setMessages,
     setIsCreator,
+    setIsNight,
   }
 }
