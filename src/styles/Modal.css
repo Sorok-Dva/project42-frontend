@@ -57,10 +57,5 @@
 
 .modal-content {
   padding: 1rem 1.5rem 1.5rem;
-}
-
-.profile-top {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  overflow: auto;
 }

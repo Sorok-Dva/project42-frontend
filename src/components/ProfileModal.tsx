@@ -124,7 +124,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                 {user ? (
                   <>
                     {role && (
-                      <div className="role-profile" style={{ marginLeft: '15vh' }}>
+                      <div className="role-profile" style={{ marginLeft: '11vh' }}>
                         <span
                           className="user-role"
                           data-team={role.name}
