@@ -1,9 +1,13 @@
+import axios from 'axios'
 import React, { FC, useEffect, useState } from 'react'
+import { Spinner } from 'reactstrap'
 
 interface UserData {
-  name: string;
-  email: string;
-  // Ajoutez les champs nécessaires
+  nickname: string;
+  points: number;
+  level: number;
+  title: string;
+  avatar: string;
 }
 
 interface ProfileModalProps {
@@ -40,29 +44,60 @@ const styles: Record<string, React.CSSProperties> = {
 
 const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
   const [userData, setUserData] = useState<UserData | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch(`/api/users/${nickname}`)
-      .then((res) => res.json())
-      .then((data: UserData) => setUserData(data))
-      .catch((err) => console.error('Erreur lors de la récupération des données :', err))
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(`/api/users/${nickname}`)
+        setUserData(response.data.user)
+      } catch (e: any) {
+        if (e.response?.data.error) {
+          setError(e.response.data.error)
+        }
+        console.error('Erreur lors de la récupération des données :', e)
+      }
+    }
+
+    fetchUserData()
   }, [nickname])
 
+  /**
+   * Close the modal if we click on the overlay
+   */
+  const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      onClose()
+    }
+  }
+
   return (
-    <div style={styles.overlay}>
+    <div style={styles.overlay} onClick={handleOverlayClick}>
       <div style={styles.modal}>
         <button onClick={onClose} style={styles.closeBtn}>
           ⛌
         </button>
         <h2>Profil de {nickname}</h2>
-        {userData ? (
+        {error ? (
+          <div className="alert alert-danger">{error}</div>
+        ) : userData ? (
           <div>
-            <p>Nom : {userData.name}</p>
-            <p>Email : {userData.email}</p>
-            {/* Autres informations... */}
+            <p>Nom : {userData.nickname}</p>
+            <p>Titre : {userData.title}</p>
           </div>
         ) : (
-          <p>Chargement...</p>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '200px',
+            }}
+          >
+            <Spinner className="custom-spinner" />
+            <div style={{ marginTop: '1rem' }}>Chargement du profil...</div>
+          </div>
         )}
       </div>
     </div>
