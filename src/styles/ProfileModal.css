@@ -1,0 +1,171 @@
+/* Overlay sombre plein écran */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* Au-dessus du reste */
+}
+
+/* Conteneur principal de la modal */
+.modal-container {
+  background-color: #1F2B44; /* bleu sombre */
+  color: #fff;
+  width: 400px;
+  max-width: 90%;
+  border-radius: 8px;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  overflow: hidden;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Header : titre + bouton close */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #182234;
+  padding: 1rem;
+}
+
+.modal-header h2 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+/* Contenu de la modal */
+.modal-content {
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+/* Partie haute : Avatar + stats */
+.profile-top {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.avatar img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ccc;
+}
+
+.profile-info h3 {
+  margin: 0 0 0.2rem 0;
+}
+
+.profile-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.profile-stats p {
+  margin-top: 0.5rem;
+}
+
+/* Exemple de quote / slogan */
+.quote {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+/* Section du milieu : ex. bouton Discord, hameau, etc. */
+.section-middle {
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.discord-btn {
+  background-color: #2C3E61;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  display: inline-block;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.discord-btn:hover {
+  background-color: #34507a;
+}
+
+.hameau-block {
+  background-color: #2C3E61;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+.hameau-block p {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.hameau-block button {
+  background-color: #f39c12;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+/* Historique des matchs */
+.match-history {
+  border-top: 1px solid rgba(255,255,255,0.2);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.match-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 0.25rem 0;
+}
+
+/* Pied d'action */
+.actions {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.actions button {
+  background-color: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.actions button:hover {
+  background-color: #fff;
+  color: #1F2B44;
+}
