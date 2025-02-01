@@ -4,6 +4,7 @@ import { usePermissions } from '../../hooks/usePermissions'
 import { addBotToGame, startGame, setPlayerReady, transferCreatorRights } from '../../services/gameService'
 import { useAuth } from '../../contexts/AuthContext'
 import { useUser } from '../../contexts/UserContext'
+import GameTimer from 'components/Game/Timer'
 
 interface Player {
   id: string
@@ -104,6 +105,8 @@ const GameControls: React.FC<GameControlsProps> = ({
             boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)'
           }}
         >
+          <GameTimer gameStarted={gameStarted} />
+
           {isCreator && !gameStarted && (
             <>
               <Typography variant="h5" gutterBottom>
