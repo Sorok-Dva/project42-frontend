@@ -72,6 +72,7 @@ const GamePage = () => {
     loading,
     isNight,
     gameStarted,
+    gameFinished,
     messagesEndRef,
     passwordRequired,
     isAuthorized,
@@ -299,6 +300,7 @@ const GamePage = () => {
                   canStartGame={canStartGame}
                   player={player}
                   gameStarted={gameStarted}
+                  gameFinished={gameFinished}
                   setGameStarted={setGameStarted}
                 />
               )}
