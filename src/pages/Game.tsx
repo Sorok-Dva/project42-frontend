@@ -84,6 +84,7 @@ const GamePage = () => {
     setMessages,
     setIsCreator,
     setGameStarted,
+    setGameFinished,
   } = useGame(gameId, user, token, socket)
 
   // temp - debug
@@ -111,6 +112,7 @@ const GamePage = () => {
     try {
       const data = await fetchGameDetails(gameId)
       setRoomData(data.room)
+      setGameFinished(data.room.status === 'completed')
     } catch (error) {
       console.error('Erreur lors du fetchGameDetails: ', error)
     }
@@ -242,7 +244,7 @@ const GamePage = () => {
     <>
       <Box display="flex" flexDirection="column" height="100vh"
         sx={{
-          backgroundImage: isNight ?
+          backgroundImage: (isNight || gameFinished) ?
             'url(/assets/images/games/background-night.png)'
             : 'url(/assets/images/games/background2.png)',
           backgroundSize: 'cover',
@@ -356,6 +358,7 @@ const GamePage = () => {
               toggleHighlightPlayer={toggleHighlightPlayer}
               highlightedPlayers={highlightedPlayers}
               gameStarted={gameStarted}
+              gameFinished={gameFinished}
             />
           </Box>
         </Box>
