@@ -203,6 +203,7 @@ export const useGame = (
           setPlayer(data.player)
           setCreator(data.creator)
           setGameStarted(data.room.status === 'in_progress')
+          setGameFinished(data.room.status === 'completed')
 
           loadPlayersAndMessages(authorized)
         }
@@ -377,5 +378,6 @@ export const useGame = (
     setIsCreator,
     setIsNight,
     setGameStarted,
+    setGameFinished,
   }
 }
