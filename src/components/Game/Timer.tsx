@@ -4,10 +4,12 @@ import { useSocket } from 'contexts/SocketContext'
 
 interface GameTimerProps {
   gameStarted: boolean
+  gameFinished: boolean
 }
 
 const GameTimer: React.FC<GameTimerProps> = ({
   gameStarted,
+  gameFinished,
 }) => {
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [phase, setPhase] = useState<number | null>(null)
@@ -16,7 +18,7 @@ const GameTimer: React.FC<GameTimerProps> = ({
   const lastSoundPlayed = useRef<number | null>(null)
 
   useEffect(() => {
-    if (!socket || !gameStarted) return
+    if (!socket || !gameStarted|| !gameFinished) return
 
     const updateTimer = (limitPhase: string) => {
       if (intervalRef.current) clearInterval(intervalRef.current) // Évite les multiples intervals
@@ -71,7 +73,7 @@ const GameTimer: React.FC<GameTimerProps> = ({
     return `${minutes}min ${remainingSeconds.toString().padStart(2, '0')}sec`
   }
 
-  return gameStarted && (
+  return gameStarted && !gameFinished && (
     <Box textAlign="center" mt={2}>
       <Typography variant="h6">Phase {phase !== null ? phase : 'Chargement...'}</Typography>
       {timeLeft !== null && <Typography variant="h4">{formatTime(timeLeft)}</Typography>}
