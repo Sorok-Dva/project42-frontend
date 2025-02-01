@@ -71,6 +71,7 @@ const GamePage = () => {
     error,
     loading,
     isNight,
+    gameStarted,
     messagesEndRef,
     passwordRequired,
     isAuthorized,
@@ -81,6 +82,7 @@ const GamePage = () => {
     setRoomData,
     setMessages,
     setIsCreator,
+    setGameStarted,
   } = useGame(gameId, user, token, socket)
 
   // temp - debug
@@ -152,10 +154,8 @@ const GamePage = () => {
         justifyContent="center"
         height="100vh"
         bgcolor="#f0f0f5"
-        sx={{
-          backgroundImage: isNight ?
-            'url(/assets/images/games/background2-night.png)'
-            : 'url(/assets/images/games/background2.png)',
+        style={{
+          backgroundImage: 'url(/assets/images/games/background-night.png)',
           backgroundSize: 'cover',
         }}
       >
@@ -237,11 +237,13 @@ const GamePage = () => {
     )
   }
 
-  return isAuthorized ? (
+  return isAuthorized && creator ? (
     <>
       <Box display="flex" flexDirection="column" height="100vh"
         sx={{
-          backgroundImage: 'url(/assets/images/games/background2.png)',
+          backgroundImage: isNight ?
+            'url(/assets/images/games/background-night.png)'
+            : 'url(/assets/images/games/background2.png)',
           backgroundSize: 'cover',
         }}
       >
@@ -296,6 +298,8 @@ const GamePage = () => {
                   canBeReady={canBeReady}
                   canStartGame={canStartGame}
                   player={player}
+                  gameStarted={gameStarted}
+                  setGameStarted={setGameStarted}
                 />
               )}
             </Box>
@@ -349,6 +353,7 @@ const GamePage = () => {
               socket={socket}
               toggleHighlightPlayer={toggleHighlightPlayer}
               highlightedPlayers={highlightedPlayers}
+              gameStarted={gameStarted}
             />
           </Box>
         </Box>
