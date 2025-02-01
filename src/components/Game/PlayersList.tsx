@@ -12,6 +12,7 @@ interface PlayersListProps {
   player: Player | null
   isCreator: boolean
   gameStarted: boolean
+  gameFinished: boolean
   creatorNickname: string
   gameId: string
   socket: Socket | null
@@ -25,6 +26,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   player,
   isCreator = false,
   gameStarted,
+  gameFinished,
   creatorNickname,
   gameId,
   socket,
@@ -71,7 +73,11 @@ const PlayersList: React.FC<PlayersListProps> = ({
             >
               {highlightedPlayers[_player.nickname] ? 'Désélectionner' : 'Surligner'}
             </button>
-            {!gameStarted && player && isCreator && creatorNickname !== _player.nickname && (
+            {!gameStarted
+              && !gameFinished
+              && player
+              && isCreator
+              && creatorNickname !== _player.nickname && (
               <Button
                 variant="outlined"
                 color="error"
