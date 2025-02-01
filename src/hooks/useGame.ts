@@ -67,6 +67,7 @@ export const useGame = (
   const [loading, setLoading] = useState(true)
   const [isNight, setIsNight] = useState(false)
   const [gameStarted, setGameStarted] = useState(false)
+  const [gameFinished, setGameFinished] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -309,6 +310,11 @@ export const useGame = (
       setIsNight(nightStarted)
     })
 
+    socket.on('gameFinished', (room: RoomData) => {
+      setGameFinished(true)
+      setIsNight(true)
+    })
+
     socket.on('error', (error: any) => {
       setMessages((prev) => [
         ...prev,
@@ -358,6 +364,7 @@ export const useGame = (
     loading,
     isNight,
     gameStarted,
+    gameFinished,
     messagesEndRef,
     passwordRequired,
     isAuthorized,
