@@ -17,6 +17,8 @@ interface GameControlsProps {
   isCreator: boolean
   canBeReady: boolean
   canStartGame: boolean
+  gameStarted: boolean
+  setGameStarted: (gameStarted: boolean) => void
   fetchGameDetails: () => void
 }
 
@@ -30,6 +32,8 @@ const GameControls: React.FC<GameControlsProps> = ({
   canBeReady,
   canStartGame,
   player,
+  gameStarted,
+  setGameStarted,
 }) => {
   const { token } = useAuth()
   const { user } = useUser()
@@ -56,6 +60,7 @@ const GameControls: React.FC<GameControlsProps> = ({
     try {
       await startGame(gameId)
       fetchGameDetails()
+      setGameStarted(true)
     } catch (error) {
       console.error('Erreur lors du lancement de la partie:', error)
     }
@@ -99,7 +104,7 @@ const GameControls: React.FC<GameControlsProps> = ({
             boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)'
           }}
         >
-          {isCreator && (
+          {isCreator && !gameStarted && (
             <>
               <Typography variant="h5" gutterBottom>
                 Configurer la partie
@@ -123,7 +128,7 @@ const GameControls: React.FC<GameControlsProps> = ({
             </>
           )}
           {[ 'SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator' ]
-            .includes(user?.role as string) && (
+            .includes(user?.role as string) && !gameStarted && (
             <div>
               {canEditGame && (
                 <>
@@ -141,7 +146,7 @@ const GameControls: React.FC<GameControlsProps> = ({
               )}
             </div>
           )}
-          {!isCreator && (
+          {!isCreator && !gameStarted && (
             <Box>
               {canBeReady && !player.ready && (
                 <Button
