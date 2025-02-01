@@ -263,7 +263,6 @@ export const useGame = (
       setMessages((prev) => [...prev, message])
       if (message.sound) {
         const audio = new Audio(`/assets/sounds/${message.sound}.mp3`)
-        audio.volume = 0.5
         audio.play()
       }
       if (message.message.toLowerCase().includes(player?.nickname.toLowerCase())) {
