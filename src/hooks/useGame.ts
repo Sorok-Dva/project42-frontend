@@ -66,6 +66,7 @@ export const useGame = (
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [isNight, setIsNight] = useState(false)
+  const [gameStarted, setGameStarted] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -200,6 +201,7 @@ export const useGame = (
           setRoomData(data.room)
           setPlayer(data.player)
           setCreator(data.creator)
+          setGameStarted(data.room.status === 'in_progress')
 
           loadPlayersAndMessages(authorized)
         }
@@ -334,7 +336,7 @@ export const useGame = (
       socket.off('nightStarted')
       socket.off('error')
     }
-  }, [socket, gameId, user, player, hasJoined, isAuthorized, roomData.maxPlayers])
+  }, [socket, gameId, user, player, hasJoined, isAuthorized, isNight, roomData.maxPlayers])
 
   /**
    * Scroll auto en bas des messages à chaque nouveau message
@@ -356,6 +358,7 @@ export const useGame = (
     error,
     loading,
     isNight,
+    gameStarted,
     messagesEndRef,
     passwordRequired,
     isAuthorized,
@@ -367,5 +370,6 @@ export const useGame = (
     setMessages,
     setIsCreator,
     setIsNight,
+    setGameStarted,
   }
 }
