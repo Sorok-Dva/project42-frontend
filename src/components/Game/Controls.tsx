@@ -19,6 +19,7 @@ interface GameControlsProps {
   canBeReady: boolean
   canStartGame: boolean
   gameStarted: boolean
+  gameFinished: boolean
   setGameStarted: (gameStarted: boolean) => void
   fetchGameDetails: () => void
 }
@@ -34,6 +35,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   canStartGame,
   player,
   gameStarted,
+  gameFinished,
   setGameStarted,
 }) => {
   const { token } = useAuth()
@@ -105,7 +107,7 @@ const GameControls: React.FC<GameControlsProps> = ({
             boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)'
           }}
         >
-          <GameTimer gameStarted={gameStarted} />
+          <GameTimer gameStarted={gameStarted} gameFinished={gameFinished} />
 
           {isCreator && !gameStarted && (
             <>
