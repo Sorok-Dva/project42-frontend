@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Box, Typography } from '@mui/material'
 import { useSocket } from 'contexts/SocketContext'
 
@@ -12,33 +12,46 @@ const GameTimer: React.FC<GameTimerProps> = ({
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [phase, setPhase] = useState<number | null>(null)
   const { socket } = useSocket()
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const lastSoundPlayed = useRef<number | null>(null)
 
   useEffect(() => {
     if (!socket || !gameStarted) return
 
-    socket.on('timerUpdated', ({ limitPhase }) => {
-      const updateTime = () => {
-        const diff = new Date(limitPhase).getTime() - new Date().getTime()
+    const updateTimer = (limitPhase: string) => {
+      if (intervalRef.current) clearInterval(intervalRef.current) // Évite les multiples intervals
+
+      const calculateTimeLeft = () => {
+        const phaseEndTime = new Date(limitPhase).getTime()
+        const diff = phaseEndTime - new Date().getTime()
+        const newTimeLeft = diff > 0 ? Math.ceil(diff / 1000) : 0
+
         setTimeLeft(diff > 0 ? Math.ceil(diff / 1000) : 0)
+
+        // 🔊 Jouer un son quand il reste 3s, 2s, ou 1s (évite de rejouer inutilement)
+        if (newTimeLeft > 0 && newTimeLeft <= 3 && lastSoundPlayed.current !== newTimeLeft) {
+          const audio = new Audio(`/assets/sounds/${newTimeLeft === 1 ? 'bip2' : 'bip1'}.mp3`)
+          audio.play()
+          lastSoundPlayed.current = newTimeLeft
+        }
       }
-      updateTime()
-      const interval = setInterval(updateTime, 1000)
-      return () => clearInterval(interval)
+
+      calculateTimeLeft()
+      intervalRef.current = setInterval(calculateTimeLeft, 1000)
+    }
+
+    socket.on('timerUpdated', ({ limitPhase }) => {
+      if (!limitPhase) return
+      updateTimer(limitPhase)
     })
 
     socket.on('phaseUpdated', ({ phase }) => {
       setPhase(phase)
     })
 
-    socket.on('playCountdownSound', (finalSecond: boolean) => {
-      const audio = new Audio(`/sounds/${finalSecond ? 'bip2' : 'bip1'}.mp3`)
-      audio.play()
-    })
-
     return () => {
       socket.off('timerUpdated')
       socket.off('phaseUpdated')
-      socket.off('playCountdownSound')
     }
   }, [socket])
 
