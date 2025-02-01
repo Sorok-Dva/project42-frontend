@@ -1,18 +1,21 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import { Box, Button, TextField, Checkbox, FormControlLabel, Typography, Paper, Grid } from '@mui/material'
+import { useUser } from 'contexts/UserContext'
 
 const CreateGame = () => {
+  const { user } = useUser()
   const [inGame, setInGame] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [gameId, setGameId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
-    name: '',
+    name: user?.nickname,
     maxPlayers: 6,
     roles: ['voyageur', 'sableur', 'archiviste', 'synchronisateur'],
     anonymousVotes: false,
     privateGame: false,
     password: '',
+    timer: 3,
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,6 +96,19 @@ const CreateGame = () => {
                 value={formData.maxPlayers}
                 onChange={handleChange}
                 inputProps={{ min: 6, max: 50 }}
+                required
+              />
+            </Box>
+
+            <Box mb={2}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Durée du débat (en minutes)"
+                name="timer"
+                value={formData.timer}
+                onChange={handleChange}
+                inputProps={{ min: 2, max: 5 }}
                 required
               />
             </Box>
