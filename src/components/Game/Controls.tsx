@@ -109,7 +109,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         >
           <GameTimer gameStarted={gameStarted} gameFinished={gameFinished} />
 
-          {isCreator && !gameStarted && (
+          {isCreator && !gameStarted && !gameFinished && (
             <>
               <Typography variant="h5" gutterBottom>
                 Configurer la partie
@@ -133,7 +133,7 @@ const GameControls: React.FC<GameControlsProps> = ({
             </>
           )}
           {[ 'SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator' ]
-            .includes(user?.role as string) && !gameStarted && (
+            .includes(user?.role as string) && !gameStarted && !gameFinished && (
             <div>
               {canEditGame && (
                 <>
@@ -151,7 +151,7 @@ const GameControls: React.FC<GameControlsProps> = ({
               )}
             </div>
           )}
-          {!isCreator && !gameStarted && (
+          {!isCreator && !gameStarted && !gameFinished && (
             <Box>
               {canBeReady && !player.ready && (
                 <Button
