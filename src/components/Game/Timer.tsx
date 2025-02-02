@@ -18,7 +18,7 @@ const GameTimer: React.FC<GameTimerProps> = ({
   const lastSoundPlayed = useRef<number | null>(null)
 
   useEffect(() => {
-    if (!socket || !gameStarted|| !gameFinished) return
+    if (!socket || !gameStarted|| gameFinished) return
 
     const updateTimer = (limitPhase: string) => {
       if (intervalRef.current) clearInterval(intervalRef.current) // Évite les multiples intervals
