@@ -70,6 +70,9 @@ const GamePage = () => {
     gameError,
     error,
     loading,
+    isNight,
+    gameStarted,
+    gameFinished,
     messagesEndRef,
     passwordRequired,
     isAuthorized,
@@ -80,6 +83,8 @@ const GamePage = () => {
     setRoomData,
     setMessages,
     setIsCreator,
+    setGameStarted,
+    setGameFinished,
   } = useGame(gameId, user, token, socket)
 
   // temp - debug
@@ -107,6 +112,7 @@ const GamePage = () => {
     try {
       const data = await fetchGameDetails(gameId)
       setRoomData(data.room)
+      setGameFinished(data.room.status === 'completed')
     } catch (error) {
       console.error('Erreur lors du fetchGameDetails: ', error)
     }
@@ -151,6 +157,10 @@ const GamePage = () => {
         justifyContent="center"
         height="100vh"
         bgcolor="#f0f0f5"
+        style={{
+          backgroundImage: 'url(/assets/images/games/background-night.png)',
+          backgroundSize: 'cover',
+        }}
       >
         <Paper
           elevation={4}
@@ -183,6 +193,10 @@ const GamePage = () => {
         justifyContent="center"
         height="100vh"
         bgcolor="#f0f0f5"
+        sx={{
+          backgroundImage: 'url(/assets/images/games/background2.png)',
+          backgroundSize: 'cover',
+        }}
       >
         <Paper
           elevation={4}
@@ -226,9 +240,16 @@ const GamePage = () => {
     )
   }
 
-  return isAuthorized ? (
+  return isAuthorized && creator ? (
     <>
-      <Box display="flex" flexDirection="column" height="100vh">
+      <Box display="flex" flexDirection="column" height="100vh"
+        sx={{
+          backgroundImage: (isNight || gameFinished) ?
+            'url(/assets/images/games/background-night.png)'
+            : 'url(/assets/images/games/background2.png)',
+          backgroundSize: 'cover',
+        }}
+      >
         {/* Header */}
         <Box
           display="flex"
@@ -237,6 +258,7 @@ const GamePage = () => {
           px={2}
           py={1}
           bgcolor="#f0f0f0"
+
         >
           <Typography variant="h6">
             [{GAME_TYPES[roomData.type]}] Partie : {roomData.name} ({players.length}/{roomData.maxPlayers})
@@ -279,6 +301,9 @@ const GamePage = () => {
                   canBeReady={canBeReady}
                   canStartGame={canStartGame}
                   player={player}
+                  gameStarted={gameStarted}
+                  gameFinished={gameFinished}
+                  setGameStarted={setGameStarted}
                 />
               )}
             </Box>
@@ -332,6 +357,8 @@ const GamePage = () => {
               socket={socket}
               toggleHighlightPlayer={toggleHighlightPlayer}
               highlightedPlayers={highlightedPlayers}
+              gameStarted={gameStarted}
+              gameFinished={gameFinished}
             />
           </Box>
         </Box>

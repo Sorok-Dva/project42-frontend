@@ -32,7 +32,7 @@ export const fetchChatMessages = async (gameId: string) => {
  * Lance la partie
  */
 export const startGame = async (gameId: string) => {
-  const response = await axios.post(`/api/games/${gameId}/start`)
+  const response = await axios.post(`/api/games/room/${gameId}/start`)
   return response.data
 }
 

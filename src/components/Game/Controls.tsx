@@ -4,6 +4,7 @@ import { usePermissions } from '../../hooks/usePermissions'
 import { addBotToGame, startGame, setPlayerReady, transferCreatorRights } from '../../services/gameService'
 import { useAuth } from '../../contexts/AuthContext'
 import { useUser } from '../../contexts/UserContext'
+import GameTimer from 'components/Game/Timer'
 
 interface Player {
   id: string
@@ -17,6 +18,9 @@ interface GameControlsProps {
   isCreator: boolean
   canBeReady: boolean
   canStartGame: boolean
+  gameStarted: boolean
+  gameFinished: boolean
+  setGameStarted: (gameStarted: boolean) => void
   fetchGameDetails: () => void
 }
 
@@ -30,6 +34,9 @@ const GameControls: React.FC<GameControlsProps> = ({
   canBeReady,
   canStartGame,
   player,
+  gameStarted,
+  gameFinished,
+  setGameStarted,
 }) => {
   const { token } = useAuth()
   const { user } = useUser()
@@ -56,6 +63,7 @@ const GameControls: React.FC<GameControlsProps> = ({
     try {
       await startGame(gameId)
       fetchGameDetails()
+      setGameStarted(true)
     } catch (error) {
       console.error('Erreur lors du lancement de la partie:', error)
     }
@@ -99,7 +107,9 @@ const GameControls: React.FC<GameControlsProps> = ({
             boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)'
           }}
         >
-          {isCreator && (
+          <GameTimer gameStarted={gameStarted} gameFinished={gameFinished} />
+
+          {isCreator && !gameStarted && !gameFinished && (
             <>
               <Typography variant="h5" gutterBottom>
                 Configurer la partie
@@ -123,7 +133,7 @@ const GameControls: React.FC<GameControlsProps> = ({
             </>
           )}
           {[ 'SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator' ]
-            .includes(user?.role as string) && (
+            .includes(user?.role as string) && !gameStarted && !gameFinished && (
             <div>
               {canEditGame && (
                 <>
@@ -141,7 +151,7 @@ const GameControls: React.FC<GameControlsProps> = ({
               )}
             </div>
           )}
-          {!isCreator && (
+          {!isCreator && !gameStarted && !gameFinished && (
             <Box>
               {canBeReady && !player.ready && (
                 <Button
