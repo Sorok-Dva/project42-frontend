@@ -151,7 +151,7 @@ export const useGame = (
     try {
       const [playersData, chatData] = await Promise.all([
         fetchPlayers(gameId),
-        fetchChatMessages(gameId),
+        fetchChatMessages(gameId, token),
       ])
       setPlayers(playersData)
       setMessages(chatData)
