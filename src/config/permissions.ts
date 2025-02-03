@@ -2,7 +2,7 @@ export const ROLE_PERMISSIONS = {
   SuperAdmin: {
     game: ['create', 'edit', 'delete', 'view', 'bypassPassword'],
     gamePowers: [
-      'message', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
+      'modo', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'giveRole', 'removeRole', 'editRole', 'seeRole',
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
@@ -16,7 +16,7 @@ export const ROLE_PERMISSIONS = {
   Admin: {
     game: ['create', 'edit', 'delete', 'view', 'bypassPassword'],
     gamePowers: [
-      'message', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
+      'modo', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'giveRole', 'removeRole', 'editRole', 'seeRole',
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
@@ -30,7 +30,7 @@ export const ROLE_PERMISSIONS = {
   Developer: {
     game: ['create', 'edit', 'delete', 'view', 'bypassPassword'],
     gamePowers: [
-      'message', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
+      'modo', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'giveRole', 'removeRole', 'editRole', 'seeRole',
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
@@ -44,7 +44,7 @@ export const ROLE_PERMISSIONS = {
   Moderator: {
     game: ['create', 'edit', 'delete', 'view', 'bypassPassword'],
     gamePowers: [
-      'message', 'warn', 'kick', 'ban', 'mute', 'unmute',
+      'modo', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'giveRole', 'removeRole', 'editRole', 'seeRole',
       'setTimer', 'crea', 'stop',
     ],
@@ -54,7 +54,7 @@ export const ROLE_PERMISSIONS = {
   ModeratorTest: {
     game: ['create', 'edit', 'view'],
     gamePowers: [
-      'message', 'warn', 'kick', 'mute', 'unmute',
+      'modo', 'warn', 'kick', 'mute', 'unmute',
     ],
     godPowers: [],
     animationPowers: [],
