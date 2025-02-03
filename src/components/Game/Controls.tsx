@@ -46,7 +46,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const canEditGame = checkPermission('game', 'edit')
 
   const handleAddBot = async () => {
-    if (!gameId) return
+    if (!gameId || gameStarted || gameFinished) return
     try {
       if (!canAddBot) {
         throw new Error('Vous n\'avez pas la permission d\'ajouter un bot')
@@ -59,7 +59,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleStartGame = async () => {
-    if (!gameId) return
+    if (!gameId || gameStarted || gameFinished) return
     try {
       await startGame(gameId)
       fetchGameDetails()
@@ -70,7 +70,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleBeReady = async () => {
-    if (!gameId) return
+    if (!gameId || gameStarted || gameFinished) return
     try {
       const response = await setPlayerReady(gameId, token)
       if (response.status === 200) {
@@ -82,7 +82,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleTransferCreator = async (newCreatorId: string) => {
-    if (!gameId) return
+    if (!gameId || gameStarted || gameFinished) return
     try {
       await transferCreatorRights(gameId, newCreatorId)
       fetchGameDetails()
@@ -108,6 +108,10 @@ const GameControls: React.FC<GameControlsProps> = ({
           }}
         >
           <GameTimer gameStarted={gameStarted} gameFinished={gameFinished} />
+
+          {gameFinished && (
+            <h3>Cette partie est terminée.</h3>
+          )}
 
           {isCreator && !gameStarted && !gameFinished && (
             <>
