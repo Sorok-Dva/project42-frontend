@@ -23,8 +23,13 @@ export const fetchPlayers = async (gameId: string) => {
 /**
  * Récupère l'historique du chat
  */
-export const fetchChatMessages = async (gameId: string) => {
-  const response = await axios.get(`/api/games/room/${gameId}/tchat`)
+export const fetchChatMessages = async (gameId: string, token: string | null) => {
+  const response = await axios.get(
+    `/api/games/room/${gameId}/tchat`,
+    token ? {
+      headers: { Authorization: `Bearer ${token}` },
+    } : {}
+  )
   return response.data
 }
 
