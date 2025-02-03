@@ -96,7 +96,7 @@ const Chat: React.FC<ChatProps> = ({
     setCurrentCommand(command)
 
     if (
-      ['kick', 'ban', 'mute', 'unmute', 'nick', 'crea'].includes(command)
+      ['kick', 'ban', 'mute', 'unmute', 'nick', 'crea', 'card'].includes(command)
       && !hasAdditionalArgs
     ) {
       const searchQuery = arg.toLowerCase()
