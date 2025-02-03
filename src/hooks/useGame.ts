@@ -101,6 +101,8 @@ export const useGame = (
       const response = await axios.post('/api/games/validate-password', {
         gameId,
         password,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
       })
 
       if (response.data.success) {
