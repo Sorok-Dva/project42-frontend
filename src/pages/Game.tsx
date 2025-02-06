@@ -16,6 +16,9 @@ import Chat from '../components/Game/Chat'
 import PlayersList from '../components/Game/PlayersList'
 import { getRandomColor } from 'utils/getRandomColor'
 
+import 'styles/Game.scss'
+import Composition from 'components/Game/Composition'
+
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
   1: 'Fun',
@@ -350,6 +353,7 @@ const GamePage = () => {
             width="25%"
             className="right-column"
           >
+            <Composition />
             <PlayersList
               players={players}
               player={player}
