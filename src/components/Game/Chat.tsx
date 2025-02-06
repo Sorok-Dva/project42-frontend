@@ -137,77 +137,167 @@ const Chat: React.FC<ChatProps> = ({
 
   return (
     <Box display="flex" flexDirection="column" height="100%">
-      <Box flex={1} bgcolor="#f5f5f5" p={2} overflow="auto">
-        {messages
-          .filter((msg) => {
-            // Si le message est envoyé dans le canal normal, on l'affiche pour tout le monde
-            if (msg.channel === 0) return true
+      <Box flex={ 1 } id="block_chat" className="shadow rounded" p={ 2 }
+        overflow="auto">
+        <Box id="block_chat_content"
+          className="block_scrollable_wrapper scrollbar-dark">
+          <Box id="block_chat_game" className="block_scrollable_content">
+            <Box className="canal_meneur game-rules">
+              <div>Rappel : vous êtes sur une partie <span className='bullet-game type-0'></span> <b>Normale</b> :<br />
+                <ul>
+                  <li>Il est strictement <b>interdit d'insulter</b> un autre joueur et d'avoir une attitude malsaine. Toute forme d'<b>anti-jeu</b> sera sanctionnée.</li>
+                  <li>Le dévoilement est <b>interdit</b> et <b>sanctionné</b> systématiquement. Il est aussi <b>interdit</b> de donner toute forme d'indice sur son rôle.</li>
+                  <li>Tous les joueurs <b>doivent</b> participer au débat. Il n'est pas autorisé d'être <b>AFK</b>.</li>
+                </ul>
+                Soyez courtois et aimable. Bon jeu ! <br /> <br />
+                <b>Rappel :</b> ne divulguez <b>jamais</b> vos informations privées sur le jeu.
+              </div>
+              <hr />
+            </Box>
+            <div id="scroll_chat"></div>
+            <div id="load_chat">Chargement des messages plus anciens...</div>
+            { messages
+              .filter((msg) => {
+                // Si le message est envoyé dans le canal normal, on l'affiche pour tout le monde
+                if (msg.channel === 0) return true
 
-            // Si le message est envoyé dans le canal des loups (channel === 3)
-            // on vérifie que le joueur connecté est un loup.
-            // Par exemple, ici, on suppose que player.card === 2 signifie que c'est un loup.
-            if (msg.channel === 3 && player?.card === 2) return true
+                // Si le message est envoyé dans le canal des loups (channel === 3)
+                // on vérifie que le joueur connecté est un loup.
+                // Par exemple, ici, on suppose que player.card === 2 signifie que c'est un loup.
+                if (msg.channel === 3 && player?.card === 2) return true
 
-            // Sinon, on ne l'affiche pas
-            return false
-          }).map((msg, index) => {
-            const cleanNickname = stripHTML(msg.nickname)
-            const escapedMessage = stripHTML(msg.message)
+                // Sinon, on ne l'affiche pas
+                return false
+              }).map((msg, index) => {
+                const cleanNickname = msg.nickname ? stripHTML(msg.nickname) : null
+                const escapedMessage = stripHTML(msg.message)
 
-            const highlightColor = highlightedPlayers[cleanNickname] || 'transparent'
+                const highlightColor = cleanNickname ? highlightedPlayers[cleanNickname] : 'transparent'
 
-            const highlightMention = (message: string, nickname?: string) => {
-              const regex = new RegExp(`\\b${nickname}\\b`, 'gi')
-              return message.replace(
-                regex,
-                `<span style="background-color: #ff9100">${nickname}</span>`
-              )
-            }
+                const highlightMention = (message : string, nickname? : string) => {
+                  const regex = new RegExp(`\\b${nickname}\\b`, 'gi')
+                  return message.replace(
+                    regex,
+                    `<span style="background-color: #ff9100">${ nickname }</span>`,
+                  )
+                }
 
-            const shouldHighlight =
-            cleanNickname !== 'Système' && cleanNickname !== 'Modération'
+                const shouldHighlight =
+                  cleanNickname !== 'Système' && cleanNickname !== 'Modération'
 
-            let processedMessage
-            if (cleanNickname === 'Modération') {
-              processedMessage = msg.message
-            } else if (shouldHighlight) {
-              processedMessage = highlightMention(escapedMessage, player?.nickname)
-            } else {
-              processedMessage = escapedMessage
-            }
+                let processedMessage
+                if (cleanNickname === 'Modération') {
+                  processedMessage = msg.message
+                } else if (cleanNickname && shouldHighlight) {
+                  processedMessage = highlightMention(escapedMessage, player?.nickname)
+                } else {
+                  processedMessage = escapedMessage
+                }
 
-            return (
-              <Typography
-                key={index}
-                variant="body1"
-                className={`canal_${msg.channel}`}
-                sx={{
-                  backgroundColor: highlightColor,
-                  padding: '4px',
-                  borderRadius: '4px',
-                }}
-                onClick={(e) => {
-                  const target = e.target as HTMLElement
-                  if (target.classList.contains('msg-nickname')) {
-                    const nickname = target.getAttribute('data-highlight-nickname')
-                    if (nickname) handleMentionClick(nickname)
-                  }
-                }}
-              >
-                <small>[{new Date(msg.createdAt).toLocaleTimeString()}]</small>{' '}
-                {msg.icon && <img src={`/assets/images/${msg.icon}`} className="msg-icon" alt="icon" />}
-                <strong className="msg-nickname" data-highlight-nickname={cleanNickname}
-                  dangerouslySetInnerHTML={{ __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname }}>
-                </strong>{`${msg.channel === 3 ? ' (Alien)' : ''}`}:{' '}
-                <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
-              </Typography>
-            )
-          })}
+                return (
+                  <Typography
+                    key={index}
+                    variant="body1"
+                    className={`canal_${msg.channel}`}
+                    sx={{
+                      backgroundColor: highlightColor,
+                      padding: '4px',
+                      borderRadius: '4px',
+                    }}
+                    onClick={(e) => {
+                      const target = e.target as HTMLElement
+                      if (target.classList.contains('msg-nickname')) {
+                        const nickname = target.getAttribute('data-highlight-nickname')
+                        if (nickname) handleMentionClick(nickname)
+                      }
+                    }}
+                  >
+                    <small>[{new Date(String(msg.createdAt)).toLocaleTimeString()}]</small>{' '}
 
-        <div ref={messagesEndRef} />
+                    {msg.icon && (
+                      <img
+                        src={`/assets/images/${msg.icon}`}
+                        className="msg-icon"
+                        alt="message icon"
+                      />
+                    )}
+
+                    {cleanNickname && (
+                      <>
+                        <b
+                          className="msg-nickname"
+                          data-highlight-nickname={cleanNickname}
+                          dangerouslySetInnerHTML={{
+                            __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname,
+                          }}
+                        ></b>
+                        {msg.channel === 3 && <span> (Alien)</span>}
+                        {': '}
+                      </>
+                    )}
+
+                    <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
+                  </Typography>
+                )
+              }) }
+            <div ref={ messagesEndRef }/>
+          </Box>
+        </Box>
       </Box>
       { player && (
-        <Box mt={2} display="flex" flexDirection="column" position="relative">
+        <div id="block_chat_post">
+          <div id="block_chat_fill" className="block_scrollable_wrapper scrollbar-light">
+            <ul className="block_scrollable_content"></ul>
+          </div>
+          <div className="chat_send">
+            <TextField
+              fullWidth
+              id="block_chat_message"
+              className="mousetrap"
+              variant="outlined"
+              placeholder="Écrire un message..."
+              value={newMessage}
+              inputRef={inputRef}
+              onChange={(e) => handleInputChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (suggestions.length > 0) {
+                  if (e.key === 'ArrowDown') {
+                    setSelectedIndex((prev) => (prev + 1) % suggestions.length)
+                    e.preventDefault()
+                  } else if (e.key === 'ArrowUp') {
+                    setSelectedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length)
+                    e.preventDefault()
+                  } else if (e.key === 'Enter') {
+                    if (selectedIndex === -1) {
+                      // Si aucune sélection, on prend la première suggestion
+                      setSelectedIndex(0)
+                      setNewMessage(`/${currentCommand} ${suggestions[0]} `)
+                      setSuggestions([])
+                      e.preventDefault()
+                    } else if (selectedIndex >= 0) {
+                      // Si une suggestion est sélectionnée, l'insérer
+                      const chosenNickname = suggestions[selectedIndex]
+                      setNewMessage(`/${currentCommand} ${chosenNickname} `)
+                      setSelectedIndex(-1) // Réinitialise l'index sélectionné
+                      setSuggestions([]) // Cache les suggestions
+                      e.preventDefault() // Empêche l'envoi immédiat du message
+                    }
+                  }
+                } else if (e.key === 'Enter') {
+                  handleSendMessage()
+                }
+              }}
+              inputProps={{
+                style: { zIndex: 1, height: 'auto' },
+                maxLength: 500,
+                autofocus: true,
+              }}
+              autoComplete="off"
+            />
+          </div>
+        </div>
+        /*<Box mt={ 2 } display="flex" flexDirection="column"
+          position="relative">
           <TextField
             fullWidth
             variant="outlined"
@@ -280,7 +370,7 @@ const Chat: React.FC<ChatProps> = ({
               ))}
             </List>
           )}
-        </Box>
+        </Box>*/
       )}
     </Box>
   )
