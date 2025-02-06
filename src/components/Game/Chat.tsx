@@ -169,7 +169,7 @@ const Chat: React.FC<ChatProps> = ({
                 // Sinon, on ne l'affiche pas
                 return false
               }).map((msg, index) => {
-                const cleanNickname = msg.nickname ? stripHTML(msg.nickname) : null
+                const cleanNickname = stripHTML(msg.nickname)
                 const escapedMessage = stripHTML(msg.message)
 
                 const highlightColor = cleanNickname ? highlightedPlayers[cleanNickname] : 'transparent'
@@ -186,7 +186,7 @@ const Chat: React.FC<ChatProps> = ({
                   cleanNickname !== 'Système' && cleanNickname !== 'Modération'
 
                 let processedMessage
-                if (cleanNickname === 'Modération') {
+                if (cleanNickname === 'Modération' || cleanNickname === 'Système') {
                   processedMessage = msg.message
                 } else if (cleanNickname && shouldHighlight) {
                   processedMessage = highlightMention(escapedMessage, player?.nickname)
@@ -222,7 +222,7 @@ const Chat: React.FC<ChatProps> = ({
                       />
                     )}
 
-                    {cleanNickname && (
+                    {cleanNickname && cleanNickname !== 'Système' && (
                       <>
                         <b
                           className="msg-nickname"
