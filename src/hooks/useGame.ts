@@ -9,6 +9,7 @@ export interface Message {
   playerId: number
   channel: number
   icon: string | null
+  isMeneur: boolean
   createdAt: Date
 }
 
@@ -255,6 +256,7 @@ export const useGame = (
           playerId: -1,
           channel: 0,
           icon: data.icon,
+          isMeneur: false,
           createdAt: new Date(),
         },
       ])
@@ -333,6 +335,7 @@ export const useGame = (
           icon: error.icon,
           playerId: -1,
           channel: 0,
+          isMeneur: false,
           createdAt: new Date(),
         },
       ])
