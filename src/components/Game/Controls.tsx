@@ -1,20 +1,16 @@
 import React from 'react'
 import { Box, Button, Paper, Typography } from '@mui/material'
-import { usePermissions } from '../../hooks/usePermissions'
-import { addBotToGame, startGame, setPlayerReady, transferCreatorRights } from '../../services/gameService'
-import { useAuth } from '../../contexts/AuthContext'
-import { useUser } from '../../contexts/UserContext'
-import GameTimer from 'components/Game/Timer'
-
-interface Player {
-  id: string
-  nickname: string
-  ready: boolean
-}
+import { usePermissions } from 'hooks/usePermissions'
+import { addBotToGame, startGame, setPlayerReady, transferCreatorRights } from 'services/gameService'
+import { useAuth } from 'contexts/AuthContext'
+import { useUser } from 'contexts/UserContext'
+import GameTimer from './Timer'
+import PhaseAction from './PhaseAction'
+import { PlayerType } from 'hooks/useGame'
 
 interface GameControlsProps {
   gameId: string | undefined
-  player: Player
+  player: PlayerType
   isCreator: boolean
   canBeReady: boolean
   canStartGame: boolean
@@ -108,6 +104,7 @@ const GameControls: React.FC<GameControlsProps> = ({
           }}
         >
           <GameTimer gameStarted={gameStarted} gameFinished={gameFinished} />
+          <PhaseAction player={player} roomId={Number(gameId!)} />
 
           {gameFinished && (
             <h3>Cette partie est terminée.</h3>
