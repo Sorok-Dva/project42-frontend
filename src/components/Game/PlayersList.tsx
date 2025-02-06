@@ -49,55 +49,62 @@ const PlayersList: React.FC<PlayersListProps> = ({
   }
 
   return (
-    <div>
-      <Typography variant="h6" gutterBottom>
-        Liste des joueurs
-      </Typography>
-      <List>
-        {players.map((_player, index) => (
-          <ListItem key={index}>
-            <ListItemText
-              data-nickname={_player.nickname}
-              primary={
-                <Typography component="span">
-                  {_player.nickname}
-                  {alienList.includes(_player.nickname) && (
-                    <b className="canal_3"> (Alien)</b>
+    <div id="block_players" className="block shadow bglightblue rounded">
+      <div className="block_header">
+        <h3>Liste des joueurs</h3>
+      </div>
+      <div className="block_content block_scrollable_wrapper scrollbar-light">
+        <div className="block_scrollable_content">
+          <div className="list_players">
+            <strong>0/{ players.length } joueurs en vie</strong>
+            <List>
+              { players.map((_player, index) => (
+                <ListItem key={ index }>
+                  <ListItemText
+                    data-nickname={ _player.nickname }
+                    primary={
+                      <Typography component="span">
+                        { _player.nickname }
+                        { alienList.includes(_player.nickname) && (
+                          <b className="canal_3"> (Alien)</b>
+                        )}
+                      </Typography>
+                    }
+                    secondary={!gameStarted ? (_player.ready ? 'Prêt' : 'Non prêt') : null}
+                  />
+                  <button
+                    onClick={() => toggleHighlightPlayer(_player.nickname)}
+                    style={{
+                      marginLeft: '8px',
+                      padding: '4px 8px',
+                      backgroundColor: highlightedPlayers[_player.nickname] || '#ccc',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {highlightedPlayers[_player.nickname] ? 'Désélectionner' : 'Surligner'}
+                  </button>
+                  {!gameStarted
+                    && !gameFinished
+                    && player
+                    && isCreator
+                    && creatorNickname !== _player.nickname && (
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => handleKickPlayer(_player.nickname)}
+                    >
+                        Kick
+                    </Button>
                   )}
-                </Typography>
-              }
-              secondary={!gameStarted ? (_player.ready ? 'Prêt' : 'Non prêt') : null}
-            />
-            <button
-              onClick={() => toggleHighlightPlayer(_player.nickname)}
-              style={{
-                marginLeft: '8px',
-                padding: '4px 8px',
-                backgroundColor: highlightedPlayers[_player.nickname] || '#ccc',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              {highlightedPlayers[_player.nickname] ? 'Désélectionner' : 'Surligner'}
-            </button>
-            {!gameStarted
-              && !gameFinished
-              && player
-              && isCreator
-              && creatorNickname !== _player.nickname && (
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() => handleKickPlayer(_player.nickname)}
-              >
-                Kick
-              </Button>
-            )}
-          </ListItem>
-        ))}
-      </List>
+                </ListItem>
+              ))}
+            </List>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
