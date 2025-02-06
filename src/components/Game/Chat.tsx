@@ -22,6 +22,7 @@ interface ChatProps {
   player?: PlayerType
   user?: User
   userRole?: string
+  isNight: boolean
   messages: Message[]
   messagesEndRef: React.RefObject<HTMLDivElement>
   socket: Socket | null
@@ -39,6 +40,7 @@ const Chat: React.FC<ChatProps> = ({
   messagesEndRef,
   socket,
   highlightedPlayers,
+  isNight,
 }) => {
   const [newMessage, setNewMessage] = useState('')
   const [currentCommand, setCurrentCommand] = useState('')
@@ -70,10 +72,16 @@ const Chat: React.FC<ChatProps> = ({
           })
         }
       } else {
+        let channelToSend = 0
+
+        // Si c'est la nuit et que le joueur est un loup, on envoie dans le canal des loups (1)
+        if (isNight && player?.card === 2) channelToSend = 3
+
         socket.emit('sendMessage', {
           roomId: gameId,
           playerId,
           content: trimmedMessage,
+          channel: channelToSend,
         })
       }
       setNewMessage('')
@@ -130,58 +138,71 @@ const Chat: React.FC<ChatProps> = ({
   return (
     <Box display="flex" flexDirection="column" height="100%">
       <Box flex={1} bgcolor="#f5f5f5" p={2} overflow="auto">
-        {messages.map((msg, index) => {
-          const cleanNickname = stripHTML(msg.nickname)
-          const escapedMessage = stripHTML(msg.message)
+        {messages
+          .filter((msg) => {
+            // Si le message est envoyé dans le canal normal, on l'affiche pour tout le monde
+            if (msg.channel === 0) return true
 
-          const highlightColor = highlightedPlayers[cleanNickname] || 'transparent'
+            // Si le message est envoyé dans le canal des loups (channel === 3)
+            // on vérifie que le joueur connecté est un loup.
+            // Par exemple, ici, on suppose que player.card === 2 signifie que c'est un loup.
+            if (msg.channel === 3 && player?.card === 2) return true
 
-          const highlightMention = (message: string, nickname?: string) => {
-            const regex = new RegExp(`\\b${nickname}\\b`, 'gi')
-            return message.replace(
-              regex,
-              `<span style="background-color: #ff9100">${nickname}</span>`
-            )
-          }
+            // Sinon, on ne l'affiche pas
+            return false
+          }).map((msg, index) => {
+            const cleanNickname = stripHTML(msg.nickname)
+            const escapedMessage = stripHTML(msg.message)
 
-          const shouldHighlight =
+            const highlightColor = highlightedPlayers[cleanNickname] || 'transparent'
+
+            const highlightMention = (message: string, nickname?: string) => {
+              const regex = new RegExp(`\\b${nickname}\\b`, 'gi')
+              return message.replace(
+                regex,
+                `<span style="background-color: #ff9100">${nickname}</span>`
+              )
+            }
+
+            const shouldHighlight =
             cleanNickname !== 'Système' && cleanNickname !== 'Modération'
 
-          let processedMessage
-          if (cleanNickname === 'Modération') {
-            processedMessage = msg.message
-          } else if (shouldHighlight) {
-            processedMessage = highlightMention(escapedMessage, player?.nickname)
-          } else {
-            processedMessage = escapedMessage
-          }
+            let processedMessage
+            if (cleanNickname === 'Modération') {
+              processedMessage = msg.message
+            } else if (shouldHighlight) {
+              processedMessage = highlightMention(escapedMessage, player?.nickname)
+            } else {
+              processedMessage = escapedMessage
+            }
 
-          return (
-            <Typography
-              key={index}
-              variant="body1"
-              sx={{
-                backgroundColor: highlightColor,
-                padding: '4px',
-                borderRadius: '4px',
-              }}
-              onClick={(e) => {
-                const target = e.target as HTMLElement
-                if (target.classList.contains('msg-nickname')) {
-                  const nickname = target.getAttribute('data-highlight-nickname')
-                  if (nickname) handleMentionClick(nickname)
-                }
-              }}
-            >
-              <small>[{new Date(msg.createdAt).toLocaleTimeString()}]</small>{' '}
-              {msg.icon && <img src={`/assets/images/${msg.icon}`} className="msg-icon" alt="icon" />}
-              <strong className="msg-nickname" data-highlight-nickname={cleanNickname}
-                dangerouslySetInnerHTML={{ __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname }}>
-              </strong>:{' '}
-              <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
-            </Typography>
-          )
-        })}
+            return (
+              <Typography
+                key={index}
+                variant="body1"
+                className={`canal_${msg.channel}`}
+                sx={{
+                  backgroundColor: highlightColor,
+                  padding: '4px',
+                  borderRadius: '4px',
+                }}
+                onClick={(e) => {
+                  const target = e.target as HTMLElement
+                  if (target.classList.contains('msg-nickname')) {
+                    const nickname = target.getAttribute('data-highlight-nickname')
+                    if (nickname) handleMentionClick(nickname)
+                  }
+                }}
+              >
+                <small>[{new Date(msg.createdAt).toLocaleTimeString()}]</small>{' '}
+                {msg.icon && <img src={`/assets/images/${msg.icon}`} className="msg-icon" alt="icon" />}
+                <strong className="msg-nickname" data-highlight-nickname={cleanNickname}
+                  dangerouslySetInnerHTML={{ __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname }}>
+                </strong>{`${msg.channel === 3 ? ' (Alien)' : ''}`}:{' '}
+                <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
+              </Typography>
+            )
+          })}
 
         <div ref={messagesEndRef} />
       </Box>
