@@ -89,8 +89,8 @@ const GameControls: React.FC<GameControlsProps> = ({
 
   return (
     <div id="block_actions">
-      { !gameStarted && (
-        <div id="block_ami" className="block rounded bgdarkred">
+      { !gameStarted && !gameFinished && (
+        <div id="block_ami" className="block rounded bgblue">
           <div className="block_header">
             <h3>Inviter vos amis</h3>
           </div>
@@ -107,7 +107,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
       {!isCreator && !gameStarted && !gameFinished && (
         <>
-          <div id="block_options" className="block rounded bgdarkred">
+          <div id="block_options" className="block rounded bgblue">
             <div className="block_header">
               <h3>Options de la partie</h3>
             </div>
@@ -123,7 +123,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
       {isCreator && !gameStarted && !gameFinished && (
         <>
-          <div id="block_crea" className="block rounded bgdarkred">
+          <div id="block_crea" className="block rounded bgblue">
             <div className="block_header">
               <h3>Configurer la partie</h3>
             </div>
@@ -151,24 +151,23 @@ const GameControls: React.FC<GameControlsProps> = ({
         </>
       )}
 
-      {(player && gameStarted && !gameFinished) ? (
-        <div id="block_ia" className="shadow rounded bgdarkred game-started">
+      {player && gameStarted && !gameFinished ? (
+        <div id="block_ia" className="shadow rounded bgblue game-started">
           <div id="block_infos">
             <p>
               Vous êtes <strong>{player.card}</strong>.<br />
             </p>
-
             <GameTimer gameStarted={gameStarted} gameFinished={gameFinished} />
             <PhaseAction player={player} roomId={Number(gameId!)} />
           </div>
         </div>
-      ) : (
-        <div id="block_ia" className="shadow rounded bgdarkred game-started spectator">
+      ) : !player ? (
+        <div id="block_ia" className="shadow rounded bgblue game-started spectator">
           <div id="block_infos">
-            <p>Vous êtes spectateur de la partie.</p>
+            {gameFinished ? <b>La partie est terminée.</b> : <p>Vous êtes spectateur de la partie.</p>}
           </div>
         </div>
-      )}
+      ) : null}
 
       {/*<Box
         display="flex"
