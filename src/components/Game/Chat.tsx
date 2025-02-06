@@ -11,6 +11,7 @@ interface Message {
   message: string
   playerId: number
   channel: number
+  isMeneur: boolean
   icon: string | null
   createdAt: Date
 }
@@ -212,9 +213,11 @@ const Chat: React.FC<ChatProps> = ({
                       }
                     }}
                   >
-                    <small>[{new Date(String(msg.createdAt)).toLocaleTimeString()}]</small>{' '}
+                    {cleanNickname !== 'Système' && (
+                      <small>[{new Date(String(msg.createdAt)).toLocaleTimeString()}]{' '}</small>
+                    )}
 
-                    {msg.icon && (
+                    {msg.icon && !msg.isMeneur && (
                       <img
                         src={`/assets/images/${msg.icon}`}
                         className="msg-icon"
@@ -236,7 +239,20 @@ const Chat: React.FC<ChatProps> = ({
                       </>
                     )}
 
-                    <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
+                    {msg.isMeneur ? (
+                      <div className="canal_meneur">
+                        {msg.icon && (
+                          <img
+                            src={`/assets/images/${msg.icon}`}
+                            className="msg-icon"
+                            alt="message icon"
+                          />
+                        )}
+                        <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
+                      </div>
+                    ) : (
+                      <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
+                    )}
                   </Typography>
                 )
               }) }
@@ -295,6 +311,38 @@ const Chat: React.FC<ChatProps> = ({
               autoComplete="off"
             />
           </div>
+          {suggestions.length > 0 && (
+            <List
+              sx={{
+                position: 'absolute',
+                bottom: '100%',
+                left: 0,
+                width: '100%',
+                bgcolor: 'white',
+                border: '1px solid #ccc',
+                maxHeight: '150px',
+                overflowY: 'auto',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                zIndex: 1000,
+              }}
+            >
+              {suggestions.map((nickname, index) => (
+                <ListItem
+                  key={index}
+                  component="li"
+                  onClick={() => handleSuggestionClick(currentCommand, nickname)}
+                  sx={{
+                    cursor: 'pointer',
+                    padding: '8px 16px',
+                    bgcolor: selectedIndex === index ? '#ddd' : 'white',
+                    ':hover': { bgcolor: '#f0f0f0' },
+                  }}
+                >
+                  <ListItemText primary={nickname} />
+                </ListItem>
+              ))}
+            </List>
+          )}
         </div>
         /*<Box mt={ 2 } display="flex" flexDirection="column"
           position="relative">
