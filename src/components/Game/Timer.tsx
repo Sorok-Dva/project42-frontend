@@ -58,26 +58,33 @@ const GameTimer: React.FC<GameTimerProps> = ({
   }, [socket])
 
   /**
-   * Converts a given time in seconds to a formatted string representation in minutes and seconds.
+   * Formats a given time in seconds into minutes or seconds as a string.
    *
-   * The resulting string will display the time in the format of "Xmin YYsec",
-   * where `X` represents the number of minutes and `YY` represents the
-   * zero-padded number of remaining seconds.
-   *
-   * @param {number} seconds - The total time in seconds to be formatted.
-   * @returns {string} A string formatted as "Xmin YYsec" representing the input time.
+   * @param {number} seconds - The total time in seconds to format.
+   * @param {'min' | 'sec'} ret - Specifies the format of the resulting string:
+   *                              'min' for minutes or 'sec' for padded seconds.
+   * @returns {string} The formatted time as a string based on the specified format.
    */
-  const formatTime = (seconds: number): string => {
+  const formatTime = (seconds: number, ret: 'min' | 'sec'): string => {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
-    return `${minutes}min ${remainingSeconds.toString().padStart(2, '0')}sec`
+    return ret === 'min' ? String(minutes) : remainingSeconds.toString().padStart(2, '0')
   }
 
   return gameStarted && !gameFinished && (
-    <Box textAlign="center" mt={2}>
-      <Typography variant="h6">Phase {phase !== null ? phase : 'Chargement...'}</Typography>
-      {timeLeft !== null && <Typography variant="h4">{formatTime(timeLeft)}</Typography>}
-    </Box>
+    <div id="block_interactions_wrapper">
+      <div id="block_chrono_parent">
+        <div id="block_chrono">
+          <span id="chrono_min">{ timeLeft ? formatTime(timeLeft, 'min') : '-' }</span>
+          <span>min</span>
+          <span id="chrono_sec">{ timeLeft ? formatTime(timeLeft, 'sec') : '--' }</span>
+          <span>sec</span>
+        </div>
+      </div>
+      <div className="block_scrollable_wrapper scrollbar-light">
+        <div id="block_interactions" className="block_scrollable_content"></div>
+      </div>
+    </div>
   )
 }
 
