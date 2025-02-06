@@ -113,7 +113,18 @@ const GameControls: React.FC<GameControlsProps> = ({
             </div>
             <div className="block_content block_scrollable_wrapper scrollbar-light">
               <div className="block_scrollable_content">
-
+                <Box>
+                  {canBeReady && !player.ready && (
+                    <Button
+                      variant="contained"
+                      color="success"
+                      className="animate__animated animate__bounce animate__infinite"
+                      onClick={handleBeReady}
+                    >
+                      Je suis prêt(e) !
+                    </Button>
+                  )}
+                </Box>
               </div>
             </div>
           </div>
