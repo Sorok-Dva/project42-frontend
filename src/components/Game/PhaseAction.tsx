@@ -33,8 +33,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     if (!socket) return
 
     socket.on('phaseActionRequest', (data: PhaseActionRequest) => {
-      console.log(data.action.card, player?.card, data.action.card === player?.card)
-      if (data.action.card === player?.card || data.action.card === -1) {
+      if (data.action.card === player?.card?.id || data.action.card === -1) {
         setActionRequest(data)
       }
     })

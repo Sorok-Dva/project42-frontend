@@ -23,7 +23,7 @@ export interface PlayerType {
   playerId: string
   nickname: string
   ready: boolean
-  card?: number
+  card?: { id: number; name: string; description: string; }
 }
 
 export interface RoomData {

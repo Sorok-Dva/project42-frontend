@@ -186,7 +186,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         <div id="block_ia" className="shadow rounded bgblue game-started">
           <div id="block_infos">
             <p>
-              Vous êtes <strong>{player.card}</strong>.<br />
+              Vous êtes <strong>{player.card?.name}</strong>.<br />
             </p>
             <GameTimer gameStarted={gameStarted} gameFinished={gameFinished} />
             <PhaseAction player={player} roomId={Number(gameId!)} />

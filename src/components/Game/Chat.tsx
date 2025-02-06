@@ -76,7 +76,7 @@ const Chat: React.FC<ChatProps> = ({
         let channelToSend = 0
 
         // Si c'est la nuit et que le joueur est un loup, on envoie dans le canal des loups (1)
-        if (isNight && player?.card === 2) channelToSend = 3
+        if (isNight && player?.card?.id === 2) channelToSend = 3
 
         socket.emit('sendMessage', {
           roomId: gameId,
@@ -164,10 +164,8 @@ const Chat: React.FC<ChatProps> = ({
 
                 // Si le message est envoyé dans le canal des loups (channel === 3)
                 // on vérifie que le joueur connecté est un loup.
-                // Par exemple, ici, on suppose que player.card === 2 signifie que c'est un loup.
-                if (msg.channel === 3 && player?.card === 2) return true
+                if (msg.channel === 3 && player?.card?.id === 2) return true
 
-                // Sinon, on ne l'affiche pas
                 return false
               }).map((msg, index) => {
                 const cleanNickname = stripHTML(msg.nickname)
