@@ -145,6 +145,26 @@ const GameControls: React.FC<GameControlsProps> = ({
                 >
                   Léguer les droits du salon
                 </Button>
+
+                {[ 'SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator' ]
+                  .includes(user?.role as string) && (
+                  <div>
+                    {canEditGame && (
+                      <>
+                        <button>Modifier le salon</button>
+                      </>
+                    )}
+                    {canAddBot && (
+                      <Button
+                        variant="outlined"
+                        color="warning"
+                        onClick={handleAddBot}
+                      >
+                        Ajouter un bot
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
