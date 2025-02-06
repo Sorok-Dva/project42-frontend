@@ -22,6 +22,7 @@ export interface PlayerType {
   playerId: string
   nickname: string
   ready: boolean
+  card?: number
 }
 
 export interface RoomData {
@@ -68,6 +69,7 @@ export const useGame = (
   const [isNight, setIsNight] = useState(false)
   const [gameStarted, setGameStarted] = useState(false)
   const [gameFinished, setGameFinished] = useState(false)
+  const [alienList, setAlienList] = useState<string[]>([])
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -318,6 +320,10 @@ export const useGame = (
       setIsNight(true)
     })
 
+    socket.on('alienList', (list: string[]) => {
+      setAlienList(list)
+    })
+
     socket.on('error', (error: any) => {
       setMessages((prev) => [
         ...prev,
@@ -372,6 +378,7 @@ export const useGame = (
     passwordRequired,
     isAuthorized,
     password,
+    alienList,
     handlePasswordSubmit,
     setPassword,
     setGameError,
