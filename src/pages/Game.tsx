@@ -77,6 +77,7 @@ const GamePage = () => {
     passwordRequired,
     isAuthorized,
     password,
+    alienList,
     handlePasswordSubmit,
     setPassword,
     setGameError,
@@ -337,6 +338,7 @@ const GamePage = () => {
                 messagesEndRef={messagesEndRef}
                 socket={socket}
                 highlightedPlayers={highlightedPlayers}
+                isNight={isNight}
               />
             )}
           </Box>
@@ -359,6 +361,7 @@ const GamePage = () => {
               highlightedPlayers={highlightedPlayers}
               gameStarted={gameStarted}
               gameFinished={gameFinished}
+              alienList={alienList}
             />
           </Box>
         </Box>
