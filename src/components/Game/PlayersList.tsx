@@ -19,6 +19,7 @@ interface PlayersListProps {
   onKick?: (nickname: string) => void
   toggleHighlightPlayer: (nickname: string) => void
   highlightedPlayers: { [nickname: string]: string }
+  alienList: string[]
 }
 
 const PlayersList: React.FC<PlayersListProps> = ({
@@ -32,6 +33,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   socket,
   toggleHighlightPlayer,
   highlightedPlayers,
+  alienList,
 }) => {
   const handleKickPlayer = (nickname: string) => {
     if (!isCreator || !socket || gameStarted) return
@@ -56,8 +58,15 @@ const PlayersList: React.FC<PlayersListProps> = ({
           <ListItem key={index}>
             <ListItemText
               data-nickname={_player.nickname}
-              primary={_player.nickname}
-              secondary={_player.ready ? 'Prêt' : 'Non prêt'}
+              primary={
+                <Typography component="span">
+                  {_player.nickname}
+                  {alienList.includes(_player.nickname) && (
+                    <b className="canal_3"> (Alien)</b>
+                  )}
+                </Typography>
+              }
+              secondary={!gameStarted ? (_player.ready ? 'Prêt' : 'Non prêt') : null}
             />
             <button
               onClick={() => toggleHighlightPlayer(_player.nickname)}
