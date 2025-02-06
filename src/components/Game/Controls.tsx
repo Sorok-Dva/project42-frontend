@@ -88,8 +88,89 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   return (
-    <>
-      <Box
+    <div id="block_actions">
+      { !gameStarted && (
+        <div id="block_ami" className="block rounded bgdarkred">
+          <div className="block_header">
+            <h3>Inviter vos amis</h3>
+          </div>
+
+          <div className="block_content block_scrollable_wrapper scrollbar-light">
+            <div className="block_scrollable_content">
+              <div className="invite_show">
+                <div className="invite_friends">Chargement...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!isCreator && !gameStarted && !gameFinished && (
+        <>
+          <div id="block_options" className="block rounded bgdarkred">
+            <div className="block_header">
+              <h3>Options de la partie</h3>
+            </div>
+            <div className="block_content block_scrollable_wrapper scrollbar-light">
+              <div className="block_scrollable_content">
+
+              </div>
+            </div>
+          </div>
+          <hr/>
+        </>
+      )}
+
+      {isCreator && !gameStarted && !gameFinished && (
+        <>
+          <div id="block_crea" className="block rounded bgdarkred">
+            <div className="block_header">
+              <h3>Configurer la partie</h3>
+            </div>
+            <div
+              className="block_content block_scrollable_wrapper scrollbar-light">
+              <div className="block_scrollable_content">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleStartGame}
+                  disabled={!canStartGame}
+                >
+                  Lancer la partie
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleTransferCreator('1')}
+                >
+                  Léguer les droits du salon
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {(player && gameStarted && !gameFinished) ? (
+        <div id="block_ia" className="shadow rounded bgdarkred game-started">
+          <div id="block_infos">
+            <p>
+              Vous êtes <strong>{player.card}</strong>.<br />
+            </p>
+
+            <GameTimer gameStarted={gameStarted} gameFinished={gameFinished} />
+            <PhaseAction player={player} roomId={Number(gameId!)} />
+          </div>
+        </div>
+      ) : (
+        <div id="block_ia" className="shadow rounded bgdarkred game-started spectator">
+          <div id="block_infos">
+            <p>Vous êtes spectateur de la partie.</p>
+          </div>
+        </div>
+      )}
+
+      {/*<Box
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -110,29 +191,7 @@ const GameControls: React.FC<GameControlsProps> = ({
             <h3>Cette partie est terminée.</h3>
           )}
 
-          {isCreator && !gameStarted && !gameFinished && (
-            <>
-              <Typography variant="h5" gutterBottom>
-                Configurer la partie
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleStartGame}
-                disabled={!canStartGame}
-              >
-                Lancer la partie
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleTransferCreator('1')}
-              >
-                Léguer les droits du salon
-              </Button>
-              <hr/>
-            </>
-          )}
+
           {[ 'SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator' ]
             .includes(user?.role as string) && !gameStarted && !gameFinished && (
             <div>
@@ -167,8 +226,8 @@ const GameControls: React.FC<GameControlsProps> = ({
             </Box>
           )}
         </Paper>
-      </Box>
-    </>
+      </Box>*/ }
+    </div>
   )
 }
 
