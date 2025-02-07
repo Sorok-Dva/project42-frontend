@@ -5,6 +5,7 @@ import { Socket } from 'socket.io-client'
 interface Player {
   nickname: string
   ready: boolean
+  alive: boolean
 }
 
 interface PlayersListProps {
@@ -57,51 +58,50 @@ const PlayersList: React.FC<PlayersListProps> = ({
         <div className="block_scrollable_content">
           <div className="list_players">
             <strong>0/{ players.length } joueurs en vie</strong>
-            <List>
-              { players.map((_player, index) => (
-                <ListItem key={ index }>
-                  <ListItemText
-                    data-nickname={ _player.nickname }
-                    primary={
-                      <Typography component="span">
-                        { _player.nickname }
-                        { alienList.includes(_player.nickname) && (
-                          <b className="canal_3"> (Alien)</b>
-                        )}
-                      </Typography>
-                    }
-                    secondary={!gameStarted ? (_player.ready ? 'Prêt' : 'Non prêt') : null}
-                  />
-                  <button
-                    onClick={() => toggleHighlightPlayer(_player.nickname)}
-                    style={{
-                      marginLeft: '8px',
-                      padding: '4px 8px',
-                      backgroundColor: highlightedPlayers[_player.nickname] || '#ccc',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                    }}
+            { players.map((_player, index) => (
+              <div
+                className={ `list_player ${!_player.alive ? 'player_dead' : ''}` }
+                key={index}
+              >
+                <img className="suspicious_card disabled"
+                  src="/assets/images/carte2.png" />
+                <span className="votecount clickable"
+                  data-tooltip="">0</span>
+                <span className="player sound-tick"
+                  data-profile={ _player.nickname }>{ _player.nickname }</span>
+                {!gameStarted ? (_player.ready ? 'Prêt' : 'Non prêt') : null}
+                { alienList.includes(_player.nickname) && (
+                  <b className="canal_3">{' '}(Alien)</b>
+                )}
+                <button
+                  onClick={() => toggleHighlightPlayer(_player.nickname)}
+                  style={{
+                    marginLeft: '8px',
+                    padding: '4px 8px',
+                    backgroundColor: highlightedPlayers[_player.nickname] || '#ccc',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {highlightedPlayers[_player.nickname] ? 'Désélectionner' : 'Surligner'}
+                </button>
+                {!gameStarted
+                  && !gameFinished
+                  && player
+                  && isCreator
+                  && creatorNickname !== _player.nickname && (
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => handleKickPlayer(_player.nickname)}
                   >
-                    {highlightedPlayers[_player.nickname] ? 'Désélectionner' : 'Surligner'}
-                  </button>
-                  {!gameStarted
-                    && !gameFinished
-                    && player
-                    && isCreator
-                    && creatorNickname !== _player.nickname && (
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => handleKickPlayer(_player.nickname)}
-                    >
-                        Kick
-                    </Button>
-                  )}
-                </ListItem>
-              ))}
-            </List>
+                      Kick
+                  </Button>
+                )}
+              </div>
+            )) }
           </div>
         </div>
       </div>
