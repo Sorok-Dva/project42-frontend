@@ -12,6 +12,7 @@ interface Message {
   playerId: number
   channel: number
   isMeneur: boolean
+  isPerso: boolean
   icon: string | null
   createdAt: Date
 }
@@ -193,6 +194,8 @@ const Chat: React.FC<ChatProps> = ({
                   processedMessage = escapedMessage
                 }
 
+                console.log(msg)
+
                 return (
                   <Typography
                     key={index}
@@ -215,7 +218,7 @@ const Chat: React.FC<ChatProps> = ({
                       <small>[{new Date(String(msg.createdAt)).toLocaleTimeString()}]{' '}</small>
                     )}
 
-                    {msg.icon && !msg.isMeneur && (
+                    {msg.icon && !msg.isMeneur && !msg.isPerso && (
                       <img
                         src={`/assets/images/${msg.icon}`}
                         className="msg-icon"
@@ -237,8 +240,8 @@ const Chat: React.FC<ChatProps> = ({
                       </>
                     )}
 
-                    {msg.isMeneur ? (
-                      <div className="canal_meneur">
+                    {msg.isMeneur || msg.isPerso ? (
+                      <div className={msg.isMeneur ? 'canal_meneur' : 'canal_perso'}>
                         {msg.icon && (
                           <img
                             src={`/assets/images/${msg.icon}`}
