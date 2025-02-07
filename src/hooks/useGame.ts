@@ -24,6 +24,7 @@ export interface PlayerType {
   playerId: string
   nickname: string
   ready: boolean
+  alive: boolean
   card?: { id: number; name: string; description: string; }
 }
 
