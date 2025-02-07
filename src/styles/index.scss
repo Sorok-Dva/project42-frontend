@@ -746,6 +746,7 @@ tr.dead span {
 .wait_for_card_reveal {
   animation: fadeIn .3s 7s ease forwards;
   opacity: 0;
+  margin-bottom: 30px;
 }
 
 @keyframes fadeIn {
@@ -795,8 +796,7 @@ tr.dead span {
   width: 100px;
   height: 100px;
   position: absolute;
-;
-  top: 60px;
+  top: 110px;
   left: calc((((100% - 11*10px)/12*3 + (10px*2))/2) + 10px);
   transform: translate3d(-50%, -50%, 0);
   z-index: 2;
