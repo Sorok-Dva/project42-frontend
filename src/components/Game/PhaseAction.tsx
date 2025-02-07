@@ -38,6 +38,11 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
       }
     })
 
+    socket.on('phaseEnded', () => {
+      setActionRequest(null)
+
+    })
+
     return () => {
       socket.off('phaseActionRequest')
     }
