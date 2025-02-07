@@ -65,10 +65,14 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   className={ `list_player ${!_player.alive ? 'player_dead' : ''}` }
                   key={index}
                 >
-                  <img className="suspicious_card disabled"
-                    src="/assets/images/carte2.png" />
-                  <span className="votecount clickable"
-                    data-tooltip="">0</span>
+                  {!_player.alive && (
+                    <>
+                      <img className="suspicious_card disabled" src="/assets/images/carte2.png" />
+                      <span className="votecount clickable"
+                        data-tooltip="">0</span>
+                    </>
+                  )}
+
                   <span className="player sound-tick"
                     data-profile={ _player.nickname }>{ _player.nickname }</span>
                   {!gameStarted ? (_player.ready ? 'Prêt' : 'Non prêt') : null}
