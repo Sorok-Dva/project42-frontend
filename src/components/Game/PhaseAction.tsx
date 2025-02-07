@@ -52,7 +52,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     socket.emit('phaseActionResponse', {
       roomId,
       playerId: user!.id,
-      phase: actionRequest.phase,
+      actionCard: actionRequest.action.card,
       targets: selectedTargets,
     })
   }
