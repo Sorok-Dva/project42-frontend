@@ -183,80 +183,34 @@ const GameControls: React.FC<GameControlsProps> = ({
       )}
 
       {player && gameStarted && !gameFinished ? (
-        <div id="block_ia" className="shadow rounded bgblue game-started">
-          <div id="block_infos">
-            <p>
-              Vous êtes <strong>{player.card?.name}</strong>.<br />
-            </p>
-            <GameTimer gameStarted={gameStarted} gameFinished={gameFinished} />
-            <PhaseAction player={player} roomId={Number(gameId!)} />
-          </div>
-        </div>
-      ) : !player ? (
-        <div id="block_ia" className="shadow rounded bgblue game-started spectator">
-          <div id="block_infos">
-            {gameFinished ? <b>La partie est terminée.</b> : <p>Vous êtes spectateur de la partie.</p>}
-          </div>
-        </div>
-      ) : null}
-
-      {/*<Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
-        <Paper
-          elevation={4}
-          sx={{
-            padding: '2rem',
-            borderRadius: '10px',
-            textAlign: 'center',
-            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)'
-          }}
-        >
-          <GameTimer gameStarted={gameStarted} gameFinished={gameFinished} />
-          <PhaseAction player={player} roomId={Number(gameId!)} />
-
-          {gameFinished && (
-            <h3>Cette partie est terminée.</h3>
-          )}
-
-
-          {[ 'SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator' ]
-            .includes(user?.role as string) && !gameStarted && !gameFinished && (
-            <div>
-              {canEditGame && (
-                <>
-                  <button>Modifier le salon</button>
-                </>
-              )}
-              {canAddBot && (
-                <Button
-                  variant="outlined"
-                  color="warning"
-                  onClick={handleAddBot}
-                >
-                  Ajouter un bot
-                </Button>
-              )}
+        <>
+          <div id="block_ia" className="shadow rounded bgblue game-started">
+            <div id="block_infos">
+              <p className="wait_for_card_reveal">
+                Vous êtes <strong>{ player.card?.name }</strong>.<br/>
+              </p>
+              <GameTimer gameStarted={ gameStarted }
+                gameFinished={ gameFinished }/>
+              <PhaseAction player={ player } roomId={ Number(gameId!) }/>
             </div>
-          )}
-          {!isCreator && !gameStarted && !gameFinished && (
-            <Box>
-              {canBeReady && !player.ready && (
-                <Button
-                  variant="contained"
-                  color="success"
-                  className="animate__animated animate__bounce animate__infinite"
-                  onClick={handleBeReady}
-                >
-                Je suis prêt(e) !
-                </Button>
-              )}
-            </Box>
-          )}
-        </Paper>
-      </Box>*/ }
+          </div>
+          <div id="card_wrapper" className="card_animation">
+            <div id="card_flipper" className="card_animation">
+              <img className="card_role"
+                src={`/assets/images/carte${ player.card?.id }.png`}/>
+              <img className="card_anon" src="/assets/images/carte0.png" />
+            </div>
+          </div>
+        </>
+      ): !player ? (
+        <div id="block_ia"
+          className="shadow rounded bgblue game-started spectator">
+          <div id="block_infos">
+            { gameFinished ? <b>La partie est terminée.</b>:
+              <p>Vous êtes spectateur de la partie.</p> }
+          </div>
+        </div>
+      ): null }
     </div>
   )
 }
