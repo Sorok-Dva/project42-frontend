@@ -817,6 +817,14 @@ BUTTONS
   margin: 0.5em 0;
 }
 
+.msg-nickname {
+  cursor:pointer;
+}
+
+.msg-nickname:hover {
+  text-decoration: underline;
+}
+
 /*Vivox logo footer*/
 .vivox {
   display:block;
