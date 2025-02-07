@@ -8,10 +8,10 @@ const GlobalClickListener: FC = () => {
     const handleClick = (event: MouseEvent) => {
       let target = event.target as HTMLElement | null
 
-      // On remonte dans les parents jusqu'à trouver data-nickname ou qu'il n'y ait plus de parent
+      // On remonte dans les parents jusqu'à trouver data-profile ou qu'il n'y ait plus de parent
       while (target) {
-        if (target.dataset.nickname) {
-          openModal(target.dataset.nickname)
+        if (target.dataset.profile) {
+          openModal(target.dataset.profile)
           break
         }
         target = target.parentElement
