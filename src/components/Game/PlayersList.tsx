@@ -62,52 +62,46 @@ const PlayersList: React.FC<PlayersListProps> = ({
               console.log('Player:', _player)
               return (
                 <div
-                  className={ `list_player ${!_player.alive ? 'player_dead' : ''}` }
-                  key={index}
+                  className={ `list_player ${ !_player.alive ? 'player_dead': '' }` }
+                  key={ index }
                 >
-                  {!_player.alive && (
+                  { !_player.alive && (
                     <>
-                      <img className="suspicious_card disabled" src="/assets/images/carte2.png" />
+                      <img className="suspicious_card disabled"
+                        src="/assets/images/carte2.png"/>
                       <span className="votecount clickable"
                         data-tooltip="">0</span>
                     </>
-                  )}
+                  ) }
 
                   <span className="player sound-tick"
                     data-profile={ _player.nickname }>{ _player.nickname }</span>
-                  {!gameStarted ? (_player.ready ? 'Prêt' : 'Non prêt') : null}
+                  { !gameStarted ? (_player.ready ? 'Prêt': 'Non prêt'): null }
                   { alienList.includes(_player.nickname) && (
-                    <b className="canal_3">{' '}(Alien)</b>
-                  )}
-                  <button
-                    onClick={() => toggleHighlightPlayer(_player.nickname)}
-                    style={{
-                      marginLeft: '8px',
-                      padding: '4px 8px',
+                    <b className="canal_3">{ ' ' }(Alien)</b>
+                  ) }
+                  <span className="player_highlight"
+                    style={ {
                       backgroundColor: highlightedPlayers[_player.nickname] || '#ccc',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {highlightedPlayers[_player.nickname] ? 'Désélectionner' : 'Surligner'}
-                  </button>
-                  {!gameStarted
-                  && !gameFinished
-                  && player
-                  && isCreator
-                  && creatorNickname !== _player.nickname && (
+                      userSelect: 'none'
+                    } }
+                    onClick={ () => toggleHighlightPlayer(_player.nickname) }>✏</span>
+                  { !gameStarted
+                    && !gameFinished
+                    && player
+                    && isCreator
+                    && creatorNickname !== _player.nickname && (
                     <Button
                       variant="outlined"
                       color="error"
-                      onClick={() => handleKickPlayer(_player.nickname)}
+                      onClick={ () => handleKickPlayer(_player.nickname) }
                     >
-                      Kick
+                        Kick
                     </Button>
-                  )}
+                  ) }
                 </div>
-              )}) }
+              )
+            }) }
           </div>
         </div>
       </div>
