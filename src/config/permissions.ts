@@ -6,7 +6,7 @@ export const ROLE_PERMISSIONS = {
       'giveRole', 'removeRole', 'editRole', 'seeRole',
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
-      'kill', 'revive',
+      'startPhase', 'endPhase', 'kill', 'revive',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
@@ -21,7 +21,7 @@ export const ROLE_PERMISSIONS = {
       'giveRole', 'removeRole', 'editRole', 'seeRole',
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
-      'kill', 'revive',
+      'startPhase', 'endPhase', 'kill', 'revive',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
@@ -36,7 +36,7 @@ export const ROLE_PERMISSIONS = {
       'giveRole', 'removeRole', 'editRole', 'seeRole',
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
-      'kill', 'revive',
+      'startPhase', 'endPhase', 'kill', 'revive',
     ],
     godPowers: [],
     animationPowers: [
