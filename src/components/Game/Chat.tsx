@@ -51,6 +51,7 @@ const Chat: React.FC<ChatProps> = ({
 
   const inputRef = React.useRef<HTMLInputElement>(null)
 
+  const developerCommand = ['startPhase', 'endPhase']
   const handleSendMessage = () => {
     const trimmedMessage = newMessage.trim()
     if (!trimmedMessage || !socket) return
@@ -63,7 +64,7 @@ const Chat: React.FC<ChatProps> = ({
           const [command, arg, ...rest] = commandString.split(' ')
           const text = rest.join(' ')
 
-          socket.emit('moderationCommand', {
+          socket.emit(developerCommand.includes(command) ? 'developerCommand' : 'moderationCommand', {
             command,
             arg,
             text,
