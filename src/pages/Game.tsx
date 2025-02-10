@@ -366,6 +366,7 @@ const GamePage = () => {
               gameStarted={gameStarted}
               gameFinished={gameFinished}
               alienList={alienList}
+              isNight={isNight}
             />
           </Box>
         </Box>

@@ -21,6 +21,7 @@ interface PlayersListProps {
   toggleHighlightPlayer: (nickname: string) => void
   highlightedPlayers: { [nickname: string]: string }
   alienList: string[]
+  isNight: boolean
 }
 
 const PlayersList: React.FC<PlayersListProps> = ({
@@ -35,6 +36,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   toggleHighlightPlayer,
   highlightedPlayers,
   alienList,
+  isNight,
 }) => {
   const handleKickPlayer = (nickname: string) => {
     if (!isCreator || !socket || gameStarted) return
@@ -65,13 +67,12 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   className={ `list_player ${ !_player.alive ? 'player_dead': '' }` }
                   key={ index }
                 >
-                  { !_player.alive && (
-                    <>
-                      <img className="suspicious_card disabled"
-                        src="/assets/images/carte2.png"/>
-                      <span className="votecount clickable"
-                        data-tooltip="">0</span>
-                    </>
+                  { gameStarted && !_player.alive ? (
+                    <img className="suspicious_card disabled"
+                      src="/assets/images/carte2.png"/>
+                  ) : gameStarted && !isNight && (
+                    <span className="votecount clickable"
+                      data-tooltip="">0</span>
                   ) }
 
                   <span className="player sound-tick"
