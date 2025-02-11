@@ -6,6 +6,7 @@ interface Player {
   nickname: string
   ready: boolean
   alive: boolean
+  cardId?: number
 }
 
 interface PlayersListProps {
@@ -69,7 +70,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                 >
                   { gameStarted && !_player.alive ? (
                     <img className="suspicious_card disabled"
-                      src="/assets/images/carte2.png"/>
+                      src={`/assets/images/carte${_player.cardId}.png`}/>
                   ): gameStarted && !isNight && (
                     <span className="votecount clickable"
                       data-tooltip="">0</span>
