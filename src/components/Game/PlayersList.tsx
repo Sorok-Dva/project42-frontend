@@ -62,7 +62,6 @@ const PlayersList: React.FC<PlayersListProps> = ({
           <div className="list_players">
             <strong>{ players.filter(p => p.alive).length }/{ players.length } joueurs en vie</strong>
             { players.map((_player, index) => {
-              console.log('Player:', _player)
               return (
                 <div
                   className={ `list_player ${ !_player.alive ? 'player_dead': '' }` }
