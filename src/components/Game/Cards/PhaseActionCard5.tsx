@@ -19,13 +19,17 @@ interface PhaseActionCard5Props {
   actionRequest: PhaseActionRequestCard5;
   alienVictim: { id: number; nickname: string } | null;
   setAlienVictim: React.Dispatch<React.SetStateAction<{ id: number; nickname: string } | null>>;
+  deathElixirUsed: string | null | undefined
+  lifeElixirUsed: string | null | undefined
 }
 
 const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
   roomId,
   actionRequest,
   alienVictim,
-  setAlienVictim
+  setAlienVictim,
+  deathElixirUsed,
+  lifeElixirUsed,
 }) => {
   const { socket } = useSocket()
   const { user } = useUser()
@@ -36,8 +40,7 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
   }
 
   const handleDeathSubmit = () => {
-    console.log(selectedDeathTarget)
-    if (!socket || selectedDeathTarget === '') return
+    if (!socket || selectedDeathTarget === '' || deathElixirUsed) return
     socket.emit('phaseActionResponse', {
       roomId,
       playerId: user!.id,
@@ -49,7 +52,7 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
   }
 
   const handleLifeSubmit = () => {
-    if (!socket) return
+    if (!socket || lifeElixirUsed) return
     socket.emit('phaseActionResponse', {
       roomId,
       playerId: user!.id,
@@ -60,36 +63,41 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
     setAlienVictim(null)
   }
 
+  console.log('elixirUsed', deathElixirUsed, lifeElixirUsed)
   return (
     <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', mt: 2 }}>
       <Typography variant="h6">{actionRequest.action.message}</Typography>
 
       {/* Section Potion de Mort */}
-      <Typography variant="subtitle1" sx={{ mt: 2 }}>Elixir de Mort :</Typography>
-      <FormControl fullWidth sx={{ mt: 1 }}>
-        <InputLabel id="death-select-label">Sélectionnez une cible</InputLabel>
-        <Select
-          labelId="death-select-label"
-          value={selectedDeathTarget}
-          label="Sélectionnez une cible"
-          onChange={handleDeathChange}
-        >
-          {actionRequest.eligibleTargets.map((target) => (
-            <MenuItem key={target.id} value={target.id}>
-              {target.nickname}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <Button
-        variant="contained"
-        color="primary"
-        sx={{ mt: 2 }}
-        onClick={handleDeathSubmit}
-        disabled={selectedDeathTarget === ''}
-      >
-        Utiliser Elixir de Mort
-      </Button>
+      { !deathElixirUsed && (
+        <>
+          <Typography variant="subtitle1" sx={{ mt: 2 }}>Elixir de Mort :</Typography>
+          <FormControl fullWidth sx={{ mt: 1 }}>
+            <InputLabel id="death-select-label">Sélectionnez une cible</InputLabel>
+            <Select
+              labelId="death-select-label"
+              value={selectedDeathTarget}
+              label="Sélectionnez une cible"
+              onChange={handleDeathChange}
+            >
+              {actionRequest.eligibleTargets.map((target) => (
+                <MenuItem key={target.id} value={target.id}>
+                  {target.nickname}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2 }}
+            onClick={handleDeathSubmit}
+            disabled={selectedDeathTarget === ''}
+          >
+            Utiliser Elixir de Mort
+          </Button>
+        </>
+      )}
 
       {/* Section elixir de Vie */}
       {alienVictim && (
@@ -104,6 +112,10 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
             Sauver {alienVictim.nickname}
           </Button>
         </>
+      )}
+
+      {deathElixirUsed && lifeElixirUsed && (
+        <Typography variant="subtitle1" sx={{ mt: 4 }}>Vous avez utilisé tout vos elixirs.</Typography>
       )}
     </Box>
   )

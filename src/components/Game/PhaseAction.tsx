@@ -14,6 +14,8 @@ interface PhaseActionRequest {
     channel?: string;
   };
   eligibleTargets: { id: number; nickname: string }[];
+  deathElixirUsed?: string | null;
+  lifeElixirUsed?: string | null;
 }
 
 interface PhaseActionProps {
@@ -74,11 +76,14 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   if (!actionRequest) return null
 
   if (actionRequest && actionRequest.action.card === 5) {
+    console.log('actionRequest', actionRequest)
     return <PhaseActionCard5
       roomId={roomId}
       actionRequest={actionRequest as any}
       alienVictim={alienVictim}
       setAlienVictim={setAlienVictim}
+      deathElixirUsed={actionRequest.deathElixirUsed}
+      lifeElixirUsed={actionRequest.lifeElixirUsed}
     />
   }
 
