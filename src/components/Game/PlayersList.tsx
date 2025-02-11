@@ -59,7 +59,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
       <div className="block_content block_scrollable_wrapper scrollbar-light">
         <div className="block_scrollable_content">
           <div className="list_players">
-            <strong>0/{ players.length } joueurs en vie</strong>
+            <strong>{ players.filter(p => p.alive).length }/{ players.length } joueurs en vie</strong>
             { players.map((_player, index) => {
               console.log('Player:', _player)
               return (
@@ -70,36 +70,35 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   { gameStarted && !_player.alive ? (
                     <img className="suspicious_card disabled"
                       src="/assets/images/carte2.png"/>
-                  ) : gameStarted && !isNight && (
+                  ): gameStarted && !isNight && (
                     <span className="votecount clickable"
                       data-tooltip="">0</span>
                   ) }
 
                   <span className="player sound-tick"
                     data-profile={ _player.nickname }>{ _player.nickname }</span>
-                  { !gameStarted ? (_player.ready ? 'Prêt': 'Non prêt'): null }
                   { alienList.includes(_player.nickname) && (
                     <b className="canal_3">{ ' ' }(Alien)</b>
                   ) }
                   <span className="player_highlight"
                     style={ {
                       backgroundColor: highlightedPlayers[_player.nickname] || '#ccc',
-                      userSelect: 'none'
+                      userSelect: 'none',
                     } }
                     onClick={ () => toggleHighlightPlayer(_player.nickname) }>✏</span>
+                  { !gameStarted  && _player.ready && (
+                    <span className="player_ready" data-tooltip="Ce joueur est prêt">✔</span>
+                  ) }
                   { !gameStarted
                     && !gameFinished
                     && player
                     && isCreator
                     && creatorNickname !== _player.nickname && (
-                    <Button
-                      variant="outlined"
-                      color="error"
+                    <span className="clickable crea_kick sound-tick"
                       onClick={ () => handleKickPlayer(_player.nickname) }
-                    >
-                        Kick
-                    </Button>
-                  ) }
+                      data-tooltip="...">→</span>
+                  )
+                  }
                 </div>
               )
             }) }
