@@ -195,8 +195,6 @@ const Chat: React.FC<ChatProps> = ({
                   processedMessage = escapedMessage
                 }
 
-                console.log(msg)
-
                 return (
                   <Typography
                     key={index}
