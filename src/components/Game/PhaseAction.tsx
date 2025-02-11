@@ -3,6 +3,7 @@ import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } fr
 import { useSocket } from 'contexts/SocketContext'
 import { useUser } from 'contexts/UserContext'
 import { PlayerType } from 'hooks/useGame'
+import PhaseActionCard5 from 'components/Game/Cards/PhaseActionCard5'
 
 interface PhaseActionRequest {
   phase: number;
@@ -28,9 +29,10 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   const { user } = useUser()
   const [actionRequest, setActionRequest] = useState<PhaseActionRequest | null>(null)
   const [selectedTargets, setSelectedTargets] = useState<number[]>([])
+  const [alienVictim, setAlienVictim] = useState<{nickname: string, id: number} | null>(null)
 
   useEffect(() => {
-    if (!socket) return
+    if (!socket || !user || !player || !roomId) return
 
     socket.on('phaseActionRequest', (data: PhaseActionRequest) => {
       if (data.action.card === player?.card?.id || data.action.card === -1) {
@@ -40,13 +42,20 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
 
     socket.on('phaseEnded', () => {
       setActionRequest(null)
+    })
 
+    socket.on('alienElimination', (victim) => {
+      if (victim.id) {
+        setAlienVictim({ nickname: victim.nickname, id: victim.id })
+      } else setAlienVictim(null)
     })
 
     return () => {
       socket.off('phaseActionRequest')
+      socket.off('phaseEnded')
+      socket.off('alienElimination')
     }
-  }, [socket, user])
+  }, [socket, user, player, roomId])
 
   const handleSelectionChange = (event: any) => {
     setSelectedTargets(event.target.value)
@@ -63,6 +72,15 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   }
 
   if (!actionRequest) return null
+
+  if (actionRequest && actionRequest.action.card === 5) {
+    return <PhaseActionCard5
+      roomId={roomId}
+      actionRequest={actionRequest as any}
+      alienVictim={alienVictim}
+      setAlienVictim={setAlienVictim}
+    />
+  }
 
   return (
     <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', mt: 2 }}>
