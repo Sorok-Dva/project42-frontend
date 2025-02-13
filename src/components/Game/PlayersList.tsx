@@ -53,6 +53,13 @@ const PlayersList: React.FC<PlayersListProps> = ({
     }
   }
 
+  const voteCounts: Record<string, number> = players.reduce((acc, _player) => {
+    if (_player.target) {
+      acc[_player.target] = (acc[_player.target] || 0) + 1
+    }
+    return acc
+  }, {} as Record<string, number>)
+
   return (
     <div id="block_players" className="block shadow bglightblue rounded">
       <div className="block_header">
@@ -75,7 +82,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                       src={`/assets/images/carte${_player.cardId}.png`}/>
                   ): gameStarted && !isNight && (
                     <span className="votecount clickable"
-                      data-tooltip="">0</span>
+                      data-tooltip="">{ voteCounts[_player.nickname] || 0 }</span>
                   ) }
 
                   <span className="player sound-tick"
