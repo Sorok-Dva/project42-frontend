@@ -1,11 +1,13 @@
 import React from 'react'
 import { Socket } from 'socket.io-client'
+import { IconSnowboarding } from '@tabler/icons-react'
 
 interface Player {
   nickname: string
   ready: boolean
   alive: boolean
   cardId?: number
+  target?: string
 }
 
 interface PlayersListProps {
@@ -80,6 +82,9 @@ const PlayersList: React.FC<PlayersListProps> = ({
                     data-profile={ _player.nickname }>{ _player.nickname }</span>
                   { alienList.includes(_player.nickname) && (
                     <b className="canal_3">{ ' ' }(Alien)</b>
+                  ) }
+                  { !isNight && _player.target && (
+                    <span className="vote-for">{' '} → { _player.target }</span>
                   ) }
                   <span className="player_highlight"
                     style={ {
