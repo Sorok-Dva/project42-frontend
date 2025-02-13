@@ -1,5 +1,4 @@
 import React from 'react'
-import { Button } from '@mui/material'
 import { Socket } from 'socket.io-client'
 
 interface Player {
@@ -60,7 +59,9 @@ const PlayersList: React.FC<PlayersListProps> = ({
       <div className="block_content block_scrollable_wrapper scrollbar-light">
         <div className="block_scrollable_content">
           <div className="list_players">
-            <strong>{ players.filter(p => p.alive).length }/{ players.length } joueurs en vie</strong>
+            { gameStarted && (
+              <strong>{ players.filter(p => p.alive).length }/{ players.length } joueurs en vie</strong>
+            )}
             { players.map((_player, index) => {
               return (
                 <div
