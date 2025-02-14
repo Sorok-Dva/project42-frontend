@@ -64,6 +64,7 @@ const GamePage = () => {
   const {
     roomData,
     player,
+    viewer,
     players,
     creator,
     isCreator,
@@ -335,6 +336,7 @@ const GamePage = () => {
                 gameId={gameId!}
                 playerId={user?.id}
                 player={player ?? undefined}
+                viewer={viewer ?? undefined}
                 players={players}
                 user={user ?? undefined}
                 userRole={user?.role}
