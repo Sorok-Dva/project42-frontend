@@ -28,6 +28,14 @@ export interface PlayerType {
   card?: { id: number; name: string; description: string; }
 }
 
+export interface Viewer {
+  id: string
+  roomId: string
+  userId: string
+  user: UserType
+  ip: string
+}
+
 export interface RoomData {
   id: number
   creator: string
@@ -62,6 +70,7 @@ export const useGame = (
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [player, setPlayer] = useState<PlayerType | null>(null)
   const [players, setPlayers] = useState<PlayerType[]>([])
+  const [viewer, setViewer] = useState<Viewer | null>(null)
   const [creator, setCreator] = useState<UserType | null>(null)
   const [isCreator, setIsCreator] = useState<boolean>(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -210,6 +219,7 @@ export const useGame = (
           setPasswordRequired(!!data.room.password)
           setRoomData(data.room)
           setPlayer(data.player)
+          setViewer(data.viewer)
           setCreator(data.creator)
           setGameStarted(data.room.status === 'in_progress')
           setGameFinished(data.room.status === 'completed')
@@ -372,6 +382,7 @@ export const useGame = (
     roomData,
     player,
     players,
+    viewer,
     creator,
     isCreator,
     messages,
