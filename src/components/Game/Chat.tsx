@@ -77,7 +77,7 @@ const Chat: React.FC<ChatProps> = ({
           })
         }
       } else {
-        let channelToSend = player ? 0 : viewer ? 2 : null
+        let channelToSend = player ? 0 : viewer ? 1 : null
         console.log('Channel to send', channelToSend)
         if (channelToSend === null) return
         // Si c'est la nuit et que le joueur est un loup, on envoie dans le canal des loups (1)
@@ -179,7 +179,7 @@ const Chat: React.FC<ChatProps> = ({
                 // on vérifie que le joueur connecté est un loup.
                 if (msg.channel === 3 && player?.card?.id === 2) return true
 
-                if (msg.channel === 2 && viewer) return true
+                if (msg.channel === 1 && viewer) return true
 
                 return false
               }).map((msg, index) => {
@@ -247,7 +247,7 @@ const Chat: React.FC<ChatProps> = ({
                             __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname,
                           }}
                         ></b>
-                        {msg.channel === 2 && <span> (Spectateur)</span>}
+                        {msg.channel === 1 && <span> (Spectateur)</span>}
                         {msg.channel === 3 && <span> (Alien)</span>}
                         {': '}
                       </>
