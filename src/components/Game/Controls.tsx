@@ -6,10 +6,11 @@ import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import GameTimer from './Timer'
 import PhaseAction from './PhaseAction'
-import { PlayerType } from 'hooks/useGame'
+import { PlayerType, RoomData } from 'hooks/useGame'
 
 interface GameControlsProps {
   gameId: string | undefined
+  roomData: RoomData
   player: PlayerType
   isCreator: boolean
   canBeReady: boolean
@@ -25,6 +26,7 @@ interface GameControlsProps {
  */
 const GameControls: React.FC<GameControlsProps> = ({
   isCreator,
+  roomData,
   gameId,
   fetchGameDetails,
   canBeReady,
@@ -113,18 +115,18 @@ const GameControls: React.FC<GameControlsProps> = ({
             </div>
             <div className="block_content block_scrollable_wrapper scrollbar-light">
               <div className="block_scrollable_content">
-                <Box>
-                  {canBeReady && !player.ready && (
-                    <Button
-                      variant="contained"
-                      color="success"
-                      className="animate__animated animate__bounce animate__infinite"
-                      onClick={handleBeReady}
-                    >
-                      Je suis prêt(e) !
-                    </Button>
-                  )}
-                </Box>
+                <div className="block_content_section text-center">
+                  <Box>
+                    {canBeReady && !player.ready && (
+                      <div
+                        className="button array_selectable sound-tick bglightblue animate__animated animate__bounce animate__infinite"
+                        onClick={handleBeReady}
+                      >
+                        Je suis prêt(e) !
+                      </div>
+                    )}
+                  </Box>
+                </div>
               </div>
             </div>
           </div>
@@ -141,64 +143,134 @@ const GameControls: React.FC<GameControlsProps> = ({
             <div
               className="block_content block_scrollable_wrapper scrollbar-light">
               <div className="block_scrollable_content">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleStartGame}
-                  disabled={!canStartGame}
-                >
-                  Lancer la partie
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleTransferCreator('1')}
-                >
-                  Léguer les droits du salon
-                </Button>
+                <div className="block_content_section">
+                  <div className="game-options">
+                    <div className="premium-options">
+                      <div id="crea_places">
+                        <div
+                          className="buttons_array buttons_array_small bglightblue">
+                          {/*$places == 6 || $places == count($joueurs))*/ }
+                          <div
+                            className="button array_clickable sound-tick sound-unselect"
+                            data-tooltip="<?= $LG->lang('delPlace'); ?>"
+                            data-action="removePlace">–
+                          </div>
 
-                {[ 'SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator' ]
-                  .includes(user?.role as string) && (
-                  <div>
-                    {canEditGame && (
-                      <>
-                        <button>Modifier le salon</button>
-                      </>
-                    )}
-                    {canAddBot && (
-                      <Button
-                        variant="outlined"
-                        color="warning"
-                        onClick={handleAddBot}
-                      >
-                        Ajouter un bot
-                      </Button>
-                    )}
+                          <div className="button unclickable"><span
+                            className="places">{ roomData.maxPlayers }</span> places
+                          </div>
+
+                          {/*if (($salonType < 2 && $places == 50) || ($salonType == 2 && $places == 30)):*/ }
+                          <div
+                            className="button array_clickable sound-tick sound-select"
+                            data-action="addPlace">+
+                          </div>
+                        </div>
+                      </div>
+                      <div id="crea_debat">
+                        <div
+                          className="buttons_array buttons_array_small bglightblue mt-1">
+                          {/*if (isset($debateMin) && $debate == $debateMin)*/ }
+                          <div
+                            className="button array_clickable sound-tick sound-unselect"
+                            data-action="debatDown">–
+                          </div>
+
+                          <div className="button unclickable">
+                            <span
+                              className="debat">{ roomData.timer }</span> min
+                            de débat
+                          </div>
+
+                          {/*if (isset($debateMax) && $debate == $debateMax)*/ }
+                          <div
+                            className="button array_clickable sound-tick sound-select"
+                            data-action="debatUp">+
+                          </div>
+                        </div>
+                      </div>
+
+                      <div id="crea_params">
+                        <div className="buttons_array bglightblue">
+                          <div
+                            className="button array_selectable sound-tick selected'"
+                            data-action="cacheVote">
+                            <img src="/assets/images/icon-votecache.png"
+                              alt="Cacher les votes"/>
+                          </div>
+
+                          <div
+                            className="button array_selectable sound-tick selected"
+                            data-action="muteSpec">
+                            <img src="/assets/images/icon-mutespec.png"
+                              alt="Muter les spectateurs"/>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                )}
+
+                  <div className="button_secondary sound-tick crea_lead">Léguer
+                    les droits du salon
+                  </div>
+                  <div className="button_secondary sound-tick join_spec">
+                    <span>Rejoindre les spectateurs</span>
+                  </div>
+
+                  { ['SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator']
+                    .includes(user?.role as string) && (
+                    <div>
+                      <div className="flex-row gutter">
+                        { canEditGame && (
+                          <div className="button_secondary sound-tick">
+                            Modifier le salon
+                          </div>
+                        ) }
+                        { canAddBot && (
+                          <div className="button_secondary sound-tick"
+                            onClick={ handleAddBot }>Ajouter un bot
+                          </div>
+                        ) }
+                      </div>
+                    </div>
+                  ) }
+
+                  <div id="crea_launch" className="block_content_section">
+                    <div
+                      className={ `button sound-tick rounded bglightblue animation-bounce ${!canStartGame ? 'disabled' : ''}` }
+                      onClick={handleStartGame}
+                    >
+                      <h3>Lancer la partie</h3>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </>
       )}
 
-      {player && gameStarted && !gameFinished ? (
+      { player && gameStarted && !gameFinished ? (
         <>
-          <div id="block_ia" className="shadow rounded bgblue game-started">
+          <div id="block_ia"
+            className="shadow rounded bgblue game-started">
             <div id="block_infos">
               <p className="wait_for_card_reveal">
-                Vous êtes <strong>{ player.card?.name }</strong>.<br/>
+                          Vous
+                          êtes <strong>{ player.card?.name }</strong>.<br/>
               </p>
               <GameTimer gameStarted={ gameStarted }
                 gameFinished={ gameFinished }/>
-              <PhaseAction player={ player } roomId={ Number(gameId!) }/>
+              <PhaseAction player={ player }
+                roomId={ Number(gameId!) }/>
             </div>
           </div>
           <div id="card_wrapper" className="card_animation">
             <div id="card_flipper" className="card_animation">
               <img className="card_role"
-                src={`/assets/images/carte${ player.card?.id }.png`}/>
-              <img className="card_anon" src="/assets/images/carte0.png" />
+                src={ `/assets/images/carte${ player.card?.id }.png` }/>
+              <img className="card_anon"
+                src="/assets/images/carte0.png"/>
             </div>
           </div>
         </>

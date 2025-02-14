@@ -300,6 +300,7 @@ const GamePage = () => {
               {player && (
                 <Controls
                   gameId={gameId}
+                  roomData={roomData}
                   fetchGameDetails={handleFetchGameDetails}
                   isCreator={isCreator}
                   canBeReady={canBeReady}
