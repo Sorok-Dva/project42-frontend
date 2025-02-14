@@ -18,6 +18,7 @@ import { getRandomColor } from 'utils/getRandomColor'
 
 import 'styles/Game.scss'
 import Composition from 'components/Game/Composition'
+import ViewersList from 'components/Game/ViewersList'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -65,6 +66,7 @@ const GamePage = () => {
     roomData,
     player,
     viewer,
+    viewers,
     players,
     creator,
     isCreator,
@@ -360,6 +362,8 @@ const GamePage = () => {
             <PlayersList
               players={players}
               player={player}
+              viewers={viewers}
+              viewer={viewer}
               isCreator={isCreator}
               creatorNickname={creator!.nickname}
               gameId={gameId!}

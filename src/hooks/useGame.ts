@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Socket } from 'socket.io-client'
-import { fetchGameDetails, fetchPlayers, fetchChatMessages } from '../services/gameService'
+import {
+  fetchGameDetails,
+  fetchPlayers,
+  fetchChatMessages,
+  fetchViewers,
+} from '../services/gameService'
 import axios from 'axios'
 
 export interface Message {
@@ -71,6 +76,7 @@ export const useGame = (
   const [player, setPlayer] = useState<PlayerType | null>(null)
   const [players, setPlayers] = useState<PlayerType[]>([])
   const [viewer, setViewer] = useState<Viewer | null>(null)
+  const [viewers, setViewers] = useState<Viewer[]>([])
   const [creator, setCreator] = useState<UserType | null>(null)
   const [isCreator, setIsCreator] = useState<boolean>(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -165,11 +171,13 @@ export const useGame = (
   const loadPlayersAndMessages = async (authorized?: boolean) => {
     if (!gameId || !authorized) return
     try {
-      const [playersData, chatData] = await Promise.all([
+      const [playersData, viewersData, chatData] = await Promise.all([
         fetchPlayers(gameId),
+        fetchViewers(gameId),
         fetchChatMessages(gameId, token),
       ])
       setPlayers(playersData)
+      setViewers(viewersData)
       setMessages(chatData)
       setLoading(false)
 
@@ -384,6 +392,7 @@ export const useGame = (
     player,
     players,
     viewer,
+    viewers,
     creator,
     isCreator,
     messages,

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Socket } from 'socket.io-client'
-import { IconSnowboarding } from '@tabler/icons-react'
+import ViewersList from 'components/Game/ViewersList'
+import { Viewer } from 'hooks/useGame'
 
 interface Player {
   nickname: string
@@ -13,6 +14,8 @@ interface Player {
 interface PlayersListProps {
   players: Player[]
   player: Player | null
+  viewers: Viewer[]
+  viewer: Viewer | null
   isCreator: boolean
   gameStarted: boolean
   gameFinished: boolean
@@ -29,6 +32,8 @@ interface PlayersListProps {
 const PlayersList: React.FC<PlayersListProps> = ({
   players,
   player,
+  viewers,
+  viewer,
   isCreator = false,
   gameStarted,
   gameFinished,
@@ -118,6 +123,10 @@ const PlayersList: React.FC<PlayersListProps> = ({
           </div>
         </div>
       </div>
+      <ViewersList
+        viewer={viewer ?? null}
+        viewers={viewers}
+      />
     </div>
   )
 }

@@ -21,6 +21,14 @@ export const fetchPlayers = async (gameId: string) => {
 }
 
 /**
+ * Récupère la liste des joueurs
+ */
+export const fetchViewers = async (gameId: string) => {
+  const response = await axios.get(`/api/games/room/${gameId}/viewers`)
+  return response.data
+}
+
+/**
  * Récupère l'historique du chat
  */
 export const fetchChatMessages = async (gameId: string, token: string | null) => {
