@@ -333,6 +333,7 @@ export const useGame = (
     })
 
     socket.on('gameFinished', (room: RoomData) => {
+      // @todo join viewers channel
       setGameFinished(true)
       setIsNight(true)
     })
