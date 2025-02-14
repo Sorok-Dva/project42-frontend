@@ -33,6 +33,7 @@ export interface RoomData {
   creator: string
   name: string
   type: number
+  timer: number
   maxPlayers: number
   isPrivate: boolean
   password?: string
@@ -51,6 +52,7 @@ export const useGame = (
     id: 0,
     creator: '',
     name: 'Chargement...',
+    timer: 3,
     type: 0,
     maxPlayers: 6,
     isPrivate: true
