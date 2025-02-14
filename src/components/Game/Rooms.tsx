@@ -4,6 +4,7 @@ import { useSocket } from 'contexts/SocketContext'
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Tooltip, Button } from '@mui/material'
 import axios from 'axios'
 import { PlayerType } from 'hooks/useGame'
+import { useAuth } from 'contexts/AuthContext'
 
 interface Room {
   id: number
@@ -17,6 +18,7 @@ interface Room {
 
 const RoomList = () => {
   const { user } = useUser()
+  const { token } = useAuth()
   const socket = useSocket().socket
   const [roomsWaiting, setRoomsWaiting] = useState<Room[]>([]) // Rooms en attente
   const [roomsInProgress, setRoomsInProgress] = useState<Room[]>([]) // Rooms en cours
@@ -99,6 +101,29 @@ const RoomList = () => {
       const response = await axios.post(`/api/games/room/${roomId}/join`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+      setPlayerRoomId(roomId)
+      window.open(`/game/${response.data.game.id}`, '_blank')
+      fetchRooms()
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        alert(error.response.data.error)
+      } else {
+        alert('Erreur lors de la tentative de rejoindre la partie.')
+      }
+    }
+  }
+
+  const handleSpectateRoom = async (roomId: number) => {
+    if (playerRoomId) {
+      alert('Vous êtes déjà dans une partie. Quittez votre partie actuelle pour en regarder une autre.')
+      return
+    }
+    try {
+      const response = await axios.post(`/api/games/room/${roomId}/spectate`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
       })
       setPlayerRoomId(roomId)
@@ -293,6 +318,9 @@ const RoomList = () => {
                     <TableCell>
                       <Button variant="contained" disabled>
                         En cours
+                      </Button>
+                      <Button variant="contained" onClick={() => handleSpectateRoom(room.id)}>
+                        Observer
                       </Button>
                     </TableCell>
                   </TableRow>
