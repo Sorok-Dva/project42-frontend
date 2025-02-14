@@ -32,7 +32,7 @@ export interface Viewer {
   id: string
   roomId: string
   userId: string
-  user: UserType
+  user?: UserType
   ip: string
 }
 
