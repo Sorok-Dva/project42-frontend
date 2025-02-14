@@ -54,3 +54,58 @@ export const isForbiddenNickname = (nickname: string): boolean => {
   return forbiddenNicknames
     .some(forbidden => nickNormalise.includes(normaliser(forbidden)))
 }
+
+export const isForbiddenEmail = (email: string): boolean => {
+  const forbiddenEmails = [
+    'yopmail.com',
+    'get2mail.fr',
+    'jetable.org',
+    'spamgourmet.com',
+    'trbvm.com ',
+    'trashmail.*',
+    'trash-mail.at',
+    'rcpt.at',
+    'kurzepost.de',
+    'wegwerfmail.*',
+    'objectmail.com',
+    'proxymail.eu',
+    'sofimail.com',
+    'mail-temporaire.fr',
+    'mailhazard.com',
+    'anonymbox.com',
+    'meltmail.com',
+    'mt2014.com',
+    'sharklasers.com',
+    'grr.la',
+    'guerrillamail.*',
+    'guerrillamailblock.com',
+    'spam4.me',
+    'filzmail.com',
+    'mailinator.com',
+    'mailexpire.com',
+    'mailcatch.com',
+    'spambox.us',
+    'dispostable.com',
+    'mintemail.com',
+    'incognitomail.org',
+    'mytempemail.com',
+    'e4ward.com',
+    'mailnull.com',
+    'spamspot.com',
+    'spamfree24.org',
+    'tempemail.net',
+    'onewaymail.com',
+    'mailscrap.com',
+    'tempail.com',
+    'uroid.com',
+    'spamobox.com',
+    'deadaddress.com',
+    'mailincubator.com',
+    'sneakemail.com',
+    'orange.fr',
+    'wanadoo.fr',
+    'laposte.net',
+  ]
+
+  return forbiddenEmails.includes(email)
+}

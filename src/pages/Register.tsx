@@ -19,7 +19,7 @@ import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { ThemeContext } from 'contexts/ThemeContext'
 import axios, { AxiosError } from 'axios'
-import { isForbiddenNickname } from 'utils/forbiddenNicknames'
+import { isForbiddenNickname, isForbiddenEmail } from 'utils/forbiddenNicknames'
 
 const Register : React.FC = () => {
   const navigate = useNavigate()
@@ -51,6 +51,7 @@ const Register : React.FC = () => {
   }, [])
 
   const validateEmail = (email : string) => {
+    if (isForbiddenEmail(email)) return false
     const re = /\S+@\S+\.\S+/
     return re.test(email)
   }
