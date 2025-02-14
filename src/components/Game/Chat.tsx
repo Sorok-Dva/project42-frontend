@@ -3,7 +3,7 @@ import { ListItem, ListItemText } from '@mui/material'
 import { Box, TextField, Typography } from '@mui/material'
 import { List } from '@mui/material'
 import { Socket } from 'socket.io-client'
-import { PlayerType } from 'hooks/useGame'
+import { PlayerType, Viewer } from 'hooks/useGame'
 import { User } from 'contexts/UserContext'
 
 interface Message {
@@ -23,6 +23,7 @@ interface ChatProps {
   playerId?: string | number
   player?: PlayerType
   user?: User
+  viewer?: Viewer
   userRole?: string
   isNight: boolean
   messages: Message[]
@@ -36,6 +37,7 @@ const Chat: React.FC<ChatProps> = ({
   playerId,
   players,
   player,
+  viewer,
   user,
   userRole,
   messages,
@@ -75,14 +77,23 @@ const Chat: React.FC<ChatProps> = ({
           })
         }
       } else {
-        let channelToSend = 0
-
+        let channelToSend = player ? 0 : viewer ? 2 : null
+        console.log('Channel to send', channelToSend)
+        if (channelToSend === null) return
         // Si c'est la nuit et que le joueur est un loup, on envoie dans le canal des loups (1)
         if (isNight && player?.card?.id === 2) channelToSend = 3
 
+        console.log('sendMessage', {
+          roomId: gameId,
+          playerId,
+          viewer,
+          content: trimmedMessage,
+          channel: channelToSend,
+        })
         socket.emit('sendMessage', {
           roomId: gameId,
           playerId,
+          viewer,
           content: trimmedMessage,
           channel: channelToSend,
         })
@@ -168,6 +179,8 @@ const Chat: React.FC<ChatProps> = ({
                 // on vérifie que le joueur connecté est un loup.
                 if (msg.channel === 3 && player?.card?.id === 2) return true
 
+                if (msg.channel === 2 && viewer) return true
+
                 return false
               }).map((msg, index) => {
                 const cleanNickname = stripHTML(msg.nickname)
@@ -234,6 +247,7 @@ const Chat: React.FC<ChatProps> = ({
                             __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname,
                           }}
                         ></b>
+                        {msg.channel === 2 && <span> (Spectateur)</span>}
                         {msg.channel === 3 && <span> (Alien)</span>}
                         {': '}
                       </>
@@ -260,7 +274,7 @@ const Chat: React.FC<ChatProps> = ({
           </Box>
         </Box>
       </Box>
-      { (player || (!player && ['SuperAdmin', 'Admin', 'Developer', 'Moderator', 'ModeratorTest'].includes(userRole as string))) && (
+      { (player || viewer?.user?.id || (!player && ['SuperAdmin', 'Admin', 'Developer', 'Moderator', 'ModeratorTest'].includes(userRole as string))) && (
         <div id="block_chat_post">
           <div className="chat_send">
             <TextField
@@ -303,7 +317,7 @@ const Chat: React.FC<ChatProps> = ({
               inputProps={{
                 style: { zIndex: 1, height: 'auto' },
                 maxLength: 500,
-                autofocus: true,
+                autoFocus: true,
               }}
               autoComplete="off"
             />
@@ -341,81 +355,6 @@ const Chat: React.FC<ChatProps> = ({
             </List>
           )}
         </div>
-        /*<Box mt={ 2 } display="flex" flexDirection="column"
-          position="relative">
-          <TextField
-            fullWidth
-            variant="outlined"
-            placeholder="Saisir un message..."
-            value={newMessage}
-            inputRef={inputRef}
-            onChange={(e) => handleInputChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (suggestions.length > 0) {
-                if (e.key === 'ArrowDown') {
-                  setSelectedIndex((prev) => (prev + 1) % suggestions.length)
-                  e.preventDefault()
-                } else if (e.key === 'ArrowUp') {
-                  setSelectedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length)
-                  e.preventDefault()
-                } else if (e.key === 'Enter') {
-                  if (selectedIndex === -1) {
-                    // Si aucune sélection, on prend la première suggestion
-                    setSelectedIndex(0)
-                    setNewMessage(`/${currentCommand} ${suggestions[0]} `)
-                    setSuggestions([])
-                    e.preventDefault()
-                  } else if (selectedIndex >= 0) {
-                    // Si une suggestion est sélectionnée, l'insérer
-                    const chosenNickname = suggestions[selectedIndex]
-                    setNewMessage(`/${currentCommand} ${chosenNickname} `)
-                    setSelectedIndex(-1) // Réinitialise l'index sélectionné
-                    setSuggestions([]) // Cache les suggestions
-                    e.preventDefault() // Empêche l'envoi immédiat du message
-                  }
-                }
-              } else if (e.key === 'Enter') {
-                handleSendMessage()
-              }
-            }}
-            inputProps={{
-              style: { zIndex: 1 },
-            }}
-            autoComplete="off"
-          />
-          {suggestions.length > 0 && (
-            <List
-              sx={{
-                position: 'absolute',
-                bottom: '100%',
-                left: 0,
-                width: '100%',
-                bgcolor: 'white',
-                border: '1px solid #ccc',
-                maxHeight: '150px',
-                overflowY: 'auto',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                zIndex: 1000,
-              }}
-            >
-              {suggestions.map((nickname, index) => (
-                <ListItem
-                  key={index}
-                  component="li"
-                  onClick={() => handleSuggestionClick(currentCommand, nickname)}
-                  sx={{
-                    cursor: 'pointer',
-                    padding: '8px 16px',
-                    bgcolor: selectedIndex === index ? '#ddd' : 'white',
-                    ':hover': { bgcolor: '#f0f0f0' },
-                  }}
-                >
-                  <ListItemText primary={nickname} />
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </Box>*/
       )}
     </Box>
   )
