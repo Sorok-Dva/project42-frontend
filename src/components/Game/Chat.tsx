@@ -260,11 +260,8 @@ const Chat: React.FC<ChatProps> = ({
           </Box>
         </Box>
       </Box>
-      { player && (
+      { (player || (!player && ['SuperAdmin', 'Admin', 'Developer', 'Moderator', 'ModeratorTest'].includes(userRole as string))) && (
         <div id="block_chat_post">
-          <div id="block_chat_fill" className="block_scrollable_wrapper scrollbar-light">
-            <ul className="block_scrollable_content"></ul>
-          </div>
           <div className="chat_send">
             <TextField
               fullWidth
