@@ -107,5 +107,5 @@ export const isForbiddenEmail = (email: string): boolean => {
     'laposte.net',
   ]
 
-  return forbiddenEmails.includes(email)
+  return forbiddenEmails.includes(email.split('@')[1])
 }
