@@ -90,6 +90,7 @@ export const useGame = (
   const [gameStarted, setGameStarted] = useState(false)
   const [gameFinished, setGameFinished] = useState(false)
   const [alienList, setAlienList] = useState<string[]>([])
+  const [slots, setSlots] = useState<number>(roomData.maxPlayers)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -231,6 +232,7 @@ export const useGame = (
           setCreator(data.creator)
           setGameStarted(data.room.status === 'in_progress')
           setGameFinished(data.room.status === 'completed')
+          setSlots(data.room.maxPlayers)
 
           loadPlayersAndMessages(authorized)
         }
@@ -409,6 +411,8 @@ export const useGame = (
     isAuthorized,
     password,
     alienList,
+    slots,
+    setSlots,
     handlePasswordSubmit,
     setPassword,
     setGameError,

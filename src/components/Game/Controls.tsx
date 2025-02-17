@@ -25,6 +25,8 @@ interface GameControlsProps {
   gameFinished: boolean
   setGameStarted: (gameStarted: boolean) => void
   fetchGameDetails: () => void
+  slots: number
+  setSlots: (slots : (prevSlots: number) => number) => void
 }
 
 /**
@@ -41,11 +43,12 @@ const GameControls: React.FC<GameControlsProps> = ({
   gameStarted,
   gameFinished,
   setGameStarted,
+  slots,
+  setSlots,
 }) => {
   const { token } = useAuth()
   const { user } = useUser()
   const { checkPermission } = usePermissions()
-  const [slots, setSlots] = useState<number>(roomData.maxPlayers)
   const canAddBot = checkPermission('godPowers', 'addBot')
   const canEditGame = checkPermission('game', 'edit')
 

@@ -84,6 +84,8 @@ const GamePage = () => {
     isAuthorized,
     password,
     alienList,
+    slots,
+    setSlots,
     handlePasswordSubmit,
     setPassword,
     setGameError,
@@ -268,7 +270,7 @@ const GamePage = () => {
 
         >
           <Typography variant="h6">
-            [{GAME_TYPES[roomData.type]}] Partie : {roomData.name} ({players.length}/{roomData.maxPlayers})
+            [{GAME_TYPES[roomData.type]}] Partie : {roomData.name} ({players.length}/{slots})
           </Typography>
 
           <Box display="flex" gap={2}>
@@ -312,6 +314,8 @@ const GamePage = () => {
                   gameStarted={gameStarted}
                   gameFinished={gameFinished}
                   setGameStarted={setGameStarted}
+                  slots={slots}
+                  setSlots={setSlots}
                 />
               )}
             </Box>
