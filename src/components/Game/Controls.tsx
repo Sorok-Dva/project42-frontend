@@ -6,7 +6,7 @@ import {
   startGame,
   setPlayerReady,
   transferCreatorRights,
-  updateMaxPlayers,
+  updateMaxPlayers, updateRoomTimer,
 } from 'services/gameService'
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
@@ -51,6 +51,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const { checkPermission } = usePermissions()
   const canAddBot = checkPermission('godPowers', 'addBot')
   const canEditGame = checkPermission('game', 'edit')
+  const [timer, setTimer] = useState<number>(3)
 
   const handleAddBot = async () => {
     if (!gameId || gameStarted || gameFinished) return
@@ -126,6 +127,46 @@ const GameControls: React.FC<GameControlsProps> = ({
       } catch (error) {
         console.error('Erreur lors du set updateMaxPlayers:', error)
         setSlots(prevSlots => prevSlots - 1)
+      }
+    }, 750)
+  }
+
+  const removeTimer = () => {
+    if (!gameId || gameStarted || gameFinished || timer <= 3) return
+
+    setTimer(prevTimer => prevTimer - 1)
+
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const response = await updateRoomTimer(timer - 1, gameId, token)
+        if (response.status !== 200) {
+          setTimer(prevTimer => prevTimer + 1)
+        }
+      } catch (error) {
+        console.error('Erreur lors du set removeTimer:', error)
+        setTimer(prevTimer => prevTimer + 1)
+      }
+    }, 750)
+  }
+
+  const addTimer = () => {
+    if (!gameId || gameStarted || gameFinished || timer >= 5) return
+
+    setTimer(prevTimer => prevTimer + 1)
+
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const response = await updateRoomTimer(timer + 1, gameId, token)
+        if (response.status !== 200) {
+          setTimer(prevTimer => prevTimer - 1)
+        }
+      } catch (error) {
+        console.error('Erreur lors du set addTimer:', error)
+        setTimer(prevTimer => prevTimer - 1)
       }
     }, 750)
   }
@@ -224,19 +265,19 @@ const GameControls: React.FC<GameControlsProps> = ({
                           {/*if (isset($debateMin) && $debate == $debateMin)*/ }
                           <div
                             className="button array_clickable sound-tick sound-unselect"
-                            data-action="debatDown">–
+                            onClick={removeTimer}>–
                           </div>
 
                           <div className="button unclickable">
                             <span
-                              className="debat">{ roomData.timer }</span> min
+                              className="debat">{ timer }</span> min
                             de débat
                           </div>
 
                           {/*if (isset($debateMax) && $debate == $debateMax)*/ }
                           <div
                             className="button array_clickable sound-tick sound-select"
-                            data-action="debatUp">+
+                            onClick={addTimer}>+
                           </div>
                         </div>
                       </div>

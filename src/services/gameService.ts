@@ -92,6 +92,20 @@ export const updateMaxPlayers = async (maxPlayers: number, gameId: string, token
 }
 
 /**
+ * Ajuste le temps de débat la room
+ */
+export const updateRoomTimer = async (timer: number, gameId: string, token: string | null) => {
+  const response = await axios.put(
+    `/api/games/room/${gameId}/timer`,
+    { timer },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  )
+  return response
+}
+
+/**
  * Transfère les droits du créateur vers un autre joueur
  */
 export const transferCreatorRights = async (gameId: string, newCreatorId: string) => {
