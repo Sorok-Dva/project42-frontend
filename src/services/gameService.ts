@@ -78,6 +78,20 @@ export const setPlayerReady = async (gameId: string, token: string | null) => {
 }
 
 /**
+ * Ajuste le nombre de joueur pour la room
+ */
+export const updateMaxPlayers = async (maxPlayers: number, gameId: string, token: string | null) => {
+  const response = await axios.put(
+    `/api/games/room/${gameId}/maxPlayers`,
+    { maxPlayers },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  )
+  return response
+}
+
+/**
  * Transfère les droits du créateur vers un autre joueur
  */
 export const transferCreatorRights = async (gameId: string, newCreatorId: string) => {

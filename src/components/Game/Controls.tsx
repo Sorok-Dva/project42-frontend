@@ -1,7 +1,13 @@
-import React from 'react'
-import { Box, Button, Paper, Typography } from '@mui/material'
+import React, { useRef, useState } from 'react'
+import { Box } from '@mui/material'
 import { usePermissions } from 'hooks/usePermissions'
-import { addBotToGame, startGame, setPlayerReady, transferCreatorRights } from 'services/gameService'
+import {
+  addBotToGame,
+  startGame,
+  setPlayerReady,
+  transferCreatorRights,
+  updateMaxPlayers,
+} from 'services/gameService'
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import GameTimer from './Timer'
@@ -39,7 +45,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const { token } = useAuth()
   const { user } = useUser()
   const { checkPermission } = usePermissions()
-
+  const [slots, setSlots] = useState<number>(roomData.maxPlayers)
   const canAddBot = checkPermission('godPowers', 'addBot')
   const canEditGame = checkPermission('game', 'edit')
 
@@ -77,6 +83,48 @@ const GameControls: React.FC<GameControlsProps> = ({
     } catch (error) {
       console.error('Erreur lors du set ready:', error)
     }
+  }
+
+  const debounceRef = useRef<NodeJS.Timeout | null>(null)
+
+  const removePlace = () => {
+    if (!gameId || gameStarted || gameFinished || slots <= 6) return
+
+    setSlots(prevSlots => prevSlots - 1)
+
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const response = await updateMaxPlayers(slots - 1, gameId, token)
+        if (response.status !== 200) {
+          setSlots(prevSlots => prevSlots + 1)
+        }
+      } catch (error) {
+        console.error('Erreur lors du set updateMaxPlayers:', error)
+        setSlots(prevSlots => prevSlots + 1)
+      }
+    }, 750)
+  }
+
+  const addPlace = () => {
+    if (!gameId || gameStarted || gameFinished || slots >= 24) return
+
+    setSlots(prevSlots => prevSlots + 1)
+
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const response = await updateMaxPlayers(slots + 1, gameId, token)
+        if (response.status !== 200) {
+          setSlots(prevSlots => prevSlots - 1)
+        }
+      } catch (error) {
+        console.error('Erreur lors du set updateMaxPlayers:', error)
+        setSlots(prevSlots => prevSlots - 1)
+      }
+    }, 750)
   }
 
   const handleTransferCreator = async (newCreatorId: string) => {
@@ -152,18 +200,18 @@ const GameControls: React.FC<GameControlsProps> = ({
                           {/*$places == 6 || $places == count($joueurs))*/ }
                           <div
                             className="button array_clickable sound-tick sound-unselect"
-                            data-tooltip="<?= $LG->lang('delPlace'); ?>"
-                            data-action="removePlace">–
+                            data-tooltip="Supprimer une place"
+                            onClick={removePlace}>–
                           </div>
 
                           <div className="button unclickable"><span
-                            className="places">{ roomData.maxPlayers }</span> places
+                            className="places">{ slots }</span> places
                           </div>
 
                           {/*if (($salonType < 2 && $places == 50) || ($salonType == 2 && $places == 30)):*/ }
                           <div
                             className="button array_clickable sound-tick sound-select"
-                            data-action="addPlace">+
+                            onClick={addPlace}>+
                           </div>
                         </div>
                       </div>
