@@ -1,17 +1,20 @@
 import { FC, useEffect } from 'react'
-import { useProfileModal } from 'contexts/ProfileModalContext'
+import { useModal } from 'contexts/ModalContext'
 
 const GlobalClickListener: FC = () => {
-  const { openModal } = useProfileModal()
+  const { openModal } = useModal()
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       let target = event.target as HTMLElement | null
 
-      // On remonte dans les parents jusqu'à trouver data-profile ou qu'il n'y ait plus de parent
       while (target) {
         if (target.dataset.profile) {
-          openModal(target.dataset.profile)
+          openModal('profile', target.dataset.profile)
+          break
+        }
+        if (target.dataset.action) {
+          openModal(target.dataset.action)
           break
         }
         target = target.parentElement
@@ -24,7 +27,7 @@ const GlobalClickListener: FC = () => {
     }
   }, [openModal])
 
-  return null // Pas d'affichage; juste un écouteur global
+  return null
 }
 
 export default GlobalClickListener

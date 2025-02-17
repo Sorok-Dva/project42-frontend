@@ -47,7 +47,7 @@ import Notifier from 'components/Notifier'
 import Leaderboard from './pages/Leaderboard'
 import GamePage from 'pages/Game'
 import { SocketProvider } from 'contexts/SocketContext'
-import ProfileModalProvider from 'contexts/ProfileModalProvider'
+import ModalProvider from 'contexts/ModalProvider'
 import GlobalClickListener from 'components/GlobalClickListener'
 
 const theme = {
@@ -141,14 +141,14 @@ const App: React.FC = () => {
         <AuthProvider>
           <UserProvider>
             <SocketProvider>
-              <ProfileModalProvider>
+              <ModalProvider>
                 <GlobalClickListener />
                 <GoogleTagManager />
                 <Notifier />
                 <AppContent />
                 <ScrollToTop />
                 <ThemeSwitcher />
-              </ProfileModalProvider>
+              </ModalProvider>
             </SocketProvider>
           </UserProvider>
         </AuthProvider>

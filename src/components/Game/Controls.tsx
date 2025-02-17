@@ -246,7 +246,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                           <Box
                             className="button array_clickable sound-tick sound-unselect"
                             data-tooltip="Supprimer une place"
-                            onClick={removePlace}>–
+                            onClick={ removePlace }>–
                           </Box>
 
                           <Box className="button unclickable"><span
@@ -256,7 +256,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                           {/*if (($salonType < 2 && $places == 50) || ($salonType == 2 && $places == 30)):*/ }
                           <Box
                             className="button array_clickable sound-tick sound-select"
-                            onClick={addPlace}>+
+                            onClick={ addPlace }>+
                           </Box>
                         </Box>
                       </Box>
@@ -266,7 +266,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                           {/*if (isset($debateMin) && $debate == $debateMin)*/ }
                           <Box
                             className="button array_clickable sound-tick sound-unselect"
-                            onClick={removeTimer}>–
+                            onClick={ removeTimer }>–
                           </Box>
 
                           <Box className="button unclickable">
@@ -278,7 +278,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                           {/*if (isset($debateMax) && $debate == $debateMax)*/ }
                           <Box
                             className="button array_clickable sound-tick sound-select"
-                            onClick={addTimer}>+
+                            onClick={ addTimer }>+
                           </Box>
                         </Box>
                       </Box>
@@ -301,6 +301,11 @@ const GameControls: React.FC<GameControlsProps> = ({
                         </Box>
                       </Box>
                     </Box>
+                  </Box>
+
+                  <Box data-action="compo"
+                    className="button sound-tick rounded bglightblue">
+                    <h3>Gérer la composition</h3>
                   </Box>
 
                   <Box className="button_secondary sound-tick crea_lead">Léguer
@@ -330,8 +335,8 @@ const GameControls: React.FC<GameControlsProps> = ({
 
                   <Box id="crea_launch" className="block_content_section">
                     <Box
-                      className={ `button sound-tick rounded bglightblue ${!canStartGame ? 'disabled' : 'animation-bounce'}` }
-                      onClick={handleStartGame}
+                      className={ `button sound-tick rounded bglightblue ${ !canStartGame ? 'disabled': 'animation-bounce' }` }
+                      onClick={ handleStartGame }
                     >
                       <h3>Lancer la partie</h3>
                     </Box>
@@ -341,7 +346,7 @@ const GameControls: React.FC<GameControlsProps> = ({
             </Box>
           </Box>
         </>
-      )}
+      ) }
 
       { player && gameStarted && !gameFinished ? (
         <>
