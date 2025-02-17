@@ -7,7 +7,7 @@ import 'index.css'
 import 'styles/Toastify.css'
 import 'styles/Spinner.css'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { ThemeProvider as SCThemeProvider } from 'styled-components'
 
@@ -120,6 +120,21 @@ const AppContent: React.FC = () => {
 }
 
 const App: React.FC = () => {
+  useEffect(() => {
+    const handleMouseOver = (event: MouseEvent) => {
+      const target = (event.target as Element)?.closest('.sound-tick:not(.disabled)')
+      if (target) {
+        const audio = new Audio('/assets/sounds/ui-tick.mp3')
+        audio.play()
+      }
+    }
+
+    document.addEventListener('mouseover', handleMouseOver)
+    return () => {
+      document.removeEventListener('mouseover', handleMouseOver)
+    }
+  }, [])
+
   return (
     <SCThemeProvider theme={theme}>
       <ErrorProvider>
