@@ -182,171 +182,171 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   return (
-    <div id="block_actions">
+    <Box id="block_actions">
       { !gameStarted && !gameFinished && (
-        <div id="block_ami" className="block rounded bgblue">
-          <div className="block_header">
+        <Box id="block_ami" className="block rounded bgblue">
+          <Box className="block_header">
             <h3>Inviter vos amis</h3>
-          </div>
+          </Box>
 
-          <div className="block_content block_scrollable_wrapper scrollbar-light">
-            <div className="block_scrollable_content">
-              <div className="invite_show">
-                <div className="invite_friends">Chargement...</div>
-              </div>
-            </div>
-          </div>
-        </div>
+          <Box className="block_content block_scrollable_wrapper scrollbar-light">
+            <Box className="block_scrollable_content">
+              <Box className="invite_show">
+                <Box className="invite_friends">Chargement...</Box>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
       )}
 
       {!isCreator && !gameStarted && !gameFinished && (
         <>
-          <div id="block_options" className="block rounded bgblue">
-            <div className="block_header">
+          <Box id="block_options" className="block rounded bgblue">
+            <Box className="block_header">
               <h3>Options de la partie</h3>
-            </div>
-            <div className="block_content block_scrollable_wrapper scrollbar-light">
-              <div className="block_scrollable_content">
-                <div className="block_content_section text-center">
+            </Box>
+            <Box className="block_content block_scrollable_wrapper scrollbar-light">
+              <Box className="block_scrollable_content">
+                <Box className="block_content_section text-center">
                   <Box>
                     {canBeReady && !player.ready && (
-                      <div
+                      <Box
                         className="button array_selectable sound-tick bglightblue animate__animated animate__bounce animate__infinite"
                         onClick={handleBeReady}
                       >
                         Je suis prêt(e) !
-                      </div>
+                      </Box>
                     )}
                   </Box>
-                </div>
-              </div>
-            </div>
-          </div>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
           <hr/>
         </>
       )}
 
       {isCreator && !gameStarted && !gameFinished && (
         <>
-          <div id="block_crea" className="block rounded bgblue">
-            <div className="block_header">
+          <Box id="block_crea" className="block rounded bgblue">
+            <Box className="block_header">
               <h3>Configurer la partie</h3>
-            </div>
-            <div
+            </Box>
+            <Box
               className="block_content block_scrollable_wrapper scrollbar-light">
-              <div className="block_scrollable_content">
-                <div className="block_content_section">
-                  <div className="game-options">
-                    <div className="premium-options">
-                      <div id="crea_places">
-                        <div
+              <Box className="block_scrollable_content">
+                <Box className="block_content_section">
+                  <Box className="game-options">
+                    <Box className="premium-options">
+                      <Box id="crea_places">
+                        <Box
                           className="buttons_array buttons_array_small bglightblue">
                           {/*$places == 6 || $places == count($joueurs))*/ }
-                          <div
+                          <Box
                             className="button array_clickable sound-tick sound-unselect"
                             data-tooltip="Supprimer une place"
                             onClick={removePlace}>–
-                          </div>
+                          </Box>
 
-                          <div className="button unclickable"><span
+                          <Box className="button unclickable"><span
                             className="places">{ slots }</span> places
-                          </div>
+                          </Box>
 
                           {/*if (($salonType < 2 && $places == 50) || ($salonType == 2 && $places == 30)):*/ }
-                          <div
+                          <Box
                             className="button array_clickable sound-tick sound-select"
                             onClick={addPlace}>+
-                          </div>
-                        </div>
-                      </div>
-                      <div id="crea_debat">
-                        <div
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Box id="crea_debat">
+                        <Box
                           className="buttons_array buttons_array_small bglightblue mt-1">
                           {/*if (isset($debateMin) && $debate == $debateMin)*/ }
-                          <div
+                          <Box
                             className="button array_clickable sound-tick sound-unselect"
                             onClick={removeTimer}>–
-                          </div>
+                          </Box>
 
-                          <div className="button unclickable">
+                          <Box className="button unclickable">
                             <span
                               className="debat">{ timer }</span> min
                             de débat
-                          </div>
+                          </Box>
 
                           {/*if (isset($debateMax) && $debate == $debateMax)*/ }
-                          <div
+                          <Box
                             className="button array_clickable sound-tick sound-select"
                             onClick={addTimer}>+
-                          </div>
-                        </div>
-                      </div>
+                          </Box>
+                        </Box>
+                      </Box>
 
-                      <div id="crea_params">
-                        <div className="buttons_array bglightblue">
-                          <div
+                      <Box id="crea_params">
+                        <Box className="buttons_array bglightblue">
+                          <Box
                             className="button array_selectable sound-tick selected'"
                             data-action="cacheVote">
                             <img src="/assets/images/icon-votecache.png"
                               alt="Cacher les votes"/>
-                          </div>
+                          </Box>
 
-                          <div
+                          <Box
                             className="button array_selectable sound-tick selected"
                             data-action="muteSpec">
                             <img src="/assets/images/icon-mutespec.png"
                               alt="Muter les spectateurs"/>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
 
-                  <div className="button_secondary sound-tick crea_lead">Léguer
+                  <Box className="button_secondary sound-tick crea_lead">Léguer
                     les droits du salon
-                  </div>
-                  <div className="button_secondary sound-tick join_spec">
+                  </Box>
+                  <Box className="button_secondary sound-tick join_spec">
                     <span>Rejoindre les spectateurs</span>
-                  </div>
+                  </Box>
 
                   { ['SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator']
                     .includes(user?.role as string) && (
-                    <div>
-                      <div className="flex-row gutter">
+                    <Box>
+                      <Box className="flex-row gutter">
                         { canEditGame && (
-                          <div className="button_secondary sound-tick">
+                          <Box className="button_secondary sound-tick">
                             Modifier le salon
-                          </div>
+                          </Box>
                         ) }
                         { canAddBot && (
-                          <div className="button_secondary sound-tick"
+                          <Box className="button_secondary sound-tick"
                             onClick={ handleAddBot }>Ajouter un bot
-                          </div>
+                          </Box>
                         ) }
-                      </div>
-                    </div>
+                      </Box>
+                    </Box>
                   ) }
 
-                  <div id="crea_launch" className="block_content_section">
-                    <div
+                  <Box id="crea_launch" className="block_content_section">
+                    <Box
                       className={ `button sound-tick rounded bglightblue ${!canStartGame ? 'disabled' : 'animation-bounce'}` }
                       onClick={handleStartGame}
                     >
                       <h3>Lancer la partie</h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
         </>
       )}
 
       { player && gameStarted && !gameFinished ? (
         <>
-          <div id="block_ia"
+          <Box id="block_ia"
             className="shadow rounded bgblue game-started">
-            <div id="block_infos">
+            <Box id="block_infos">
               <p className="wait_for_card_reveal">
                           Vous
                           êtes <strong>{ player.card?.name }</strong>.<br/>
@@ -355,27 +355,27 @@ const GameControls: React.FC<GameControlsProps> = ({
                 gameFinished={ gameFinished }/>
               <PhaseAction player={ player }
                 roomId={ Number(gameId!) }/>
-            </div>
-          </div>
-          <div id="card_wrapper" className="card_animation">
-            <div id="card_flipper" className="card_animation">
+            </Box>
+          </Box>
+          <Box id="card_wrapper" className="card_animation">
+            <Box id="card_flipper" className="card_animation">
               <img className="card_role"
                 src={ `/assets/images/carte${ player.card?.id }.png` }/>
               <img className="card_anon"
                 src="/assets/images/carte0.png"/>
-            </div>
-          </div>
+            </Box>
+          </Box>
         </>
       ): !player ? (
-        <div id="block_ia"
+        <Box id="block_ia"
           className="shadow rounded bgblue game-started spectator">
-          <div id="block_infos">
+          <Box id="block_infos">
             { gameFinished ? <b>La partie est terminée.</b>:
               <p>Vous êtes spectateur de la partie.</p> }
-          </div>
-        </div>
+          </Box>
+        </Box>
       ): null }
-    </div>
+    </Box>
   )
 }
 
