@@ -45,8 +45,15 @@ export const fetchChatMessages = async (gameId: string, token: string | null) =>
  * Lance la partie
  */
 export const startGame = async (gameId: string) => {
-  const response = await axios.post(`/api/games/room/${gameId}/start`)
-  return response.data
+  try {
+    const response = await axios.post(`/api/games/room/${gameId}/start`)
+    return response.data
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data.error || error.message)
+    }
+    throw error
+  }
 }
 
 /**

@@ -13,6 +13,7 @@ import { useUser } from 'contexts/UserContext'
 import GameTimer from './Timer'
 import PhaseAction from './PhaseAction'
 import { PlayerType, RoomData } from 'hooks/useGame'
+import axios, { AxiosError } from 'axios'
 
 interface GameControlsProps {
   gameId: string | undefined
@@ -73,7 +74,7 @@ const GameControls: React.FC<GameControlsProps> = ({
       fetchGameDetails()
       setGameStarted(true)
     } catch (error) {
-      console.error('Erreur lors du lancement de la partie:', error)
+      alert(error)
     }
   }
 
