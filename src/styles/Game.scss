@@ -548,9 +548,13 @@ BUTTONS
 
   &.disabled,
   &[disabled] {
-    background-color: #1b204d;
+    background-color: #181f30;
     cursor: default;
     color: rgba(255, 255, 255, 0.5);
+  }
+
+  &.bgred:not(.disabled):hover {
+    background-color: #0d4c73;
   }
 }
 
