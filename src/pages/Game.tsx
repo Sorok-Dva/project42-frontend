@@ -362,7 +362,7 @@ const GamePage = () => {
             width="25%"
             className="right-column"
           >
-            <Composition />
+            <Composition roomData={roomData} />
             <PlayersList
               players={players}
               player={player}

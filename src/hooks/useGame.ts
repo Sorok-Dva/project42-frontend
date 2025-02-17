@@ -41,6 +41,20 @@ export interface Viewer {
   ip: string
 }
 
+export interface Card {
+  id: number
+  name: string
+  description: string
+}
+
+export interface RoomCard {
+  id: number
+  roomId: number
+  cardId: number
+  quantity: number
+  card: Card
+}
+
 export interface RoomData {
   id: number
   creator: string
@@ -50,6 +64,7 @@ export interface RoomData {
   maxPlayers: number
   isPrivate: boolean
   password?: string
+  cards: RoomCard[]
 }
 
 /**
@@ -68,7 +83,8 @@ export const useGame = (
     timer: 3,
     type: 0,
     maxPlayers: 6,
-    isPrivate: true
+    isPrivate: true,
+    cards: [],
   })
   const [passwordRequired, setPasswordRequired] = useState(false)
   const [password, setPassword] = useState('')
