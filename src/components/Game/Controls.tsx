@@ -57,7 +57,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleStartGame = async () => {
-    if (!gameId || gameStarted || gameFinished) return
+    if (!gameId || gameStarted || gameFinished || !canStartGame) return
     try {
       await startGame(gameId)
       fetchGameDetails()
@@ -237,7 +237,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
                   <div id="crea_launch" className="block_content_section">
                     <div
-                      className={ `button sound-tick rounded bglightblue animation-bounce ${!canStartGame ? 'disabled' : ''}` }
+                      className={ `button sound-tick rounded bglightblue ${!canStartGame ? 'disabled' : 'animation-bounce'}` }
                       onClick={handleStartGame}
                     >
                       <h3>Lancer la partie</h3>
