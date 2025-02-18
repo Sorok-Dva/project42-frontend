@@ -19,8 +19,14 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
     const fetchCards = async () => {
       try {
         const response = await axios.get(`/api/games/room/${roomId}/cards`)
-        setCards(response.data.roomCards)
-        setAllCards(response.data.gameCards)
+        const roomCardsArray = Array.isArray(response.data.roomCards)
+          ? response.data.roomCards
+          : Object.values(response.data.roomCards)
+        const gameCardsArray = Array.isArray(response.data.gameCards)
+          ? response.data.gameCards
+          : Object.values(response.data.gameCards)
+        setCards(roomCardsArray)
+        setAllCards(gameCardsArray)
       } catch (e: any) {
         if (e.response?.data.error) {
           setError(e.response.data.error)
