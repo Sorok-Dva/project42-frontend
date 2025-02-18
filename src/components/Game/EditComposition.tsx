@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useState } from 'react'
+import { Tooltip } from 'react-tooltip'
 
 import 'styles/Modal.css'
 import axios from 'axios'
@@ -101,63 +102,67 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
       }
 
       return (
-        <div
-          key={i}
-          data-id-card={i}
-          data-state={number}
-          className={classNames}
-          {...(dataTooltip ? { 'data-tooltip': dataTooltip } : {})}
-        >
-          <div className="card_wrapper">
-            {Array.from({ length: qtecards }).map((_, idx) => (
-              <img key={idx} src={`/assets/images/carte${i}.png`} alt={`Carte ${i}`} />
-            ))}
-            {i === 22 && (
-              <div className="role_amount">
-                <span>2</span>
-              </div>
-            )}
-            {i === 26 && (
-              <div className="role_amount">
-                <span>3</span>
-              </div>
-            )}
-            {i === 1 && (
-              <div className="role_amount">
-                <span className="role_amount_sv">{number}</span>
-              </div>
-            )}
+        <>
+          <div
+            key={i}
+            data-id-card={i}
+            data-state={number}
+            className={classNames}
+            {...(dataTooltip ? { 'data-tooltip-content': dataTooltip } : {})}
+            data-tooltip-id={String(i)}
+          >
+            <div className="card_wrapper">
+              {Array.from({ length: qtecards }).map((_, idx) => (
+                <img key={idx} src={`/assets/images/carte${i}.png`} alt={`Carte ${i}`} />
+              ))}
+              {i === 22 && (
+                <div className="role_amount">
+                  <span>2</span>
+                </div>
+              )}
+              {i === 26 && (
+                <div className="role_amount">
+                  <span>3</span>
+                </div>
+              )}
+              {i === 1 && (
+                <div className="role_amount">
+                  <span className="role_amount_sv">{number}</span>
+                </div>
+              )}
+              {i === 2 && (
+                <div className="role_amount">
+                  <span className="role_amount_lg">{number}</span>
+                </div>
+              )}
+              {(i === 3 || i === 6) && (
+                <div className="compo_edit_caption">
+                  {number !== 0 && number}
+                </div>
+              )}
+            </div>
+            <b>{allCards[i]?.name}</b>
             {i === 2 && (
-              <div className="role_amount">
-                <span className="role_amount_lg">{number}</span>
+              <div className="buttons_array small_array bglightblue">
+                <div className="decrement_wolves button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Loup-Garou">–</div>
+                <div className="increment_wolves button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Loup-Garou">+</div>
               </div>
             )}
-            {(i === 3 || i === 6) && (
-              <div className="compo_edit_caption">
-                {number !== 0 && number}
+            {i === 19 && (
+              <div className="buttons_array small_array bglightblue">
+                <div className="decrement_angels button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Ange">–</div>
+                <div className="increment_angels button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Ange">+</div>
+              </div>
+            )}
+            {i === 29 && (
+              <div className="buttons_array small_array bglightblue">
+                <div className="decrement_judges button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Juge">–</div>
+                <div className="increment_judges button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Juge">+</div>
               </div>
             )}
           </div>
-          <b>{allCards[i]?.name}</b>
-          {i === 2 && (
-            <div className="buttons_array small_array bglightblue">
-              <div className="decrement_wolves button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Loup-Garou">–</div>
-              <div className="increment_wolves button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Loup-Garou">+</div>
-            </div>
-          )}
-          {i === 19 && (
-            <div className="buttons_array small_array bglightblue">
-              <div className="decrement_angels button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Ange">–</div>
-              <div className="increment_angels button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Ange">+</div>
-            </div>
-          )}
-          {i === 29 && (
-            <div className="buttons_array small_array bglightblue">
-              <div className="decrement_judges button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Juge">–</div>
-              <div className="increment_judges button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Juge">+</div>
-            </div>
-          )}
-        </div>
+          <Tooltip id={String(i)} />
+        </>
       )
     })
   }

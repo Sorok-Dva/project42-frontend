@@ -74,6 +74,7 @@
     "react-scripts": "5.0.1",
     "react-table": "^7.8.0",
     "react-toastify": "9.0.3",
+    "react-tooltip": "^5.28.0",
     "reactstrap": "9.2.2",
     "sass": "^1.83.4",
     "sharp": "^0.33.5",

@@ -15,6 +15,10 @@ body.game {
   cursor: default;
 }
 
+.react-tooltip {
+  z-index: 5 !important;
+}
+
 .change_name_button {
   padding: 5px 10px;
   border: none;
@@ -3244,10 +3248,6 @@ kbd {
   transition: all .3s ease;
   pointer-events: none;
   filter: grayscale(100%) brightness(125%) contrast(75%);
-}
-
-.compo_edit_card img:nth-child(1) {
-  z-index: 2;
 }
 
 .compo_edit_card img:nth-child(2) {
