@@ -101,7 +101,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
       const cardUnavailable = cardLimit(i) > slots
 
       let classNames = 'compo_edit_card '
-      classNames += selected ? 'card_selected ' : ''
+      classNames += selected && !cardUnavailable ? 'card_selected ' : ''
       classNames += cardUnavailable ? 'card_unavailable ' : ''
 
       let dataTooltip = ''
@@ -149,29 +149,24 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
                 <span className="role_amount_lg">{number}</span>
               </div>
             )}
-            {(i === 3 || i === 6) && (
-              <div className="compo_edit_caption">
-                {number !== 0 && number}
-              </div>
-            )}
           </div>
           <b>{allCards[i]?.name}</b>
           {i === 2 && (
             <div className="buttons_array small_array bglightblue">
-              <div className="decrement_wolves button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Loup-Garou">–</div>
-              <div className="increment_wolves button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Loup-Garou">+</div>
+              <div className="decrement_wolves button array_clickable sound-tick sound-unselect" data-tooltip-id={String(i)} data-tooltip-content="Enlever un Loup-Garou">–</div>
+              <div className="increment_wolves button array_clickable sound-tick sound-select" data-tooltip-id={String(i)} data-tooltip-content="Ajouter un Loup-Garou">+</div>
             </div>
           )}
           {i === 19 && (
             <div className="buttons_array small_array bglightblue">
-              <div className="decrement_angels button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Ange">–</div>
-              <div className="increment_angels button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Ange">+</div>
+              <div className="decrement_angels button array_clickable sound-tick sound-unselect" data-tooltip-id={String(i)} data-tooltip-content="Enlever un Ange">–</div>
+              <div className="increment_angels button array_clickable sound-tick sound-select" data-tooltip-id={String(i)} data-tooltip-content="Ajouter un Ange">+</div>
             </div>
           )}
           {i === 29 && (
             <div className="buttons_array small_array bglightblue">
-              <div className="decrement_judges button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Juge">–</div>
-              <div className="increment_judges button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Juge">+</div>
+              <div className="decrement_judges button array_clickable sound-tick sound-unselect" data-tooltip-id={String(i)} data-tooltip-content="Enlever un Juge">–</div>
+              <div className="increment_judges button array_clickable sound-tick sound-select" data-tooltip-id={String(i)} data-tooltip-content="Ajouter un Juge">+</div>
             </div>
           )}
           <Tooltip id={String(i)} />
