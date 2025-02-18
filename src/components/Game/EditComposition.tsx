@@ -72,9 +72,6 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
   }
 
   const handleCardClick = (i: number, current: number) => {
-    // On empêche l'édition des cartes uneditable (ex. 1 et 2)
-    if (i === 1 || i === 2) return
-
     // Définir la valeur par défaut lors de la sélection
     let defaultValue = 1
     if (i === 22) defaultValue = 2
@@ -116,7 +113,6 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
       let classNames = 'compo_edit_card '
       classNames += selected ? 'card_selected ' : ''
       classNames += cardUnavailable ? 'card_unavailable ' : ''
-      classNames += (i === 1 || i === 2) ? 'uneditable' : ''
 
       let dataTooltip = ''
       if (i === 1)

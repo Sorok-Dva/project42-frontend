@@ -282,7 +282,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                         </Box>
                       </Box>
 
-                      <Box id="crea_params">
+                      {/*<Box id="crea_params">
                         <Box className="buttons_array bglightblue">
                           <Box
                             className="button array_selectable sound-tick selected'"
@@ -298,7 +298,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                               alt="Muter les spectateurs"/>
                           </Box>
                         </Box>
-                      </Box>
+                      </Box>*/}
                     </Box>
                   </Box>
 
