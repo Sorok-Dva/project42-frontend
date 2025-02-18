@@ -10,11 +10,11 @@ const GlobalClickListener: FC = () => {
 
       while (target) {
         if (target.dataset.profile) {
-          openModal('profile', target.dataset.profile)
+          openModal('profile', target.dataset)
           break
         }
         if (target.dataset.action) {
-          openModal(target.dataset.action)
+          openModal(target.dataset.action, target.dataset)
           break
         }
         target = target.parentElement

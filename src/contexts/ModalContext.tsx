@@ -9,7 +9,7 @@ import { createContext, useContext } from 'react'
  * - closeModal: Closes the currently opened profile modal.
  */
 interface ModalContextValue {
-  openModal: (type: string, param?: unknown) => void;
+  openModal: (type: string, param: DOMStringMap) => void;
   closeModal: () => void;
 }
 

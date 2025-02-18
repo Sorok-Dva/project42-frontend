@@ -11,18 +11,26 @@ const ModalProvider: FC<ModalProviderProps> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [type, setType] = useState<string>('default')
   const [selectedNickname, setSelectedNickname] = useState<string | null>(null)
+  const [roomId, setRoomId] = useState<number | null>(0)
+  const [slots, setSlots] = useState<number | null>(6)
 
   const openModal = (
     type: string,
-    nickname: unknown,
+    params: DOMStringMap,
   ) => {
-    setSelectedNickname(nickname as string)
     setType(type)
+
+    if (params.profile) setSelectedNickname(params.profile as string)
+    if (params.roomid) setRoomId(Number(params.roomid))
+    if (params.slots) setSlots(Number(params.slots))
+
     setIsOpen(true)
   }
 
   const closeModal = () => {
     setSelectedNickname(null)
+    setRoomId(null)
+    setSlots(null)
     setIsOpen(false)
   }
 
@@ -34,8 +42,8 @@ const ModalProvider: FC<ModalProviderProps> = ({ children }) => {
         <ProfileModal nickname={selectedNickname} onClose={closeModal} />
       )}
 
-      {type === 'compo' && isOpen && (
-        <EditComposition onClose={closeModal} />
+      {type === 'compo' && slots && roomId && isOpen && (
+        <EditComposition slots={slots} roomId={roomId} onClose={closeModal} />
       )}
     </ModalContext.Provider>
   )
