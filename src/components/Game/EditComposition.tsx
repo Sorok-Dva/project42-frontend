@@ -1,14 +1,166 @@
-import React, { FC, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 
 import 'styles/Modal.css'
+import axios from 'axios'
+import { Card, RoomCard } from 'hooks/useGame'
 
 interface EditCompoModalProps {
+  roomId: number
+  slots: number
   onClose: () => void;
 }
 
-const EditCompoModal: FC<EditCompoModalProps> = ({ onClose }) => {
+const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => {
   const [error, setError] = useState<string | null>(null)
+  const [cards, setCards] = useState<RoomCard[]>([])
+  const [allCards, setAllCards] = useState<Card[]>([])
 
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const response = await axios.get(`/api/games/room/${roomId}/cards`)
+        setCards(response.data.roomCards)
+        setAllCards(response.data.gameCards)
+      } catch (e: any) {
+        if (e.response?.data.error) {
+          setError(e.response.data.error)
+        }
+        console.error('Erreur lors de la récupération des cards :', e)
+      }
+    }
+
+    fetchCards()
+  }, [roomId])
+
+  const cardLimit = (id: number) => {
+    let limite = 0
+    switch (id) {
+    case 15:
+      limite = 12
+      break
+    case 19:
+      limite = 8
+      break
+    case 20:
+      limite = 10
+      break
+    case 21:
+      limite = 10
+      break
+    case 22:
+      limite = 10
+      break
+    case 26:
+      limite = 11
+      break
+    case 29:
+      limite = 10
+      break
+    case 31:
+      limite = 12
+      break
+    default:
+      break
+    }
+    return limite
+  }
+
+  const renderCards = (array: number[]) => {
+    return array.map((i) => {
+      // Calcul de la valeur number pour la carte
+      let number
+      if (cards[i] && typeof cards[i].quantity === 'number') {
+        number = cards[i].quantity
+      } else if (i === 1) {
+        number = slots - cards.length
+      } else {
+        number = 0
+      }
+
+      const enabled = number !== 0
+      const cardUnavailable = (cardLimit(i) > slots)
+
+      // Construction de la classe CSS
+      let classNames = 'compo_edit_card '
+
+      classNames += enabled ? 'card_selected ' : ''
+      classNames += (cardUnavailable) ? 'card_unavailable ' : ''
+      classNames += (i === 1 || i === 2) ? 'uneditable' : ''
+
+      // Définition du data-tooltip
+      let dataTooltip = ''
+      if (i === 1) dataTooltip = 'Le nombre de Membre d\'équipage est automatique.'
+
+
+      // Définir le nombre d'images à afficher
+      let qtecards = 1
+      if (i === 1 || i === 2 || i === 22) {
+        qtecards = 2
+      } else if (i === 26) {
+        qtecards = 3
+      }
+
+      return (
+        <div
+          key={i}
+          data-id-card={i}
+          data-state={number}
+          className={classNames}
+          {...(dataTooltip ? { 'data-tooltip': dataTooltip } : {})}
+        >
+          <div className="card_wrapper">
+            {Array.from({ length: qtecards }).map((_, idx) => (
+              <img key={idx} src={`/assets/images/carte${i}.png`} alt={`Carte ${i}`} />
+            ))}
+            {i === 22 && (
+              <div className="role_amount">
+                <span>2</span>
+              </div>
+            )}
+            {i === 26 && (
+              <div className="role_amount">
+                <span>3</span>
+              </div>
+            )}
+            {i === 1 && (
+              <div className="role_amount">
+                <span className="role_amount_sv">{number}</span>
+              </div>
+            )}
+            {i === 2 && (
+              <div className="role_amount">
+                <span className="role_amount_lg">{number}</span>
+              </div>
+            )}
+            {(i === 3 || i === 6) && (
+              <div className="compo_edit_caption">
+                {number !== 0 && number}
+              </div>
+            )}
+          </div>
+          <b>{allCards[i]?.name}</b>
+          {i === 2 && (
+            <div className="buttons_array small_array bglightblue">
+              <div className="decrement_wolves button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Loup-Garou">–</div>
+              <div className="increment_wolves button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Loup-Garou">+</div>
+            </div>
+          )}
+          {i === 19 && (
+            <div className="buttons_array small_array bglightblue">
+              <div className="decrement_angels button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Ange">–</div>
+              <div className="increment_angels button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Ange">+</div>
+            </div>
+          )}
+          {i === 29 && (
+            <div className="buttons_array small_array bglightblue">
+              <div className="decrement_judges button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Juge">–</div>
+              <div className="increment_judges button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Juge">+</div>
+            </div>
+          )}
+        </div>
+      )
+    })
+  }
   /**
    * Close the modal if we click on the overlay
    */
@@ -48,7 +200,24 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ onClose }) => {
           </button>
         </div>
         <div className="modal-content">
-
+          <div className="compo_row">
+            <div className="compo_category">
+              <h3>Aliens</h3>
+              {renderCards([2, 20, 21])}
+            </div>
+            <div className="compo_category">
+              <h3>Personnages solitaires</h3>
+              {renderCards([9, 15, 19, 31])}
+            </div>
+            <div className="compo_category">
+              <h3>Autres</h3>
+              {renderCards([11, 16, 25])}
+            </div>
+          </div>
+          <div className="compo_category">
+            <h3>Innocents</h3>
+            {renderCards([1, 3, 4, 5, 6, 7, 8, 10, 12, 13, 14, 17, 18, 22, 23, 24, 26, 27, 28, 29, 32, 33, 34])}
+          </div>
         </div>
       </div>
     </div>
