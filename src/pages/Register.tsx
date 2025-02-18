@@ -18,7 +18,7 @@ import PageBanner from 'components/Common/PageBanner'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { ThemeContext } from 'contexts/ThemeContext'
-import axios, { AxiosError } from 'axios'
+import axios from 'axios'
 import { isForbiddenNickname, isForbiddenEmail } from 'utils/forbiddenNicknames'
 
 const Register : React.FC = () => {

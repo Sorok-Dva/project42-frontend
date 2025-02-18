@@ -13,7 +13,6 @@ import { useUser } from 'contexts/UserContext'
 import GameTimer from './Timer'
 import PhaseAction from './PhaseAction'
 import { PlayerType, RoomData } from 'hooks/useGame'
-import axios, { AxiosError } from 'axios'
 
 interface GameControlsProps {
   gameId: string | undefined
@@ -303,7 +302,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                     </Box>
                   </Box>
 
-                  <Box data-action="compo" data-slots={slots} data-roomId={roomData.id}
+                  <Box data-action="compo" data-slots={slots} data-roomid={roomData.id}
                     className="button sound-tick rounded bglightblue">
                     <h3>Gérer la composition</h3>
                   </Box>

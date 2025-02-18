@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import axios from 'axios'
-import { Box, Button, TextField, Checkbox, FormControlLabel, Typography, Paper, Grid } from '@mui/material'
+import { Box, Button, TextField, Checkbox, FormControlLabel, Typography, Paper } from '@mui/material'
 import { useUser } from 'contexts/UserContext'
 
 const CreateGame = () => {

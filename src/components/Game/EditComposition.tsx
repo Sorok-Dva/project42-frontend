@@ -1,6 +1,5 @@
 import React, { FC, useEffect, useState } from 'react'
 import { Tooltip } from 'react-tooltip'
-
 import 'styles/Modal.css'
 import axios from 'axios'
 import { Card, RoomCard } from 'hooks/useGame'
@@ -29,9 +28,9 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
         console.error('Erreur lors de la récupération des cards :', e)
       }
     }
-
     fetchCards()
   }, [roomId])
+
 
   const cardLimit = (id: number) => {
     let limite = 0
@@ -66,34 +65,57 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
     return limite
   }
 
+  const handleCardClick = (i: number, current: number) => {
+    // On empêche l'édition des cartes uneditable (ex. 1 et 2)
+    if (i === 1 || i === 2) return
+
+    // Définir la valeur par défaut lors de la sélection
+    let defaultValue = 1
+    if (i === 22) defaultValue = 2
+    if (i === 26) defaultValue = 3
+
+    const newValue = current === 0 ? defaultValue : 0
+
+    setCards(prevCards =>
+      prevCards.find(card => Number(card.id) === i)
+        ? prevCards.map(card =>
+          Number(card.id) === i ? { ...card, quantity: newValue } : card
+        )
+        : [
+          ...prevCards,
+          {
+            id: i,
+            quantity: newValue,
+            roomId: roomId, // On utilise la prop roomId
+            cardId: i,      // On suppose que l'id de la carte est identique
+            card: allCards.find(c => Number(c.id) === i)!, // On récupère les données via allCards (assurez-vous qu'elles existent)
+          },
+        ]
+    )
+  }
+
   const renderCards = (array: number[]) => {
     return array.map((i) => {
-      // Calcul de la valeur number pour la carte
-      let number
-      if (cards[i] && typeof cards[i].quantity === 'number') {
-        number = cards[i].quantity
+      const card = cards.find(card => Number(card.id) === i)
+      let number = 0
+      if (card && typeof card.quantity === 'number') {
+        number = card.quantity
       } else if (i === 1) {
         number = slots - cards.length
-      } else {
-        number = 0
       }
 
-      const enabled = number !== 0
-      const cardUnavailable = (cardLimit(i) > slots)
+      const selected = number !== 0
+      const cardUnavailable = cardLimit(i) > slots
 
-      // Construction de la classe CSS
       let classNames = 'compo_edit_card '
-
-      classNames += enabled ? 'card_selected ' : ''
-      classNames += (cardUnavailable) ? 'card_unavailable ' : ''
+      classNames += selected ? 'card_selected ' : ''
+      classNames += cardUnavailable ? 'card_unavailable ' : ''
       classNames += (i === 1 || i === 2) ? 'uneditable' : ''
 
-      // Définition du data-tooltip
       let dataTooltip = ''
-      if (i === 1) dataTooltip = 'Le nombre de Membre d\'équipage est automatique.'
+      if (i === 1)
+        dataTooltip = 'Le nombre de Membre d\'équipage est automatique.'
 
-
-      // Définir le nombre d'images à afficher
       let qtecards = 1
       if (i === 1 || i === 2 || i === 22) {
         qtecards = 2
@@ -102,70 +124,70 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
       }
 
       return (
-        <>
-          <div
-            key={i}
-            data-id-card={i}
-            data-state={number}
-            className={classNames}
-            {...(dataTooltip ? { 'data-tooltip-content': dataTooltip } : {})}
-            data-tooltip-id={String(i)}
-          >
-            <div className="card_wrapper">
-              {Array.from({ length: qtecards }).map((_, idx) => (
-                <img key={idx} src={`/assets/images/carte${i}.png`} alt={`Carte ${i}`} />
-              ))}
-              {i === 22 && (
-                <div className="role_amount">
-                  <span>2</span>
-                </div>
-              )}
-              {i === 26 && (
-                <div className="role_amount">
-                  <span>3</span>
-                </div>
-              )}
-              {i === 1 && (
-                <div className="role_amount">
-                  <span className="role_amount_sv">{number}</span>
-                </div>
-              )}
-              {i === 2 && (
-                <div className="role_amount">
-                  <span className="role_amount_lg">{number}</span>
-                </div>
-              )}
-              {(i === 3 || i === 6) && (
-                <div className="compo_edit_caption">
-                  {number !== 0 && number}
-                </div>
-              )}
-            </div>
-            <b>{allCards[i]?.name}</b>
+        <div
+          key={i}
+          data-id-card={i}
+          data-state={number}
+          className={classNames}
+          {...(dataTooltip ? { 'data-tooltip-content': dataTooltip } : {})}
+          data-tooltip-id={String(i)}
+          onClick={() => handleCardClick(i, number)}
+        >
+          <div className="card_wrapper">
+            {Array.from({ length: qtecards }).map((_, idx) => (
+              <img key={idx} src={`/assets/images/carte${i}.png`} alt={`Carte ${i}`} />
+            ))}
+            {i === 22 && (
+              <div className="role_amount">
+                <span>2</span>
+              </div>
+            )}
+            {i === 26 && (
+              <div className="role_amount">
+                <span>3</span>
+              </div>
+            )}
+            {i === 1 && (
+              <div className="role_amount">
+                <span className="role_amount_sv">{number}</span>
+              </div>
+            )}
             {i === 2 && (
-              <div className="buttons_array small_array bglightblue">
-                <div className="decrement_wolves button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Loup-Garou">–</div>
-                <div className="increment_wolves button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Loup-Garou">+</div>
+              <div className="role_amount">
+                <span className="role_amount_lg">{number}</span>
               </div>
             )}
-            {i === 19 && (
-              <div className="buttons_array small_array bglightblue">
-                <div className="decrement_angels button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Ange">–</div>
-                <div className="increment_angels button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Ange">+</div>
-              </div>
-            )}
-            {i === 29 && (
-              <div className="buttons_array small_array bglightblue">
-                <div className="decrement_judges button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Juge">–</div>
-                <div className="increment_judges button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Juge">+</div>
+            {(i === 3 || i === 6) && (
+              <div className="compo_edit_caption">
+                {number !== 0 && number}
               </div>
             )}
           </div>
+          <b>{allCards[i]?.name}</b>
+          {i === 2 && (
+            <div className="buttons_array small_array bglightblue">
+              <div className="decrement_wolves button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Loup-Garou">–</div>
+              <div className="increment_wolves button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Loup-Garou">+</div>
+            </div>
+          )}
+          {i === 19 && (
+            <div className="buttons_array small_array bglightblue">
+              <div className="decrement_angels button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Ange">–</div>
+              <div className="increment_angels button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Ange">+</div>
+            </div>
+          )}
+          {i === 29 && (
+            <div className="buttons_array small_array bglightblue">
+              <div className="decrement_judges button array_clickable sound-tick sound-unselect" data-tooltip="Enlever un Juge">–</div>
+              <div className="increment_judges button array_clickable sound-tick sound-select" data-tooltip="Ajouter un Juge">+</div>
+            </div>
+          )}
           <Tooltip id={String(i)} />
-        </>
+        </div>
       )
     })
   }
+
   /**
    * Close the modal if we click on the overlay
    */
