@@ -303,7 +303,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                     </Box>
                   </Box>
 
-                  <Box data-action="compo"
+                  <Box data-action="compo" data-slots={slots} data-roomId={roomData.id}
                     className="button sound-tick rounded bglightblue">
                     <h3>Gérer la composition</h3>
                   </Box>
