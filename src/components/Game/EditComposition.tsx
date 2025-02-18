@@ -7,26 +7,20 @@ import { Card, RoomCard } from 'hooks/useGame'
 interface EditCompoModalProps {
   roomId: number
   slots: number
-  onClose: () => void;
+  onClose: () => void
 }
 
 const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => {
   const [error, setError] = useState<string | null>(null)
-  const [cards, setCards] = useState<RoomCard[]>([])
-  const [allCards, setAllCards] = useState<Card[]>([])
+  const [cards, setCards] = useState<Record<number, RoomCard>>({})
+  const [allCards, setAllCards] = useState<Record<number, Card>>({})
 
   useEffect(() => {
     const fetchCards = async () => {
       try {
         const response = await axios.get(`/api/games/room/${roomId}/cards`)
-        const roomCardsArray = Array.isArray(response.data.roomCards)
-          ? response.data.roomCards
-          : Object.values(response.data.roomCards)
-        const gameCardsArray = Array.isArray(response.data.gameCards)
-          ? response.data.gameCards
-          : Object.values(response.data.gameCards)
-        setCards(roomCardsArray)
-        setAllCards(gameCardsArray)
+        setCards(response.data.roomCards)
+        setAllCards(response.data.gameCards)
       } catch (e: any) {
         if (e.response?.data.error) {
           setError(e.response.data.error)
@@ -36,7 +30,6 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
     }
     fetchCards()
   }, [roomId])
-
 
   const cardLimit = (id: number) => {
     let limite = 0
@@ -72,39 +65,36 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
   }
 
   const handleCardClick = (i: number, current: number) => {
-    // Définir la valeur par défaut lors de la sélection
+    if (i === 1 || i === 2) return
+
     let defaultValue = 1
     if (i === 22) defaultValue = 2
     if (i === 26) defaultValue = 3
 
     const newValue = current === 0 ? defaultValue : 0
 
-    setCards(prevCards =>
-      prevCards.find(card => Number(card.id) === i)
-        ? prevCards.map(card =>
-          Number(card.id) === i ? { ...card, quantity: newValue } : card
-        )
-        : [
-          ...prevCards,
-          {
-            id: i,
-            quantity: newValue,
-            roomId: roomId, // On utilise la prop roomId
-            cardId: i,      // On suppose que l'id de la carte est identique
-            card: allCards.find(c => Number(c.id) === i)!, // On récupère les données via allCards (assurez-vous qu'elles existent)
-          },
-        ]
-    )
+    setCards(prevCards => ({
+      ...prevCards,
+      [i]: prevCards[i]
+        ? { ...prevCards[i], quantity: newValue }
+        : {
+          id: i,
+          quantity: newValue,
+          roomId: roomId,
+          cardId: i,
+          card: allCards[i]
+        }
+    }))
   }
 
   const renderCards = (array: number[]) => {
     return array.map((i) => {
-      const card = cards.find(card => Number(card.id) === i)
+      const card = cards[i]
       let number = 0
       if (card && typeof card.quantity === 'number') {
         number = card.quantity
       } else if (i === 1) {
-        number = slots - cards.length
+        number = slots - Object.keys(cards).length
       }
 
       const selected = number !== 0
@@ -190,9 +180,6 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
     })
   }
 
-  /**
-   * Close the modal if we click on the overlay
-   */
   const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) {
       onClose()
@@ -202,7 +189,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
   if (error) {
     return (
       <div className="modal-overlay" onClick={handleOverlayClick}>
-        <div className="modal-container" onClick={e => e.stopPropagation()}>
+        <div className="modal-container" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
             <h2>Modifier la composition de jeu</h2>
             <button className="close-btn" onClick={onClose}>
@@ -219,9 +206,11 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, slots, onClose }) => 
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-container"
+      <div
+        className="modal-container"
         style={{ width: '1300px' }}
-        onClick={e => e.stopPropagation()}>
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <h2 className="text-center">Modifier la composition de jeu</h2>
           <button className="close-btn" onClick={onClose}>
