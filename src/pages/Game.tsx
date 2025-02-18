@@ -302,22 +302,20 @@ const GamePage = () => {
             mr={2}
           >
             <Box mb={2}>
-              {player && (
-                <Controls
-                  gameId={gameId}
-                  roomData={roomData}
-                  fetchGameDetails={handleFetchGameDetails}
-                  isCreator={isCreator}
-                  canBeReady={canBeReady}
-                  canStartGame={canStartGame}
-                  player={player}
-                  gameStarted={gameStarted}
-                  gameFinished={gameFinished}
-                  setGameStarted={setGameStarted}
-                  slots={slots}
-                  setSlots={setSlots}
-                />
-              )}
+              <Controls
+                gameId={gameId}
+                roomData={roomData}
+                fetchGameDetails={handleFetchGameDetails}
+                isCreator={isCreator}
+                canBeReady={canBeReady}
+                canStartGame={canStartGame}
+                player={player}
+                gameStarted={gameStarted}
+                gameFinished={gameFinished}
+                setGameStarted={setGameStarted}
+                slots={slots}
+                setSlots={setSlots}
+              />
             </Box>
           </Box>
 

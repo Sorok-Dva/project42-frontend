@@ -17,7 +17,7 @@ import { PlayerType, RoomData } from 'hooks/useGame'
 interface GameControlsProps {
   gameId: string | undefined
   roomData: RoomData
-  player: PlayerType
+  player: PlayerType | null
   isCreator: boolean
   canBeReady: boolean
   canStartGame: boolean
@@ -78,7 +78,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleBeReady = async () => {
-    if (!gameId || gameStarted || gameFinished) return
+    if (!gameId || !player || gameStarted || gameFinished) return
     try {
       const response = await setPlayerReady(gameId, token)
       if (response.status === 200) {
@@ -209,7 +209,7 @@ const GameControls: React.FC<GameControlsProps> = ({
               <Box className="block_scrollable_content">
                 <Box className="block_content_section text-center">
                   <Box>
-                    {canBeReady && !player.ready && (
+                    {player && canBeReady && !player.ready && (
                       <Box
                         className="button array_selectable sound-tick bglightblue animate__animated animate__bounce animate__infinite"
                         onClick={handleBeReady}
@@ -375,8 +375,19 @@ const GameControls: React.FC<GameControlsProps> = ({
         <Box id="block_ia"
           className="shadow rounded bgblue game-started spectator">
           <Box id="block_infos">
-            { gameFinished ? <b>La partie est terminée.</b>:
-              <p>Vous êtes spectateur de la partie.</p> }
+            { gameFinished ?
+              <b>La partie est terminée.</b>:
+              <>
+                <Box style={{ marginTop: '4rem' }}>
+                  <GameTimer gameStarted={ gameStarted }
+                    gameFinished={ gameFinished }/>
+                </Box>
+
+                <Box className="mt-4">
+                  <b>Vous êtes spectateur de la partie.</b>
+                </Box>
+              </>
+            }
           </Box>
         </Box>
       ): null }
