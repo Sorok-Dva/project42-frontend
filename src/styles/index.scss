@@ -2267,18 +2267,20 @@ p.compo-hidden {
 }
 
 #block_players {
-  position: relative;
+  max-height: 60vh;
   display: flex;
-  flex: 0 1 auto;
-  position: relative;
   flex-flow: column nowrap;
-  margin-bottom: auto;
+  overflow: hidden;
 
   .block_content {
-    // background: transparent url(../assets/images/background-players.png) center center / 80% no-repeat;
-    //max-height: calc(100% - 44px); // firefox fix
-    max-height: 100%;
+     //background: transparent url(/assets/images/background-players.png) center center / 80% no-repeat;
+    max-height: 100vh;
     box-sizing: border-box;
+
+    .block_scrollable_wrapper{
+      flex: 1 1 auto;
+      overflow-y: auto;
+    }
   }
 
   .list_players {
