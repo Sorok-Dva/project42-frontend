@@ -19,7 +19,10 @@ const GameComposition: React.FC<GameCompositionProps> = ({
       </div>
       <Box className="block_content block_scrollable_wrapper scrollbar-light">
         <Box className="block_scrollable_content">
-          <Box className="block_content_section">
+          <Box className="block_content_section" style={{
+            display: 'flex',
+            alignItems: 'center'
+          }}>
             { roomData.cards.map((roomCard, i) => {
               return (
                 <Box
@@ -37,12 +40,6 @@ const GameComposition: React.FC<GameCompositionProps> = ({
                   ) : (
                     <img className="carte" src={`/assets/images/carte${roomCard.cardId}.png`} alt="" />
                   )}
-
-                  {roomCard.cardId === 30 ? (
-                    <div className="role_amount bavarde">B</div>
-                  ) : roomCard.cardId === 60 ? (
-                    <div className="role_amount bavard">B</div>
-                  ) : null}
                 </Box>
               )
             }) }
