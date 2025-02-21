@@ -53,7 +53,7 @@ const Chat: React.FC<ChatProps> = ({
 
   const inputRef = React.useRef<HTMLInputElement>(null)
 
-  const developerCommand = ['startPhase', 'endPhase']
+  const developerCommand = ['startPhase', 'endPhase', 'listCards']
   const handleSendMessage = () => {
     const trimmedMessage = newMessage.trim()
     if (!trimmedMessage || !socket) return
@@ -118,7 +118,10 @@ const Chat: React.FC<ChatProps> = ({
     setCurrentCommand(command)
 
     if (
-      ['kick', 'ban', 'mute', 'unmute', 'nick', 'crea', 'card'].includes(command)
+      [
+        'kick', 'ban', 'mute', 'unmute', 'nick', 'crea', 'card',
+        'kill', 'revive',
+      ].includes(command)
       && !hasAdditionalArgs
     ) {
       const searchQuery = arg.toLowerCase()
