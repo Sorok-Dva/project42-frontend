@@ -2747,6 +2747,7 @@ span#game_nb_players {
   .button:not(.array_clickable) {
     width: 100%;
     margin-bottom: 5px;
+    user-select: none;
   }
 
   #crea_params {
@@ -3079,16 +3080,14 @@ kbd {
 #explicRole {
   position: fixed;
   width: 400px;
-  bottom: -300px;
+  bottom: 0;
   left: 50%;
-  transform: translateX(-50%);
-  color: white;
-  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  transform: translate(-50%, 100%);
   opacity: 0;
-  transition: all .3s ease;
   pointer-events: none;
   z-index: 10;
   overflow: visible;
+  transition: transform 1s cubic-bezier(0.8, 0, 0, 1), opacity 1s cubic-bezier(0.8, 0, 0, 1);
 }
 
 #explicRole>div {
@@ -3124,10 +3123,9 @@ kbd {
 }
 
 #explicRole.visible {
+  transform: translate(-50%, 0);
   opacity: 1;
-  bottom: 0;
   pointer-events: all;
-  transition: all 1s cubic-bezier(.8, 0, 0, 1);
 }
 
 #explicRole .close {
