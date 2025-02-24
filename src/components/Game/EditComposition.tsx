@@ -14,7 +14,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
   const [error, setError] = useState<string | null>(null)
   const [cards, setCards] = useState<Record<number, RoomCard>>({})
   const [allCards, setAllCards] = useState<Record<number, Card>>({})
-  const { roomData, slots, setSlots, setRoomData } = useGameContext()
+  const { slots, setSlots, setRoomData } = useGameContext()
 
   useEffect(() => {
     const fetchCards = async () => {
@@ -31,7 +31,6 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
     }
     fetchCards()
   }, [roomId])
-
 
   useEffect(() => {
     if (!allCards[1]) return // On attend que la carte avec l'id 1 soit chargée
