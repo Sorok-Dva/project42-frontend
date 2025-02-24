@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { RoomCard } from 'hooks/useGame'
 
 /**
  * Récupère les détails d'une partie (gameDetails) (roomData + player courant)
@@ -91,6 +92,20 @@ export const updateMaxPlayers = async (maxPlayers: number, gameId: string, token
   const response = await axios.put(
     `/api/games/room/${gameId}/maxPlayers`,
     { maxPlayers },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  )
+  return response
+}
+
+/**
+ * Modifie les cartes du salon
+ */
+export const updateRoomCards = async (cards: RoomCard[], gameId: string, token: string | null) => {
+  const response = await axios.put(
+    `/api/games/room/${gameId}/cards`,
+    { cards },
     {
       headers: { Authorization: `Bearer ${token}` },
     }
