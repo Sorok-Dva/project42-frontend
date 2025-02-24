@@ -5,6 +5,7 @@ import { List } from '@mui/material'
 import { Socket } from 'socket.io-client'
 import { PlayerType, Viewer } from 'hooks/useGame'
 import { User } from 'contexts/UserContext'
+import { useSocket } from 'contexts/SocketContext'
 
 interface Message {
   nickname: string
@@ -28,7 +29,6 @@ interface ChatProps {
   isNight: boolean
   messages: Message[]
   messagesEndRef: React.RefObject<HTMLDivElement>
-  socket: Socket | null
   highlightedPlayers: { [nickname: string]: string }
 }
 
@@ -42,10 +42,10 @@ const Chat: React.FC<ChatProps> = ({
   userRole,
   messages,
   messagesEndRef,
-  socket,
   highlightedPlayers,
   isNight,
 }) => {
+  const { socket } = useSocket()
   const [newMessage, setNewMessage] = useState('')
   const [currentCommand, setCurrentCommand] = useState('')
   const [suggestions, setSuggestions] = useState<string[]>([])

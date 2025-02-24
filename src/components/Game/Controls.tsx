@@ -13,6 +13,7 @@ import { useUser } from 'contexts/UserContext'
 import GameTimer from './Timer'
 import PhaseAction from './PhaseAction'
 import { PlayerType, RoomData } from 'hooks/useGame'
+import EditCompoModal from 'components/Game/EditComposition'
 
 interface GameControlsProps {
   gameId: string | undefined
@@ -52,6 +53,10 @@ const GameControls: React.FC<GameControlsProps> = ({
   const canAddBot = checkPermission('godPowers', 'addBot')
   const canEditGame = checkPermission('game', 'edit')
   const [timer, setTimer] = useState<number>(3)
+  const [isEditCompositionOpen, setIsEditCompositionOpen] = useState(false)
+
+  const openEditComposition = () => setIsEditCompositionOpen(true)
+  const closeEditComposition = () => setIsEditCompositionOpen(false)
 
   const handleAddBot = async () => {
     if (!gameId || gameStarted || gameFinished) return
@@ -302,7 +307,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                     </Box>
                   </Box>
 
-                  <Box data-action="compo" data-slots={slots} data-roomid={roomData.id}
+                  <Box onClick={openEditComposition}
                     className="button sound-tick rounded bglightblue">
                     <h3>Gérer la composition</h3>
                   </Box>
@@ -391,6 +396,10 @@ const GameControls: React.FC<GameControlsProps> = ({
           </Box>
         </Box>
       ): null }
+
+      {isEditCompositionOpen && (
+        <EditCompoModal roomId={roomData.id} onClose={closeEditComposition} />
+      )}
     </Box>
   )
 }
