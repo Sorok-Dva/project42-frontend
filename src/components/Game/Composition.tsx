@@ -40,8 +40,7 @@ const GameComposition: React.FC<GameCompositionProps> = ({
       </div>
       <Box className="block_content block_scrollable_wrapper scrollbar-light">
         <Box className="block_scrollable_content">
-          <Box className="block_content_section"
-            style={{ display: 'flex', alignItems: 'center' }}>
+          <Box className="block_content_section">
             { roomData.cards.map((roomCard, i) => {
               const cardName = roomCard.card.name
               const cardDesc = roomCard.card.description

@@ -528,6 +528,11 @@ tr.dead span {
   position: relative;
 
   .block_content_section {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
     padding: 0 15px;
 
     &:first-of-type {
