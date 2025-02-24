@@ -59,7 +59,6 @@ const GameControls: React.FC<GameControlsProps> = ({
 
   const openEditComposition = () => setIsEditCompositionOpen(true)
   const closeEditComposition = async () => {
-    console.log(roomData.maxPlayers, slots, 'edit compo')
     if (roomData.maxPlayers !== slots) {
       const response = await updateMaxPlayers(slots, String(gameId), token)
       if (response.status !== 200) {

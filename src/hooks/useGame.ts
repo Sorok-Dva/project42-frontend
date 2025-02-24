@@ -364,6 +364,10 @@ export const useGame = (
       setIsNight(true)
     })
 
+    socket.on('updateCards', (cards: RoomCard[]) => {
+      setRoomData(prevRoom => ({ ...prevRoom, cards }))
+    })
+
     socket.on('alienList', (list: string[]) => {
       setAlienList(list)
     })
