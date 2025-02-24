@@ -41,6 +41,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
       .reduce((total, [, cardData]) => total + (cardData.quantity || 0), 0)
     const remainingSlots = slots - manualUsedSlots
 
+    if (manualUsedSlots > slots) setSlots(manualUsedSlots)
     if (remainingSlots > 0) {
       if (!cards[1] || cards[1].quantity !== remainingSlots) {
         setCards(prevCards => ({
