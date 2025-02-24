@@ -27,7 +27,8 @@ interface GameControlsProps {
   setGameStarted: (gameStarted: boolean) => void
   fetchGameDetails: () => void
   slots: number
-  setSlots: (slots : (prevSlots: number) => number) => void
+  setSlots: React.Dispatch<React.SetStateAction<number>>
+  setRoomData: React.Dispatch<React.SetStateAction<RoomData>>
 }
 
 /**
@@ -46,6 +47,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   setGameStarted,
   slots,
   setSlots,
+  setRoomData,
 }) => {
   const { token } = useAuth()
   const { user } = useUser()
@@ -56,7 +58,16 @@ const GameControls: React.FC<GameControlsProps> = ({
   const [isEditCompositionOpen, setIsEditCompositionOpen] = useState(false)
 
   const openEditComposition = () => setIsEditCompositionOpen(true)
-  const closeEditComposition = () => setIsEditCompositionOpen(false)
+  const closeEditComposition = async () => {
+    console.log(roomData.maxPlayers, slots, 'edit compo')
+    if (roomData.maxPlayers !== slots) {
+      const response = await updateMaxPlayers(slots, String(gameId), token)
+      if (response.status !== 200) {
+        setSlots(roomData.maxPlayers)
+      } else setRoomData({ ...roomData, maxPlayers: slots })
+    }
+    setIsEditCompositionOpen(false)
+  }
 
   const handleAddBot = async () => {
     if (!gameId || gameStarted || gameFinished) return

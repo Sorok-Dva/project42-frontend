@@ -14,7 +14,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
   const [error, setError] = useState<string | null>(null)
   const [cards, setCards] = useState<Record<number, RoomCard>>({})
   const [allCards, setAllCards] = useState<Record<number, Card>>({})
-  const { roomData, slots, setSlots } = useGameContext()
+  const { roomData, slots, setSlots, setRoomData } = useGameContext()
 
   useEffect(() => {
     const fetchCards = async () => {
@@ -32,20 +32,16 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
     fetchCards()
   }, [roomId])
 
+
   useEffect(() => {
-    // Calculer le nombre de places utilisées par les cartes manuelles (id != 1)
-    const usedSlots = Object.entries(cards)
+    if (!allCards[1]) return // On attend que la carte avec l'id 1 soit chargée
+
+    const manualUsedSlots = Object.entries(cards)
       .filter(([key]) => Number(key) !== 1)
       .reduce((total, [, cardData]) => total + (cardData.quantity || 0), 0)
-
-    console.log(usedSlots, slots)
-    if (usedSlots > slots) setSlots(usedSlots)
-
-    // Calculer le nombre de slots restants
-    const remainingSlots = slots - usedSlots
+    const remainingSlots = slots - manualUsedSlots
 
     if (remainingSlots > 0) {
-      // Mettre à jour (ou ajouter) la carte id 1 avec la quantité restante
       if (!cards[1] || cards[1].quantity !== remainingSlots) {
         setCards(prevCards => ({
           ...prevCards,
@@ -58,16 +54,18 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
           }
         }))
       }
-    } else {
-      // Si aucun slot restant, supprimer la carte id 1
-      if (cards[1]) {
-        setCards(prevCards => {
-          const updatedCards = { ...prevCards }
-          delete updatedCards[1]
-          return updatedCards
-        })
-      }
+    } else if (cards[1]) {
+      setCards(prevCards => {
+        const updatedCards = { ...prevCards }
+        delete updatedCards[1]
+        return updatedCards
+      })
     }
+
+    setRoomData(prevRoomData => ({
+      ...prevRoomData,
+      cards: Object.values(cards)
+    }))
   }, [slots, cards, allCards, roomId])
 
   const cardLimit = (id: number) => {
@@ -168,7 +166,6 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
           data-tooltip-id={String(i)}
           onClick={() => handleCardClick(i, number)}
         >
-          { slots }
           <div className="card_wrapper">
             {Array.from({ length: qtecards }).map((_, idx) => (
               <img key={idx} src={`/assets/images/carte${i}.png`} alt={`Carte ${i}`} />
