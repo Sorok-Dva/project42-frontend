@@ -6,7 +6,7 @@ import {
   startGame,
   setPlayerReady,
   transferCreatorRights,
-  updateMaxPlayers, updateRoomTimer,
+  updateMaxPlayers, updateRoomTimer, updateRoomCards,
 } from 'services/gameService'
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
@@ -65,6 +65,9 @@ const GameControls: React.FC<GameControlsProps> = ({
         setSlots(roomData.maxPlayers)
       } else setRoomData({ ...roomData, maxPlayers: slots })
     }
+
+    await updateRoomCards(roomData.cards, String(gameId), token)
+
     setIsEditCompositionOpen(false)
   }
 
