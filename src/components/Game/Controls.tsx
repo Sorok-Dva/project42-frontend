@@ -334,7 +334,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
                   { ['SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator']
                     .includes(user?.role as string) && (
-                    <Box>
+                    <Box style={{ width: '100%' }}>
                       <Box className="flex-row gutter">
                         { canEditGame && (
                           <Box className="button_secondary sound-tick">
