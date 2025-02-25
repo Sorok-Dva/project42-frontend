@@ -433,6 +433,7 @@ export const useGame = (
     alienList,
     slots,
     setSlots,
+    setPlayer,
     handlePasswordSubmit,
     setPassword,
     setGameError,
