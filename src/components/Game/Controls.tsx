@@ -14,6 +14,7 @@ import GameTimer from './Timer'
 import PhaseAction from './PhaseAction'
 import { PlayerType, RoomData } from 'hooks/useGame'
 import EditCompoModal from 'components/Game/EditComposition'
+import axios from 'axios'
 
 interface GameControlsProps {
   gameId: string | undefined
@@ -125,6 +126,9 @@ const GameControls: React.FC<GameControlsProps> = ({
       } catch (error) {
         console.error('Erreur lors du set updateMaxPlayers:', error)
         setSlots(prevSlots => prevSlots + 1)
+        if (axios.isAxiosError(error)) {
+          alert(error.response?.data.error)
+        }
       }
     }, 750)
   }
