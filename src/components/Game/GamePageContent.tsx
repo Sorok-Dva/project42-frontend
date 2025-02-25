@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom'
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
-import { GameProvider, useGameContext } from 'contexts/GameContext'
+import { useGameContext } from 'contexts/GameContext'
 
 import {
   fetchGameDetails,
@@ -20,7 +20,6 @@ import { getRandomColor } from 'utils/getRandomColor'
 import 'styles/Game.scss'
 import Composition from './Composition'
 import ViewersList from 'components/Game/ViewersList'
-import EditCompoModal from './EditComposition'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -88,6 +87,7 @@ const GamePage = () => {
     alienList,
     slots,
     setSlots,
+    setPlayer,
     handlePasswordSubmit,
     setPassword,
     setGameError,
@@ -121,8 +121,10 @@ const GamePage = () => {
   const handleFetchGameDetails = useCallback(async () => {
     if (!gameId) return
     try {
-      const data = await fetchGameDetails(gameId)
+      const data = await fetchGameDetails(gameId, token || undefined)
       setRoomData(data.room)
+      if (data.player) setPlayer(data.player)
+      setGameStarted(data.room.status === 'in_progress')
       setGameFinished(data.room.status === 'completed')
     } catch (error) {
       console.error('Erreur lors du fetchGameDetails: ', error)
