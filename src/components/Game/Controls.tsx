@@ -79,7 +79,6 @@ const GameControls: React.FC<GameControlsProps> = ({
         throw new Error('Vous n\'avez pas la permission d\'ajouter un bot')
       }
       await addBotToGame(gameId, token)
-      fetchGameDetails()
     } catch (error) {
       console.error('Erreur lors de l\'ajout du bot:', error)
     }
