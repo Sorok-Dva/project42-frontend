@@ -150,7 +150,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const removeTimer = () => {
-    if (!gameId || gameStarted || gameFinished || timer <= 3) return
+    if (!gameId || gameStarted || gameFinished || timer <= 2) return
 
     setTimer(prevTimer => prevTimer - 1)
 
@@ -163,7 +163,7 @@ const GameControls: React.FC<GameControlsProps> = ({
           setTimer(prevTimer => prevTimer + 1)
         }
       } catch (error) {
-        console.error('Erreur lors du set removeTimer:', error)
+        console.error('Erreur lors du removeTimer:', error)
         setTimer(prevTimer => prevTimer + 1)
       }
     }, 750)
