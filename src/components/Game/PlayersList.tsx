@@ -82,7 +82,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   className={ `list_player ${ !_player.alive ? 'player_dead': '' }` }
                   key={ index }
                 >
-                  { gameStarted && !_player.alive ? (
+                  { (gameStarted && !_player.alive) || gameFinished ? (
                     <img className="suspicious_card disabled"
                       src={`/assets/images/carte${_player.cardId}.png`}/>
                   ): gameStarted && !isNight && (
@@ -104,7 +104,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                       userSelect: 'none',
                     } }
                     onClick={ () => toggleHighlightPlayer(_player.nickname) }>✏</span>
-                  { !gameStarted  && _player.ready && (
+                  { !gameStarted && !gameFinished && _player.ready && (
                     <span className="player_ready" data-tooltip="Ce joueur est prêt">✔</span>
                   ) }
                   { !gameStarted
