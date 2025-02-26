@@ -65,6 +65,10 @@ const PlayersList: React.FC<PlayersListProps> = ({
     return acc
   }, {} as Record<string, number>)
 
+  const maxVotes = () : number => {
+    return Object.values(voteCounts).reduce((max, count) => Math.max(max, count), 0)
+  }
+
   return (
     <div id="block_players" className="block shadow bglightblue rounded">
       <div className="block_header">
@@ -77,6 +81,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
               <strong>{ players.filter(p => p.alive).length }/{ players.length } joueurs en vie</strong>
             )}
             { players.map((_player, index) => {
+              const mostVotes = (voteCounts[_player.nickname] === maxVotes()) ? ' most-voted' : ''
               return (
                 <div
                   className={ `list_player ${ !_player.alive ? 'player_dead': '' }` }
@@ -86,7 +91,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                     <img className="suspicious_card disabled"
                       src={`/assets/images/carte${_player.cardId}.png`}/>
                   ): gameStarted && !isNight && (
-                    <span className="votecount clickable"
+                    <span className={`votecount clickable${mostVotes}`}
                       data-tooltip="">{ voteCounts[_player.nickname] || 0 }</span>
                   ) }
 
