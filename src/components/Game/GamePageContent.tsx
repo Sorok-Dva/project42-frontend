@@ -352,6 +352,8 @@ const GamePage = () => {
                 messagesEndRef={messagesEndRef}
                 highlightedPlayers={highlightedPlayers}
                 isNight={isNight}
+                gameStarted={gameStarted}
+                gameFinished={gameFinished}
               />
             )}
           </Box>

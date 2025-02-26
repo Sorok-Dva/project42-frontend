@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { ListItem, ListItemText } from '@mui/material'
 import { Box, TextField, Typography } from '@mui/material'
 import { List } from '@mui/material'
-import { Socket } from 'socket.io-client'
 import { PlayerType, Viewer } from 'hooks/useGame'
 import { User } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
@@ -27,6 +26,8 @@ interface ChatProps {
   viewer?: Viewer
   userRole?: string
   isNight: boolean
+  gameStarted: boolean
+  gameFinished: boolean
   messages: Message[]
   messagesEndRef: React.RefObject<HTMLDivElement>
   highlightedPlayers: { [nickname: string]: string }
@@ -44,6 +45,8 @@ const Chat: React.FC<ChatProps> = ({
   messagesEndRef,
   highlightedPlayers,
   isNight,
+  gameStarted,
+  gameFinished,
 }) => {
   const { socket } = useSocket()
   const [newMessage, setNewMessage] = useState('')
@@ -81,7 +84,7 @@ const Chat: React.FC<ChatProps> = ({
         console.log('Channel to send', channelToSend)
         if (channelToSend === null) return
         // Si c'est la nuit et que le joueur est un loup, on envoie dans le canal des loups (1)
-        if (isNight && player?.card?.id === 2) channelToSend = 3
+        if (isNight && player?.card?.id === 2 && gameStarted && !gameFinished) channelToSend = 3
 
         console.log('sendMessage', {
           roomId: gameId,
