@@ -122,11 +122,13 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   useEffect(() => {
+    const uiTick = new Audio('/assets/sounds/ui-tick.mp3')
+
     const handleMouseOver = (event: MouseEvent) => {
       const target = (event.target as Element)?.closest('.sound-tick:not(.disabled)')
       if (target) {
-        const audio = new Audio('/assets/sounds/ui-tick.mp3')
-        audio.play()
+        uiTick.currentTime = 0
+        uiTick.play()
       }
     }
 
