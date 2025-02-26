@@ -40,7 +40,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
       .reduce((total, [, cardData]) => total + (cardData.quantity || 0), 0)
     const remainingSlots = slots - manualUsedSlots
 
-    if (manualUsedSlots > slots) setSlots(manualUsedSlots)
+    if (manualUsedSlots > slots && manualUsedSlots <= 24) setSlots(manualUsedSlots)
     if (remainingSlots > 0) {
       if (!cards[1] || cards[1].quantity !== remainingSlots) {
         setCards(prevCards => ({
@@ -67,6 +67,63 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
       cards: Object.values(cards)
     }))
   }, [slots, cards, allCards, roomId])
+
+  const updateAliens = (action: 'add' | 'remove') => {
+    const alienCardId = 2
+    if (!allCards[alienCardId]) {
+      console.error('La carte Alien n\'existe pas dans les cartes disponibles.')
+      return
+    }
+
+    setCards(prevCards => {
+      const newCards = { ...prevCards }
+
+      if (action === 'add') {
+        const totalCards = Object.values(newCards).reduce(
+          (sum, card) => sum + (card.quantity || 0),
+          0
+        )
+        if (totalCards + 1 > 24) {
+          const crewCard = newCards[1]
+          if (crewCard && crewCard.quantity > 0) {
+            if (crewCard.quantity === 1) {
+              delete newCards[1]
+            } else {
+              newCards[1] = { ...crewCard, quantity: crewCard.quantity - 1 }
+            }
+          } else {
+            console.error('Le nombre total de cartes ne peut pas dépasser 24.')
+            return prevCards
+          }
+        }
+      }
+
+      const currentAlienCard = newCards[alienCardId] || {
+        id: alienCardId,
+        quantity: 0,
+        roomId,
+        cardId: alienCardId,
+        card: allCards[alienCardId],
+      }
+
+      const updatedQuantity =
+        action === 'add'
+          ? currentAlienCard.quantity + 1
+          : Math.max(0, currentAlienCard.quantity - 1)
+
+      if (updatedQuantity === 0) {
+        const { [alienCardId]: _, ...restCards } = newCards
+        return restCards
+      }
+
+      newCards[alienCardId] = {
+        ...currentAlienCard,
+        quantity: updatedQuantity,
+      }
+
+      return newCards
+    })
+  }
 
   const cardLimit = (id: number) => {
     let limite = 0
@@ -194,8 +251,18 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
           <b>{allCards[i]?.name}</b>
           {i === 2 && (
             <div className="buttons_array small_array bglightblue">
-              <div className="decrement_wolves button array_clickable sound-tick sound-unselect" data-tooltip-id={String(i)} data-tooltip-content="Enlever un Loup-Garou">–</div>
-              <div className="increment_wolves button array_clickable sound-tick sound-select" data-tooltip-id={String(i)} data-tooltip-content="Ajouter un Loup-Garou">+</div>
+              <div
+                className="button array_clickable sound-tick sound-unselect"
+                data-tooltip-id={String(i)}
+                data-tooltip-content="Enlever un Loup-Garou"
+                onClick={() => updateAliens('remove')}
+              >–</div>
+              <div
+                className="button array_clickable sound-tick sound-select"
+                data-tooltip-id={String(i)}
+                data-tooltip-content="Ajouter un Loup-Garou"
+                onClick={() => updateAliens('add')}
+              >+</div>
             </div>
           )}
           {i === 19 && (

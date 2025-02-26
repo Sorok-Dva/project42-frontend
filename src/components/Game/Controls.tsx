@@ -60,16 +60,24 @@ const GameControls: React.FC<GameControlsProps> = ({
 
   const openEditComposition = () => setIsEditCompositionOpen(true)
   const closeEditComposition = async () => {
-    if (roomData.maxPlayers !== slots) {
-      const response = await updateMaxPlayers(slots, String(gameId), token)
-      if (response.status !== 200) {
-        setSlots(roomData.maxPlayers)
-      } else setRoomData({ ...roomData, maxPlayers: slots })
+    try {
+      if (roomData.maxPlayers !== slots) {
+        const response = await updateMaxPlayers(slots, String(gameId), token)
+        if (response.status !== 200) {
+          setSlots(roomData.maxPlayers)
+        } else setRoomData({ ...roomData, maxPlayers: slots })
+      }
+
+      await updateRoomCards(roomData.cards, String(gameId), token)
+
+      setIsEditCompositionOpen(false)
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        alert(e.response?.data.error)
+      } else {
+        alert(e)
+      }
     }
-
-    await updateRoomCards(roomData.cards, String(gameId), token)
-
-    setIsEditCompositionOpen(false)
   }
 
   const handleAddBot = async () => {
