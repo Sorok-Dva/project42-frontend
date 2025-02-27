@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { Box } from '@mui/material'
 import { usePermissions } from 'hooks/usePermissions'
 import {
@@ -15,6 +15,7 @@ import PhaseAction from './PhaseAction'
 import { PlayerType, RoomData } from 'hooks/useGame'
 import EditCompoModal from 'components/Game/EditComposition'
 import axios from 'axios'
+import CardImage from 'components/Game/CardImage'
 
 interface GameControlsProps {
   gameId: string | undefined
@@ -210,6 +211,9 @@ const GameControls: React.FC<GameControlsProps> = ({
     }
   }
 
+  const cardId = player?.card?.id
+  const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} />, [cardId])
+
   return (
     <Box id="block_actions">
       { !gameStarted && !gameFinished && (
@@ -382,8 +386,7 @@ const GameControls: React.FC<GameControlsProps> = ({
             className="shadow rounded bgblue game-started">
             <Box id="block_infos">
               <p className="wait_for_card_reveal">
-                          Vous
-                          êtes <strong>{ player.card?.name }</strong>.<br/>
+                Vous êtes <strong>{ player.card?.name }</strong>.<br/>
               </p>
               <GameTimer gameStarted={ gameStarted }
                 gameFinished={ gameFinished }/>
@@ -391,14 +394,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                 roomId={ Number(gameId!) }/>
             </Box>
           </Box>
-          <Box id="card_wrapper" className="card_animation">
-            <Box id="card_flipper" className="card_animation">
-              <img className="card_role"
-                src={ `/assets/images/carte${ player.card?.id }.png` }/>
-              <img className="card_anon"
-                src="/assets/images/carte0.png"/>
-            </Box>
-          </Box>
+          {memoizedCardImage}
         </>
       ): !player ? (
         <Box id="block_ia"
