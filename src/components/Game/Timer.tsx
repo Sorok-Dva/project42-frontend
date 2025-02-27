@@ -16,6 +16,9 @@ const GameTimer: React.FC<GameTimerProps> = ({
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const lastSoundPlayed = useRef<number | null>(null)
 
+  const bip1 = new Audio('/assets/sounds/bip1.mp3')
+  const bip2 = new Audio('/assets/sounds/bip2.mp3')
+
   useEffect(() => {
     if (!socket || !gameStarted|| gameFinished) return
 
@@ -31,8 +34,13 @@ const GameTimer: React.FC<GameTimerProps> = ({
 
         // 🔊 Jouer un son quand il reste 3s, 2s, ou 1s (évite de rejouer inutilement)
         if (newTimeLeft > 0 && newTimeLeft <= 3 && lastSoundPlayed.current !== newTimeLeft) {
-          const audio = new Audio(`/assets/sounds/${newTimeLeft === 1 ? 'bip2' : 'bip1'}.mp3`)
-          audio.play()
+          if (newTimeLeft === 1) {
+            bip2.currentTime = 0
+            bip2.play()
+          } else {
+            bip1.currentTime = 0
+            bip1.play()
+          }
           lastSoundPlayed.current = newTimeLeft
         }
       }
