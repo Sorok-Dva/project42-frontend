@@ -187,6 +187,8 @@ const Chat: React.FC<ChatProps> = ({
 
                 if (msg.channel === 1 && viewer) return true
 
+                if (msg.channel === 2 && player && !player.alive) return true
+
                 return false
               }).map((msg, index) => {
                 const cleanNickname = stripHTML(msg.nickname)
@@ -233,7 +235,7 @@ const Chat: React.FC<ChatProps> = ({
                     }}
                   >
                     {cleanNickname !== 'Système' && (
-                      <small>[{new Date(String(msg.createdAt)).toLocaleTimeString()}]{' '}</small>
+                      <span className="msg-date">[{new Date(String(msg.createdAt)).toLocaleTimeString()}]{' '}</span>
                     )}
 
                     {msg.icon && !msg.isMeneur && !msg.isPerso && (
@@ -253,7 +255,8 @@ const Chat: React.FC<ChatProps> = ({
                             __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname,
                           }}
                         ></b>
-                        {msg.channel === 1 && <span> (Spectateur)</span>}
+                        {msg.channel === 1 && <>&nbsp;<span className='chat-badge-specta'>Spectateur</span></>}
+                        {msg.channel === 2 && <>&nbsp;<span className='chat-badge-dead'>Mort</span></>}
                         {msg.channel === 3 && <span> (Alien)</span>}
                         {': '}
                       </>
