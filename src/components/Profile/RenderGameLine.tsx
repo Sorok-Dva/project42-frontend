@@ -1,15 +1,15 @@
 import React from 'react'
+import { Tooltip } from 'react-tooltip'
 
 interface Game {
   id: string;
-  mode: string;
   name: string;
   link: string;
   type: string;
   idRole: number;
   date: string;
   meanClaps: number;
-  state: string;
+  result: string;
 }
 
 interface RenderGameLineProps {
@@ -28,7 +28,8 @@ const RenderGameLine: React.FC<RenderGameLineProps> = ({ game, wasMdj = false, m
         href={game.link}
         target="_blank"
         rel="noopener noreferrer"
-        data-tooltip={!wasMdj || mdjLevel ? tooltipName : undefined}
+        data-tooltip-id={game.id}
+        data-tooltip-html={!wasMdj || mdjLevel ? tooltipName : undefined}
       >
         {!wasMdj ? (
           <img
@@ -74,7 +75,8 @@ const RenderGameLine: React.FC<RenderGameLineProps> = ({ game, wasMdj = false, m
             game.meanClaps !== -1 ? (
               <div
                 className="star-rating"
-                data-tooltip={`Moyenne de claps reçus : ${game.meanClaps}/50`}
+                data-tooltip-id="game-rating"
+                data-tooltip-content={`Moyenne de claps reçus : ${game.meanClaps}/50`}
               >
                 <span
                   style={{ width: `${game.meanClaps * 2}%` }}
@@ -87,14 +89,15 @@ const RenderGameLine: React.FC<RenderGameLineProps> = ({ game, wasMdj = false, m
           ) : (
             <b className="game-state label-gm">MDJ</b>
           )
-        ) : game.state === 'Victoire' ? (
-          <b className="game-state label-win">{game.state}</b>
-        ) : game.state === 'Égalité' ? (
-          <b className="game-state label-draw">{game.state}</b>
+        ) : game.result === 'Victoire' ? (
+          <b className="game-state label-win">{game.result}</b>
+        ) : game.result === 'Égalité' ? (
+          <b className="game-state label-draw">{game.result}</b>
         ) : (
-          <b className="game-state label-lose">{game.state}</b>
+          <b className="game-state label-lose">{game.result}</b>
         )}
       </a>
+      <Tooltip id={String(game.id)} />
     </li>
   )
 }
