@@ -22,7 +22,6 @@ interface User {
   role: { name: string };
   summaryHistory: [{
     id: string;
-    mode: string;
     date: string;
     result: string;
     name: string;
@@ -30,7 +29,6 @@ interface User {
     type: string;
     idRole: number;
     meanClaps: number;
-    state: string;
   }];
   stats: [{
     id: number;
@@ -192,121 +190,121 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                         </p>
                         <p></p>
                       </div>
+                    </div>
 
-                      <div className="fav-badges">
-                        <div className="badges">
-                          <div className="achievement_badge">
-                            {/* if achievement.unique*/}
-                            <div className="achievement_level">1</div>
-                            <img src="/assets/images/pictos/1.png"
-                              style={{ height: '20px' }}
-                              alt="Description"/>
-                          </div>
+                    <div className="fav-badges">
+                      <div className="badges">
+                        <div className="achievement_badge">
+                          {/* if achievement.unique*/}
+                          <div className="achievement_level">1</div>
+                          <img src="/assets/images/pictos/1.png"
+                            style={{ height: '20px' }}
+                            alt="Description"/>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="profil-info-game">
-                        {/* Dernières parties */}
-                        <div className="resume-last-game">
-                          {user.playedGames === 0 && selfProfile ? (
-                            <p>
+                    <div className="profil-info-game">
+                      {/* Dernières parties */}
+                      <div className="resume-last-game">
+                        {user.playedGames === 0 && selfProfile ? (
+                          <p>
                               Tu viens seulement de débarquer dans la station Mir.
-                              <br />
+                            <br />
                               Rejoins vite les autres explorateurs en partie !
-                            </p>
-                          ) : user.playedGames === 0 ? (
-                            <p>
-                              <strong>{user.nickname}</strong> vient seulement de débarquer dans la station Mir.
-                              <br />
-                              {user.isMale ? 'Il' : 'Elle'} n'a pas encore joué de partie.
-                            </p>
-                          ) : (
-                            <>
-                              <div className="games-bar">
-                                {user.stats.map((stat: { id: number, playedGames: number }) => {
-                                  const flexValue = Math.round((stat.playedGames / user.playedGames) * 100)
-                                  return (
-                                    <div
-                                      key={stat.id}
-                                      className={`games-bar-section type-${stat.id}`}
-                                      style={{ flex: flexValue }}
-                                    ></div>
-                                  )
-                                })}
-                              </div>
-                              {/* Récap des parties */}
-                              <div className="game-tableau">
-                                <ul className="last-games">
-                                  {user.summaryHistory.map((game) => (
-                                    <li key={game.id}>
-                                      <RenderGameLine game={game} />
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Stations */}
-                        <div className="hameau-user">
-                          {user.guild ? (
-                            <a
-                              className="profile-infos-hamlet"
-                              href={`/station?tag=${user.guild.tag}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <div
-                                className={`hamlet-banner ${
-                                  user.guild.border ? `hamlet-border-${user.guild.border}` : ''
-                                }`}
-                                style={{ backgroundImage: `url(${user.guild.picture})` }}
-                              ></div>
-                              <h2>
-                                {user.guild.name} <br />
-                                <small>[{user.guild.tag}]</small>
-                              </h2>
-                              <ul className="hamlet-details">
-                                <li data-tooltip={`Rôle de ${user.nickname} dans sa station`}>
-                                  <img src="/assets/images/icon-capitaine.png" alt="Rôle" />{' '}
-                                  {user.guild.role}
-                                  {user.guild.role !== 'maire' && !user.isMale ? 'e' : ''}
-                                </li>
-                                <li data-tooltip="Joueurs membres de la station">
-                                  <img src="/assets/images/icon-people.png" alt="Membres" /> {user.guild.membersCount}/100
-                                </li>
-                              </ul>
-                            </a>
-                          ) : selfProfile ? (
-                            // C'est mon profil et je n'ai pas de station
-                            <div>
-                              <p>
-                                <strong>Tu n’as pas de station spatiale.</strong>{' '}
-                                {user.level >= 3 ? (
-                                  <>
-                                    Rejoins-en un dès maintenant pour faire de nouvelles rencontres !
-                                  </>
-                                ) : (
-                                  <>Atteins le niveau 3 pour pouvoir en rejoindre une !</>
-                                )}
-                              </p>
-                              {user.level >= 3 && (
-                                <a className="button" href="/stations-spatiales" target="_blank" rel="noopener noreferrer">
-                                  Voir les stations spatiales
-                                </a>
-                              )}
+                          </p>
+                        ) : user.playedGames === 0 ? (
+                          <p>
+                            <strong>{user.nickname}</strong> vient seulement de débarquer dans la station Mir.
+                            <br />
+                            {user.isMale ? 'Il' : 'Elle'} n'a pas encore joué de partie.
+                          </p>
+                        ) : (
+                          <>
+                            <div className="games-bar">
+                              {user.stats.map((stat: { id: number, playedGames: number }) => {
+                                const flexValue = Math.round((stat.playedGames / user.playedGames) * 100)
+                                return (
+                                  <div
+                                    key={stat.id}
+                                    className={`games-bar-section type-${stat.id}`}
+                                    style={{ flex: flexValue }}
+                                  ></div>
+                                )
+                              })}
                             </div>
-                          ) : (
-                            // C'est le profil d'un autre et il n'a pas de hameau
+                            {/* Récap des parties */}
+                            <div className="game-tableau">
+                              <ul className="last-games">
+                                {user.summaryHistory.map((game) => (
+                                  <li key={game.id}>
+                                    <RenderGameLine game={game} />
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Stations */}
+                      <div className="hameau-user">
+                        {user.guild ? (
+                          <a
+                            className="profile-infos-hamlet"
+                            href={`/station?tag=${user.guild.tag}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <div
+                              className={`hamlet-banner ${
+                                user.guild.border ? `hamlet-border-${user.guild.border}` : ''
+                              }`}
+                              style={{ backgroundImage: `url(${user.guild.picture})` }}
+                            ></div>
+                            <h2>
+                              {user.guild.name} <br />
+                              <small>[{user.guild.tag}]</small>
+                            </h2>
+                            <ul className="hamlet-details">
+                              <li data-tooltip={`Rôle de ${user.nickname} dans sa station`}>
+                                <img src="/assets/images/icon-capitaine.png" alt="Rôle" />{' '}
+                                {user.guild.role}
+                                {user.guild.role !== 'maire' && !user.isMale ? 'e' : ''}
+                              </li>
+                              <li data-tooltip="Joueurs membres de la station">
+                                <img src="/assets/images/icon-people.png" alt="Membres" /> {user.guild.membersCount}/100
+                              </li>
+                            </ul>
+                          </a>
+                        ) : selfProfile ? (
+                        // C'est mon profil et je n'ai pas de station
+                          <div>
                             <p>
-                              <strong>{user.nickname} n'a aucune station.</strong>
-                              <br />
-                              <br />
-                              Ce joueur n'a rejoint aucune station spatiale !
+                              <strong>Tu n’as pas de station spatiale.</strong>{' '}
+                              {user.level >= 3 ? (
+                                <>
+                                    Rejoins-en un dès maintenant pour faire de nouvelles rencontres !
+                                </>
+                              ) : (
+                                <>Atteins le niveau 3 pour pouvoir en rejoindre une !</>
+                              )}
                             </p>
-                          )}
-                        </div>
+                            {user.level >= 3 && (
+                              <a className="button" href="/stations-spatiales" target="_blank" rel="noopener noreferrer">
+                                  Voir les stations spatiales
+                              </a>
+                            )}
+                          </div>
+                        ) : (
+                        // C'est le profil d'un autre et il n'a pas de hameau
+                          <p>
+                            <strong>{user.nickname} n'a aucune station.</strong>
+                            <br />
+                            <br />
+                              Ce joueur n'a rejoint aucune station spatiale !
+                          </p>
+                        )}
                       </div>
                     </div>
                   </>
