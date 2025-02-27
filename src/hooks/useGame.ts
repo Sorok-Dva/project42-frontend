@@ -372,6 +372,10 @@ export const useGame = (
       setAlienList(list)
     })
 
+    socket.on('dead', () => {
+      setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, alive: false } : null)
+    })
+
     socket.on('error', (error: any) => {
       setMessages((prev) => [
         ...prev,
