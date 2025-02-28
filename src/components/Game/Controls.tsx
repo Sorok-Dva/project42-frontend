@@ -1,12 +1,17 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { Box } from '@mui/material'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faHeart, faHeartCircleXmark } from '@fortawesome/free-solid-svg-icons'
 import { usePermissions } from 'hooks/usePermissions'
 import {
   addBotToGame,
   startGame,
   setPlayerReady,
   transferCreatorRights,
-  updateMaxPlayers, updateRoomTimer, updateRoomCards,
+  updateMaxPlayers,
+  updateRoomTimer,
+  updateRoomCards,
+  addFavoriteGame,
 } from 'services/gameService'
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
@@ -29,6 +34,7 @@ interface GameControlsProps {
   setGameStarted: (gameStarted: boolean) => void
   fetchGameDetails: () => void
   slots: number
+  isArchive: boolean
   setSlots: React.Dispatch<React.SetStateAction<number>>
   setRoomData: React.Dispatch<React.SetStateAction<RoomData>>
 }
@@ -50,6 +56,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   slots,
   setSlots,
   setRoomData,
+  isArchive,
 }) => {
   const { token } = useAuth()
   const { user } = useUser()
@@ -58,9 +65,15 @@ const GameControls: React.FC<GameControlsProps> = ({
   const canEditGame = checkPermission('game', 'edit')
   const [timer, setTimer] = useState<number>(3)
   const [isEditCompositionOpen, setIsEditCompositionOpen] = useState(false)
+  const [isFavoriteArchive, setIsFavoriteArchive] = useState<boolean>(false)
+  const [favoriteComment, setFavoriteComment] = useState<string>('')
 
-  const openEditComposition = () => setIsEditCompositionOpen(true)
+  const openEditComposition = () => {
+    if (!isCreator || isArchive) return
+    setIsEditCompositionOpen(true)
+  }
   const closeEditComposition = async () => {
+    if (!isCreator || isArchive) return
     try {
       if (roomData.maxPlayers !== slots) {
         const response = await updateMaxPlayers(slots, String(gameId), token)
@@ -96,9 +109,19 @@ const GameControls: React.FC<GameControlsProps> = ({
   const handleStartGame = async () => {
     if (!gameId || gameStarted || gameFinished || !canStartGame) return
     try {
-      await startGame(gameId)
+      await startGame(gameId, token)
       fetchGameDetails()
       setGameStarted(true)
+    } catch (error) {
+      alert(error)
+    }
+  }
+
+  const handleAddFavorite = async () => {
+    if (!gameId || gameStarted || !gameFinished || !isArchive) return
+    try {
+      addFavoriteGame(gameId, token)
+      setIsFavoriteArchive(!isFavoriteArchive)
     } catch (error) {
       alert(error)
     }
@@ -162,7 +185,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const removeTimer = () => {
-    if (!gameId || gameStarted || gameFinished || timer <= 2) return
+    if (!gameId || !isCreator || gameStarted || gameFinished || timer <= 2) return
 
     setTimer(prevTimer => prevTimer - 1)
 
@@ -182,7 +205,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const addTimer = () => {
-    if (!gameId || gameStarted || gameFinished || timer >= 5) return
+    if (!gameId || !isCreator || gameStarted || gameFinished || timer >= 5) return
 
     setTimer(prevTimer => prevTimer + 1)
 
@@ -209,6 +232,24 @@ const GameControls: React.FC<GameControlsProps> = ({
     } catch (error) {
       console.error('Erreur lors du transfert des droits de créateur:', error)
     }
+  }
+
+  const getGameDuration = () => {
+    if (!roomData) return
+
+    const start = new Date(roomData.createdAt).getTime()
+    const end = new Date(roomData.updatedAt).getTime()
+
+    if (isNaN(start) || isNaN(end)) return 'Durée invalide'
+
+    const diffMs = end - start
+
+    if (diffMs <= 0) return 'Durée invalide'
+
+    const minutes = Math.floor(diffMs / 60000)
+    const seconds = Math.floor((diffMs % 60000) / 1000)
+
+    return `${minutes} min ${seconds} sec`
   }
 
   const cardId = player?.card?.id
@@ -415,7 +456,64 @@ const GameControls: React.FC<GameControlsProps> = ({
             }
           </Box>
         </Box>
-      ): null }
+      ): <>
+        { isArchive && (() => {
+          const winStates: Record<number, string> = {
+            90: 'Les <b>Aliens infiltrés</b> ont gagné !',
+            91: 'Les <b>Membres de la station</b> ont gagné !',
+            92: 'Les <b>Amoureux</b> ont gagné !',
+            93: 'L\'<b>Ange</b> a gagné !',
+            99: 'Tout le monde est mort !',
+          }
+
+          return (
+            <Box id="block_ia" className="shadow rounded bgblue game-started spectator">
+              <Box id="block_infos">
+                <h3>Archive de la partie {roomData.name}</h3>
+                <Box style={{ marginTop: '4rem' }}>
+                  <h3 dangerouslySetInnerHTML={{ __html: winStates[roomData.phase] }} />
+                  <p><b>Durée de la partie</b>: {getGameDuration()}</p>
+                </Box>
+
+                <Box className="block_content_section mt-4">
+                  <Box
+                    className="button sound-tick rounded bglightblue heart"
+                    onClick={handleAddFavorite}
+                  >
+                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      { !isFavoriteArchive ? (
+                        <>
+                          <FontAwesomeIcon icon={faHeart} style={{ color: 'pink', fontSize: '1.5em' }} />
+                          Ajouter à mes favoris
+                        </>
+                      ): (
+                        <>
+                          <FontAwesomeIcon icon={faHeartCircleXmark} style={{ color: 'pink', fontSize: '1.5em' }} />
+                          Retirer de mes favoris
+                        </>
+                      )}
+                    </h3>
+                  </Box>
+                  { isFavoriteArchive && (
+                    <Box
+                      className="button sound-tick rounded bglightblue heart"
+                    >
+                      <textarea
+                        value={favoriteComment}
+                        onChange={(e) => setFavoriteComment(e.target.value)}
+                        placeholder="Un commentaire sur cette partie ? 😊"
+                        className="border rounded p-2 w-full"
+                        cols={40}
+                        rows={4}
+                      />
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+          )
+        })()}
+      </> }
 
       {isEditCompositionOpen && (
         <EditCompoModal roomId={roomData.id} onClose={closeEditComposition} />
