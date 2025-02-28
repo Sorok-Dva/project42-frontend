@@ -28,6 +28,7 @@ interface ChatProps {
   isNight: boolean
   gameStarted: boolean
   gameFinished: boolean
+  isArchive: boolean
   messages: Message[]
   messagesEndRef: React.RefObject<HTMLDivElement>
   highlightedPlayers: { [nickname: string]: string }
@@ -47,6 +48,7 @@ const Chat: React.FC<ChatProps> = ({
   isNight,
   gameStarted,
   gameFinished,
+  isArchive,
 }) => {
   const { socket } = useSocket()
   const [newMessage, setNewMessage] = useState('')
@@ -58,6 +60,7 @@ const Chat: React.FC<ChatProps> = ({
 
   const developerCommand = ['startPhase', 'endPhase', 'listCards']
   const handleSendMessage = () => {
+    if (isArchive) return
     const trimmedMessage = newMessage.trim()
     if (!trimmedMessage || !socket) return
 
@@ -283,7 +286,7 @@ const Chat: React.FC<ChatProps> = ({
           </Box>
         </Box>
       </Box>
-      { (player || viewer?.user?.id || (!player && ['SuperAdmin', 'Admin', 'Developer', 'Moderator', 'ModeratorTest'].includes(userRole as string))) && (
+      { (!isArchive && (player || viewer?.user?.id || (!player && ['SuperAdmin', 'Admin', 'Developer', 'Moderator', 'ModeratorTest'].includes(userRole as string)))) && (
         <div id="block_chat_post">
           <div className="chat_send">
             <TextField
