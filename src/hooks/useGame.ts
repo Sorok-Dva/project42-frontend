@@ -64,7 +64,15 @@ export interface RoomData {
   maxPlayers: number
   isPrivate: boolean
   password?: string
+  phase: number
   cards: RoomCard[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+function isDateMoreThan10MinutesOld(date: Date) {
+  const tenMinutesAgo = Date.now() - 600000
+  return new Date(date).getTime() < tenMinutesAgo
 }
 
 /**
@@ -85,6 +93,9 @@ export const useGame = (
     maxPlayers: 6,
     isPrivate: true,
     cards: [],
+    phase: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   })
   const [passwordRequired, setPasswordRequired] = useState(false)
   const [password, setPassword] = useState('')
@@ -107,6 +118,7 @@ export const useGame = (
   const [gameFinished, setGameFinished] = useState(false)
   const [alienList, setAlienList] = useState<string[]>([])
   const [slots, setSlots] = useState<number>(roomData.maxPlayers)
+  const [isArchive, setIsArchive] = useState<boolean>(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -251,6 +263,11 @@ export const useGame = (
           setSlots(data.room.maxPlayers)
 
           loadPlayersAndMessages(authorized)
+
+          if (data.room.status === 'completed'
+            && isDateMoreThan10MinutesOld(data.room.updatedAt)) {
+            setIsArchive(true)
+          }
         }
       } catch (err) {
         console.error('Erreur lors du fetchGameDetails : ', err)
@@ -436,6 +453,8 @@ export const useGame = (
     password,
     alienList,
     slots,
+    isArchive,
+    setIsArchive,
     setSlots,
     setPlayer,
     handlePasswordSubmit,
