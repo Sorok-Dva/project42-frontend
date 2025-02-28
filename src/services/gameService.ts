@@ -45,9 +45,11 @@ export const fetchChatMessages = async (gameId: string, token: string | null) =>
 /**
  * Lance la partie
  */
-export const startGame = async (gameId: string) => {
+export const startGame = async (gameId: string, token: string | null) => {
   try {
-    const response = await axios.post(`/api/games/room/${gameId}/start`)
+    const response = await axios.post(`/api/games/room/${gameId}/start`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
     return response.data
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
@@ -148,3 +150,18 @@ export const leaveGame = async (token: string | null) => {
   )
   return response.data
 }
+
+/**
+ * Ajoute la partie dans les favoris
+ */
+export const addFavoriteGame = async (gameId: string, token: string | null) => {
+  const response = await axios.post(
+    `/api/admin/games/favorite/${gameId}`,
+    {},
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  )
+  return response.data
+}
+
