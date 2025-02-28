@@ -86,6 +86,8 @@ const GamePage = () => {
     password,
     alienList,
     slots,
+    isArchive,
+    setIsArchive,
     setSlots,
     setPlayer,
     handlePasswordSubmit,
@@ -115,8 +117,14 @@ const GamePage = () => {
     setIsCreator(player?.nickname === creator?.nickname)
   }, [creator])
 
+  function isDateMoreThan10MinutesOld(date: Date) {
+    const tenMinutesAgo = Date.now() - 600000
+    return new Date(date).getTime() < tenMinutesAgo
+  }
+
   /**
    * Requête pour recharger certains détails du jeu (ex : titre, etc.)
+   * @todo check if this is used anymore
    */
   const handleFetchGameDetails = useCallback(async () => {
     if (!gameId) return
@@ -315,6 +323,7 @@ const GamePage = () => {
                 player={player}
                 gameStarted={gameStarted}
                 gameFinished={gameFinished}
+                isArchive={isArchive}
                 setGameStarted={setGameStarted}
                 slots={slots}
                 setSlots={setSlots}
@@ -354,6 +363,7 @@ const GamePage = () => {
                 isNight={isNight}
                 gameStarted={gameStarted}
                 gameFinished={gameFinished}
+                isArchive={isArchive}
               />
             )}
           </Box>
