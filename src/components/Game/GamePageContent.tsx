@@ -284,22 +284,24 @@ const GamePage = () => {
             [{GAME_TYPES[roomData.type]}] Partie : {roomData.name} ({players.length}/{slots})
           </Typography>
 
-          <Box display="flex" gap={2}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleClearChat}
-            >
-              ♻️
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleLeaveGame}
-            >
-              Quitter
-            </Button>
-          </Box>
+          {!isArchive && (
+            <Box display="flex" gap={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleClearChat}
+              >
+                ♻️
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleLeaveGame}
+              >
+                Quitter
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {/* Contenu principal */}
@@ -406,7 +408,7 @@ const GamePage = () => {
         width="100%"
       >
         <Typography variant="caption">
-          Partie #{gameId} - v{process.env.REACT_APP_GAME_VERSION} || {player?.nickname}
+          {!isArchive ? 'Partie' : 'Archive'} #{gameId} - v{process.env.REACT_APP_GAME_VERSION} || {player?.nickname}
         </Typography>
       </Box>
     </>
