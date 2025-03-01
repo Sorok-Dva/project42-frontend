@@ -393,6 +393,10 @@ export const useGame = (
       setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, alive: false } : null)
     })
 
+    socket.on('disolve', () => {
+      setError('Le salon a été détruit.')
+    })
+
     socket.on('error', (error: any) => {
       setMessages((prev) => [
         ...prev,
