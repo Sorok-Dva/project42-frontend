@@ -393,7 +393,7 @@ export const useGame = (
       setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, alive: false } : null)
     })
 
-    socket.on('disolve', () => {
+    socket.on('dissolve', () => {
       setGameError('Le salon a été détruit par la modération.')
     })
 
@@ -427,7 +427,7 @@ export const useGame = (
       socket.off('updateCards')
       socket.off('alienList')
       socket.off('dead')
-      socket.off('disolve')
+      socket.off('dissolve')
       socket.off('error')
     }
   }, [socket, gameId, user, player, hasJoined, isAuthorized, isNight, roomData.maxPlayers])
