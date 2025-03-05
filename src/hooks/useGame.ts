@@ -394,7 +394,7 @@ export const useGame = (
     })
 
     socket.on('disolve', () => {
-      setError('Le salon a été détruit.')
+      setGameError('Le salon a été détruit par la modération.')
     })
 
     socket.on('error', (error: any) => {
@@ -423,6 +423,7 @@ export const useGame = (
       socket.off('enableReadyOption')
       socket.off('enableStartGame')
       socket.off('nightStarted')
+      socket.off('disolve')
       socket.off('error')
     }
   }, [socket, gameId, user, player, hasJoined, isAuthorized, isNight, roomData.maxPlayers])
