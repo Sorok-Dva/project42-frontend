@@ -437,25 +437,6 @@ const GameControls: React.FC<GameControlsProps> = ({
           </Box>
           {memoizedCardImage}
         </>
-      ): !player ? (
-        <Box id="block_ia"
-          className="shadow rounded bgblue game-started spectator">
-          <Box id="block_infos">
-            { gameFinished ?
-              <b>La partie est terminée.</b>:
-              <>
-                <Box style={{ marginTop: '4rem' }}>
-                  <GameTimer gameStarted={ gameStarted }
-                    gameFinished={ gameFinished }/>
-                </Box>
-
-                <Box className="mt-4">
-                  <b>Vous êtes spectateur de la partie.</b>
-                </Box>
-              </>
-            }
-          </Box>
-        </Box>
       ): <>
         { isArchive && (() => {
           const winStates: Record<number, string> = {
