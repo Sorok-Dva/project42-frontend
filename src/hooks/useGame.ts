@@ -423,6 +423,10 @@ export const useGame = (
       socket.off('enableReadyOption')
       socket.off('enableStartGame')
       socket.off('nightStarted')
+      socket.off('gameFinished')
+      socket.off('updateCards')
+      socket.off('alienList')
+      socket.off('dead')
       socket.off('disolve')
       socket.off('error')
     }
