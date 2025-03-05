@@ -1,6 +1,6 @@
 export const ROLE_PERMISSIONS = {
   SuperAdmin: {
-    game: ['create', 'edit', 'delete', 'view', 'bypassPassword'],
+    game: ['create', 'edit', 'disolve', 'view', 'bypassPassword'],
     gamePowers: [
       'modo', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'giveRole', 'removeRole', 'editRole', 'seeRole',
@@ -16,7 +16,7 @@ export const ROLE_PERMISSIONS = {
     ],
   },
   Admin: {
-    game: ['create', 'edit', 'delete', 'view', 'bypassPassword'],
+    game: ['create', 'edit', 'disolve', 'view', 'bypassPassword'],
     gamePowers: [
       'modo', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'giveRole', 'removeRole', 'editRole', 'seeRole',
@@ -32,7 +32,7 @@ export const ROLE_PERMISSIONS = {
     ],
   },
   Developer: {
-    game: ['create', 'edit', 'delete', 'view', 'bypassPassword'],
+    game: ['create', 'edit', 'disolve', 'view', 'bypassPassword'],
     gamePowers: [
       'modo', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'giveRole', 'removeRole', 'editRole', 'seeRole',
@@ -48,7 +48,7 @@ export const ROLE_PERMISSIONS = {
     ],
   },
   Moderator: {
-    game: ['create', 'edit', 'delete', 'view', 'bypassPassword'],
+    game: ['create', 'edit', 'disolve', 'view', 'bypassPassword'],
     gamePowers: [
       'modo', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'giveRole', 'removeRole', 'editRole', 'seeRole',
