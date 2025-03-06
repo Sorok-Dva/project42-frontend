@@ -128,6 +128,12 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
   const cardLimit = (id: number) => {
     let limite = 0
     switch (id) {
+    case 16:
+      limite = 10
+      break
+    case 17:
+      limite = 10
+      break
     case 19:
       limite = 8
       break
@@ -136,18 +142,6 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
       break
     case 21:
       limite = 10
-      break
-    case 22:
-      limite = 10
-      break
-    case 26:
-      limite = 11
-      break
-    case 29:
-      limite = 10
-      break
-    case 31:
-      limite = 12
       break
     default:
       break
@@ -204,9 +198,9 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
         dataTooltip = 'Le nombre de Membre d\'équipage est automatique.'
 
       let qtecards = 1
-      if (i === 1 || i === 2 || i === 22) {
+      if (i === 1 || i === 2 || i === 16) {
         qtecards = 2
-      } else if (i === 26) {
+      } else if (i === 17) {
         qtecards = 3
       }
 
@@ -224,12 +218,12 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
             {Array.from({ length: qtecards }).map((_, idx) => (
               <img key={idx} src={`/assets/images/carte${i}.png`} alt={`Carte ${i}`} />
             ))}
-            {i === 22 && (
+            {i === 16 && (
               <div className="role_amount">
                 <span>2</span>
               </div>
             )}
-            {i === 26 && (
+            {i === 17 && (
               <div className="role_amount">
                 <span>3</span>
               </div>
@@ -266,12 +260,6 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
             <div className="buttons_array small_array bglightblue">
               <div className="decrement_angels button array_clickable sound-tick sound-unselect" data-tooltip-id={String(i)} data-tooltip-content="Enlever un Ange">–</div>
               <div className="increment_angels button array_clickable sound-tick sound-select" data-tooltip-id={String(i)} data-tooltip-content="Ajouter un Ange">+</div>
-            </div>
-          )}
-          {i === 29 && (
-            <div className="buttons_array small_array bglightblue">
-              <div className="decrement_judges button array_clickable sound-tick sound-unselect" data-tooltip-id={String(i)} data-tooltip-content="Enlever un Juge">–</div>
-              <div className="increment_judges button array_clickable sound-tick sound-select" data-tooltip-id={String(i)} data-tooltip-content="Ajouter un Juge">+</div>
             </div>
           )}
           <Tooltip id={String(i)} />
