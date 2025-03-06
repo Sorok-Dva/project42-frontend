@@ -31,6 +31,7 @@ export interface PlayerType {
   ready: boolean
   alive: boolean
   card?: { id: number; name: string; description: string; }
+  inLove: boolean
 }
 
 export interface Viewer {

@@ -10,6 +10,7 @@ interface Player {
   alive: boolean
   cardId?: number
   target?: string
+  inLove: boolean
 }
 
 interface PlayersListProps {
@@ -104,14 +105,15 @@ const PlayersList: React.FC<PlayersListProps> = ({
                     <b className="canal_3">{ ' ' }(Alien)</b>
                   ) }
 
-                  { coupleList.includes(_player.nickname) && (
+                  { (coupleList.includes(_player.nickname) || _player.inLove) && (
                     <>
                       <div className="badge-lovers"
-                        data-tooltip-content="Vous êtes un couple !"
+                        data-tooltip-content={_player.inLove ? 'Ce joueur était en couple.' : 'Vous êtes un couple !'}
                         data-tooltip-id="lover"></div>
                       <Tooltip id="lover" />
                     </>
                   ) }
+
                   { !isNight && _player.target && (
                     <span className="vote-for">{' '} → { _player.target }</span>
                   ) }
