@@ -128,9 +128,6 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
   const cardLimit = (id: number) => {
     let limite = 0
     switch (id) {
-    case 15:
-      limite = 12
-      break
     case 19:
       limite = 8
       break
@@ -328,16 +325,16 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
             </div>
             <div className="compo_category">
               <h3>Personnages solitaires</h3>
-              {renderCards([9, 15, 19, 31])}
+              {renderCards([9, 15, 19])}
             </div>
             <div className="compo_category">
               <h3>Autres</h3>
-              {renderCards([11, 16, 25])}
+              {renderCards([11])}
             </div>
           </div>
           <div className="compo_category">
             <h3>Innocents</h3>
-            {renderCards([1, 3, 4, 5, 6, 7, 8, 10, 12, 13, 14, 17, 18, 22, 23, 24, 26, 27, 28, 29, 32, 33, 34])}
+            {renderCards([1, 3, 4, 5, 6, 7, 8, 10, 12, 13, 16, 17])}
           </div>
         </div>
       </div>
