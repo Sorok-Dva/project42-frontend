@@ -85,6 +85,7 @@ const GamePage = () => {
     isAuthorized,
     password,
     alienList,
+    coupleList,
     slots,
     isArchive,
     setIsArchive,
@@ -392,6 +393,7 @@ const GamePage = () => {
               gameStarted={gameStarted}
               gameFinished={gameFinished}
               alienList={alienList}
+              coupleList={coupleList}
               isNight={isNight}
             />
           </Box>

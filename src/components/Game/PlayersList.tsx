@@ -2,6 +2,7 @@ import React from 'react'
 import { Socket } from 'socket.io-client'
 import ViewersList from 'components/Game/ViewersList'
 import { Viewer } from 'hooks/useGame'
+import { Tooltip } from 'react-tooltip'
 
 interface Player {
   nickname: string
@@ -26,6 +27,7 @@ interface PlayersListProps {
   toggleHighlightPlayer: (nickname: string) => void
   highlightedPlayers: { [nickname: string]: string }
   alienList: string[]
+  coupleList: string[]
   isNight: boolean
 }
 
@@ -43,6 +45,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   toggleHighlightPlayer,
   highlightedPlayers,
   alienList,
+  coupleList,
   isNight,
 }) => {
   const handleKickPlayer = (nickname: string) => {
@@ -99,6 +102,15 @@ const PlayersList: React.FC<PlayersListProps> = ({
                     data-profile={ _player.nickname }>{ _player.nickname }</span>
                   { alienList.includes(_player.nickname) && (
                     <b className="canal_3">{ ' ' }(Alien)</b>
+                  ) }
+
+                  { coupleList.includes(_player.nickname) && (
+                    <>
+                      <div className="badge-lovers"
+                        data-tooltip-content="Vous êtes un couple !"
+                        data-tooltip-id="lover"></div>
+                      <Tooltip id="lover" />
+                    </>
                   ) }
                   { !isNight && _player.target && (
                     <span className="vote-for">{' '} → { _player.target }</span>

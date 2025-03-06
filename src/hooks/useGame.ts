@@ -117,6 +117,7 @@ export const useGame = (
   const [gameStarted, setGameStarted] = useState(false)
   const [gameFinished, setGameFinished] = useState(false)
   const [alienList, setAlienList] = useState<string[]>([])
+  const [coupleList, setCoupleList] = useState<string[]>([])
   const [slots, setSlots] = useState<number>(roomData.maxPlayers)
   const [isArchive, setIsArchive] = useState<boolean>(false)
 
@@ -389,6 +390,10 @@ export const useGame = (
       setAlienList(list)
     })
 
+    socket.on('coupleList', (list: string[]) => {
+      setCoupleList(list)
+    })
+
     socket.on('dead', () => {
       setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, alive: false } : null)
     })
@@ -426,6 +431,7 @@ export const useGame = (
       socket.off('gameFinished')
       socket.off('updateCards')
       socket.off('alienList')
+      socket.off('coupleList')
       socket.off('dead')
       socket.off('dissolve')
       socket.off('error')
@@ -461,6 +467,7 @@ export const useGame = (
     isAuthorized,
     password,
     alienList,
+    coupleList,
     slots,
     isArchive,
     setIsArchive,
