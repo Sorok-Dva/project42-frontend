@@ -64,17 +64,34 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   }, [socket, user, player, roomId])
 
   const handleSelectionChange = (event: any) => {
-    setSelectedTargets(event.target.value)
+    const { value } = event.target
+    setSelectedTargets(typeof value === 'string' ? value.split(',').map(Number) : value)
   }
 
   const handleSubmit = () => {
     if (!socket || !actionRequest) return
-    socket.emit('phaseActionResponse', {
+    const payload: any = {
       roomId,
       playerId: user!.id,
       actionCard: actionRequest.action.card,
-      targets: selectedTargets,
-    })
+    }
+
+    // Gestion spécifique pour Cupidon (carte 7)
+    if (actionRequest.action.card === 7) {
+      if (selectedTargets.length !== 2) {
+        alert('Veuillez sélectionner exactement deux joueurs.')
+        return
+      }
+      socket.emit('phaseActionResponse', {
+        ...payload,
+        targets: selectedTargets,
+      })
+    } else {
+      socket.emit('phaseActionResponse', {
+        ...payload,
+        targetId: selectedTargets[0] ?? -1,
+      })
+    }
   }
 
   if (!actionRequest) return null
