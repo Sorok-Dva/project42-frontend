@@ -65,6 +65,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
 
   const handleSelectionChange = (event: any) => {
     const { value } = event.target
+    console.log('value', value)
     setSelectedTargets(typeof value === 'string' ? value.split(',').map(Number) : value)
   }
 
@@ -89,7 +90,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     } else {
       socket.emit('phaseActionResponse', {
         ...payload,
-        targetId: selectedTargets[0] ?? -1,
+        targetId: selectedTargets ?? -1,
       })
     }
   }
