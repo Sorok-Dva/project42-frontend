@@ -26,6 +26,17 @@ const LossPointsNotif = ({ points }: { points: number }) => (
   </Link>
 )
 
+const AchievementNotif = ({
+  title,
+  content,
+  id,
+}: { title: string, content: string, id: number }) => (
+  <div className="msg-container">
+    <img src={`/assets/images/pictos/${ id }.png`} style={{ height: '20px', marginRight: '5px' }} />
+    <b>{title}</b>: <span dangerouslySetInnerHTML={{ __html: content }} />
+  </div>
+)
+
 const Notifications = ({ token }: { token: string }) => {
   useEffect(() => {
     if (token === 'undefined') return
@@ -52,6 +63,9 @@ const Notifications = ({ token }: { token: string }) => {
               break
             case 'lossPoints':
               toast.warn(<LossPointsNotif points={ data.points }/>)
+              break
+            case 'achievement':
+              toast.info(<AchievementNotif title={ data.title } content={ data.content } id={ data.id }/>)
               break
             default:
               console.warn('Unhandled event type:', data.event)
