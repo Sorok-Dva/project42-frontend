@@ -13,6 +13,7 @@ interface Message {
   channel: number
   isMeneur: boolean
   isPerso: boolean
+  isMsgSite: boolean
   icon: string | null
   createdAt: Date
 }
@@ -265,8 +266,18 @@ const Chat: React.FC<ChatProps> = ({
                       </>
                     )}
 
-                    {msg.isMeneur || msg.isPerso ? (
-                      <div className={msg.isMeneur ? 'canal_meneur' : 'canal_perso'}>
+                    {(msg.isMeneur || msg.isPerso || msg.isMsgSite) ? (
+                      <div
+                        className={
+                          msg.isMeneur
+                            ? 'canal_meneur'
+                            : msg.isPerso
+                              ? 'canal_perso'
+                              : msg.isMsgSite
+                                ? 'canal_msg_site'
+                                : ''
+                        }
+                      >
                         {msg.icon && (
                           <img
                             src={`/assets/images/${msg.icon}`}

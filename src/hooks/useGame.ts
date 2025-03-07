@@ -16,6 +16,7 @@ export interface Message {
   icon: string | null
   isMeneur: boolean
   isPerso: boolean
+  isMsgSite: boolean
   createdAt: Date
 }
 
@@ -317,6 +318,7 @@ export const useGame = (
           icon: data.icon,
           isMeneur: false,
           isPerso: false,
+          isMsgSite: false,
           createdAt: new Date(),
         },
       ])
@@ -414,6 +416,7 @@ export const useGame = (
           channel: 0,
           isPerso: true,
           isMeneur: false,
+          isMsgSite: false,
           createdAt: new Date(),
         },
       ])
