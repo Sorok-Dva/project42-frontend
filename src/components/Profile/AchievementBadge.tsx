@@ -18,12 +18,12 @@ interface AchievementBadgeProps {
 
 const AchievementBadge : React.FC<AchievementBadgeProps> = ({
   achievement,
-  isMemory = false,
+  isMemory,
 }) => {
   if (achievement.level === 0) return null
 
   const memoryClass = isMemory ? 'souvenir': ''
-
+  console.log('memoryClass', memoryClass)
   // Pour la tooltip, on reconstruit en HTML la représentation du badge
   const levelHtml = !achievement.unique ? `<div class="achievement_level">${ achievement.level }</div>`: ''
   const badgeHtmlString = `<div class="achievement_badge ${ memoryClass }">
