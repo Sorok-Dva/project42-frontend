@@ -14,6 +14,7 @@ export const ROLE_PERMISSIONS = {
       'music', 'video', 'image', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer',
     ],
+    site: ['achievement'],
   },
   Admin: {
     game: ['create', 'edit', 'dissolve', 'view', 'bypassPassword'],
@@ -30,6 +31,7 @@ export const ROLE_PERMISSIONS = {
       'music', 'video', 'image', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer',
     ],
+    site: ['achievement'],
   },
   Developer: {
     game: ['create', 'edit', 'dissolve', 'view', 'bypassPassword'],
@@ -46,6 +48,7 @@ export const ROLE_PERMISSIONS = {
       'music', 'video', 'image', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer',
     ],
+    site: ['achievement'],
   },
   Moderator: {
     game: ['create', 'edit', 'dissolve', 'view', 'bypassPassword'],
@@ -56,6 +59,7 @@ export const ROLE_PERMISSIONS = {
     ],
     godPowers: [],
     animationPowers: [],
+    site: [],
   },
   ModeratorTest: {
     game: ['create', 'edit', 'view'],
@@ -64,27 +68,31 @@ export const ROLE_PERMISSIONS = {
     ],
     godPowers: [],
     animationPowers: [],
+    site: [],
   },
   Animator: {
     game: ['create', 'view'],
-    gamePowers: [ 'addTimer', 'removeTimer', 'setTimer', 'message', 'messageTo'],
+    gamePowers: [ 'addTimer', 'removeTimer', 'setTimer', 'message', 'messageTo' ],
     godPowers: ['setNight', 'setDay',],
     animationPowers: [
       'music', 'video', 'image', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer',
     ],
+    site: [],
   },
   User: {
     game: ['create', 'view'],
     gamePowers: [],
     godPowers: [],
     animationPowers: [],
+    site: [],
   },
   Banned: {
     game: ['view'],
     gamePowers: [],
     godPowers: [],
     animationPowers: [],
+    site: [],
   },
 } as const satisfies {
   [role: string]: {
