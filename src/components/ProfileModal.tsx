@@ -7,7 +7,19 @@ import 'styles/Modal.css'
 import '../styles/ProfileModal.scss'
 import { rolify } from 'utils/rolify'
 import RenderGameLine from 'components/Profile/RenderGameLine'
+import AchievementBadge from 'components/Profile/AchievementBadge'
+import Actions from './Profile/Actions'
 
+interface AchievementResult { [favorite: number]:  {
+    id: number
+    description: string
+    total: number
+    unique: boolean
+    memory: boolean
+    level: number
+    title?: string | { [level: number]: string }
+    nextLevelTo?: number
+  } }
 interface User {
   nickname: string;
   points: number;
@@ -19,6 +31,7 @@ interface User {
   isMale: boolean;
   rank: string;
   playedGames: number;
+  canGuildInvite: boolean;
   role: { name: string };
   summaryHistory: [{
     id: string;
@@ -35,13 +48,26 @@ interface User {
     playedGames: number;
   }],
   guild: {
+    id: number;
     name: string;
     tag: string;
     picture: string;
     border: string;
     role: string;
     membersCount: string;
-  }
+  },
+  achievements: {
+    favorites: AchievementResult,
+    possessed: [{
+      id: string
+      title: string
+      description: string
+      unique: boolean
+      level: number
+      total?: number
+      nextLevelTo?: number
+    }]
+  },
   createdAt: Date;
 }
 
@@ -193,15 +219,24 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                     </div>
 
                     <div className="fav-badges">
-                      <div className="badges">
-                        <div className="achievement_badge">
-                          {/* if achievement.unique*/}
-                          <div className="achievement_level">1</div>
-                          <img src="/assets/images/pictos/1.png"
-                            style={{ height: '20px' }}
-                            alt="Description"/>
-                        </div>
-                      </div>
+                      {Object.values(user.achievements.favorites).length > 0 ? (
+                        Object.values(user.achievements.favorites).map((a, index) => (
+                          <div className="badges" key={index}>
+                            <div className="achievement_badge">
+                              <AchievementBadge achievement={a} />
+                            </div>
+                          </div>
+                        ))
+                      ) : selfProfile ? (
+                        <p>
+                          Tu n'as pas encore indiqué quels étaient tes badges favoris.
+                          Fais le vite dans l'onglet <strong>Badges et titre</strong> de ton Compte !
+                        </p>
+                      ) : (
+                        <p>
+                          <strong>{user.nickname}</strong> n'a pas encore décidé quels talents {user.isMale ? 'il' : 'elle'} souhaitait mettre en avant.
+                        </p>
+                      )}
                     </div>
 
                     <div className="profil-info-game">
@@ -307,6 +342,8 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                         )}
                       </div>
                     </div>
+
+                    <Actions data={user} relation='me' />
                   </>
                 ): (
                   <div
@@ -326,6 +363,8 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                 )}
               </div>
             </div>
+
+            {/*<ProfileDetails user={user} relation='me' renderAchievement={} />*/}
           </div>
         </div>
       </div>
