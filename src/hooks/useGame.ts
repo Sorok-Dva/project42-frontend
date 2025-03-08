@@ -330,6 +330,9 @@ export const useGame = (
     })
 
     socket.on('newMessage', (message) => {
+      if (message.channel === 2 && isNight) {
+        socket.emit('shaman_listen', message)
+      }
       setMessages((prev) => [...prev, message])
       if (message.sound) {
         const audio = new Audio(`/assets/sounds/${message.sound}.mp3`)
