@@ -292,12 +292,14 @@ USER PROFILE MODAL
       padding: 10px 15px 15px 15px;
       border-radius: 15px;
       background-color: #0e1735;
-      height: 75px;
+      min-height: 75px; // temp, replace by height
       margin: 2vh auto;
       display: flex;
       flex-direction: row;
+      flex-wrap: wrap; // temp
       justify-content: center;
       align-items: center;
+      width: 500px;
 
       .badges {
         margin: 0.5vh 0.2vh 0 0.2vh;
