@@ -112,25 +112,29 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   return (
     <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', mt: 2 }}>
       <Typography variant="h6">{actionRequest.action.message}</Typography>
-      <FormControl fullWidth sx={{ mt: 1 }}>
-        <InputLabel id="phase-action-select-label">Sélectionnez</InputLabel>
-        <Select
-          labelId="phase-action-select-label"
-          multiple={actionRequest.action.targetCount > 1}
-          value={selectedTargets}
-          label="Sélectionnez"
-          onChange={handleSelectionChange}
-        >
-          {actionRequest.eligibleTargets.map((target) => (
-            <MenuItem key={target.id} value={target.id}>
-              {target.nickname}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={handleSubmit}>
-        Valider
-      </Button>
+      { actionRequest.action.targetCount > 0 && (
+        <>
+          <FormControl fullWidth sx={{ mt: 1 }}>
+            <InputLabel id="phase-action-select-label">Sélectionnez</InputLabel>
+            <Select
+              labelId="phase-action-select-label"
+              multiple={actionRequest.action.targetCount > 1}
+              value={selectedTargets}
+              label="Sélectionnez"
+              onChange={handleSelectionChange}
+            >
+              {actionRequest.eligibleTargets.map((target) => (
+                <MenuItem key={target.id} value={target.id}>
+                  {target.nickname}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={handleSubmit}>
+            Valider
+          </Button>
+        </>
+      )}
     </Box>
   )
 }
