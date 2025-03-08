@@ -193,9 +193,15 @@ const Chat: React.FC<ChatProps> = ({
 
                 if (msg.channel === 2 && player && !player.alive) return true
 
+                if (msg.channel === 2 && player && player?.card?.id === 10 && isNight) return true
+
                 return false
               }).map((msg, index) => {
-                const cleanNickname = stripHTML(msg.nickname)
+                let cleanNickname = stripHTML(msg.nickname)
+                if (msg.channel === 2
+                  && player
+                  && player?.card?.id === 10
+                  && isNight) cleanNickname = '(Anonyme)'
                 const escapedMessage = stripHTML(msg.message)
 
                 const highlightColor = cleanNickname ? highlightedPlayers[cleanNickname] : 'transparent'
