@@ -127,7 +127,7 @@ const Chat: React.FC<ChatProps> = ({
     if (
       [
         'kick', 'ban', 'mute', 'unmute', 'nick', 'crea', 'card',
-        'kill', 'revive',
+        'kill', 'revive', 'achievement'
       ].includes(command)
       && !hasAdditionalArgs
     ) {
