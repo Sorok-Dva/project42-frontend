@@ -85,18 +85,14 @@ const Chat: React.FC<ChatProps> = ({
         }
       } else {
         let channelToSend = player ? 0 : viewer ? 1 : null
-        console.log('Channel to send', channelToSend)
         if (channelToSend === null) return
-        // Si c'est la nuit et que le joueur est un loup, on envoie dans le canal des loups (1)
-        if (isNight && player?.card?.id === 2 && gameStarted && !gameFinished) channelToSend = 3
+        // Si c'est la nuit et que le joueur est un alien, on envoie dans le canal des aliens (1)
+        if (isNight
+          && [2, 9, 20, 21].includes(player?.card?.id || -1)
+          && gameStarted
+          && !gameFinished
+        ) channelToSend = 3
 
-        console.log('sendMessage', {
-          roomId: gameId,
-          playerId,
-          viewer,
-          content: trimmedMessage,
-          channel: channelToSend,
-        })
         socket.emit('sendMessage', {
           roomId: gameId,
           playerId,
@@ -187,7 +183,7 @@ const Chat: React.FC<ChatProps> = ({
 
                 // Si le message est envoyé dans le canal des loups (channel === 3)
                 // on vérifie que le joueur connecté est un loup.
-                if (msg.channel === 3 && player?.card?.id === 2) return true
+                if (msg.channel === 3 && player && [2, 9, 20, 21].includes(player.card?.id || -1)) return true
 
                 if (msg.channel === 1 && viewer) return true
 
@@ -196,6 +192,8 @@ const Chat: React.FC<ChatProps> = ({
                 if (msg.channel === 2 && player && player?.card?.id === 10 && player.alive && isNight) return true
 
                 if (msg.channel === 3 && player && player?.card?.id === 12 && player.alive && isNight) return true
+
+                if (gameFinished) return true
 
                 return false
               }).map((msg, index) => {
