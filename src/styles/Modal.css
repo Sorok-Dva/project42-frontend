@@ -58,4 +58,17 @@
 .modal-content {
   padding: 1rem 1.5rem 1.5rem;
   overflow: auto;
+  max-height: 82vh;
+}
+
+.profile-info {
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.profile-tabs {
+  width: 100%;
+  margin-top: 20px;
+  text-align: center;
 }

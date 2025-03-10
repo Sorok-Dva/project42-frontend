@@ -1,22 +1,24 @@
-import React from 'react'
+import React, { useState } from 'react'
+import renderGameLine from 'components/Profile/RenderGameLine'
+import AchievementBadge from 'components/Profile/AchievementBadge'
+import { Tooltip } from 'react-tooltip'
 
 interface ProfileDetailsProps {
   user: any;
   relation: string; // 'me', 'none', 'waiting', 'friend', etc.
-  renderGamesBar: (gamesStatistics: any[], playedGames: number) => JSX.Element;
-  renderGameLine: (game: any, isMdj: boolean) => JSX.Element;
-  renderArchivesLink: () => JSX.Element;
-  renderAchievement: (achievement: any, isSouvenir?: boolean) => JSX.Element;
 }
 
 const ProfileDetails: React.FC<ProfileDetailsProps> = ({
   user,
   relation,
-  renderGamesBar,
-  renderGameLine,
-  renderArchivesLink,
-  renderAchievement,
 }) => {
+  const [detailsIsShown, setDetailsIsShown] = useState(false)
+  const [activeTab, setActiveTab] = useState('player') // onglet actif par défaut
+
+  const showDetails = () => {
+    setDetailsIsShown(!detailsIsShown)
+  }
+
   // Calcul des statistiques par cartes
   const cardsStatistics = user.cardsStatistics.reduce((acc: any, game: any) => {
     const { idRole, state } = game
@@ -47,11 +49,11 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
   const calculatedStats = calculateRatios({ ...cardsStatistics })
 
   // Séparation des badges et souvenirs
-  const badgesArray = Object.values(user.achievements.possedes).filter(
-    (a: any) => !a.souvenir
+  const badgesArray = Object.values(user.achievements.possessed).filter(
+    (a: any) => !a.memory
   )
-  const souvenirsArray = Object.values(user.achievements.possedes).filter(
-    (a: any) => a.souvenir
+  const memoriesArray = Object.values(user.achievements.possessed).filter(
+    (a: any) => a.memory
   )
 
   return (
@@ -59,45 +61,72 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
       {/* Bouton Voir Plus */}
       <div className="voir-plus">
         <hr />
-        <div className="voir-plus-buttons buttons" user-state="hidden">
-          <a className="button_secondary">Voir plus de détails</a>
+        <div className="voir-plus-buttons buttons" onClick={showDetails}>
+          <a className="button_secondary">
+            {detailsIsShown ? 'Masquer les détails' : 'Voir plus de détails'}
+          </a>
         </div>
       </div>
 
       {/* Contenu des onglets caché par défaut */}
-      <div id="contenu-voir-plus" style={{ display: 'none' }}>
+      <div id="contenu-voir-plus" style={ detailsIsShown ? { display: 'block' } : { display: 'none' } }>
         {/* Liste des onglets */}
         <ul id="tabs_profile">
-          <li className="active" id="profile_player_button" user-content="profile_player">
+          <li
+            className={activeTab === 'player' ? 'active' : ''}
+            onClick={() => setActiveTab('player')}
+            id="profile_player_button"
+          >
             Joueur
           </li>
+          {/* Si nécessaire, décommenter et adapter l'onglet MDJ */}
+          {/*
           {user.mdj.history.length === 0 ? (
             <li
               id="profile_gm_button"
-              className="mdjdisabled"
+              className={`mdjdisabled ${activeTab === 'gm' ? 'active' : ''}`}
               user-tooltip={
                 relation === 'me'
                   ? 'Anime des parties pour débloquer cet onglet'
                   : 'Ce joueur n’a pas encore animé de partie'
               }
+              onClick={() => setActiveTab('gm')}
             >
               MDJ
             </li>
           ) : (
-            <li id="profile_gm_button" user-content="profile_gm">
+            <li
+              id="profile_gm_button"
+              user-content="profile_gm"
+              className={activeTab === 'gm' ? 'active' : ''}
+              onClick={() => setActiveTab('gm')}
+            >
               MDJ
             </li>
           )}
-          <li id="profile_badge_button" user-content="profile_badge">
+          */}
+          <li
+            className={activeTab === 'badge' ? 'active' : ''}
+            onClick={() => setActiveTab('badge')}
+            id="profile_badge_button"
+          >
             Badges
           </li>
-          <li id="profile_stats_button" user-content="profile_stats">
+          <li
+            className={activeTab === 'stats' ? 'active' : ''}
+            onClick={() => setActiveTab('stats')}
+            id="profile_stats_button"
+          >
             Stats
           </li>
         </ul>
 
-        {/* Onglet PARTIES */}
-        <div id="profile_player" className="tabs_profile_content playerGm_informations">
+        {/* Onglet JOUEUR */}
+        <div
+          id="profile_player"
+          className="tabs_profile_content playerGm_informations"
+          style={{ display: activeTab === 'player' ? 'block' : 'none' }}
+        >
           {user.playedGames === 0 ? (
             relation === 'me' ? (
               <p>
@@ -142,9 +171,6 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
                 </div>
               </div>
 
-              {/* Barre de jeu */}
-              {renderGamesBar(user.gamesStatistics, user.playedGames)}
-
               {/* Récapitulatif des parties */}
               <ul className="last-games">
                 <li className="separateur">
@@ -156,56 +182,26 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
                   </React.Fragment>
                 ))}
               </ul>
-              {relation === 'me' && renderArchivesLink()}
             </>
           )}
         </div>
 
-        {/* Onglet MDJ */}
-        <div id="profile_gm" className="tabs_profile_content playerGm_informations">
-          <div className="gm_stats">
-            <div className="gm_played">
-              <div className="gm_user">
-                <img src="/jeu/assets/images/dice.png" alt="Parties" />
-                <strong>{user.mdj.numberGamesAnimated}</strong> parties animées
-              </div>
-              <div className="gm_user">
-                <strong>{user.mdj.totalpoints}</strong> claps reçus
-              </div>
-              <div className="gm_user">
-                <div
-                  className="star-rating"
-                  user-tooltip={`Moyenne de claps reçus : ${user.mdj.mean}/50`}
-                >
-                  <span
-                    style={{ width: `${user.mdj.mean * 2}%` }}
-                    className="star-rating-score"
-                  ></span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <ul className="last-games">
-            <li className="separateur">
-              <hr />
-            </li>
-            {user.mdj.history
-              .filter((game: any) => game.idRole === -1)
-              .map((game: any, index: number) => (
-                <React.Fragment key={index}>
-                  {renderGameLine(game, true)}
-                </React.Fragment>
-              ))}
-          </ul>
-          {relation === 'me' && renderArchivesLink()}
-        </div>
-
         {/* Onglet BADGES */}
-        <div id="profile_badge" className="tabs_profile_content playerBadge_informations">
+        <div
+          id="profile_badge"
+          className="tabs_profile_content playerBadge_informations"
+          style={{ display: activeTab === 'badge' ? 'block' : 'none' }}
+        >
           <div className="achievements">
             {badgesArray.length > 0 ? (
               badgesArray.map((a: any, index: number) => (
-                <React.Fragment key={index}>{renderAchievement(a)}</React.Fragment>
+                <React.Fragment key={index}>
+                  <div className="badges">
+                    <div className="achievement_badge">
+                      <AchievementBadge achievement={a} isMemory={a.memory} />
+                    </div>
+                  </div>
+                </React.Fragment>
               ))
             ) : relation === 'me' ? (
               <p>
@@ -215,57 +211,69 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
               </p>
             ) : (
               <p>
-                <strong>{user.username}</strong> n'a pas encore remporté de badge.
+                <strong>{user.nickname}</strong> n'a pas encore remporté de badge.
                 <br />
                 Invite {user.isMale ? 'le' : 'la'} à jouer pour l'aider à débuter sa collection !
               </p>
             )}
           </div>
-          <div className="achievements">
+          <div className="memory-achievements">
             <h2>Souvenirs</h2>
             <p>Pour montrer que tu étais là au bon moment</p>
-            {souvenirsArray.length > 0 ? (
-              souvenirsArray.map((a: any, index: number) => (
-                <React.Fragment key={index}>{renderAchievement(a, true)}</React.Fragment>
+            {memoriesArray.length > 0 ? (
+              memoriesArray.map((a: any, index: number) => (
+                <React.Fragment key={index}>
+                  <div className="badges">
+                    <div className="achievement_badge">
+                      <AchievementBadge achievement={a} isMemory={true} />
+                    </div>
+                  </div>
+                </React.Fragment>
               ))
             ) : relation === 'me' ? (
               <p>Tu n'as pas encore remporté de souvenirs.</p>
             ) : (
               <p>
-                <strong>{user.username}</strong> n'a pas encore remporté de souvenirs.
+                <strong>{user.nickname}</strong> n'a pas encore remporté de souvenirs.
               </p>
             )}
           </div>
         </div>
 
-        {/* Onglet CARDS STATS */}
-        <div id="profile_stats" className="tabs_profile_content playerBadge_informations">
+        {/* Onglet STATS */}
+        <div
+          id="profile_stats"
+          className="tabs_profile_content playerBadge_informations"
+          style={{ display: activeTab === 'stats' ? 'block' : 'none' }}
+        >
           <div className="profile_stats">
-            <div className="achievements">
+            <div className="stats">
               <h2>Statistiques par cartes</h2>
               {Object.keys(cardsStatistics).length === 0 && (
                 <>
                   <br />
                   <p>
-                    <strong>{user.username}</strong> n'a joué aucune partie.
+                    <strong>{user.nickname}</strong> n'a joué aucune partie.
                   </p>
                 </>
               )}
               <div id="roles-stats">
                 {Object.entries(calculatedStats).map(([idRole, stats]: [string, any], index) => {
-                  const es = stats.total > 1 ? 's' : ''
-                  const tooltip = `<b>Statistiques sur ${stats.total} parti${es} joué${es}.</b><br/><b>Victoires : ${stats.victories}</b>・<b>Défaites : ${stats.defeats}</b>・<b>Égalités : ${stats.draws}</b> <br/><b>Ratio :</b> ${stats.ratio}`
+                  const s = stats.total > 1 ? 's' : ''
+                  const tooltip = `<b>Statistiques sur ${stats.total} partie${s} jouée${s}.</b><br/><b>Victoires : ${stats.victories}</b>・<b>Défaites : ${stats.defeats}</b>・<b>Égalités : ${stats.draws}</b> <br/><b>Ratio :</b> ${stats.ratio}`
                   return (
                     <div
                       className="role role-stats sound-tick"
                       key={index}
-                      user-tooltip={tooltip}
+                      data-tooltip-html={tooltip}
+                      data-tooltip-id={String(index)}
                     >
                       <img
                         className="carte"
                         src={`/jeu/assets/images/carte${idRole}.png`}
                         alt=""
                       />
+                      <Tooltip id={String(index)} />
                     </div>
                   )
                 })}

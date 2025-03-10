@@ -9,6 +9,7 @@ import { rolify } from 'utils/rolify'
 import RenderGameLine from 'components/Profile/RenderGameLine'
 import AchievementBadge from 'components/Profile/AchievementBadge'
 import Actions from './Profile/Actions'
+import Details from './Profile/Details'
 
 interface AchievementResult { [favorite: number]:  {
     id: number
@@ -363,6 +364,12 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                 )}
               </div>
             </div>
+
+            { user && (
+              <div className="profile-tabs">
+                <Details user={user} relation="me" />
+              </div>
+            )}
 
             {/*<ProfileDetails user={user} relation='me' renderAchievement={} />*/}
           </div>
