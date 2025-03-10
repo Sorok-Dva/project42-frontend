@@ -13,17 +13,16 @@ interface Achievement {
 
 interface AchievementBadgeProps {
   achievement : Achievement
+  aKey: string
   isMemory? : boolean
 }
 
 const AchievementBadge : React.FC<AchievementBadgeProps> = ({
   achievement,
   isMemory,
+  aKey,
 }) => {
-  if (achievement.level === 0) return null
-
   const memoryClass = isMemory ? 'souvenir': ''
-  console.log('memoryClass', memoryClass)
   // Pour la tooltip, on reconstruit en HTML la représentation du badge
   const levelHtml = !achievement.unique ? `<div class="achievement_level">${ achievement.level }</div>`: ''
   const badgeHtmlString = `<div class="achievement_badge ${ memoryClass }">
@@ -54,7 +53,7 @@ const AchievementBadge : React.FC<AchievementBadgeProps> = ({
 
   return (
     <>
-      <div data-tooltip-id={ tooltipId }
+      <div data-tooltip-id={`${aKey}_${tooltipId}`}
         data-tooltip-html={ tooltipHtml }>
         <div className={ `achievement_badge ${ memoryClass }` }>
           { !achievement.unique &&
@@ -63,7 +62,7 @@ const AchievementBadge : React.FC<AchievementBadgeProps> = ({
             style={ { height: '20px' } } alt={ achievement.description }/>
         </div>
       </div>
-      <Tooltip id={ tooltipId }/>
+      <Tooltip id={`${aKey}_${tooltipId}`} />
     </>
   )
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import renderGameLine from 'components/Profile/RenderGameLine'
 import AchievementBadge from 'components/Profile/AchievementBadge'
 import { Tooltip } from 'react-tooltip'
+import RenderGameLine from 'components/Profile/RenderGameLine'
 
 interface ProfileDetailsProps {
   user: any;
@@ -130,13 +130,13 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
           {user.playedGames === 0 ? (
             relation === 'me' ? (
               <p>
-                Tu viens seulement de débarquer à Thiercelieux.
+                Tu viens seulement de débarquer sur Project 42.
                 <br />
                 Rejoins vite les autres villageois en partie !
               </p>
             ) : (
               <p>
-                <strong>{user.username}</strong> vient seulement de débarquer à Thiercelieux.
+                <strong>{user.username}</strong> vient seulement de débarquer sur Project 42.
                 <br />
                 {user.isMale ? 'Il' : 'Elle'} n'a pas encore joué de partie.
               </p>
@@ -177,16 +177,22 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
                   <hr />
                 </li>
                 {user.gamesHistoryFull.map((game: any, index: number) => (
-                  <React.Fragment key={index}>
-                    {renderGameLine(game, false)}
+                  <React.Fragment key={game.id}>
+                    <RenderGameLine game={game} key='all' />
                   </React.Fragment>
                 ))}
               </ul>
+              { relation === 'me' && (
+                <div className="all-archives-parties">
+                  <a href="/game/archives" target="_blank">Voir toutes
+                    mes parties</a>
+                </div>
+              ) }
             </>
-          )}
+          ) }
         </div>
 
-        {/* Onglet BADGES */}
+        {/* Onglet BADGES */ }
         <div
           id="profile_badge"
           className="tabs_profile_content playerBadge_informations"
@@ -198,7 +204,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
                 <React.Fragment key={index}>
                   <div className="badges">
                     <div className="achievement_badge">
-                      <AchievementBadge achievement={a} isMemory={a.memory} />
+                      <AchievementBadge achievement={a} isMemory={a.memory} aKey='all' />
                     </div>
                   </div>
                 </React.Fragment>
@@ -225,7 +231,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
                 <React.Fragment key={index}>
                   <div className="badges">
                     <div className="achievement_badge">
-                      <AchievementBadge achievement={a} isMemory={true} />
+                      <AchievementBadge achievement={a} isMemory={true} aKey='memory' />
                     </div>
                   </div>
                 </React.Fragment>

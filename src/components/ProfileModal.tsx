@@ -224,7 +224,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                         Object.values(user.achievements.favorites).map((a, index) => (
                           <div className="badges" key={index}>
                             <div className="achievement_badge">
-                              <AchievementBadge achievement={a} isMemory={a.memory} />
+                              <AchievementBadge achievement={a} isMemory={a.memory} aKey='fav' />
                             </div>
                           </div>
                         ))
@@ -274,7 +274,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                               <ul className="last-games">
                                 {user.summaryHistory.map((game) => (
                                   <li key={game.id}>
-                                    <RenderGameLine game={game} />
+                                    <RenderGameLine game={game} key='fav' />
                                   </li>
                                 ))}
                               </ul>

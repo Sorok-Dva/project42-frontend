@@ -14,11 +14,12 @@ interface Game {
 
 interface RenderGameLineProps {
   game: Game;
+  key: string;
   wasMdj?: boolean;
   mdjLevel?: number | false;
 }
 
-const RenderGameLine: React.FC<RenderGameLineProps> = ({ game, wasMdj = false, mdjLevel = false }) => {
+const RenderGameLine: React.FC<RenderGameLineProps> = ({ game, key, wasMdj = false, mdjLevel = false }) => {
   const tooltipName = `Partie “<strong>${game.name}</strong>”`
 
   return (
@@ -28,7 +29,7 @@ const RenderGameLine: React.FC<RenderGameLineProps> = ({ game, wasMdj = false, m
         href={game.link}
         target="_blank"
         rel="noopener noreferrer"
-        data-tooltip-id={game.id}
+        data-tooltip-id={`${key}_${game.id}`}
         data-tooltip-html={!wasMdj || mdjLevel ? tooltipName : undefined}
       >
         {!wasMdj ? (
@@ -97,7 +98,7 @@ const RenderGameLine: React.FC<RenderGameLineProps> = ({ game, wasMdj = false, m
           <b className="game-state label-lose">{game.result}</b>
         )}
       </a>
-      <Tooltip id={String(game.id)} />
+      <Tooltip id={`${key}_${game.id}`} />
     </li>
   )
 }
