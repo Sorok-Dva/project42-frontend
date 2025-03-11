@@ -90,12 +90,26 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
         ...payload,
         targets: selectedTargets,
       })
+    } else if (actionRequest.action.card === 15 && selectedTargets) { // Gestion pour le maitre des ondes
+      if (selectedTargets.length > 2) {
+        alert('Veuillez sélectionner exactement deux joueurs ou moins.')
+        return
+      }
+      socket.emit('phaseActionResponse', {
+        ...payload,
+        targets: selectedTargets,
+      })
     } else {
       socket.emit('phaseActionResponse', {
         ...payload,
         targetId: selectedTargets ?? -1,
       })
     }
+
+    const resetAction = [3, 4, 6, 15, 7, 8].includes(actionRequest.action.card)
+    if (resetAction) setActionRequest(null)
+
+    setSelectedTargets([])
   }
 
   if (!actionRequest) return null
