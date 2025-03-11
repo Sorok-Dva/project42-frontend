@@ -33,6 +33,7 @@ export interface PlayerType {
   alive: boolean
   card?: { id: number; name: string; description: string; }
   inLove: boolean
+  isCharmed: boolean
 }
 
 export interface Viewer {
