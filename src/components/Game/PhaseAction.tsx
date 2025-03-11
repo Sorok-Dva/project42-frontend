@@ -44,7 +44,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
       if (
         ((data.action.card === player?.card?.id || data.action.card === -1)
          || data.action.card === 2 && [2, 9, 20, 21].includes(player.card?.id || -1))
-        && (data.action.card !== 6 && player.alive)) {
+        && (data.action.card === 6 && !player.alive)) {
         setActionRequest(data)
       }
     })
