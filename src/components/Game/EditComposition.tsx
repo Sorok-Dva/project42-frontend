@@ -262,18 +262,6 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
               >+</div>
             </div>
           )}
-          {i === 19 && (
-            <div className="buttons_array small_array bglightblue">
-              <div className="decrement_angels button array_clickable sound-tick sound-unselect" data-tooltip-id={String(i)} data-tooltip-content="Enlever un Ange">–</div>
-              <div className="increment_angels button array_clickable sound-tick sound-select" data-tooltip-id={String(i)} data-tooltip-content="Ajouter un Ange">+</div>
-            </div>
-          )}
-          {i === 29 && (
-            <div className="buttons_array small_array bglightblue">
-              <div className="decrement_judges button array_clickable sound-tick sound-unselect" data-tooltip-id={String(i)} data-tooltip-content="Enlever un Juge">–</div>
-              <div className="increment_judges button array_clickable sound-tick sound-select" data-tooltip-id={String(i)} data-tooltip-content="Ajouter un Juge">+</div>
-            </div>
-          )}
           <Tooltip id={String(i)} />
         </div>
       )
