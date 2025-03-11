@@ -1857,6 +1857,25 @@ tr.dead span {
     background-color: #c5cee0;
     pointer-events: none;
   }
+
+  &.chat-badge-alien {
+    border: 1px solid #ba3b3b;
+    background-color: #e7dcec;
+    color: #ba3b3b;
+  }
+
+  &.chat-badge-sister {
+    border: 1px solid #906;
+    background-color: #e7dcec;
+    color: #906;
+  }
+
+  &.chat-badge-brother {
+    border: 1px solid #069;
+    color: #069;
+    background-color: #c5cee0;
+    pointer-events: none;
+  }
 }
 
 .canal_joueurs::after {
