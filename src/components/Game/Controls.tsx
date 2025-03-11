@@ -444,6 +444,7 @@ const GameControls: React.FC<GameControlsProps> = ({
             90: 'Les <b>Aliens infiltrés</b> ont gagné !',
             91: 'Les <b>Membres de la station</b> ont gagné !',
             92: 'Les <b>Amoureux</b> ont gagné !',
+            94: 'Le <b>Maître des Ondes</b> a gagné !',
             95: 'Le <b>Séraphin</b> a gagné !',
             99: 'Tout le monde est mort !',
           }
@@ -452,6 +453,7 @@ const GameControls: React.FC<GameControlsProps> = ({
             90: 2,
             91: 1,
             92: 6,
+            94: 15,
             95: 9,
             99: -1,
           }
@@ -461,15 +463,13 @@ const GameControls: React.FC<GameControlsProps> = ({
               <Box id="block_infos">
                 <h3>Archive de la partie {roomData.name}</h3>
                 <Box>
-                  <Box id="block_ia" className="shadow rounded bgblue game-started">
-                    <Box id="block_infos">
-                      <Box style={{ marginTop: '1rem', marginLeft: '2rem' }}>
-                        <h3 dangerouslySetInnerHTML={{ __html: winStates[roomData.phase] }} />
-                        <p><b>Durée de la partie</b>: {getGameDuration()}</p>
-                      </Box>
+                  <Box id="block_infos">
+                    <Box style={{ marginTop: '1rem', marginLeft: '2rem' }}>
+                      <h3 dangerouslySetInnerHTML={{ __html: winStates[roomData.phase] }} />
+                      <p><b>Durée de la partie</b>: {getGameDuration()}</p>
                     </Box>
                   </Box>
-                  <CardImage cardId={cardsIds[roomData.phase]} />
+                  <CardImage cardId={cardsIds[roomData.phase] ?? cardId} />
                 </Box>
                 <Box className="block_content_section mt-4">
                   <Box
