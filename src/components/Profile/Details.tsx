@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import AchievementBadge from 'components/Profile/AchievementBadge'
 import { Tooltip } from 'react-tooltip'
 import RenderGameLine from 'components/Profile/RenderGameLine'
@@ -8,18 +8,21 @@ interface ProfileDetailsProps {
   relation: string; // 'me', 'none', 'waiting', 'friend', etc.
 }
 
-const ProfileDetails: React.FC<ProfileDetailsProps> = ({
-  user,
-  relation,
-}) => {
+const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, relation }) => {
   const [detailsIsShown, setDetailsIsShown] = useState(false)
   const [activeTab, setActiveTab] = useState('player') // onglet actif par défaut
+  const detailsRef = useRef<HTMLDivElement>(null)
 
   const showDetails = () => {
-    setDetailsIsShown(!detailsIsShown)
+    setDetailsIsShown(prev => !prev)
   }
 
-  // Calcul des statistiques par cartes
+  useEffect(() => {
+    if (detailsIsShown && detailsRef.current) {
+      detailsRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [detailsIsShown])
+
   const cardsStatistics = user.cardsStatistics.reduce((acc: any, game: any) => {
     const { idRole, state } = game
     if (!acc[idRole]) {
@@ -48,7 +51,6 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
 
   const calculatedStats = calculateRatios({ ...cardsStatistics })
 
-  // Séparation des badges et souvenirs
   const badgesArray = Object.values(user.achievements.possessed).filter(
     (a: any) => !a.memory
   )
@@ -69,7 +71,11 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
       </div>
 
       {/* Contenu des onglets caché par défaut */}
-      <div id="contenu-voir-plus" style={ detailsIsShown ? { display: 'block' } : { display: 'none' } }>
+      <div
+        id="contenu-voir-plus"
+        ref={detailsRef}
+        style={ detailsIsShown ? { display: 'block' } : { display: 'none' } }
+      >
         {/* Liste des onglets */}
         <ul id="tabs_profile">
           <li
@@ -79,32 +85,6 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
           >
             Joueur
           </li>
-          {/* Si nécessaire, décommenter et adapter l'onglet MDJ */}
-          {/*
-          {user.mdj.history.length === 0 ? (
-            <li
-              id="profile_gm_button"
-              className={`mdjdisabled ${activeTab === 'gm' ? 'active' : ''}`}
-              user-tooltip={
-                relation === 'me'
-                  ? 'Anime des parties pour débloquer cet onglet'
-                  : 'Ce joueur n’a pas encore animé de partie'
-              }
-              onClick={() => setActiveTab('gm')}
-            >
-              MDJ
-            </li>
-          ) : (
-            <li
-              id="profile_gm_button"
-              user-content="profile_gm"
-              className={activeTab === 'gm' ? 'active' : ''}
-              onClick={() => setActiveTab('gm')}
-            >
-              MDJ
-            </li>
-          )}
-          */}
           <li
             className={activeTab === 'badge' ? 'active' : ''}
             onClick={() => setActiveTab('badge')}
@@ -178,21 +158,22 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
                 </li>
                 {user.gamesHistoryFull.map((game: any, index: number) => (
                   <React.Fragment key={game.id}>
-                    <RenderGameLine game={game} key='all' />
+                    <RenderGameLine game={game} key="all" />
                   </React.Fragment>
                 ))}
               </ul>
-              { relation === 'me' && (
+              {relation === 'me' && (
                 <div className="all-archives-parties">
-                  <a href="/game/archives" target="_blank">Voir toutes
-                    mes parties</a>
+                  <a href="/game/archives" target="_blank">
+                    Voir toutes mes parties
+                  </a>
                 </div>
-              ) }
+              )}
             </>
-          ) }
+          )}
         </div>
 
-        {/* Onglet BADGES */ }
+        {/* Onglet BADGES */}
         <div
           id="profile_badge"
           className="tabs_profile_content playerBadge_informations"
@@ -204,7 +185,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
                 <React.Fragment key={index}>
                   <div className="badges">
                     <div className="achievement_badge">
-                      <AchievementBadge achievement={a} isMemory={a.memory} aKey='all' />
+                      <AchievementBadge achievement={a} isMemory={a.memory} aKey="all" />
                     </div>
                   </div>
                 </React.Fragment>
@@ -231,7 +212,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
                 <React.Fragment key={index}>
                   <div className="badges">
                     <div className="achievement_badge">
-                      <AchievementBadge achievement={a} isMemory={true} aKey='memory' />
+                      <AchievementBadge achievement={a} isMemory={true} aKey="memory" />
                     </div>
                   </div>
                 </React.Fragment>

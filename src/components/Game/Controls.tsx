@@ -439,23 +439,38 @@ const GameControls: React.FC<GameControlsProps> = ({
         </>
       ): <>
         { isArchive && (() => {
+          let cardId = 1
           const winStates: Record<number, string> = {
             90: 'Les <b>Aliens infiltrés</b> ont gagné !',
             91: 'Les <b>Membres de la station</b> ont gagné !',
             92: 'Les <b>Amoureux</b> ont gagné !',
-            93: 'L\'<b>Ange</b> a gagné !',
+            95: 'Le <b>Séraphin</b> a gagné !',
             99: 'Tout le monde est mort !',
+          }
+
+          const cardsIds: Record<number, number> = {
+            90: 2,
+            91: 1,
+            92: 6,
+            95: 9,
+            99: -1,
           }
 
           return (
             <Box id="block_ia" className="shadow rounded bgblue game-started spectator">
               <Box id="block_infos">
                 <h3>Archive de la partie {roomData.name}</h3>
-                <Box style={{ marginTop: '4rem' }}>
-                  <h3 dangerouslySetInnerHTML={{ __html: winStates[roomData.phase] }} />
-                  <p><b>Durée de la partie</b>: {getGameDuration()}</p>
+                <Box>
+                  <Box id="block_ia" className="shadow rounded bgblue game-started">
+                    <Box id="block_infos">
+                      <Box style={{ marginTop: '1rem', marginLeft: '2rem' }}>
+                        <h3 dangerouslySetInnerHTML={{ __html: winStates[roomData.phase] }} />
+                        <p><b>Durée de la partie</b>: {getGameDuration()}</p>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <CardImage cardId={cardsIds[roomData.phase]} />
                 </Box>
-
                 <Box className="block_content_section mt-4">
                   <Box
                     className="button sound-tick rounded bglightblue heart"
