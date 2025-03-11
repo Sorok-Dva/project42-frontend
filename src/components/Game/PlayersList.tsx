@@ -11,6 +11,7 @@ interface Player {
   cardId?: number
   target?: string
   inLove: boolean
+  isCharmed: boolean
 }
 
 interface PlayersListProps {
@@ -111,6 +112,15 @@ const PlayersList: React.FC<PlayersListProps> = ({
                         data-tooltip-content={_player.inLove ? 'Ce joueur était en couple.' : 'Vous êtes un couple !'}
                         data-tooltip-id="lover"></div>
                       <Tooltip id="lover" />
+                    </>
+                  ) }
+
+                  { (_player.isCharmed) && (
+                    <>
+                      <div className="badge-jdf"
+                        data-tooltip-content={_player.nickname !== player?.nickname ? 'Ce joueur est charmé.' : 'Vous êtes charmé !'}
+                        data-tooltip-id="charmed"></div>
+                      <Tooltip id="charmed" />
                     </>
                   ) }
 
