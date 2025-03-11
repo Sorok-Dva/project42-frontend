@@ -33,6 +33,8 @@ export interface PlayerType {
   alive: boolean
   card?: { id: number; name: string; description: string; }
   inLove: boolean
+  isSister: boolean
+  isBrother: boolean
   isCharmed: boolean
 }
 
@@ -120,6 +122,8 @@ export const useGame = (
   const [gameStarted, setGameStarted] = useState(false)
   const [gameFinished, setGameFinished] = useState(false)
   const [alienList, setAlienList] = useState<string[]>([])
+  const [sistersList, setSisterList] = useState<string[]>([])
+  const [brothersList, setBrothersList] = useState<string[]>([])
   const [coupleList, setCoupleList] = useState<string[]>([])
   const [slots, setSlots] = useState<number>(roomData.maxPlayers)
   const [isArchive, setIsArchive] = useState<boolean>(false)
@@ -397,6 +401,14 @@ export const useGame = (
       setAlienList(list)
     })
 
+    socket.on('sistersList', (list: string[]) => {
+      setSisterList(list)
+    })
+
+    socket.on('brothersList', (list: string[]) => {
+      setBrothersList(list)
+    })
+
     socket.on('coupleList', (list: string[]) => {
       setCoupleList(list)
     })
@@ -475,6 +487,8 @@ export const useGame = (
     isAuthorized,
     password,
     alienList,
+    sistersList,
+    brothersList,
     coupleList,
     slots,
     isArchive,

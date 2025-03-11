@@ -85,6 +85,8 @@ const GamePage = () => {
     isAuthorized,
     password,
     alienList,
+    sistersList,
+    brothersList,
     coupleList,
     slots,
     isArchive,
@@ -393,6 +395,8 @@ const GamePage = () => {
               gameStarted={gameStarted}
               gameFinished={gameFinished}
               alienList={alienList}
+              sistersList={sistersList}
+              brothersList={brothersList}
               coupleList={coupleList}
               isNight={isNight}
             />

@@ -3,7 +3,7 @@ import { Socket } from 'socket.io-client'
 import ViewersList from 'components/Game/ViewersList'
 import { Viewer } from 'hooks/useGame'
 import { Tooltip } from 'react-tooltip'
-import { faHeart, faUserAstronaut } from '@fortawesome/free-solid-svg-icons'
+import { faUserAstronaut } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Box } from '@mui/material'
 
@@ -14,6 +14,8 @@ interface Player {
   cardId?: number
   target?: string
   inLove: boolean
+  isSister: boolean
+  isBrother: boolean
   isCharmed: boolean
 }
 
@@ -32,6 +34,8 @@ interface PlayersListProps {
   toggleHighlightPlayer: (nickname: string) => void
   highlightedPlayers: { [nickname: string]: string }
   alienList: string[]
+  sistersList: string[]
+  brothersList: string[]
   coupleList: string[]
   isNight: boolean
 }
@@ -50,6 +54,8 @@ const PlayersList: React.FC<PlayersListProps> = ({
   toggleHighlightPlayer,
   highlightedPlayers,
   alienList,
+  sistersList,
+  brothersList,
   coupleList,
   isNight,
 }) => {
@@ -110,6 +116,30 @@ const PlayersList: React.FC<PlayersListProps> = ({
                       {voteCounts[_player.nickname] || 0}
                     </span>
                   ) : null}
+                  { sistersList.includes(_player.nickname) && !gameFinished && (
+                    <>
+                      <img
+                        className="suspicious_card disabled"
+                        src={'/assets/images/carte16.png'}
+                        data-tooltip-content={`${_player.nickname === player?.nickname ? 'Vous êtes une soeur.' : 'Ce joueur est votre soeur.'}`}
+                        data-tooltip-id={`${_player.nickname}_sister`}
+                      />
+                      <Tooltip id={`${_player.nickname}_brother`} />
+                    </>
+                  ) }
+
+                  { brothersList.includes(_player.nickname) && !gameFinished && (
+                    <>
+                      <img
+                        className="suspicious_card disabled"
+                        src={'/assets/images/carte17.png'}
+                        data-tooltip-content={`${_player.nickname === player?.nickname ? 'Vous êtes un frère.' : 'Ce joueur est votre frère.'}`}
+                        data-tooltip-id={`${_player.nickname}_brother`}
+                      />
+                      <Tooltip id={`${_player.nickname}_sister`} />
+                    </>
+                  ) }
+
                   <span className="player sound-tick"
                     data-profile={ _player.nickname }>{ _player.nickname }</span>
                   { alienList.includes(_player.nickname) && (

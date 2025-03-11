@@ -86,12 +86,23 @@ const Chat: React.FC<ChatProps> = ({
       } else {
         let channelToSend = player ? 0 : viewer ? 1 : null
         if (channelToSend === null) return
-        // Si c'est la nuit et que le joueur est un alien, on envoie dans le canal des aliens (1)
         if (isNight
           && [2, 9, 20, 21].includes(player?.card?.id || -1)
           && gameStarted
           && !gameFinished
         ) channelToSend = 3
+
+        if (isNight
+          && (player?.card?.id === 16)
+          && gameStarted
+          && !gameFinished
+        ) channelToSend = 4
+
+        if (isNight
+          && (player?.card?.id === 17)
+          && gameStarted
+          && !gameFinished
+        ) channelToSend = 5
 
         socket.emit('sendMessage', {
           roomId: gameId,
@@ -193,6 +204,10 @@ const Chat: React.FC<ChatProps> = ({
 
                 if (msg.channel === 3 && player && player?.card?.id === 12 && player.alive && isNight) return true
 
+                if (msg.channel === 4 && player && player?.card?.id === 16 && isNight) return true
+
+                if (msg.channel === 5 && player && player?.card?.id === 17 && isNight) return true
+
                 if (gameFinished) return true
 
                 return false
@@ -271,7 +286,9 @@ const Chat: React.FC<ChatProps> = ({
                         ></b>
                         {msg.channel === 1 && <>&nbsp;<span className='chat-badge-specta'>Spectateur</span></>}
                         {msg.channel === 2 && <>&nbsp;<span className='chat-badge-dead'>Mort</span></>}
-                        {msg.channel === 3 && <span> (Alien)</span>}
+                        {msg.channel === 3 && <>&nbsp;<span className='chat-badge-alien'>Alien</span></>}
+                        {msg.channel === 4 && <>&nbsp;<span className='chat-badge-sister'>Soeur</span></>}
+                        {msg.channel === 5 && <>&nbsp;<span className='chat-badge-brother'>Frère</span></>}
                         {': '}
                       </>
                     )}
