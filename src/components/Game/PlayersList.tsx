@@ -3,6 +3,8 @@ import { Socket } from 'socket.io-client'
 import ViewersList from 'components/Game/ViewersList'
 import { Viewer } from 'hooks/useGame'
 import { Tooltip } from 'react-tooltip'
+import { faHeart, faUserAstronaut } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 interface Player {
   nickname: string
@@ -92,14 +94,21 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   className={ `list_player ${ !_player.alive ? 'player_dead': '' }` }
                   key={ index }
                 >
-                  { (gameStarted && !_player.alive) || gameFinished ? (
-                    <img className="suspicious_card disabled"
-                      src={`/assets/images/carte${_player.cardId}.png`}/>
-                  ): gameStarted && !isNight && (
-                    <span className={`votecount clickable${mostVotes}`}
-                      data-tooltip="">{ voteCounts[_player.nickname] || 0 }</span>
-                  ) }
-
+                  {(gameStarted && !_player.alive) || gameFinished ? (
+                    <img
+                      className="suspicious_card disabled"
+                      src={`/assets/images/carte${_player.cardId}.png`}
+                    />
+                  ) : _player.cardId === 13 ? (
+                    <img
+                      className="suspicious_card disabled"
+                      src={`/assets/images/carte${_player.cardId}.png`}
+                    />
+                  ) : (gameStarted && _player.alive && !gameFinished) ? (
+                    <span className={`votecount clickable${mostVotes ? ' most_votes' : ''}`}>
+                      {voteCounts[_player.nickname] || 0}
+                    </span>
+                  ) : null}
                   <span className="player sound-tick"
                     data-profile={ _player.nickname }>{ _player.nickname }</span>
                   { alienList.includes(_player.nickname) && (
@@ -121,6 +130,16 @@ const PlayersList: React.FC<PlayersListProps> = ({
                         data-tooltip-content={_player.nickname !== player?.nickname ? 'Ce joueur est charmé.' : 'Vous êtes charmé !'}
                         data-tooltip-id="charmed"></div>
                       <Tooltip id="charmed" />
+                    </>
+                  ) }
+
+                  { (_player.cardId === 13) && (
+                    <>
+                      <FontAwesomeIcon icon={faHeart}
+                        style={{ color: 'pink', fontSize: '1.5em' }}
+                        data-tooltip-content={_player.nickname !== player?.nickname ? 'Ce joueur est le Membre Loyal.' : 'Vous êtes le Membre Loyal !'}
+                        data-tooltip-id="loyal" />
+                      <Tooltip id="loyal" />
                     </>
                   ) }
 
