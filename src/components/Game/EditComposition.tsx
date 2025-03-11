@@ -128,6 +128,12 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
   const cardLimit = (id: number) => {
     let limite = 0
     switch (id) {
+    case 16:
+      limite = 8
+      break
+    case 17:
+      limite = 10
+      break
     case 19:
       limite = 8
       break
@@ -159,8 +165,8 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
     if (i === 1 || i === 2) return
 
     let defaultValue = 1
-    if (i === 22) defaultValue = 2
-    if (i === 26) defaultValue = 3
+    if (i === 16) defaultValue = 2
+    if (i === 17) defaultValue = 3
 
     const newValue = current === 0 ? defaultValue : 0
 
@@ -204,9 +210,9 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
         dataTooltip = 'Le nombre de Membre d\'équipage est automatique.'
 
       let qtecards = 1
-      if (i === 1 || i === 2 || i === 22) {
+      if (i === 1 || i === 2 || i === 16) {
         qtecards = 2
-      } else if (i === 26) {
+      } else if (i === 17) {
         qtecards = 3
       }
 
@@ -224,12 +230,12 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
             {Array.from({ length: qtecards }).map((_, idx) => (
               <img key={idx} src={`/assets/images/carte${i}.png`} alt={`Carte ${i}`} />
             ))}
-            {i === 22 && (
+            {i === 16 && (
               <div className="role_amount">
                 <span>2</span>
               </div>
             )}
-            {i === 26 && (
+            {i === 17 && (
               <div className="role_amount">
                 <span>3</span>
               </div>
