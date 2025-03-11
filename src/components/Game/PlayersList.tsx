@@ -5,6 +5,7 @@ import { Viewer } from 'hooks/useGame'
 import { Tooltip } from 'react-tooltip'
 import { faHeart, faUserAstronaut } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Box } from '@mui/material'
 
 interface Player {
   nickname: string
@@ -134,13 +135,13 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   ) }
 
                   { (_player.cardId === 13) && (
-                    <>
-                      <FontAwesomeIcon icon={faHeart}
-                        style={{ color: 'pink', fontSize: '1.5em' }}
+                    <Box style={{ marginLeft: '1vh' }}>
+                      <FontAwesomeIcon icon={faUserAstronaut}
+                        style={{ color: '#bdbfb0', fontSize: '1.5em' }}
                         data-tooltip-content={_player.nickname !== player?.nickname ? 'Ce joueur est le Membre Loyal.' : 'Vous êtes le Membre Loyal !'}
                         data-tooltip-id="loyal" />
                       <Tooltip id="loyal" />
-                    </>
+                    </Box>
                   ) }
 
                   { !isNight && _player.target && (
