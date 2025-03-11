@@ -2151,12 +2151,12 @@ p.compo-hidden {
   width: 18px;
   height: 18px;
   line-height: 18px;
-  background-color: white;
   top: 5px;
   right: 5px;
   transform: rotate3d(0, 0, 1, 45deg);
   box-shadow: 2px 2px 2px rgba(0, 0, 0, .2);
   transition: opacity 0.3s ease;
+  background-color: black;
 
   &.bavarde,
   &.bavard {
