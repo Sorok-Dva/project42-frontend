@@ -129,7 +129,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
     let limite = 0
     switch (id) {
     case 16:
-      limite = 8
+      limite = 10
       break
     case 17:
       limite = 10
