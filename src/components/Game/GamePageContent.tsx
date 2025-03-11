@@ -279,7 +279,7 @@ const GamePage = () => {
           justifyContent="space-between"
           px={2}
           py={1}
-          bgcolor="#f0f0f0"
+          bgcolor="#262626"
         >
           <Typography variant="h6">
             [{GAME_TYPES[roomData.type]}] Partie : {roomData.name} ({players.length}/{slots})
@@ -405,7 +405,7 @@ const GamePage = () => {
         bottom={0}
         left={0}
         p={1}
-        bgcolor="#f0f0f0"
+        bgcolor="#262626"
         borderTop="1px solid #ccc"
         width="100%"
       >
