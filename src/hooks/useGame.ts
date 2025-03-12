@@ -36,6 +36,7 @@ export interface PlayerType {
   isSister: boolean
   isBrother: boolean
   isCharmed: boolean
+  isInfected: boolean
 }
 
 export interface Viewer {

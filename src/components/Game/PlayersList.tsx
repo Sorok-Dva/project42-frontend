@@ -17,6 +17,7 @@ interface Player {
   isSister: boolean
   isBrother: boolean
   isCharmed: boolean
+  isInfected: boolean
 }
 
 interface PlayersListProps {
