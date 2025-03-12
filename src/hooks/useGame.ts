@@ -418,6 +418,10 @@ export const useGame = (
       setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, alive: false } : null)
     })
 
+    socket.on('infected', () => {
+      setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, isInfected: true } : null)
+    })
+
     socket.on('dissolve', () => {
       setGameError('Le salon a été détruit par la modération.')
     })

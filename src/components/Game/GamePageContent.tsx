@@ -326,6 +326,7 @@ const GamePage = () => {
                 canBeReady={canBeReady}
                 canStartGame={canStartGame}
                 player={player}
+                players={players}
                 gameStarted={gameStarted}
                 gameFinished={gameFinished}
                 isArchive={isArchive}

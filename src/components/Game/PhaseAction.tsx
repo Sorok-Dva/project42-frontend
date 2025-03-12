@@ -4,6 +4,7 @@ import { useSocket } from 'contexts/SocketContext'
 import { useUser } from 'contexts/UserContext'
 import { PlayerType } from 'hooks/useGame'
 import PhaseActionCard5 from 'components/Game/Cards/PhaseActionCard5'
+import PhaseActionCard20 from 'components/Game/Cards/PhaseActionCard20'
 
 interface PhaseActionRequest {
   phase: number;
@@ -43,7 +44,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
       }
       if (
         (((data.action.card === player?.card?.id || data.action.card === -1)
-         || (data.action.card === 2 && [2, 9, 20, 21].includes(player.card?.id || -1))))
+         || (data.action.card === 2 && ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected))))
         || (data.action.card === 6 && !player.alive)) {
         setActionRequest(data)
       }
@@ -106,7 +107,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
       })
     }
 
-    const resetAction = [3, 4, 6, 15, 7, 8].includes(actionRequest.action.card)
+    const resetAction = [3, 4, 6, 7, 8, 15, 20].includes(actionRequest.action.card)
     if (resetAction) setActionRequest(null)
 
     setSelectedTargets([])
@@ -123,6 +124,16 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
       setAlienVictim={setAlienVictim}
       deathElixirUsed={actionRequest.deathElixirUsed}
       lifeElixirUsed={actionRequest.lifeElixirUsed}
+    />
+  }
+
+  if (actionRequest && actionRequest.action.card === 20) {
+    console.log('actionRequest', actionRequest)
+    return <PhaseActionCard20
+      roomId={roomId}
+      actionRequest={actionRequest as any}
+      alienVictim={alienVictim}
+      setAlienVictim={setAlienVictim}
     />
   }
 

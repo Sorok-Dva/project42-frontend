@@ -175,7 +175,16 @@ const PlayersList: React.FC<PlayersListProps> = ({
                     </Box>
                   ) }
 
-                  { !isNight && _player.target && (
+                  { (_player.isInfected) && (
+                    <>
+                      <div className="badge-alien"
+                        data-tooltip-content="Ce joueur a été infecté."
+                        data-tooltip-id={`${_player.nickname}_infected`}></div>
+                      <Tooltip id={`${_player.nickname}_infected`} />
+                    </>
+                  ) }
+
+                  { !isNight && _player.target && !gameFinished && (
                     <span className="vote-for">{' '} → { _player.target }</span>
                   ) }
                   <span className="player_highlight"

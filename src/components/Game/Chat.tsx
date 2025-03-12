@@ -87,13 +87,13 @@ const Chat: React.FC<ChatProps> = ({
         let channelToSend = player ? 0 : viewer ? 1 : null
         if (channelToSend === null) return
         if (isNight
-          && [2, 9, 20, 21].includes(player?.card?.id || -1)
+          && ([2, 9, 20, 21].includes(player?.card?.id || -1) || player?.isInfected)
           && gameStarted
           && !gameFinished
         ) channelToSend = 3
 
         if (isNight
-          && (player?.card?.id === 16)
+          && player?.card?.id === 16
           && gameStarted
           && !gameFinished
         ) channelToSend = 4
@@ -194,7 +194,7 @@ const Chat: React.FC<ChatProps> = ({
 
                 // Si le message est envoyé dans le canal des loups (channel === 3)
                 // on vérifie que le joueur connecté est un loup.
-                if (msg.channel === 3 && player && [2, 9, 20, 21].includes(player.card?.id || -1)) return true
+                if (msg.channel === 3 && player && ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected)) return true
 
                 if (msg.channel === 1 && viewer) return true
 

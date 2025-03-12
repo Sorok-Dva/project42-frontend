@@ -7,7 +7,6 @@ import {
   addBotToGame,
   startGame,
   setPlayerReady,
-  transferCreatorRights,
   updateMaxPlayers,
   updateRoomTimer,
   updateRoomCards,
@@ -19,6 +18,7 @@ import GameTimer from './Timer'
 import PhaseAction from './PhaseAction'
 import { PlayerType, RoomData } from 'hooks/useGame'
 import EditCompoModal from 'components/Game/EditComposition'
+import TransferLeadModal from 'components/Game/TransferLead'
 import axios from 'axios'
 import CardImage from 'components/Game/CardImage'
 
@@ -26,6 +26,7 @@ interface GameControlsProps {
   gameId: string | undefined
   roomData: RoomData
   player: PlayerType | null
+  players: PlayerType[]
   isCreator: boolean
   canBeReady: boolean
   canStartGame: boolean
@@ -50,6 +51,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   canBeReady,
   canStartGame,
   player,
+  players,
   gameStarted,
   gameFinished,
   setGameStarted,
@@ -65,6 +67,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const canEditGame = checkPermission('game', 'edit')
   const [timer, setTimer] = useState<number>(3)
   const [isEditCompositionOpen, setIsEditCompositionOpen] = useState(false)
+  const [isTransferLeadOpen, setIsTransferLeadOpen] = useState(false)
   const [isFavoriteArchive, setIsFavoriteArchive] = useState<boolean>(false)
   const [favoriteComment, setFavoriteComment] = useState<string>('')
 
@@ -224,14 +227,17 @@ const GameControls: React.FC<GameControlsProps> = ({
     }, 750)
   }
 
-  const handleTransferCreator = async (newCreatorId: string) => {
+  const handleTransferCreator = async () => {
     if (!gameId || gameStarted || gameFinished) return
     try {
-      await transferCreatorRights(gameId, newCreatorId)
-      fetchGameDetails()
+      setIsTransferLeadOpen(true)
     } catch (error) {
       console.error('Erreur lors du transfert des droits de créateur:', error)
     }
+  }
+
+  const closeTransferLead = async () => {
+    setIsTransferLeadOpen(false)
   }
 
   const getGameDuration = () => {
@@ -381,8 +387,8 @@ const GameControls: React.FC<GameControlsProps> = ({
                     <h3>Gérer la composition</h3>
                   </Box>
 
-                  <Box className="button_secondary sound-tick crea_lead">Léguer
-                    les droits du salon
+                  <Box className="button_secondary sound-tick crea_lead" onClick={handleTransferCreator}>
+                    Léguer les droits du salon
                   </Box>
                   <Box className="button_secondary sound-tick join_spec">
                     <span>Rejoindre les spectateurs</span>
@@ -439,7 +445,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         </>
       ): <>
         { isArchive && (() => {
-          let cardId = 1
+          const cardId = 1
           const winStates: Record<number, string> = {
             90: 'Les <b>Aliens infiltrés</b> ont gagné !',
             91: 'Les <b>Membres de la station</b> ont gagné !',
@@ -513,6 +519,9 @@ const GameControls: React.FC<GameControlsProps> = ({
 
       {isEditCompositionOpen && (
         <EditCompoModal roomId={roomData.id} onClose={closeEditComposition} />
+      )}
+      {isTransferLeadOpen && (
+        <TransferLeadModal roomId={roomData.id} players={players} creator={roomData.creator} onClose={closeTransferLead} />
       )}
     </Box>
   )
