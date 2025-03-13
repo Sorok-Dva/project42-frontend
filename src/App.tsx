@@ -2,6 +2,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import 'react-tooltip/dist/react-tooltip.css'
 import 'assets/vendor/nucleo/css/nucleo.css'
 import 'assets/vendor/font-awesome/css/fa.all.css'
+import 'assets/styles/scss/style.scss'
 import 'animate.css'
 import 'styles/index.scss'
 import 'index.css'
@@ -10,21 +11,18 @@ import 'styles/Spinner.css'
 
 import React, { useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { ThemeProvider as SCThemeProvider } from 'styled-components'
 
 import { UserProvider, useUser } from 'contexts/UserContext'
 import { AuthProvider } from 'contexts/AuthContext'
 import { ErrorProvider, useError } from 'contexts/ErrorContext'
 
 import GoogleTagManager from 'components/GoogleTagManager'
-import Navbar from 'components/Layouts/Navbar'
+import Navbar from 'components/Layouts/navbar/Navbar'
 import Footer from 'components/Layouts/Footer'
 import NotFound from 'components/ErrorPage/404'
 import AdminRoute from 'components/AdminRoute'
 import ScrollToTop from 'components/Layouts/ScrollToTop'
-import ThemeSwitcher from 'components/Layouts/ThemeSwitcher'
 
-import AdminNavbar from 'components/Layouts/AdminNavbar'
 import HomePage from 'pages/HomePage'
 import LandingPage from 'pages/LandingPage'
 import Login from 'components/Auth/LoginForm'
@@ -50,15 +48,7 @@ import GamePage from 'pages/Game'
 import { SocketProvider } from 'contexts/SocketContext'
 import ModalProvider from 'contexts/ModalProvider'
 import GlobalClickListener from 'components/GlobalClickListener'
-
-const theme = {
-  colors: {
-    primary: '#0070f3',
-    secondary: '#09dfdf',
-    background: 'rgba(9,9,9,0)',
-    text: '#090909',
-  },
-}
+import SplitTextAnimations from 'utils/SplitTextAnim'
 
 const AppContent: React.FC = () => {
   const { serverError } = useError()
@@ -69,9 +59,7 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      {!isAdminRoute ? (
-        !isGameRoute ? (<Navbar />) : null
-      ) : (<AdminNavbar />) }
+      {!isGameRoute && (<Navbar isTransparent={true} />) }
       <Routes>
         {serverError ? (
           <>
@@ -139,24 +127,22 @@ const App: React.FC = () => {
   }, [])
 
   return (
-    <SCThemeProvider theme={theme}>
-      <ErrorProvider>
-        <AuthProvider>
-          <UserProvider>
-            <SocketProvider>
-              <ModalProvider>
-                <GlobalClickListener />
-                <GoogleTagManager />
-                <Notifier />
-                <AppContent />
-                <ScrollToTop />
-                <ThemeSwitcher />
-              </ModalProvider>
-            </SocketProvider>
-          </UserProvider>
-        </AuthProvider>
-      </ErrorProvider>
-    </SCThemeProvider>
+    <ErrorProvider>
+      <AuthProvider>
+        <UserProvider>
+          <SocketProvider>
+            <ModalProvider>
+              <GlobalClickListener />
+              <GoogleTagManager />
+              <Notifier />
+              <AppContent />
+              <ScrollToTop />
+              <SplitTextAnimations />
+            </ModalProvider>
+          </SocketProvider>
+        </UserProvider>
+      </AuthProvider>
+    </ErrorProvider>
   )
 }
 

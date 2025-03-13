@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useState, useEffect } from 'react'
 import { Img as Image } from 'react-image'
 import { Link, useLocation } from 'react-router-dom'
