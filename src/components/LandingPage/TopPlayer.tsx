@@ -1,56 +1,28 @@
 import Button from 'components/Layouts/Button'
 import sword from 'assets/img/sword.png'
-import topplayer1 from 'assets/img/top-player1.png'
-import topplayer2 from 'assets/img/top-player2.png'
-import topplayer3 from 'assets/img/top-player3.png'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Img as Image } from 'react-image'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import { Autoplay, Navigation } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
+import axios from 'axios'
+import { User } from 'components/ProfileModal'
 
-const topPlayers = [
-  {
-    id: 1,
-    img: topplayer1,
-    title: 'Jane Cooper',
-    team: 'Fire',
-  },
-  {
-    id: 2,
-    img: topplayer2,
-    title: 'Jane Cooper',
-    team: 'Fire',
-  },
-  {
-    id: 3,
-    img: topplayer3,
-    title: 'Jane Cooper',
-    team: 'Fire',
-  },
-  {
-    id: 4,
-    img: topplayer1,
-    title: 'Jane Cooper',
-    team: 'Fire',
-  },
-  {
-    id: 5,
-    img: topplayer2,
-    title: 'Jane Cooper',
-    team: 'Fire',
-  },
-  {
-    id: 6,
-    img: topplayer3,
-    title: 'Jane Cooper',
-    team: 'Fire',
-  },
-]
 const TopPlayer: React.FC = () => {
+  const [topPlayers, setTopPlayers] = useState<User[]>([])
+
+  useEffect(() => {
+    async function retrieveTopPlayers () {
+      const response = await axios.get('/api/users/leaderboard?limit=5')
+      setTopPlayers(response.data.users)
+    }
+
+    retrieveTopPlayers()
+  }, [])
+
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
 
@@ -89,7 +61,7 @@ const TopPlayer: React.FC = () => {
       })
     }
   }, [])
-  return (
+  return topPlayers && (
     <section className="top-player-section pt-120 pb-120" id="top-player">
       {/* <!-- sword animation --> */}
       <div className="sword-area" id="sword-area">
@@ -141,8 +113,8 @@ const TopPlayer: React.FC = () => {
               }}
               wrapperClass="my-1"
               className="swiper swiper-top-player">
-              {topPlayers.map(({ id, img, team, title }) => (
-                <SwiperSlide key={id}>
+              {topPlayers.map((user) => (
+                <SwiperSlide key={user.id}>
                   <div
                     className="player-card d-grid gap-6 p-6 card-tilt"
                     data-tilt>
@@ -151,7 +123,7 @@ const TopPlayer: React.FC = () => {
                         <div className="player-img position-relative">
                           <Image
                             className="w-100 rounded-circle"
-                            src={img}
+                            src={user.avatar}
                             alt="player"
                           />
                           <span className="player-status position-absolute end-0 bottom-0 tcn-1 fs-xs d-center">
@@ -160,39 +132,18 @@ const TopPlayer: React.FC = () => {
                         </div>
                         <div>
                           <h5 className="player-name tcn-1 mb-1 title-anim">
-                            {title}
+                            {user.nickname}
                           </h5>
-                          <span className="tcn-6 fs-sm">Duelist</span>
+                          <span className="tcn-6 fs-sm">{ user.title }</span>
                         </div>
                       </div>
-                      <form action="#">
-                        <Button classes="follow-btn">
-                          <i className="ti ti-user-plus fs-xl"></i>
-                        </Button>
-                      </form>
                     </div>
                     <div className="player-score-details d-flex align-items-center flex-wrap gap-3">
                       <div className="score">
                         <h6 className="score-title tcn-6 mb-2">Score</h6>
-                        <ul className="d-flex align-items-center gap-1 tcp-2">
-                          <li>
-                            <i className="ti ti-star-filled"></i>
-                          </li>
-                          <li>
-                            <i className="ti ti-star-filled"></i>
-                          </li>
-                          <li>
-                            <i className="ti ti-star-filled"></i>
-                          </li>
-                          <li>
-                            <i className="ti ti-star-half-filled"></i>
-                          </li>
-                          <li>
-                            <i className="ti ti-star"></i>
-                          </li>
-                        </ul>
+                        { user.points }
                       </div>
-                      <div className="rank">
+                      {/*<div className="rank">
                         <h6 className="rank-title tcn-6 mb-2">Rank</h6>
                         <span className="tcn-1 fs-sm">
                           <i className="ti ti-diamond"></i> Diamond
@@ -201,11 +152,11 @@ const TopPlayer: React.FC = () => {
                       <div className="region">
                         <h6 className="region-title tcn-6 mb-2">Region</h6>
                         <span className="tcn-1 fs-sm text-uppercase"> EUW</span>
-                      </div>
+                      </div>*/}
                       <div className="team">
-                        <h6 className="team-title tcn-6 mb-2">Team</h6>
+                        <h6 className="team-title tcn-6 mb-2">Guilde</h6>
                         <span className="tcs-1 fs-sm text-uppercase">
-                          {team}
+                          {user.guild?.name ? user.guild.name : 'Aucune'}
                         </span>
                       </div>
                     </div>
