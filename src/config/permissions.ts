@@ -12,7 +12,7 @@ export const ROLE_PERMISSIONS = {
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
       'music', 'video', 'image', 'dice', 'text', 'timer',
-      'quiz', 'poll', 'vote', 'question', 'answer',
+      'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
     site: ['achievement'],
   },
@@ -29,7 +29,7 @@ export const ROLE_PERMISSIONS = {
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
       'music', 'video', 'image', 'dice', 'text', 'timer',
-      'quiz', 'poll', 'vote', 'question', 'answer',
+      'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
     site: ['achievement'],
   },
@@ -46,7 +46,7 @@ export const ROLE_PERMISSIONS = {
     godPowers: [],
     animationPowers: [
       'music', 'video', 'image', 'dice', 'text', 'timer',
-      'quiz', 'poll', 'vote', 'question', 'answer',
+      'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
     site: ['achievement'],
   },
@@ -76,7 +76,7 @@ export const ROLE_PERMISSIONS = {
     godPowers: ['setNight', 'setDay',],
     animationPowers: [
       'music', 'video', 'image', 'dice', 'text', 'timer',
-      'quiz', 'poll', 'vote', 'question', 'answer',
+      'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
     site: [],
   },
