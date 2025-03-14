@@ -5,38 +5,42 @@ import award from 'assets/img/award.png'
 import bg1 from 'assets/img/bg-1.png'
 import bigStar from 'assets/img/big-star.png'
 import hero from 'assets/img/hero.png'
-import player1 from 'assets/img/player1.png'
-import player2 from 'assets/img/player2.png'
-import player3 from 'assets/img/player3.png'
-import player4 from 'assets/img/player4.png'
 import smallStar from 'assets/img/small-star.png'
 import { Img as Image } from 'react-image'
-import React from 'react'
+import React, { useEffect } from 'react'
 import Tilt from 'react-parallax-tilt'
 import useDropdown from 'hooks/useDropdown'
+import axios from 'axios'
 
-const winners = [
-  {
-    id: 1,
-    name: 'Cristofer Dorwart',
-    img: avatar1,
-    prizeMoney: 350,
-  },
-  {
-    id: 2,
-    name: 'Luna Evergreen',
-    img: avatar2,
-    prizeMoney: 250,
-  },
-  {
-    id: 3,
-    name: 'Lucas Thornfield',
-    img: avatar3,
-    prizeMoney: 150,
-  },
-]
+interface User {
+  id: number
+  nickname: string
+  isMale: boolean
+  role: string
+  roleId: number
+  isAdmin: boolean
+  level: number
+  avatar: string
+  points: string
+}
+
 const Hero: React.FC = () => {
   const { toggleOpen } = useDropdown()
+
+  const [connectedUsers, setConnectedUsers] = React.useState<User[]>([])
+  const [registeredUsers, setRegistereddUsers] = React.useState<User[]>([])
+
+  useEffect(() => {
+    async function retrieveServerData () {
+      const connectedResponse = await axios.get('/api/users/connected')
+      const registeredResponse = await axios.get('/api/users/lastRegisteredUsers')
+      setConnectedUsers(Object.values(connectedResponse.data.users))
+      setRegistereddUsers(Object.values(registeredResponse.data.users))
+    }
+
+    retrieveServerData ()
+  }, [])
+
   return (
     <section className="hero-section pt-20 pb-120 position-relative">
       <div className="gradient-bg"></div>
@@ -87,23 +91,23 @@ const Hero: React.FC = () => {
               <Tilt
                 className="card-area py-lg-8 py-6 px-lg-6 px-3 rounded-5 tilt mb-10"
                 data-tilt>
-                <h3 className="tcn-1 dot-icon cursor-scale growDown mb-6 title-anim">
+                <h3 className="tcn-1 dot-icon cursor-scale growDown mb-6">
                   Derniers joueurs inscrits
                 </h3>
                 <div className="hr-line mb-6"></div>
                 <div className="card-items d-grid gap-5">
-                  {winners.map(({ id, img, name, prizeMoney }) => (
-                    <React.Fragment key={id}>
+                  {registeredUsers.map((user, id) => (
+                    <React.Fragment key={user.id}>
                       <div className="card-item d-flex align-items-center gap-4">
                         <div className="card-img-area rounded-circle overflow-hidden">
-                          <Image className="w-100" src={img} alt="profile" />
+                          <Image className="w-100" src={user.avatar} alt="profile" />
                         </div>
                         <div className="card-info">
-                          <h4 className="card-title fw-semibold tcn-1 mb-1 cursor-scale growDown2 title-anim">
-                            {name}
+                          <h4 className="card-title fw-semibold tcn-1 mb-1 cursor-scale growDown2">
+                            {user.nickname}
                           </h4>
-                          <p className="card-text tcs-1 fw-medium">
-                            +${prizeMoney}
+                          <p className="card-text tcs-3 fw-medium">
+                            Niveau: {user.level} ({user.points} points)
                           </p>
                         </div>
                       </div>
@@ -114,21 +118,16 @@ const Hero: React.FC = () => {
               </Tilt>
               <div className="active-player-list d-grid justify-content-end gap-2">
                 <ul className="player-lists d-flex align-items-center">
-                  <li className="rounded-circle overflow-hidden me-n6">
-                    <Image src={player1} alt="player" />
-                  </li>
-                  <li className="rounded-circle overflow-hidden me-n6">
-                    <Image src={player2} alt="player" />
-                  </li>
-                  <li className="rounded-circle overflow-hidden me-n6">
-                    <Image src={player3} alt="player" />
-                  </li>
-                  <li className="rounded-circle overflow-hidden me-n6">
-                    <Image src={player4} alt="player" />
-                  </li>
-                  <li className="rounded-circle overflow-hidden me-n6 heading-font fs-xl">
-                    99+
-                  </li>
+                  {connectedUsers.slice(0, 5).map((user) => (
+                    <li key={user.id} className="rounded-circle overflow-hidden me-n6">
+                      <Image src={user.avatar} alt={user.nickname} />
+                    </li>
+                  ))}
+                  {connectedUsers.length > 5 && (
+                    <li className="rounded-circle overflow-hidden me-n6 heading-font fs-xl">
+                      +{connectedUsers.length - 5}
+                    </li>
+                  )}
                 </ul>
                 <span className="d-block tcn-1 dot-icon cursor-scale growDown2 fs-xl text-end">
                   Joueurs actifs
