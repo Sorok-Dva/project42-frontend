@@ -3,7 +3,7 @@ import Hero from 'components/LandingPage/Hero'
 import ThreeDSwiper from 'components/LandingPage/ThreeDSwiper'
 import TopPlayer from 'components/LandingPage/TopPlayer'
 import Games from 'components/LandingPage/Games'
-import NextLevelGaming from 'components/LandingPage/NextLevelGaming'
+import About from 'components/LandingPage/About'
 import Cards from 'components/LandingPage/Cards'
 
 const LandingPage : React.FC = () => {
@@ -13,7 +13,7 @@ const LandingPage : React.FC = () => {
       <TopPlayer />
       <Games />
       <Cards />
-      <NextLevelGaming />
+      <About />
       <ThreeDSwiper />
     </main>
   )

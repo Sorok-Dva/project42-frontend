@@ -78,7 +78,7 @@ const Cards: React.FC = () => {
                         <Image className="w-100 h-100" src={`/assets/images/carte${card.id}.png`} alt="game" />
                       </div>
                       <div className="game-link d-center p-4">
-                        <i className="ti ti-info fs-2xl"></i>
+                        <i className="ti ti-info-circle fs-2xl"></i>
                         {card.description}
                       </div>
                     </div>
