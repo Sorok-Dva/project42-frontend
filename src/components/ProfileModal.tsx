@@ -21,7 +21,9 @@ interface AchievementResult { [favorite: number]:  {
     title?: string | { [level: number]: string }
     nextLevelTo?: number
   } }
-interface User {
+
+export interface User {
+  id : number
   nickname: string;
   points: number;
   level: number;
