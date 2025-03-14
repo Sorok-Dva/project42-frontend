@@ -7,27 +7,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: black;
-}
-
-body.light-theme {
-  background-color: white;
-  color: white;
-}
-
-body.dark-theme {
-  background-color: #121212;
-  color: white;
-}
-
-body.dark-theme.bg-dark {
-  background-color: #121212 !important;
-  color: white !important;
-}
-
-body.light-theme.bg-light {
-  background-color: white !important;
-  color: black !important;
+  background-color: #121315;
 }
 
 .bg-dark > .input-group-text {

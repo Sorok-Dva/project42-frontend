@@ -13,6 +13,7 @@ import smallStar from 'assets/img/small-star.png'
 import { Img as Image } from 'react-image'
 import React from 'react'
 import Tilt from 'react-parallax-tilt'
+import useDropdown from 'hooks/useDropdown'
 
 const winners = [
   {
@@ -35,6 +36,7 @@ const winners = [
   },
 ]
 const Hero: React.FC = () => {
+  const { toggleOpen } = useDropdown()
   return (
     <section className="hero-section pt-20 pb-120 position-relative">
       <div className="gradient-bg"></div>
@@ -55,19 +57,18 @@ const Hero: React.FC = () => {
           <div className="col-lg-5 col-md-6 col-sm-8">
             <div className="hero-content">
               <ul className="d-flex gap-3 fs-2xl fw-semibold heading-font mb-5 list-icon title-anim">
-                <li>Play</li>
-                <li>Earn</li>
-                <li>Enjoy</li>
+                <li>Jouer</li>
+                <li>Débattre</li>
+                <li>Gagner</li>
               </ul>
               <h1 className="hero-title display-one tcn-1 cursor-scale growUp mb-10">
-                ULTIMATE
-                <span className="d-block tcp-1">GAMER&apos;S</span>
-                HAVEN
+                <span className="d-block tcp-1">Project 42</span>
               </h1>
               <a
-                href="https://www.youtube.com/watch?v=G5kzUpWAusI"
+                href="#"
+                onClick={toggleOpen}
                 className="btn-half-border position-relative d-inline-block py-2 px-6 bgp-1 rounded-pill popupvideo mfp-iframe">
-                Play Now
+                Jouer maintenant
               </a>
             </div>
           </div>
@@ -87,7 +88,7 @@ const Hero: React.FC = () => {
                 className="card-area py-lg-8 py-6 px-lg-6 px-3 rounded-5 tilt mb-10"
                 data-tilt>
                 <h3 className="tcn-1 dot-icon cursor-scale growDown mb-6 title-anim">
-                  Last Winners
+                  Derniers joueurs inscrits
                 </h3>
                 <div className="hr-line mb-6"></div>
                 <div className="card-items d-grid gap-5">
@@ -130,7 +131,7 @@ const Hero: React.FC = () => {
                   </li>
                 </ul>
                 <span className="d-block tcn-1 dot-icon cursor-scale growDown2 fs-xl text-end">
-                  Active Players
+                  Joueurs actifs
                 </span>
               </div>
             </div>
