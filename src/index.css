@@ -7,7 +7,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #121315;
+  background-color: #121315 !important;
+  /*background-size: 100% !important;*/
+  /*background-attachment: fixed !important;*/
 }
 
 .bg-dark > .input-group-text {
