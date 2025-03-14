@@ -4,17 +4,8 @@ import React, { useContext } from 'react'
 import { Button, Col, Row } from 'reactstrap'
 import { FaDiscord, FaRotateRight } from 'react-icons/fa6'
 import PageBanner from 'components/Common/PageBanner'
-import { ThemeContext } from 'contexts/ThemeContext'
 
 const CustomErrorContent: React.FC = () => {
-  const themeContext = useContext(ThemeContext)
-
-  if (!themeContext) {
-    throw new Error('ThemeContext not found')
-  }
-
-  const { theme } = themeContext
-
   const handleReload = () => {
     window.location.href = '/'
   }
@@ -26,9 +17,9 @@ const CustomErrorContent: React.FC = () => {
         homePageText="Accueil"
         activePageText="Serveur indisponible"
       />
-      <div className={`pt-50 pb-70 ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}>
+      <div className={'pt-50 pb-70 bg-dark text-white}'}>
         <div className="container">
-          <div className={`error-area ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`} >
+          <div className={'error-area bg-dark text-white'} >
             <Row>
               <Col>
                 <img
