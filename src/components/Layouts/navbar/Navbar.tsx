@@ -4,82 +4,47 @@ import React, { useEffect, useState } from 'react'
 import AnimateHeight from 'react-animate-height'
 import Notification from './Notification'
 import Profile from './Profile'
-import Wallet from './Wallet'
+import Login from 'components/Layouts/navbar/Login'
 import favicon from 'assets/img/favicon.png'
 import logo from 'assets/img/logo.png'
 import { Img as Image } from 'react-image'
+import { useUser } from 'contexts/UserContext'
 
 const menuData = [
   {
     id: 1,
-    title: 'Home',
+    title: 'Accueil',
     url: '/',
   },
   {
     id: 2,
-    title: 'Tournament',
-    submenus: [
-      {
-        id: 1,
-        title: 'Tournaments',
-        url: '/tournaments/',
-      },
-      {
-        id: 2,
-        title: 'Tournaments Details',
-        url: '/tournaments/1',
-      },
-    ],
+    title: 'Jouer',
+    url: '/games',
   },
   {
     id: 3,
-    title: 'Game',
-    url: '/game/',
-  },
-  {
-    id: 4,
-    title: 'Teams',
+    title: 'Guildes',
     submenus: [
       {
         id: 1,
-        title: 'Teams',
-        url: '/teams/',
-      },
-      {
-        id: 2,
-        title: 'Teams Details',
-        url: '/teams/1',
+        title: 'Liste',
+        url: '/guilds/',
       },
     ],
   },
   {
-    id: 5,
-    title: 'Pages',
+    id: 4,
+    title: 'Classements',
     submenus: [
       {
         id: 1,
-        title: 'Signup',
-        url: '/signup/',
+        title: 'Joueurs',
+        url: '/leaderboard/players/',
       },
       {
         id: 2,
-        title: 'Signin',
-        url: '/signin/',
-      },
-      {
-        id: 3,
-        title: 'Error',
-        url: '/error',
-      },
-      {
-        id: 4,
-        title: 'Faq',
-        url: '/faq/',
-      },
-      {
-        id: 5,
-        title: 'Terms Conditions',
-        url: '/terms-condition/',
+        title: 'Guildes',
+        url: '/leaderboard/guilds',
       },
     ],
   },
@@ -93,6 +58,7 @@ type submenuType = {
 const Navbar: React.FC<{
   isTransparent: boolean;
 }> = ({ isTransparent }: { isTransparent?: boolean }) => {
+  const { user } = useUser()
   const [navOpen, setNavOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [openSubmenu, setOpenSubmenu] = useState<null | number>(null)
@@ -243,9 +209,13 @@ const Navbar: React.FC<{
               </div>
             </nav>
             <div className="header-btn-area d-flex align-items-center gap-sm-6 gap-3">
-              <Wallet />
-              <Notification />
-              <Profile />
+              { !user ? (<Login />)
+                :(
+                  <>
+                    <Notification />
+                    <Profile />
+                  </>
+                )}
             </div>
           </div>
         </div>

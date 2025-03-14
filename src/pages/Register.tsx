@@ -134,7 +134,7 @@ const Register : React.FC = () => {
                           </InputGroupText>
                           <Input
                             className={`form-control ${validateUsername(nickname) ? 'is-valid' : 'is-invalid'} ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}
-                            placeholder="Username"
+                            placeholder="Pseudo"
                             type="text"
                             value={nickname}
                             onChange={(e) => setNickname(e.target.value)}
@@ -164,7 +164,7 @@ const Register : React.FC = () => {
                           </InputGroupText>
                           <Input
                             className={`${validatePassword(password) ? 'is-valid' : 'is-invalid'} ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}
-                            placeholder="Password"
+                            placeholder="Mot de passe"
                             type={showPassword ? 'text' : 'password'}
                             autoComplete="off"
                             value={password}

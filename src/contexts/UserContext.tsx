@@ -25,6 +25,7 @@ export interface User {
   isAdmin : boolean;
   validated : boolean;
   lastNicknameChange: Date;
+  level: number;
   token: string;
 }
 

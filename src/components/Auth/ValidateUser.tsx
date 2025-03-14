@@ -41,6 +41,7 @@ const ValidateUser: React.FC = () => {
               isAdmin: payload.isAdmin,
               validated: payload.validated,
               lastNicknameChange: payload.lastNicknameChange,
+              level: payload.level,
               token: payload.token,
             }, token)
             if (!user) navigate('/')
