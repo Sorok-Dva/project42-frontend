@@ -10,11 +10,11 @@ const LandingPage : React.FC = () => {
   return (
     <main>
       <Hero />
-      <ThreeDSwiper />
       <TopPlayer />
       <Games />
       <Cards />
       <NextLevelGaming />
+      <ThreeDSwiper />
     </main>
   )
 }

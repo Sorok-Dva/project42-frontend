@@ -16,6 +16,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import Button from 'components/Layouts/Button'
 import React from 'react'
 
+// staff website
 const slides = [
   {
     id: 1,
@@ -92,6 +93,13 @@ const ThreeDSwiper: React.FC = () => {
   return (
     <section className="swiper-3d-section position-relative z-1" id="swiper-3d">
       <div className="container px-0 px-sm-3">
+        <div className="row justify-content-between mb-15">
+          <div className="col-lg-6 col-sm-10">
+            <h2 className="display-four tcn-1 cursor-scale growUp title-anim">
+              <span className="d-block">L'équipe</span> de Project 42
+            </h2>
+          </div>
+        </div>
         {/* <!-- Slider main container --> */}
         <Swiper
           slidesPerView="auto"
