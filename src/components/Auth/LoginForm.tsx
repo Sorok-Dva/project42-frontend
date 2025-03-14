@@ -86,7 +86,6 @@ const LoginForm: React.FC<{
   }
   return (
     <>
-      <h1 className="tcn-1 text-center cursor-scale growUp mb-10">Se connecter</h1>
       { error &&
         <div className="alert alert-danger text-center">{ error }</div> }
       <Form role="form" onSubmit={ handleSubmit }>

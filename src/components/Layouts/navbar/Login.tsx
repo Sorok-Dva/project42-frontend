@@ -43,24 +43,34 @@ const Login: React.FC = () => {
             </h3>
             <div className="wallet-option pb-20">
               { loginFormOpened && (
-                <>
-                  <Link to="#" onClick={handleLoginForm} className='btn-half-border position-relative d-inline-block py-2 px-6 bgp-1 rounded-pill'>⬅️</Link>
-                  <LoginForm toggle={toggleOpen} />
-                </>
+                <div className="row">
+                  <div className="col-12">
+                    <div className="d-flex align-items-center gap-4 mb-4"><a
+                      className="back-btn" href="#"><i
+                        className="ti ti-arrow-narrow-left fs-2xl" onClick={ handleLoginForm }></i></a>
+                    <h1 className="tcn-1 text-center">Se connecter</h1>
+                    </div>
+                    <LoginForm toggle={ toggleOpen }/>
+                  </div>
+                </div>
               )}
 
               { !loginFormOpened && (
                 <ul className="d-grid gap-sm-8 gap-4">
-                  <li className="wallet-item p-sm-6 p-2 bgn-3 rounded-4">
-                    <Link to="#" className="d-between" onClick={handleLoginForm}>
+                  <li
+                    className="wallet-item p-sm-6 p-2 bgn-3 rounded-4">
+                    <Link to="#" className="d-between"
+                      onClick={ handleLoginForm }>
                       <span>Se connecter</span>
                       <div className="wallet-item-thumb">
                         <h2>🛰️</h2>
                       </div>
                     </Link>
                   </li>
-                  <li className="wallet-item p-sm-6 p-2 bgn-3 rounded-4">
-                    <Link to="/register" onClick={toggleOpen} className="d-between">
+                  <li
+                    className="wallet-item p-sm-6 p-2 bgn-3 rounded-4">
+                    <Link to="/register" onClick={ toggleOpen }
+                      className="d-between">
                       <span>S'inscrire</span>
                       <div className="wallet-item-thumb">
                         <h2>🚀</h2>
@@ -68,7 +78,7 @@ const Login: React.FC = () => {
                     </Link>
                   </li>
                 </ul>
-              )}
+              ) }
             </div>
           </div>
         </div>
