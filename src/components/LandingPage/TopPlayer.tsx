@@ -113,7 +113,7 @@ const TopPlayer: React.FC = () => {
               }}
               wrapperClass="my-1"
               className="swiper swiper-top-player">
-              {topPlayers.map((user) => (
+              {topPlayers.map((user, id) => (
                 <SwiperSlide key={user.id}>
                   <div
                     className="player-card d-grid gap-6 p-6 card-tilt"
@@ -127,11 +127,11 @@ const TopPlayer: React.FC = () => {
                             alt="player"
                           />
                           <span className="player-status position-absolute end-0 bottom-0 tcn-1 fs-xs d-center">
-                            1
+                            #{ id + 1 }
                           </span>
                         </div>
                         <div>
-                          <h5 className="player-name tcn-1 mb-1 title-anim">
+                          <h5 className="player-name tcn-1 mb-1">
                             {user.nickname}
                           </h5>
                           <span className="tcn-6 fs-sm">{ user.title }</span>
