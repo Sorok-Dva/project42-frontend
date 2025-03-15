@@ -108,7 +108,7 @@ const Games: React.FC = () => {
                     </div>
                     <div className="tournament-content px-xl-4 px-sm-2">
                       <div className="tournament-info mb-5">
-                        <Link to={`/games/${room.id}`} className="d-block">
+                        <Link to={`/game/${room.id}`} className="d-block">
                           <h4 className="tournament-title tcn-1 mb-1 cursor-scale growDown">
                             {room.name}
                           </h4>
@@ -144,7 +144,7 @@ const Games: React.FC = () => {
                             <span className="tcn-6 fs-sm">{room.maxPlayers} joueurs</span>
                           </div>
                         </div>
-                        <Link to={`/games/${room.id}`} className="btn2">
+                        <Link to={`/game/${room.id}`} className="btn2">
                           <i className="ti ti-eye fs-2xl"></i>
                         </Link>
                       </div>
