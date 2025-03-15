@@ -1,159 +1,144 @@
 import React from 'react'
-import { Container } from 'reactstrap'
-import styled from 'styled-components'
 
-const TermsContainer = styled(Container)`
-  padding: 2rem;
-  text-align: left;
-`
-
-const Title = styled.h1`
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: 2rem;
-`
-
-const SectionTitle = styled.h2`
-  color: ${props => props.theme.colors.secondary};
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-`
-
-const SectionSubTitle = styled.h5`
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: 1rem;
-`
-
-const Paragraph = styled.p`
-  margin-bottom: 1rem;
-  font-size: 20px;
-`
-
-const TermsOfService = () => {
+const TermsCondition: React.FC = () => {
   return (
     <>
-      <div className="text-container ptb-100">
+      <section className="terms-condition pb-120 pt-120 mt-lg-0 mt-sm-15 mt-10">
         <div className="container">
-          <TermsContainer>
-            <Title>Conditions Générales d&apos;Utilisation (CGU) de "Le Sentier des Rêves"</Title>
-
-            <SectionTitle>1. Préambule</SectionTitle>
-            <Paragraph>
-              Les présentes <strong>Conditions Générales d&apos;Utilisation</strong> (ci-après "CGU") ont pour objet de définir
-              les modalités et conditions dans lesquelles les utilisateurs (ci-après "Utilisateur(s)")
-              peuvent accéder et utiliser le site web <strong>"Le Sentier des Rêves"</strong> (ci-après "le Site").
-              En accédant au Site, l&apos;Utilisateur accepte sans réserve les présentes CGU.
-            </Paragraph>
-
-            <SectionTitle>2. Présentation du Site</SectionTitle>
-            <Paragraph>
-              <strong>"Le Sentier des Rêves"</strong> est une plateforme en ligne dédiée à l&apos;exploration
-              des rêves lucides et à la gestion d&apos;un journal de rêves numérique.
-              Le Site propose des tutoriels, des ressources sur l&apos;interprétation des rêves,
-              et permet aux Utilisateurs de partager leurs expériences oniriques avec une communauté.
-            </Paragraph>
-
-            <SectionTitle>3. Accès au Site</SectionTitle>
-            <Paragraph>
-              Le Site est accessible gratuitement à tout Utilisateur disposant d&apos;un accès à Internet.
-              Tous les coûts relatifs à l&apos;accès au Site, qu&apos;il s&apos;agisse des frais matériels,
-              logiciels ou d&apos;accès à Internet, sont exclusivement à la charge de l&apos;Utilisateur.
-              L&apos;éditeur du Site se réserve le droit de refuser l&apos;accès au Site,
-              unilatéralement et sans notification préalable, à tout Utilisateur ne respectant pas les
-              présentes CGU.
-            </Paragraph>
-
-            <SectionTitle>4. Inscription</SectionTitle>
-            <Paragraph>
-              Certaines fonctionnalités du Site, telles que la création d&apos;un journal de rêves numérique ou
-              la participation à la communauté, nécessitent une inscription préalable.
-              L&apos;Utilisateur s&apos;engage à fournir des informations exactes et à jour lors de son inscription
-              et à les maintenir à jour.
-            </Paragraph>
-            <SectionSubTitle>4.1. Identifiants</SectionSubTitle>
-            <Paragraph>
-              L&apos;Utilisateur est seul responsable de la confidentialité de ses identifiants de connexion
-              (adresse e-mail et mot de passe). Toute utilisation du Site effectuée à partir des identifiants
-              de l&apos;Utilisateur sera considérée comme ayant été faite par celui-ci.
-            </Paragraph>
-
-            <SectionSubTitle>4.2. Suppression du compte</SectionSubTitle>
-            <Paragraph>
-              L&apos;Utilisateur peut à tout moment demander la suppression de son compte via les paramètres de son compte.
-              L&apos;éditeur se réserve le droit de suspendre ou supprimer un compte en cas de non-respect des présentes CGU.
-            </Paragraph>
-
-            <SectionTitle>5. Utilisation du Site</SectionTitle>
-            <Paragraph>
-              L&apos;Utilisateur s&apos;engage à utiliser le Site de manière conforme à la législation en vigueur et aux présentes CGU.
-              Il s&apos;interdit notamment de :
-            </Paragraph>
-            <ul>
-              <li>Publier des contenus illégaux, injurieux, diffamatoires, obscènes ou portant atteinte aux droits d&apos;autrui.</li>
-              <li>Utiliser le Site à des fins commerciales non autorisées par l&apos;éditeur.</li>
-              <li>Tenter de porter atteinte au bon fonctionnement du Site (attaques DDoS, injection de code malveillant, etc.).</li>
-            </ul>
-
-            <SectionTitle>6. Propriété Intellectuelle</SectionTitle>
-            <Paragraph>
-              Le Site et chacun des éléments qui le composent, y compris les textes, images, vidéos, bases de données, structures, marques, logos et logiciels, sont protégés par les lois françaises et internationales relatives à la propriété intellectuelle. Toute reproduction, représentation, modification, publication, adaptation de tout ou partie des éléments du Site, quel que soit le moyen ou le procédé utilisé, est interdite, sauf autorisation écrite préalable de l&apos;éditeur.
-            </Paragraph>
-
-            <SectionTitle>7. Données Personnelles</SectionTitle>
-            <Paragraph>
-              L&apos;Utilisateur est informé que lors de sa navigation sur le Site et de son utilisation, des données personnelles peuvent être collectées et traitées. Le traitement de ces données est effectué conformément à la réglementation applicable, notamment le Règlement Général sur la Protection des Données (RGPD).
-            </Paragraph>
-            <SectionSubTitle>7.1. Nature des données collectées</SectionSubTitle>
-            <Paragraph>
-              Les données collectées peuvent inclure des informations telles que l&apos;adresse e-mail, le nom, l&apos;adresse IP, l&apos;historique de navigation, et les données de connexion.
-            </Paragraph>
-
-            <SectionSubTitle>7.2. Finalité du traitement</SectionSubTitle>
-            <Paragraph>
-              Les données collectées sont utilisées pour la gestion du compte Utilisateur, la fourniture des services, l&apos;amélioration du Site, ainsi que pour l&apos;envoi d&apos;informations relatives à l&apos;utilisation du Site.
-            </Paragraph>
-
-            <SectionSubTitle>7.3. Droit d&apos;accès, de rectification et de suppression</SectionSubTitle>
-            <Paragraph>
-              Conformément à la loi Informatique et Libertés du 6 janvier 1978 modifiée, et au RGPD, l&apos;Utilisateur dispose d&apos;un droit d&apos;accès, de rectification, de suppression et de portabilité des données le concernant. Ces droits peuvent être exercés en contactant l&apos;éditeur via les coordonnées fournies dans la section "Contact" des présentes CGU.
-            </Paragraph>
-
-            <SectionTitle>8. Cookies</SectionTitle>
-            <Paragraph>
-              Le Site utilise des cookies pour améliorer l&apos;expérience de l&apos;Utilisateur et permettre certaines fonctionnalités. L&apos;Utilisateur est informé que des cookies peuvent être installés sur son terminal lors de la navigation sur le Site. L&apos;Utilisateur a la possibilité de gérer les cookies via les paramètres de son navigateur.
-            </Paragraph>
-
-            <SectionTitle>9. Limitation de Responsabilité</SectionTitle>
-            <Paragraph>
-              L&apos;éditeur met tout en œuvre pour assurer l&apos;accès au Site 24 heures sur 24, 7 jours sur 7, sauf en cas de force majeure ou d&apos;un événement hors de son contrôle, et sous réserve des éventuelles pannes et interventions de maintenance nécessaires au bon fonctionnement du Site.
-            </Paragraph>
-            <Paragraph>
-              L&apos;éditeur ne saurait être tenu responsable en cas de dysfonctionnement du réseau Internet, de pertes de données, d&apos;intrusions, de virus ou de toute autre perturbation technique empêchant l&apos;accès au Site ou altérant son bon fonctionnement.
-            </Paragraph>
-
-            <SectionTitle>10. Modification des CGU</SectionTitle>
-            <Paragraph>
-              L&apos;éditeur se réserve le droit de modifier les présentes CGU à tout moment. Toute modification prendra effet immédiatement après la mise en ligne des nouvelles CGU. L&apos;Utilisateur est invité à consulter régulièrement les CGU pour prendre connaissance des éventuelles modifications.
-            </Paragraph>
-
-            <SectionTitle>11. Loi Applicable et Juridiction</SectionTitle>
-            <Paragraph>
-              Les présentes CGU sont régies par la loi française. Tout litige relatif à l&apos;exécution ou à l&apos;interprétation des présentes CGU, qui ne pourra être résolu à l&apos;amiable, sera soumis aux tribunaux compétents du ressort de la Cour d&apos;appel de Paris.
-            </Paragraph>
-
-            <SectionTitle>12. Contact</SectionTitle>
-            <Paragraph>
-              Pour toute question relative aux présentes CGU, l&apos;Utilisateur peut contacter l&apos;éditeur via l&apos;adresse suivante : <a
-                href="mailto:support@screen-me.cloud">sorokdva.developer+sdr@gmail.com</a>.
-            </Paragraph>
-
-            <Paragraph>
-              <em>Dernière mise à jour : Mercredi 13 Août 2024 à 18h04</em>
-            </Paragraph>
-          </TermsContainer>
+          <div className="row justify-content-center">
+            <div className="col-lg-10">
+              <div className="terms-condition-wrapper p-lg-15 p-md-10 p-sm-8 p-4 bgn-4 rounded">
+                <h2 className="tcn-1 mb-10 text-center cursor-scale growUp title-anim">
+                  Terms and conditions
+                </h2>
+                <div className="d-grid gap-3 mb-8">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    Agreement to Terms
+                  </h5>
+                  <p className="tcn-6 content-anim">
+                    I apologize for any confusion, but as an AI language model, I
+                    don&apos;t have access specific gaming platforms, games, or
+                    online services can vary widely depending on the specific
+                    company and the jurisdiction they operate in.
+                  </p>
+                  <p className="tcn-6 content-anim">
+                    If you&apos;re looking for the terms and conditions of a
+                    particular gaming platform or game recommend visiting the
+                    official website of the platform or contacting their customer
+                    support. The terms and conditions are usually provided on
+                    their website,
+                  </p>
+                  <p className="tcn-6 content-anim">
+                    I&apos;d be happy to provide you with some general information
+                    about terms and conditions. terms and conditions of any
+                    particular service or organization. The terms and conditions
+                    specific company or service you are referring to.
+                  </p>
+                  <p className="tcn-6 content-anim">
+                    I&apos;d be happy to provide you with some general information
+                    about terms and conditions. However, please note that I am AI
+                    language model, and I don&apos;t have access to specific terms
+                    and conditions of any particular service or organization.
+                  </p>
+                </div>
+                <div className="d-grid gap-3 mb-8">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    User Representations
+                  </h5>
+                  <ol className="d-grid gap-3 tcn-6">
+                    <li className="content-anim">
+                      Acceptance: Users are typically required to agree to the
+                      terms and conditions before using a service. button or by
+                      simply using the service.
+                    </li>
+                    <li className="content-anim">
+                      User rights and responsibilities: The terms and conditions
+                      specify the rights granted to users and the responsibilities
+                      they have while using the service.
+                    </li>
+                    <li className="content-anim">
+                      your reviews should not contain offensive profanity, racist,
+                      offensive, or hate language;
+                    </li>
+                    <li className="content-anim">
+                      Dispute resolution: Procedures for resolving disputes, such
+                      as arbitration or mediation, may be outlined in the terms
+                      and conditions.
+                    </li>
+                    <li className="content-anim">
+                      Intellectual property: These sections outline the ownership
+                      and usage rights of intellectual property such as
+                      copyrights, trademarks, and patents associated with the
+                      service or content provided.
+                    </li>
+                  </ol>
+                  <p className="tcn-6 content-anim">
+                    Remember that it&apos;s important to read and understand the
+                    specific terms and conditions of any service or product you
+                    use. If you have any questions or concerns about a particular
+                    set of terms clarification.
+                  </p>
+                </div>
+                <div className="d-grid gap-3 mb-8">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    Guideline for Reviews
+                  </h5>
+                  <ol className="d-grid gap-3 tcn-6">
+                    <li className="content-anim">
+                      you should have firsthand experience with the object being
+                      reviewed;
+                    </li>
+                    <li className="content-anim">
+                      your reviews should not contain offensive profanity
+                      offensive, or hate language;
+                    </li>
+                    <li className="content-anim">
+                      your reviews should not contain discriminatory references
+                      based on religion, race, gender, national origin, age,
+                      marital status, sexual orientation, or disability;
+                    </li>
+                    <li className="content-anim">
+                      your reviews should not contain references to illegal
+                      activity;
+                    </li>
+                    <li className="content-anim">
+                      you may not organize encouraging others to post reviews,
+                      whether positive or negative.
+                    </li>
+                  </ol>
+                  <p className="tcn-6 content-anim">
+                    We may accept, reject, or remove reviews at our sole
+                    discretion. We have absolutely no obligation to screen reviews
+                    or to delete reviews, even if anyone considers reviews
+                    objectionable or inaccurate.
+                  </p>
+                </div>
+                <div className="d-grid gap-3">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    Social Media
+                  </h5>
+                  <p className="tcn-6 content-anim">
+                    As part of the functionality of the Site, you may link your
+                    account with online accounts you either: providing your
+                    Third-Party Account login information through the Site
+                    allowing us each Third-Party Account.
+                  </p>
+                  <p className="tcn-6 content-anim">
+                    You represent and warrant that you are entitled to disclose
+                    your Third-Party Account login you of any of the Terms and
+                    Conditions that govern your use of the applicable Third-Party
+                    Account, and without obligating us to pay any fees or making
+                    us subject to any usage service provider of the Third-Party
+                    Account.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     </>
   )
 }
 
-export default TermsOfService
+export default TermsCondition
