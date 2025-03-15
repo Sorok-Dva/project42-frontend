@@ -1,6 +1,3 @@
-import avatar1 from 'assets/img/avatar1.png'
-import avatar2 from 'assets/img/avatar2.png'
-import avatar3 from 'assets/img/avatar3.png'
 import award from 'assets/img/award.png'
 import bg1 from 'assets/img/bg-1.png'
 import bigStar from 'assets/img/big-star.png'
@@ -130,7 +127,7 @@ const Hero: React.FC = () => {
                   )}
                 </ul>
                 <span className="d-block tcn-1 dot-icon cursor-scale growDown2 fs-xl text-end">
-                  Joueurs actifs
+                  {connectedUsers.length} Joueurs actifs
                 </span>
               </div>
             </div>
