@@ -101,8 +101,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
       if (msg.channel === 2 && player && player.card?.id === 10 && isNight) {
         cleanNickname = '(Anonyme)'
       }
-      if (msg.channel === 3 && player && player.card?.id === 12 && isNight) {
-        cleanNickname = ''
+      if (msg.channel === 3 && cleanNickname !== 'Système' && player && player.card?.id === 12 && isNight) {
+        cleanNickname = '(Alien)'
       }
       const escapedMessage = stripHTML(msg.message)
       const highlightColor = cleanNickname ? (highlightedPlayers[cleanNickname] || 'transparent') : 'transparent'
