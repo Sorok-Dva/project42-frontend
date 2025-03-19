@@ -129,20 +129,6 @@ export const useGame = (
   const [slots, setSlots] = useState<number>(roomData.maxPlayers)
   const [isArchive, setIsArchive] = useState<boolean>(false)
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  /**
-   * scrollToBottom is a function that scrolls the view to the bottom of a container.
-   * It ensures that the UI automatically scrolls to the most recent content,
-   * providing a smooth scrolling effect.
-   *
-   * The function utilizes a reference (messagesEndRef) to the DOM element
-   * and invokes the scrollIntoView method with the 'smooth' behavior.
-   */
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
   /**
    * Asynchronously handles the submission of a password for game authentication.
    * Sends an HTTP POST request to validate the password associated with a specific game.
@@ -463,13 +449,6 @@ export const useGame = (
     }
   }, [socket, gameId, user, player, hasJoined, isAuthorized, isNight, roomData.maxPlayers])
 
-  /**
-   * Scroll auto en bas des messages à chaque nouveau message
-   */
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
   return {
     roomData,
     player,
@@ -487,7 +466,6 @@ export const useGame = (
     isNight,
     gameStarted,
     gameFinished,
-    messagesEndRef,
     passwordRequired,
     isAuthorized,
     password,
