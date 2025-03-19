@@ -689,13 +689,12 @@ USER PROFILE MODAL
         span.game-date {
           position: relative;
           left: 0;
-          margin: 0;
           font-style: italic;
           flex-grow: 1;
           align-content: baseline;
           text-align: start;
-          margin-left: 3vh;
-          margin-right: 1vh;
+          margin: 0 1vh 0 3vh;
+          font-size: inherit !important;
         }
 
         .label-win {
