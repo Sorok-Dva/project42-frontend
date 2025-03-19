@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { ListItem, ListItemText } from '@mui/material'
-import { Box, TextField, Typography } from '@mui/material'
+import { Box, TextField } from '@mui/material'
 import { List } from '@mui/material'
 import { PlayerType, Viewer } from 'hooks/useGame'
 import { User } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
+import ChatMessages from 'components/Game/ChatMessage'
 
 interface Message {
   nickname: string
@@ -31,7 +32,6 @@ interface ChatProps {
   gameFinished: boolean
   isArchive: boolean
   messages: Message[]
-  messagesEndRef: React.RefObject<HTMLDivElement>
   highlightedPlayers: { [nickname: string]: string }
 }
 
@@ -44,7 +44,6 @@ const Chat: React.FC<ChatProps> = ({
   user,
   userRole,
   messages,
-  messagesEndRef,
   highlightedPlayers,
   isNight,
   gameStarted,
@@ -172,7 +171,7 @@ const Chat: React.FC<ChatProps> = ({
         overflow="auto">
         <Box id="block_chat_content"
           className="block_scrollable_wrapper scrollbar-dark">
-          <Box id="block_chat_game" className="block_scrollable_content">
+          <Box id="block_chat_game" className="block_scrollable_content" sx={{ flex: 1, height: '100%' }}>
             <Box className="canal_meneur game-rules">
               <div>Rappel : vous êtes sur une partie <span className='bullet-game type-0'></span> <b>Normale</b> :<br />
                 <ul>
@@ -187,140 +186,14 @@ const Chat: React.FC<ChatProps> = ({
             </Box>
             <div id="scroll_chat"></div>
             <div id="load_chat">Chargement des messages plus anciens...</div>
-            { messages
-              .filter((msg) => {
-                // Si le message est envoyé dans le canal normal, on l'affiche pour tout le monde
-                if (msg.channel === 0) return true
-
-                // Si le message est envoyé dans le canal des loups (channel === 3)
-                // on vérifie que le joueur connecté est un loup.
-                if (msg.channel === 3 && player && ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected)) return true
-
-                if (msg.channel === 1 && viewer) return true
-
-                if (msg.channel === 2 && player && !player.alive) return true
-
-                if (msg.channel === 2 && player && player?.card?.id === 10 && player.alive && isNight) return true
-
-                if (msg.channel === 3 && player && player?.card?.id === 12 && player.alive && isNight) return true
-
-                if (msg.channel === 4 && player && player?.card?.id === 16 && isNight) return true
-
-                if (msg.channel === 5 && player && player?.card?.id === 17 && isNight) return true
-
-                if (gameFinished) return true
-
-                return false
-              }).map((msg, index) => {
-                let cleanNickname = stripHTML(msg.nickname)
-                if (msg.channel === 2
-                  && player
-                  && player?.card?.id === 10
-                  && isNight) cleanNickname = '(Anonyme)'
-                if (msg.channel === 3
-                  && player
-                  && player?.card?.id === 12
-                  && isNight) cleanNickname = ''
-                const escapedMessage = stripHTML(msg.message)
-
-                const highlightColor = cleanNickname ? highlightedPlayers[cleanNickname] : 'transparent'
-
-                const highlightMention = (message : string, nickname? : string) => {
-                  const regex = new RegExp(`\\b${nickname}\\b`, 'gi')
-                  return message.replace(
-                    regex,
-                    `<span style="background-color: #ff9100">${ nickname }</span>`,
-                  )
-                }
-
-                const shouldHighlight =
-                  cleanNickname !== 'Système' && cleanNickname !== 'Modération'
-
-                let processedMessage
-                if (cleanNickname === 'Modération' || cleanNickname === 'Système') {
-                  processedMessage = msg.message
-                } else if (cleanNickname && shouldHighlight) {
-                  processedMessage = highlightMention(escapedMessage, player?.nickname)
-                } else {
-                  processedMessage = escapedMessage
-                }
-
-                return (
-                  <Typography
-                    key={index}
-                    variant="body1"
-                    className={`canal_${msg.channel}`}
-                    sx={{
-                      backgroundColor: highlightColor,
-                      padding: '4px',
-                      borderRadius: '4px',
-                    }}
-                    onClick={(e) => {
-                      const target = e.target as HTMLElement
-                      if (target.classList.contains('msg-nickname')) {
-                        const nickname = target.getAttribute('data-highlight-nickname')
-                        if (nickname) handleMentionClick(nickname)
-                      }
-                    }}
-                  >
-                    {cleanNickname !== 'Système' && (
-                      <span className="msg-date">[{new Date(String(msg.createdAt)).toLocaleTimeString()}]{' '}</span>
-                    )}
-
-                    {msg.icon && !msg.isMeneur && !msg.isPerso && (
-                      <img
-                        src={`/assets/images/${msg.icon}`}
-                        className="msg-icon"
-                        alt="message icon"
-                      />
-                    )}
-
-                    {cleanNickname && cleanNickname !== 'Système' && (
-                      <>
-                        <b
-                          className="msg-nickname"
-                          data-highlight-nickname={cleanNickname}
-                          dangerouslySetInnerHTML={{
-                            __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname,
-                          }}
-                        ></b>
-                        {msg.channel === 1 && <>&nbsp;<span className='chat-badge-specta'>Spectateur</span></>}
-                        {msg.channel === 2 && <>&nbsp;<span className='chat-badge-dead'>Mort</span></>}
-                        {msg.channel === 3 && <>&nbsp;<span className='chat-badge-alien'>Alien</span></>}
-                        {msg.channel === 4 && <>&nbsp;<span className='chat-badge-sister'>Soeur</span></>}
-                        {msg.channel === 5 && <>&nbsp;<span className='chat-badge-brother'>Frère</span></>}
-                        {': '}
-                      </>
-                    )}
-
-                    {(msg.isMeneur || msg.isPerso || msg.isMsgSite) ? (
-                      <div
-                        className={
-                          msg.isMeneur
-                            ? 'canal_meneur'
-                            : msg.isPerso
-                              ? 'canal_perso'
-                              : msg.isMsgSite
-                                ? 'canal_msg_site'
-                                : ''
-                        }
-                      >
-                        {msg.icon && (
-                          <img
-                            src={`/assets/images/${msg.icon}`}
-                            className="msg-icon"
-                            alt="message icon"
-                          />
-                        )}
-                        <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
-                      </div>
-                    ) : (
-                      <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
-                    )}
-                  </Typography>
-                )
-              }) }
-            <div ref={ messagesEndRef }/>
+            <ChatMessages
+              messages={messages}
+              highlightedPlayers={highlightedPlayers}
+              player={player}
+              isNight={isNight}
+              gameFinished={gameFinished}
+              handleMentionClick={handleMentionClick}
+            />
           </Box>
         </Box>
       </Box>

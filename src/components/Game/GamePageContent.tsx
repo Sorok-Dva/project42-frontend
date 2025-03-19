@@ -80,7 +80,6 @@ const GamePage = () => {
     isNight,
     gameStarted,
     gameFinished,
-    messagesEndRef,
     passwordRequired,
     isAuthorized,
     password,
@@ -364,7 +363,6 @@ const GamePage = () => {
                 user={user ?? undefined}
                 userRole={user?.role}
                 messages={messages}
-                messagesEndRef={messagesEndRef}
                 highlightedPlayers={highlightedPlayers}
                 isNight={isNight}
                 gameStarted={gameStarted}
