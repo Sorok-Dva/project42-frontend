@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMedal } from '@fortawesome/free-solid-svg-icons'
+import { faMedal, faIdCardAlt } from '@fortawesome/free-solid-svg-icons'
 import axios from 'axios'
 
 import Badges, { BadgesData } from './Badges'
@@ -12,11 +12,12 @@ import Nickname from './Nickname'
 import Email from './Email'
 import Password from './Password'
 import Other from './Other'
+import Profile from './Profile'
 
 const UserSettings: React.FC = () => {
   const { token } = useAuth()
   const { user } = useUser()
-  const [activeTab, setActiveTab] = useState<string>('tab-badges')
+  const [activeTab, setActiveTab] = useState<string>('tab-profile')
   const [achievements, setAchievements] = useState<{
     achievements: BadgesData;
     playerTitle?: string;
@@ -55,12 +56,23 @@ const UserSettings: React.FC = () => {
             <div className="col-lg-3">
               <ul className="tabs">
                 <li
+                  className={activeTab === 'tab-profile' ? 'current' : ''}
+                  onClick={() => openTabSection('tab-profile')}
+                >
+                  <span>
+                    <i><FontAwesomeIcon icon={faIdCardAlt} /></i>
+                    <h3>Profil</h3>
+                    <p>Modifier votre profil</p>
+                  </span>
+                </li>
+
+                <li
                   className={activeTab === 'tab-badges' ? 'current' : ''}
                   onClick={() => openTabSection('tab-badges')}
                 >
                   <span>
                     <i><FontAwesomeIcon icon={faMedal} /></i>
-                    <h3>Vos badges</h3>
+                    <h3>Badges & Titre</h3>
                     <p>Modifier votre titre et vos badges favoris</p>
                   </span>
                 </li>
@@ -113,6 +125,12 @@ const UserSettings: React.FC = () => {
 
             <div className="col-lg-9">
               <div className="tab_content">
+                {activeTab === 'tab-profile' && (
+                  <div id="tab-profile" className="tabs_item active">
+                    <Profile user={user!} openTabSection={openTabSection} />
+                  </div>
+                )}
+
                 {activeTab === 'tab-badges' && (
                   <div id="tab-badges" className="tabs_item active">
                     <Badges achievements={achievements.achievements} playerTitle={achievements.playerTitle} />
