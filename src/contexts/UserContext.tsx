@@ -26,6 +26,7 @@ export interface User {
   validated : boolean;
   lastNicknameChange: Date;
   level: number;
+  title: string;
   token: string;
 }
 
