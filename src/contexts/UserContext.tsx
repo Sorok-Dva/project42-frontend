@@ -15,18 +15,21 @@ export type Role =
   | 'Banned'
 
 export interface User {
-  id : number;
-  email : string;
-  oldEmail : string;
-  nickname : string;
-  avatar : string;
-  role : Role;
-  roleId : number;
-  isAdmin : boolean;
-  validated : boolean;
+  id: number;
+  email: string;
+  oldEmail: string;
+  nickname: string;
+  avatar: string;
+  role: Role;
+  roleId: number;
+  isAdmin: boolean;
+  isMale?: boolean;
+  validated: boolean;
   lastNicknameChange: Date;
   level: number;
   title: string;
+  signature?: string;
+  premium?: Date;
   token: string;
 }
 
