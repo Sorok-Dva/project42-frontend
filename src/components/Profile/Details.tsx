@@ -181,15 +181,19 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, relation }) => {
         >
           <div className="achievements">
             {badgesArray.length > 0 ? (
-              badgesArray.map((a: any, index: number) => (
-                <React.Fragment key={index}>
-                  <div className="badges">
-                    <div className="achievement_badge">
-                      <AchievementBadge achievement={a} isMemory={a.memory} aKey="all" />
-                    </div>
-                  </div>
-                </React.Fragment>
-              ))
+              badgesArray.map((a: any, index: number) => {
+                if (a.level > 0) {
+                  return (
+                    <React.Fragment key={index}>
+                      <div className="badges">
+                        <div className="achievement_badge">
+                          <AchievementBadge achievement={a} isMemory={a.memory} aKey="all" />
+                        </div>
+                      </div>
+                    </React.Fragment>
+                  )
+                }
+              })
             ) : relation === 'me' ? (
               <p>
                 Tu n'as pas encore remporté de badge.
