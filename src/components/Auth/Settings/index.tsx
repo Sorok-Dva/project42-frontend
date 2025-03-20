@@ -1,29 +1,70 @@
-'use client'
+import '../../../styles/Account.scss'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useAuth } from 'contexts/AuthContext'
+import { useUser } from 'contexts/UserContext'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMedal } from '@fortawesome/free-solid-svg-icons'
+import axios from 'axios'
+
+import Badges, { BadgesData } from './Badges'
 import Nickname from './Nickname'
 import Email from './Email'
 import Password from './Password'
 import Other from './Other'
 
 const UserSettings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('tab1')
+  const { token } = useAuth()
+  const { user } = useUser()
+  const [activeTab, setActiveTab] = useState<string>('tab-badges')
+  const [achievements, setAchievements] = useState<{
+    achievements: BadgesData;
+    playerTitle?: string;
+  }>({ achievements: { possessed: [], favorites: [] }, playerTitle: user?.title})
 
   const openTabSection = (tabName: string) => {
     setActiveTab(tabName)
   }
 
+  useEffect(() => {
+    async function retrieveMyAchievements () {
+      try {
+        const { data } = await axios.get('/api/users/achievements', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        setAchievements(data)
+      } catch (err) {
+        console.error('Failed to fetch achievements', err)
+      }
+    }
+
+    retrieveMyAchievements()
+  }, [])
+
   return (
     <div className="industries-area pb-100 mt-30">
       <div className="container">
         <div className="section-title">
-          <h5>Mettez à jour les paramètres de votre compte tels que le pseudo, l'e-mail et le mot de passe.</h5>
+          <h5>Mettez à jour les paramètres de votre compte tels que le pseudo, l'e-mail ou le mot de passe.</h5>
         </div>
 
         <div className="tab industries-list-tab">
           <div className="row align-items-center">
             <div className="col-lg-3">
               <ul className="tabs">
+                <li
+                  className={activeTab === 'tab-badges' ? 'current' : ''}
+                  onClick={() => openTabSection('tab-badges')}
+                >
+                  <span>
+                    <i><FontAwesomeIcon icon={faMedal} /></i>
+                    <h3>Vos badges</h3>
+                    <p>Modifier votre titre et vos badges favoris</p>
+                  </span>
+                </li>
+
                 <li
                   className={activeTab === 'tab1' ? 'current' : ''}
                   onClick={() => openTabSection('tab1')}
@@ -72,6 +113,12 @@ const UserSettings: React.FC = () => {
 
             <div className="col-lg-9">
               <div className="tab_content">
+                {activeTab === 'tab-badges' && (
+                  <div id="tab-badges" className="tabs_item active">
+                    <Badges achievements={achievements.achievements} playerTitle={achievements.playerTitle} />
+                  </div>
+                )}
+
                 {activeTab === 'tab1' && (
                   <div id="tab1" className="tabs_item active">
                     <Nickname />
