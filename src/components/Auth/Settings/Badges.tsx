@@ -51,29 +51,23 @@ const ProfileAchievements: React.FC<AchievementsProps> = ({ achievements, player
     setFavorites(newFavorites)
   }, [achievements])
 
-  // Référence à la pop-up pour le clic en dehors
   const popupRef = useRef<HTMLDivElement>(null)
 
-  // Calcul des IDs des badges déjà utilisés dans les favoris
   const favoritesIds = Object.values(favorites)
     .filter((b): b is Badge => b !== null)
     .map(badge => badge.id)
 
-  // Ouvre la pop-up en enregistrant le slot sélectionné
   const openAchievementPanel = (slot: number) => {
     setSelectedSocket(slot)
     setShowPopup(true)
   }
 
-  // Ferme la pop-up et réinitialise le socket sélectionné
   const hideAchievementPanel = () => {
     setSelectedSocket(null)
     setShowPopup(false)
   }
 
-  // Lors du clic sur un badge dans la pop-up, on l'assigne au socket actif
   const handleBadgePopupClick = (badge: Badge) => {
-    // Si le badge est déjà utilisé dans un autre slot, on ne fait rien
     if (favoritesIds.includes(badge.id)) return
 
     if (selectedSocket !== null) {
@@ -85,7 +79,6 @@ const ProfileAchievements: React.FC<AchievementsProps> = ({ achievements, player
     hideAchievementPanel()
   }
 
-  // Retirer un badge d'un socket (clic sur l'icône de suppression)
   const removeBadgeFromSocket = (slot: number) => {
     setFavorites(prev => ({
       ...prev,
@@ -93,27 +86,31 @@ const ProfileAchievements: React.FC<AchievementsProps> = ({ achievements, player
     }))
   }
 
-  // Sauvegarder les favoris en envoyant un POST au serveur
   const saveAchievements = async () => {
-    // Préparation de l'objet favorites : si un slot n'a pas de badge, on envoie 0
-    const favoritesToSave: { [slot: number]: number } = {}
-    for (let slot = 1; slot <= 6; slot++) {
-      favoritesToSave[slot] = favorites[slot]?.id || 0
-    }
+    const favoritesToSave = Array.from({ length: 6 }, (_, i) => favorites[i + 1]?.id || 0)
     try {
-      const { data } = await axios.post('/ajax/user.php', { action: 'setFavBadges', favorites: favoritesToSave })
-      if (data.msg) {
-        // Remplacez alert par votre système de flash message si nécessaire
-        alert('Tes achievements préférés ont été modifiés avec succès')
+      const { data } = await axios.post('/api/users/actions/setFavBadges', { favorites: favoritesToSave }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (data.message) {
+        toast.success('Tes badges préférés ont été modifiés avec succès.',
+          ToastDefaultOptions)
       } else {
-        alert(`Tes achievements préférés n'ont pas pu être modifiés : ${data.error}`)
+        toast.error(`Tes badges préférés n'ont pas pu être modifiés : ${data.error}.`,
+          ToastDefaultOptions)
       }
     } catch (err) {
-      console.error('Erreur lors de la sauvegarde des achievements', err)
+      if (axios.isAxiosError(err)) {
+        toast.error(`Tes badges préférés n'ont pas pu être modifiés : ${err.response?.data.error}.`,
+          ToastDefaultOptions)
+      } else {
+        console.log(err)
+      }
     }
   }
 
-  // Définir un titre en cliquant sur un niveau débloqué
   const handleSetTitle = async (badgeId: number, level: number) => {
     try {
       const { data } = await axios.post('/api/users/actions/setTitle', { idAchievement: badgeId, lvl: level }, {
@@ -139,7 +136,6 @@ const ProfileAchievements: React.FC<AchievementsProps> = ({ achievements, player
     }
   }
 
-  // Supprimer le titre actuel
   const deleteTitle = async () => {
     try {
       const { data } = await axios.post('/api/users/actions/removeTitle', {}, {
@@ -165,7 +161,6 @@ const ProfileAchievements: React.FC<AchievementsProps> = ({ achievements, player
     }
   }
 
-  // Gestion du clic en dehors de la pop-up pour la fermer
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
@@ -182,7 +177,6 @@ const ProfileAchievements: React.FC<AchievementsProps> = ({ achievements, player
     }
   }, [showPopup])
 
-  // Fonction pour générer l'icône d'un badge
   const getAchievementIcon = (id: number, unique: boolean, level: number): JSX.Element => {
     return (
       <div className="achievement_badge" data-id={id}>
