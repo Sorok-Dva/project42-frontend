@@ -71,7 +71,7 @@ const AppContent: React.FC = () => {
             {user ? (
               <>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/settings" element={<UserSettingsPage />} />
+                <Route path="/account/settings" element={<UserSettingsPage />} />
                 { user.isAdmin && (
                   <Route element={<AdminRoute />}>
                     <Route path="/admin" element={<AdminLayout />}>
