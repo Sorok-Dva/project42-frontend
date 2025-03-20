@@ -53,6 +53,9 @@ const Profile: React.FC = () => {
           <Link to="/chat" className="account-item">
             Messages
           </Link>
+          <Link to="/account/settings" className="account-item">
+            Mon compte
+          </Link>
           <hr/>
           <button className="bttn account-item" onClick={handleLogout}>Déconnexion</button>
         </div>
