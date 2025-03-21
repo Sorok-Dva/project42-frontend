@@ -24,7 +24,7 @@ const AchievementBadge : React.FC<AchievementBadgeProps> = ({
 }) => {
   const memoryClass = isMemory ? 'souvenir': ''
   // Pour la tooltip, on reconstruit en HTML la représentation du badge
-  const levelHtml = !achievement.unique ? `<div class="achievement_level">${ achievement.level }</div>`: ''
+  const levelHtml = !achievement.unique && achievement.level > 0 ? `<div class="achievement_level">${ achievement.level }</div>`: ''
   const badgeHtmlString = `<div class="achievement_badge ${ memoryClass }">
       ${ levelHtml }
       <img src="/assets/images/pictos/${ achievement.id }.png" style="height: 20px;" alt="${ achievement.description }">
@@ -33,7 +33,7 @@ const AchievementBadge : React.FC<AchievementBadgeProps> = ({
   // Construction du contenu HTML de la tooltip
   let tooltipHtml = `<div class="${ memoryClass }">${ badgeHtmlString }</div>
     <div class="achievement_details">
-      <strong>${ achievement.title }</strong>
+      <strong>${ achievement.title ? achievement.title : '' }</strong>
       <p><b>${ !achievement.unique ? achievement.total || '': '' }</b> ${ achievement.description }</p>`
 
   if (!achievement.unique) {
@@ -56,7 +56,7 @@ const AchievementBadge : React.FC<AchievementBadgeProps> = ({
       <div data-tooltip-id={`${aKey}_${tooltipId}`}
         data-tooltip-html={ tooltipHtml }>
         <div className={ `achievement_badge ${ memoryClass }` }>
-          { !achievement.unique &&
+          { !achievement.unique && achievement.level > 0 &&
             <div className="achievement_level">{ achievement.level }</div> }
           <img src={ `/assets/images/pictos/${ achievement.id }.png` }
             style={ { height: '20px' } } alt={ achievement.description }/>
