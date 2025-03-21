@@ -14,7 +14,7 @@ import axios from 'axios'
 import Badges, { BadgesData } from './Badges'
 import Settings from './Settings'
 import Profile from './Profile'
-import ModAntecedents from './ModAntecedents'
+import ModHistory from 'components/Auth/Settings/ModHistory'
 
 const UserSettings: React.FC = () => {
   const { token } = useAuth()
@@ -101,7 +101,7 @@ const UserSettings: React.FC = () => {
 
             { activeTab === 'tab-behavior' && (
               <div className="account-antecedents">
-                <ModAntecedents/>
+                <ModHistory/>
               </div>
             ) }
           </div>

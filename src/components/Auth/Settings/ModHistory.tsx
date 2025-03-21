@@ -24,7 +24,7 @@ const PUNISHMENT_TITLES: { [key: string]: { title: string } } = {
   '51': { title: 'Avertissement éclair' },
 }
 
-const ModAntecedents: React.FC = () => {
+const ModHistory: React.FC = () => {
   const { user } = useUser()
   return (
     <div>
@@ -144,4 +144,4 @@ const ModAntecedents: React.FC = () => {
   )
 }
 
-export default ModAntecedents
+export default ModHistory
