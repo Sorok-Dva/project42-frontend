@@ -5,6 +5,8 @@ import axios from 'axios'
 import { useAuth } from 'contexts/AuthContext'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
+import { useUser } from 'contexts/UserContext'
+import { setUser } from '@sentry/react'
 
 interface Badge {
   id: number;
@@ -21,16 +23,10 @@ export interface BadgesData {
   favorites: { [key: number]: Badge }; // clés de 1 à 6
 }
 
-interface AchievementsProps {
-  achievements: BadgesData;
-  playerTitle?: string;
-}
-
-const ProfileAchievements: React.FC<AchievementsProps> = ({ achievements, playerTitle }) => {
+const ProfileAchievements: React.FC = () => {
   const { token } = useAuth()
-
-  const noBadge = achievements.possessed.length === 0
-
+  const { user } = useUser()
+  const [achievements, setAchievements] = useState<BadgesData>({ possessed: [], favorites: [] })
   const [showPopup, setShowPopup] = useState(false)
   const [selectedSocket, setSelectedSocket] = useState<number | null>(null)
   const [favorites, setFavorites] = useState<{ [slot: number]: Badge | null }>(() => {
@@ -41,7 +37,25 @@ const ProfileAchievements: React.FC<AchievementsProps> = ({ achievements, player
     }
     return initial
   })
-  const [currentTitle, setCurrentTitle] = useState<string>(playerTitle || 'Tu n\'as pas encore sélectionné de titre')
+  const [currentTitle, setCurrentTitle] = useState<string>(user?.title || 'Tu n\'as pas encore sélectionné de titre')
+
+  useEffect(() => {
+    async function retrieveMyAchievements () {
+      try {
+        const { data } = await axios.get('/api/users/achievements', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        setAchievements(data.achievements)
+        setCurrentTitle(data.playerTitle === '' ? 'Tu n\'as pas encore sélectionné de titre' : data.playerTitle)
+      } catch (err) {
+        console.error('Failed to fetch achievements', err)
+      }
+    }
+
+    retrieveMyAchievements()
+  }, [])
 
   useEffect(() => {
     const newFavorites: { [slot: number]: Badge | null } = {}
@@ -120,6 +134,7 @@ const ProfileAchievements: React.FC<AchievementsProps> = ({ achievements, player
       })
       if (data.message) {
         setCurrentTitle(data.newTitle)
+        setUser({ ...user, title: data.newTitle })
         toast.success('Ton titre a été modifié avec succès.',
           ToastDefaultOptions)
       } else {
@@ -235,6 +250,8 @@ const ProfileAchievements: React.FC<AchievementsProps> = ({ achievements, player
     }
     return <>{lines}</>
   }
+
+  const noBadge = achievements.possessed.length === 0
 
   return (
     <Box className="account-achievements">
