@@ -31,13 +31,15 @@ export interface User {
   signature?: string;
   premium?: Date;
   token: string;
+  behaviorPoints?: number;
+  moderatorPoints?: number;
 }
 
 interface UserContextType {
   user : User | null;
   setUser : (user : User | null) => void;
   logout : () => void;
-  login : (user : User, token : string) => void;
+  login : (user : Omit<User, 'behaviorPoints' | 'moderatorPoints'>, token : string) => void;
   isAdmin : boolean;
   navigateTo : (path : string) => void;
 }
