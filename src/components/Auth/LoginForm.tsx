@@ -4,6 +4,7 @@ import { useUser } from 'contexts/UserContext'
 import { toast } from 'react-toastify'
 import { Button, Form, FormGroup, Input, InputGroup, InputGroupText } from 'reactstrap'
 import { ToastDefaultOptions } from 'utils/toastOptions'
+import axios from 'axios'
 
 const LoginForm: React.FC<{
   toggle?: () => void
@@ -30,16 +31,10 @@ const LoginForm: React.FC<{
     e.preventDefault()
 
     try {
-      const response = await fetch('/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      })
+      const response = await axios.post('/api/users/login', { username, password })
 
-      if (response.ok) {
-        const data = await response.json()
+      if (response.status === 200) {
+        const { data } = await response
         const token = data.token
         const payload = JSON.parse(atob(token.split('.')[1]))
         login({
@@ -71,7 +66,7 @@ const LoginForm: React.FC<{
         navigate('/')
         if (toggle) toggle()
       } else if (response.status === 400) {
-        const errorData = await response.json()
+        const errorData = await response.data
         if (errorData.errors && Array.isArray(errorData.errors)) {
           errorData.errors.forEach((error : { msg : string }) => {
             toast.error(error.msg, ToastDefaultOptions)
@@ -81,8 +76,7 @@ const LoginForm: React.FC<{
         }
       }
     } catch (err) {
-      console.log(err)
-      setError('An error occurred while attempting to log you in.')
+      toast.error('Une erreur est survenue.', { ...ToastDefaultOptions, autoClose: 30000 })
     }
   }
   return (
