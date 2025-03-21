@@ -18,7 +18,7 @@ const Actions: React.FC<ActionsProps> = ({ data, relation }) => {
     <div className="parametres-profil">
       <div className="profile_actions buttons">
         {relation === 'me' ? (
-          <a className="button_secondary" href="/compte#profil" target="_blank" rel="noopener noreferrer">
+          <a className="button_secondary" href="/account/settings" target="_blank" rel="noopener noreferrer">
             Modifier le profil
           </a>
         ) : (
@@ -30,7 +30,7 @@ const Actions: React.FC<ActionsProps> = ({ data, relation }) => {
             )}
             {data.canGuildInvite && (
               <div className="button_secondary" data-invite-hamlet={data.guild.id}>
-                Inviter dans mon hameau
+                Inviter dans a station
               </div>
             )}
             {relation === 'none' && (

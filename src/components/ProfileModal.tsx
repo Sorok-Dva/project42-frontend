@@ -372,116 +372,11 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                 <Details user={user} relation="me" />
               </div>
             )}
-
-            {/*<ProfileDetails user={user} relation='me' renderAchievement={} />*/}
           </div>
         </div>
       </div>
     </div>
   )
 }
-
-/*
-<div className="modal-container" onClick={e => e.stopPropagation()}>
-  Header avec le titre et le bouton de fermeture
-  <div className="modal-header">
-    <h2>Profil de {nickname}</h2>
-    <button className="close-btn" onClick={onClose}>
-      &times;
-    </button>
-  </div>
-
-  Contenu principal
-  <div className="modal-content">
-    {error ? (
-      <div className="alert alert-danger">{error}</div>
-    ) : user ? (
-      <>
-        <div className="profile-top">
-          <div className="avatar">
-            <img src={ user.avatar } alt="avatar"/>
-          </div>
-          <div className="profile-info">
-            <b>
-              { nickname },
-              <span className="user-role"
-                    data-team={ role?.name }
-                    style={{ backgroundColor: role?.color }}>
-                      { role?.name }
-                    </span>
-            </b>
-            <div className="quote">{ user.quote }</div>
-            <div className="profile-stats">
-                    <span>
-                      <img src="/assets/images/profile/level.png" alt="Niveau" />
-                      Niveau <b>{ user.level }</b>
-                    </span>
-              <span>
-                      <img src="/assets/images/dice.png" alt="Parties" />
-                      <b>{ user.gamesPlayed }</b> parties jouées
-                    </span>
-              <span>
-                      <img src="/assets/images/star.png" alt="Points" />
-                      <b>{ user.points }</b> points
-                    </span>
-              <div className="mt-4" style={{ marginLeft: '-20vh' }}>
-                <small>Inscrit le { new Date(user.createdAt).toLocaleDateString('fr-FR', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                }) }</small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="section-middle">
-          <div className="hameau-block">
-            { selfProfile && (
-              <>
-                <p><b style={{ color: '#982726' }}>Tu n&apos;as pas de hameau.</b></p>
-                <p>Rejoins-en un dès
-                  maintenant
-                  pour faire de nouvelles rencontres !</p>
-                <button>Voir les hameaux</button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/!* Historique des dernières parties *!/ }
-        <div className="match-history">
-          { user.matchHistory.map((match, idx) => (
-            <div key={ idx } className="match-row">
-              <span>{ match.mode }</span>
-              <span>{ match.date }</span>
-              <span>{ match.result }</span>
-            </div>
-          )) }
-        </div>
-
-        {/!* Bouton masquer/fermer ou autres actions *!/ }
-        <div className="actions">
-          <button onClick={ onClose }>Masquer les détails</button>
-        </div>
-      </>
-    ): (
-      <div
-        style={ {
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '200px',
-        } }
-      >
-        <Spinner className="custom-spinner"/>
-        <div style={ { marginTop: '1rem' } }>Chargement du profil...
-        </div>
-      </div>
-    ) }
-  </div>
-</div>
-*/
 
 export default ProfileModal
