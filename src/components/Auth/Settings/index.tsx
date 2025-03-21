@@ -14,6 +14,7 @@ import axios from 'axios'
 import Badges, { BadgesData } from './Badges'
 import Settings from './Settings'
 import Profile from './Profile'
+import ModAntecedents from './ModAntecedents'
 
 const UserSettings: React.FC = () => {
   const { token } = useAuth()
@@ -93,14 +94,16 @@ const UserSettings: React.FC = () => {
             ) }
 
             { activeTab === 'tab-settings' && (
-              <div data-tab="parametres" className="account-settings">
+              <div className="account-settings">
                 <Settings/>
               </div>
             ) }
 
-            <div data-tab="comportement" className="account-antecedents">
-
-            </div>
+            { activeTab === 'tab-behavior' && (
+              <div className="account-antecedents">
+                <ModAntecedents/>
+              </div>
+            ) }
           </div>
         </div>
       </div>
