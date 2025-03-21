@@ -3,6 +3,7 @@ import { usePermissions } from 'hooks/usePermissions'
 
 const ProfilePanel: React.FC = () => {
   const { checkPermission } = usePermissions()
+  const [actionIsShown, setActionIsShown] = React.useState(false)
 
   const permissions = {
     warn: checkPermission('site', 'warn'),
@@ -20,75 +21,83 @@ const ProfilePanel: React.FC = () => {
 
   return (
     <div className="moderation-panel">
-      { permissions.antecedents && (
-        <div className="moderation-buttons buttons">
-          <a className="button_secondary bgred" target="#">
-            Antécédents
-          </a>
-        </div>
-      )}
-      { permissions.moderationNotes && (
-        <div className="moderation-buttons buttons">
-          <a className="button_secondary bgred" target="#">
-            Notes sur le joueur
-          </a>
-        </div>
-      )}
-      { permissions.warn && (
-        <div className="moderation-buttons buttons">
-          <a className="button_secondary bgred" target="#">
-            Avertir
-          </a>
-        </div>
-      )}
-      { permissions.stalk && (
-        <div className="moderation-buttons buttons">
-          <a className="button_secondary bgred" target="#">
-            Surveiller
-          </a>
-        </div>
-      )}
-      { permissions.dcInfos && (
-        <div className="moderation-buttons buttons">
-          <a className="button_secondary bgred" target="#">
-            Doubles-Comptes
-          </a>
-        </div>
-      )}
-      { permissions.rename && (
-        <div className="moderation-buttons buttons">
-          <a className="button_secondary bgred" target="#">
-            Renommer
-          </a>
-        </div>
-      )}
-      { permissions.removeSignature && (
-        <div className="moderation-buttons buttons">
-          <a className="button_secondary bgred" target="#">
-            Supprimer la signature
-          </a>
-        </div>
-      )}
-      { permissions.addPoints && (
-        <div className="moderation-buttons buttons">
-          <a className="button_secondary bgred" target="#">
-            Ajouter des points
-          </a>
-        </div>
-      )}
+      {!actionIsShown ? (
+        <div className="actions">
+          { permissions.antecedents && (
+            <div className="moderation-buttons buttons">
+              <a className="button_secondary bgred" target="#">
+                Antécédents
+              </a>
+            </div>
+          )}
+          { permissions.moderationNotes && (
+            <div className="moderation-buttons buttons">
+              <a className="button_secondary bgred" target="#">
+                Notes sur le joueur
+              </a>
+            </div>
+          )}
+          { permissions.warn && (
+            <div className="moderation-buttons buttons">
+              <a className="button_secondary bgred" target="#">
+                Avertir
+              </a>
+            </div>
+          )}
+          { permissions.stalk && (
+            <div className="moderation-buttons buttons">
+              <a className="button_secondary bgred" target="#">
+                Surveiller
+              </a>
+            </div>
+          )}
+          { permissions.dcInfos && (
+            <div className="moderation-buttons buttons">
+              <a className="button_secondary bgred" target="#">
+                Doubles-Comptes
+              </a>
+            </div>
+          )}
+          { permissions.rename && (
+            <div className="moderation-buttons buttons">
+              <a className="button_secondary bgred" target="#">
+                Renommer
+              </a>
+            </div>
+          )}
+          { permissions.removeSignature && (
+            <div className="moderation-buttons buttons">
+              <a className="button_secondary bgred" target="#">
+                Supprimer la signature
+              </a>
+            </div>
+          )}
+          { permissions.addPoints && (
+            <div className="moderation-buttons buttons">
+              <a className="button_secondary bgred" target="#">
+                Ajouter des points
+              </a>
+            </div>
+          )}
 
-      { permissions.ip && (
-        <div className="moderation-buttons buttons">
-          <a className="button_secondary bgred" target="#">
-            Voir l'IP
-          </a>
+          { permissions.ip && (
+            <div className="moderation-buttons buttons">
+              <a className="button_secondary bgred" target="#">
+                Voir l'IP
+              </a>
+            </div>
+          )}
+          { permissions.ban && (
+            <div className="moderation-buttons buttons">
+              <a className="button_secondary bgred" target="#">
+                Bannir
+              </a>
+            </div>
+          )}
         </div>
-      )}
-      { permissions.ban && (
-        <div className="moderation-buttons buttons">
-          <a className="button_secondary bgred" target="#">
-            Bannir
-          </a>
+      ) : (
+        <div className="actions">
+
         </div>
       )}
     </div>

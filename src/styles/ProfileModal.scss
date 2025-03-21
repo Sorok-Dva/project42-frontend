@@ -892,7 +892,7 @@ USER PROFILE MODAL
   }
 }
 
-.moderation-panel {
+.moderation-panel > .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;

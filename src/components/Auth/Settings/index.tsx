@@ -25,7 +25,7 @@ const UserSettings: React.FC = () => {
   return (
     <div className="industries-area pb-100 mt-30">
       <div className="container">
-        <div className="account-page page-tabs">
+        <div className="page-tabs">
           <header>
             <h1>Mon compte</h1>
           </header>
