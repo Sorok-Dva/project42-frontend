@@ -36,6 +36,7 @@ import AdminLayout from 'layouts/Admin'
 import UserList from 'pages/admin/users/UserList'
 import AdminUserProfile from 'pages/admin/users/UserProfile'
 import AdminDashboard from 'pages/admin/Dashboard'
+import AdminAlphaKeys from 'pages/admin/AlphaKeys'
 import ResetPassword from 'pages/ResetPassword'
 import ServiceUnavailable from 'pages/ServiceUnavailable'
 import UserSettingsPage from 'pages/UserSettings'
@@ -78,6 +79,7 @@ const AppContent: React.FC = () => {
                       <Route path="home" element={<AdminDashboard />} />
                       <Route path="users" element={<UserList />} />
                       <Route path="users/:id" element={<AdminUserProfile />} />
+                      <Route path="alpha-keys" element={<AdminAlphaKeys />} />
                     </Route>
                   </Route>
                 )}
