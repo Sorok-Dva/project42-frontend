@@ -14,7 +14,11 @@ export const ROLE_PERMISSIONS = {
       'music', 'video', 'image', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
-    site: ['achievement'],
+    site: [
+      'achievement', 'warn', 'ban', 'rename', 'addPoints',
+      'ip', 'ipComment', 'antecedents', 'moderationNotes', 'stalk',
+      'userRole', 'dcInfos', 'removeSignature'
+    ],
   },
   Admin: {
     game: ['create', 'edit', 'dissolve', 'view', 'bypassPassword'],
@@ -31,7 +35,11 @@ export const ROLE_PERMISSIONS = {
       'music', 'video', 'image', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
-    site: ['achievement'],
+    site: [
+      'achievement', 'warn', 'ban', 'rename', 'addPoints',
+      'ip', 'ipComment', 'antecedents', 'moderationNotes', 'stalk',
+      'userRole', 'dcInfos', 'removeSignature'
+    ],
   },
   Developer: {
     game: ['create', 'edit', 'dissolve', 'view', 'bypassPassword'],
@@ -48,7 +56,9 @@ export const ROLE_PERMISSIONS = {
       'music', 'video', 'image', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
-    site: ['achievement'],
+    site: [
+      'achievement', 'ip', 'ipComment', 'antecedents', 'moderationNotes',
+    ],
   },
   Moderator: {
     game: ['create', 'edit', 'dissolve', 'view', 'bypassPassword'],
@@ -59,7 +69,11 @@ export const ROLE_PERMISSIONS = {
     ],
     godPowers: [],
     animationPowers: [],
-    site: [],
+    site: [
+      'warn', 'ban', 'rename',
+      'ip', 'ipComment', 'antecedents', 'moderationNotes', 'stalk',
+      'dcInfos', 'removeSignature'
+    ],
   },
   ModeratorTest: {
     game: ['create', 'edit', 'view'],
@@ -68,7 +82,9 @@ export const ROLE_PERMISSIONS = {
     ],
     godPowers: [],
     animationPowers: [],
-    site: [],
+    site: [
+      'warn', 'antecedents', 'moderationNotes', 'dcInfos'
+    ],
   },
   Animator: {
     game: ['create', 'view'],
