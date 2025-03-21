@@ -861,6 +861,27 @@ USER PROFILE MODAL
         }
       }
     }
+
+    .moderation-buttons {
+      width: 25vh;
+      margin: -5.8vh 0 0 0;
+      z-index: 2;
+      position: relative;
+
+      a {
+        border-radius: 5px;
+        font-size: 12px;
+        background-color: #5e1717;
+        transition: background-color .2s ease;
+        margin: 0 2px;
+        padding: 5px 10px;
+        text-transform: uppercase;
+
+        &:hover {
+          background-color: #982626;
+        }
+      }
+    }
   }
 
   .signature {
@@ -868,6 +889,28 @@ USER PROFILE MODAL
     font-style: italic;
     font-size: 14px;
     word-wrap: break-word;
+  }
+}
+
+.moderation-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.moderation-buttons {
+  margin: 0;
+  a {
+    border-radius: 5px;
+    font-size: 12px;
+    background-color: #5e1717;
+    transition: background-color .2s ease;
+    margin: 0 2px;
+    padding: 5px 10px;
+    text-transform: uppercase;
+
+    &:hover {
+      background-color: #982626 !important;
+    }
   }
 }
 
