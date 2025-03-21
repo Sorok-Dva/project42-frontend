@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Img as Image } from 'react-image'
 import clsx from 'clsx'
@@ -13,6 +13,17 @@ const Profile: React.FC = () => {
     logout()
     localStorage.removeItem('token')
   }
+
+  useEffect(() => {
+    if (open) {
+      document.addEventListener('mouseup', toggleOpen)
+    } else {
+      document.removeEventListener('mouseup', toggleOpen)
+    }
+    return () => {
+      document.removeEventListener('mouseup', toggleOpen)
+    }
+  }, [open])
 
   if (!user) return
   return (
