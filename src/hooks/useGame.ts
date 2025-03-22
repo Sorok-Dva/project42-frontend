@@ -110,7 +110,7 @@ export const useGame = (
   const [players, setPlayers] = useState<PlayerType[]>([])
   const [viewer, setViewer] = useState<Viewer | null>(null)
   const [viewers, setViewers] = useState<Viewer[]>([])
-  const [creator, setCreator] = useState<UserType | null>(null)
+  const [creator, setCreator] = useState<PlayerType | null>(null)
   const [isCreator, setIsCreator] = useState<boolean>(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [canBeReady, setCanBeReady] = useState(false)
@@ -206,9 +206,11 @@ export const useGame = (
       setLoading(false)
 
       const allPlayersReady = playersData
-        .filter((player: PlayerType) => player.playerId !== creator?.id)
+        .filter((player: PlayerType) => player.playerId !== creator?.playerId)
         .every((player: PlayerType) => player.ready)
 
+      console.log(creator, playersData)
+      console.log(allPlayersReady, playersData.length === roomData.maxPlayers)
       if (allPlayersReady && playersData.length === roomData.maxPlayers) {
         setCanStartGame(true)
       } else {
