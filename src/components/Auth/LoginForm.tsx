@@ -69,9 +69,11 @@ const LoginForm: React.FC<{
         const errorData = await response.data
         if (errorData.errors && Array.isArray(errorData.errors)) {
           errorData.errors.forEach((error : { msg : string }) => {
+            setError(error.msg)
             toast.error(error.msg, ToastDefaultOptions)
           })
         } else if (errorData.error) {
+          setError(errorData.error)
           toast.error(errorData.error, { ...ToastDefaultOptions, autoClose: 30000 })
         }
       }
