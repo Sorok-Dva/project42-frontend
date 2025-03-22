@@ -179,6 +179,7 @@ const RoomList = () => {
           },
         })
       setGameId(response.data.gameId)
+      setPlayerRoomId(response.data.gameId)
       setInGame(true)
       window.open(`/game/${response.data.game.id}`, '_blank')
     } catch (error: any) {
@@ -210,6 +211,7 @@ const RoomList = () => {
         },
       })
       setPlayerRoomId(data?.roomId || null)
+      setInGame(data?.roomId !== null)
     } catch (error) {
       console.error('Erreur lors de la récupération de la room du joueur :', error)
     }
@@ -286,6 +288,7 @@ const RoomList = () => {
           player: { id: user?.id, nickname: user?.nickname },
         })
         setPlayerRoomId(null)
+        setInGame(false)
         localStorage.removeItem(`game_auth_${playerRoomId}`)
         alert('Vous avez bien quitter votre partie.')
         fetchRooms()
@@ -310,7 +313,14 @@ const RoomList = () => {
             <div></div>
           </h1>
           <article>
-            {/* Contenu de la partie en cours */}
+            { playerRoomId && (
+              <>
+                <aside>
+                  <Button className="bgblue" onClick={handleJoinCurrentRoom}> Rejoindre la partie en cours</Button>
+                  <Button className="bgblue" onClick={handleLeaveRoom}>Quitter la partie</Button>
+                </aside>
+              </>
+            )}
           </article>
           <div>
             <i className="mdi mdi-information-outline"></i>

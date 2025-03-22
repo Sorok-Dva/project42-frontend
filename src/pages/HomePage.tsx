@@ -3,7 +3,6 @@ import 'styles/Room.scss'
 import React from 'react'
 import styled from 'styled-components'
 import MainBanner from 'components/HomePage/MainBanner'
-import CreateGame from 'components/Game/Create'
 import RoomList from 'components/Game/Rooms'
 
 const DashboardContainer = styled.div`
@@ -33,9 +32,6 @@ const HomePage = () => {
 
         <GridContainer>
           <RoomList />
-        </GridContainer>
-        <GridContainer>
-          <CreateGame />
         </GridContainer>
       </DashboardContainer>
     </>
