@@ -9,128 +9,144 @@ const TermsCondition: React.FC = () => {
             <div className="col-lg-10">
               <div className="terms-condition-wrapper p-lg-15 p-md-10 p-sm-8 p-4 bgn-4 rounded">
                 <h2 className="tcn-1 mb-10 text-center cursor-scale growUp title-anim">
-                  Terms and conditions
+                  Conditions Générales d’Utilisation de Project 42
                 </h2>
                 <div className="d-grid gap-3 mb-8">
                   <h5 className="tcn-1 cursor-scale growDown title-anim">
-                    Agreement to Terms
+                    1. Introduction
                   </h5>
                   <p className="tcn-6 content-anim">
-                    I apologize for any confusion, but as an AI language model, I
-                    don&apos;t have access specific gaming platforms, games, or
-                    online services can vary widely depending on the specific
-                    company and the jurisdiction they operate in.
-                  </p>
-                  <p className="tcn-6 content-anim">
-                    If you&apos;re looking for the terms and conditions of a
-                    particular gaming platform or game recommend visiting the
-                    official website of the platform or contacting their customer
-                    support. The terms and conditions are usually provided on
-                    their website,
-                  </p>
-                  <p className="tcn-6 content-anim">
-                    I&apos;d be happy to provide you with some general information
-                    about terms and conditions. terms and conditions of any
-                    particular service or organization. The terms and conditions
-                    specific company or service you are referring to.
-                  </p>
-                  <p className="tcn-6 content-anim">
-                    I&apos;d be happy to provide you with some general information
-                    about terms and conditions. However, please note that I am AI
-                    language model, and I don&apos;t have access to specific terms
-                    and conditions of any particular service or organization.
+                    Les présentes Conditions Générales d’Utilisation (CGU) régissent l’accès et l’utilisation du jeu « Project 42 », hébergé par OVH, et constituent le contrat liant le Joueur à l’Éditeur. En utilisant le Jeu, vous acceptez ces termes.
                   </p>
                 </div>
                 <div className="d-grid gap-3 mb-8">
                   <h5 className="tcn-1 cursor-scale growDown title-anim">
-                    User Representations
+                    2. Objet et Champ d’Application
                   </h5>
-                  <ol className="d-grid gap-3 tcn-6">
-                    <li className="content-anim">
-                      Acceptance: Users are typically required to agree to the
-                      terms and conditions before using a service. button or by
-                      simply using the service.
-                    </li>
-                    <li className="content-anim">
-                      User rights and responsibilities: The terms and conditions
-                      specify the rights granted to users and the responsibilities
-                      they have while using the service.
-                    </li>
-                    <li className="content-anim">
-                      your reviews should not contain offensive profanity, racist,
-                      offensive, or hate language;
-                    </li>
-                    <li className="content-anim">
-                      Dispute resolution: Procedures for resolving disputes, such
-                      as arbitration or mediation, may be outlined in the terms
-                      and conditions.
-                    </li>
-                    <li className="content-anim">
-                      Intellectual property: These sections outline the ownership
-                      and usage rights of intellectual property such as
-                      copyrights, trademarks, and patents associated with the
-                      service or content provided.
-                    </li>
-                  </ol>
                   <p className="tcn-6 content-anim">
-                    Remember that it&apos;s important to read and understand the
-                    specific terms and conditions of any service or product you
-                    use. If you have any questions or concerns about a particular
-                    set of terms clarification.
+                    Ce document définit les règles d’accès, d’utilisation, de responsabilité et de comportement sur le Jeu. Il s’adresse à toute personne souhaitant utiliser les services proposés par Project 42.
                   </p>
                 </div>
                 <div className="d-grid gap-3 mb-8">
                   <h5 className="tcn-1 cursor-scale growDown title-anim">
-                    Guideline for Reviews
+                    3. Définitions
                   </h5>
                   <ol className="d-grid gap-3 tcn-6">
+                    <li className="content-anim">Joueur : Toute personne physique utilisant le Jeu.</li>
+                    <li className="content-anim">Compte Utilisateur : Espace personnel créé lors de l’inscription.</li>
+                    <li className="content-anim">Identifiants : Pseudonyme et mot de passe permettant l’accès.</li>
+                    <li className="content-anim">Éditeur : L’entité responsable de la conception, de la maintenance et de l’édition du Jeu.</li>
+                    <li className="content-anim">Services : L’ensemble des fonctionnalités mises à disposition par le Jeu.</li>
+                  </ol>
+                </div>
+                <div className="d-grid gap-3 mb-8">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    4. Accès au Jeu et Inscription
+                  </h5>
+                  <p className="tcn-6 content-anim">
+                    Le Jeu est accessible via internet sur le domaine défini par l’Éditeur et hébergé par OVH. L’accès complet requiert l’inscription et la fourniture d’informations exactes et vérifiables.
+                  </p>
+                </div>
+                <div className="d-grid gap-3 mb-8">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    5. Compte Utilisateur et Responsabilités
+                  </h5>
+                  <p className="tcn-6 content-anim">
+                    Chaque Joueur ne peut détenir qu’un seul compte personnel. Vous êtes responsable de la confidentialité de vos identifiants et il est interdit de les partager. La création d’un nouveau compte pour contourner une suspension est prohibée, sauf dérogation expresse.
+                  </p>
+                </div>
+                <div className="d-grid gap-3 mb-8">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    6. Propriété Intellectuelle
+                  </h5>
+                  <p className="tcn-6 content-anim">
+                    Tous les éléments du Jeu (textes, images, sons, vidéos, etc.) sont la propriété exclusive de l’Éditeur ou de ses partenaires. Toute reproduction ou diffusion sans autorisation écrite est interdite.
+                  </p>
+                </div>
+                <div className="d-grid gap-3 mb-8">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    7. Protection des Données Personnelles et Conformité au RGPD
+                  </h5>
+                  <p className="tcn-6 content-anim">
+                    L’Éditeur collecte certaines données personnelles lors de l’inscription et de l’utilisation du Jeu, telles que votre adresse IP, votre email et d’autres informations que vous fournissez. Ces données servent à garantir la sécurité et la bonne gestion du Jeu.
+                  </p>
+                  <p className="tcn-6 content-anim">
+                    Conformément au RGPD, vous disposez d’un droit d’accès, de rectification, de suppression, de limitation du traitement et d’opposition concernant vos données personnelles. Vous pouvez exercer ces droits via l’interface « Mon Compte » ou en contactant directement l’Éditeur. Les données sont conservées uniquement pour la durée nécessaire aux finalités pour lesquelles elles ont été collectées et ne sont pas transmises à des tiers sans votre consentement, sauf obligation légale.
+                  </p>
+                </div>
+                <div className="d-grid gap-3 mb-8">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    8. Charte de Bonne Conduite
+                  </h5>
+                  <p className="tcn-6 content-anim">
+                    Pour garantir une expérience de jeu harmonieuse, chaque Joueur s’engage à respecter les règles suivantes :
+                  </p>
+                  <ol className="d-grid gap-3 tcn-6">
                     <li className="content-anim">
-                      you should have firsthand experience with the object being
-                      reviewed;
+                      Posséder un seul compte personnel et ne pas partager ses identifiants.
                     </li>
                     <li className="content-anim">
-                      your reviews should not contain offensive profanity
-                      offensive, or hate language;
+                      Choisir un pseudonyme original et respectueux, exempt de toute connotation insultante, sexuelle, religieuse, politique, violente ou incitative à des comportements répréhensibles.
                     </li>
                     <li className="content-anim">
-                      your reviews should not contain discriminatory references
-                      based on religion, race, gender, national origin, age,
-                      marital status, sexual orientation, or disability;
+                      S’abstenir d’utiliser le compte d’un tiers, même avec autorisation, afin de préserver la sécurité et la réputation du compte.
                     </li>
                     <li className="content-anim">
-                      your reviews should not contain references to illegal
-                      activity;
+                      Ne pas entreprendre d’actions malveillantes telles que compromettre la sécurité du Jeu ou exploiter des failles.
                     </li>
                     <li className="content-anim">
-                      you may not organize encouraging others to post reviews,
-                      whether positive or negative.
+                      Respecter la vie privée en évitant la diffusion non autorisée d’informations personnelles d’autrui.
+                    </li>
+                    <li className="content-anim">
+                      Ne pas abuser des outils de modération et éviter tout comportement de harcèlement.
                     </li>
                   </ol>
+                </div>
+                <div className="d-grid gap-3 mb-8">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    9. Responsabilités de l’Éditeur
+                  </h5>
                   <p className="tcn-6 content-anim">
-                    We may accept, reject, or remove reviews at our sole
-                    discretion. We have absolutely no obligation to screen reviews
-                    or to delete reviews, even if anyone considers reviews
-                    objectionable or inaccurate.
+                    L’Éditeur met tout en œuvre pour fournir un service de qualité. Toutefois, il ne peut être tenu responsable des interruptions, dysfonctionnements ou problèmes de sécurité liés à des événements indépendants de sa volonté, notamment en cas de défaillance de l’hébergement chez OVH.
+                  </p>
+                </div>
+                <div className="d-grid gap-3 mb-8">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    10. Modification des CGU
+                  </h5>
+                  <p className="tcn-6 content-anim">
+                    L'Éditeur se réserve le droit de modifier à tout moment les présentes CGU afin de les adapter aux évolutions du Jeu ou à la législation en vigueur. Il est de votre responsabilité de consulter régulièrement ces conditions.
+                  </p>
+                </div>
+                <div className="d-grid gap-3 mb-8">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    11. Limitation de Responsabilité
+                  </h5>
+                  <p className="tcn-6 content-anim">
+                    En aucun cas, l'Éditeur ne pourra être tenu responsable des dommages directs ou indirects résultant de l’utilisation du Jeu, y compris en cas d’interruption ou de défaillance des services.
+                  </p>
+                </div>
+                <div className="d-grid gap-3 mb-8">
+                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                    12. Loi Applicable et Juridiction
+                  </h5>
+                  <p className="tcn-6 content-anim">
+                    Les présentes CGU sont régies par la loi française. Tout litige sera soumis aux tribunaux compétents du siège de l’Éditeur.
                   </p>
                 </div>
                 <div className="d-grid gap-3">
                   <h5 className="tcn-1 cursor-scale growDown title-anim">
-                    Social Media
+                    13. Dispositions Diverses
                   </h5>
                   <p className="tcn-6 content-anim">
-                    As part of the functionality of the Site, you may link your
-                    account with online accounts you either: providing your
-                    Third-Party Account login information through the Site
-                    allowing us each Third-Party Account.
+                    Toute communication avec l’Éditeur peut être effectuée via le formulaire de contact mis à disposition sur le site. Si une clause venait à être déclarée invalide, les autres dispositions demeureront en vigueur.
                   </p>
-                  <p className="tcn-6 content-anim">
-                    You represent and warrant that you are entitled to disclose
-                    your Third-Party Account login you of any of the Terms and
-                    Conditions that govern your use of the applicable Third-Party
-                    Account, and without obligating us to pay any fees or making
-                    us subject to any usage service provider of the Third-Party
-                    Account.
-                  </p>
+                </div>
+
+                <div className="d-grid gap-3" style={{ marginTop: '5vh' }}>
+                  <b className="tcn-6 content-anim title-anim">
+                    Dernière modification : le 22/03/2025 à 01:26
+                  </b>
                 </div>
               </div>
             </div>
