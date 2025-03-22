@@ -1,21 +1,28 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@mui/material'
+import { RoomCard, RoomData } from 'hooks/useGame'
 import { Spinner } from 'reactstrap'
 import { Tooltip } from 'react-tooltip'
-import { useUser } from 'contexts/UserContext'
-import { useSocket } from 'contexts/SocketContext'
-import { PlayerType, RoomCard, RoomData } from 'hooks/useGame'
-import { useAuth } from 'contexts/AuthContext'
 
-interface Room {
-  id: number
-  name: string
-  creator: string
-  maxPlayers: number
-  currentPlayers: number
-  players: PlayerType[]
-  status: 'waiting' | 'in_progress'
+interface RoomsData {
+  code: number;
+  game?: RoomData;
+  partieBlitz?: RoomData[];
+  featured?: RoomData[];
+  waiting?: RoomData[];
+  current?: RoomData[];
+}
+
+interface RoomPageProps {
+  isPremium: boolean;
+  addPremium?: string;
+  isInGame: boolean;
+  addInGame?: string;
+  canC: boolean;
+  canV: string;
+  hasPremium: boolean;
+  roomsData?: RoomsData;
+  canCreateGame: boolean;
 }
 
 const GenerateBloc: React.FC<{ className: string; title: string }> = ({ className, title }) => {
@@ -96,182 +103,31 @@ const generateRoomHtml = (game: RoomData, featuring: boolean = true): JSX.Elemen
   )
 }
 
-const RoomList = () => {
-  const { user } = useUser()
-  const { token } = useAuth()
-  const socket = useSocket().socket
-  const [inGame, setInGame] = useState(false)
-  const [ingameVisible, setIngameVisible] = useState(inGame)
-  const [roomsWaiting, setRoomsWaiting] = useState<Room[]>([]) // Rooms en attente
-  const [roomsInProgress, setRoomsInProgress] = useState<Room[]>([]) // Rooms en cours
-  const [playerRoomId, setPlayerRoomId] = useState<number | null>(null) // Room actuelle du joueur
-  const [hoveredRow, setHoveredRow] = useState<number | null>(null) // Ligne survolée
-  const [showForm, setShowForm] = useState(false)
-  const [gameId, setGameId] = useState<number | null>(null)
-  const [formData, setFormData] = useState({
-    name: user?.nickname,
-    maxPlayers: 6,
-    anonymousVotes: false,
-    privateGame: false,
-    password: '',
-    timer: 3,
-  })
+//
+// Composant principal RoomPage
+//
+const RoomPage: React.FC<RoomPageProps> = ({
+  isPremium,
+  addPremium = '',
+  isInGame,
+  addInGame = '',
+  canC,
+  canV,
+  hasPremium,
+  roomsData,
+  canCreateGame,
+}) => {
+  const [ingameVisible, setIngameVisible] = useState(isInGame)
 
+  // On simule un rafraîchissement des rooms toutes les 15 secondes (à remplacer par useEffect avec API)
   useEffect(() => {
-    fetchRooms()
-    fetchPlayerRoom()
-
-    socket.on('roomsUpdated', fetchRooms)
-
-    return () => {
-      socket.off('roomsUpdated')
-    }
+    // Exemple : fetchRooms(); setInterval(fetchRooms, 15000);
   }, [])
 
-  useEffect(() => {
-    if (!socket) return
-
-    socket.onAny((eventName, ...args) => {
-      console.log(`Événement reçu : ${eventName}`, args)
-    })
-
-    return () => {
-      socket.offAny()
-    }
-  }, [socket])
-
-  useEffect(() => {
-    if (!socket || !user) return
-
-    const handlePlayerLeft = (data: { message: string }) => {
-      alert(data.message.includes(user?.nickname))
-
-      if (data.message.includes(user?.nickname)) {
-        setPlayerRoomId(null)
-        fetchRooms()
-      }
-    }
-
-    socket.on('selfLeaveGame', handlePlayerLeft)
-
-    // return () => {
-    //   socket.off('playerLeft', handlePlayerLeft)
-    // }
-  }, [socket, user])
-
-  const fetchRooms = async () => {
-    try {
-      const { data } = await axios.get('/api/games/rooms')
-      const waiting = data.filter((room: Room) => room.status === 'waiting')
-      const inProgress = data.filter((room: Room) => room.status === 'in_progress')
-      setRoomsWaiting(waiting)
-      setRoomsInProgress(inProgress)
-    } catch (error) {
-      console.error('Erreur lors de la récupération des rooms :', error)
-    }
-  }
-
-  const fetchPlayerRoom = async () => {
-    try {
-      const { data } = await axios.get('/api/games/players/room', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
-      setPlayerRoomId(data?.roomId || null)
-    } catch (error) {
-      console.error('Erreur lors de la récupération de la room du joueur :', error)
-    }
-  }
-
-  const handleJoinRoom = async (roomId: number) => {
-    if (playerRoomId) {
-      alert('Vous êtes déjà dans une partie. Quittez votre partie actuelle pour en rejoindre une autre.')
-      return
-    }
-    try {
-      const response = await axios.post(`/api/games/room/${roomId}/join`, {}, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
-      setPlayerRoomId(roomId)
-      window.open(`/game/${response.data.game.id}`, '_blank')
-      fetchRooms()
-    } catch (error: any) {
-      if (error.response?.data?.error) {
-        alert(error.response.data.error)
-      } else {
-        alert('Erreur lors de la tentative de rejoindre la partie.')
-      }
-    }
-  }
-
-  const handleSpectateRoom = async (roomId: number) => {
-    if (playerRoomId) {
-      alert('Vous êtes déjà dans une partie. Quittez votre partie actuelle pour en regarder une autre.')
-      return
-    }
-    try {
-      const response = await axios.post(`/api/games/room/${roomId}/spectate`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setPlayerRoomId(roomId)
-      window.open(`/game/${response.data.game.id}`, '_blank')
-      fetchRooms()
-    } catch (error: any) {
-      if (error.response?.data?.error) {
-        alert(error.response.data.error)
-      } else {
-        alert('Erreur lors de la tentative de rejoindre la partie.')
-      }
-    }
-  }
-
-  const handleJoinCurrentRoom = async () => {
-    if (!playerRoomId) {
-      alert('Vous n\'êtes pas dans une partie.')
-      return
-    }
-    window.open(`/game/${playerRoomId}`, '_blank')
-  }
-
-  const handleLeaveRoom = async () => {
-    if (!playerRoomId) {
-      alert('Vous n\'êtes dans aucune partie.')
-      return
-    }
-    try {
-      const response = await axios.post('/api/games/players/room/leave', {}, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
-      if (response.data.message) {
-        socket.emit('leaveRoom', {
-          roomId: playerRoomId,
-          player: { id: user?.id, nickname: user?.nickname },
-        })
-        setPlayerRoomId(null)
-        localStorage.removeItem(`game_auth_${playerRoomId}`)
-        alert('Vous avez bien quitter votre partie.')
-        fetchRooms()
-      }
-    } catch (error: any) {
-      if (error.response?.data?.error) {
-        alert(error.response.data.error)
-      } else {
-        alert('Erreur lors de la tentative de quitter la partie.')
-      }
-    }
-  }
-
   return (
-    <section className="room-page list-room">
+    <section className={`room-page list-room ${addInGame}`}>
       {/* Section Ingame */}
-      {playerRoomId && (
+      {ingameVisible && (
         <section className="ingame-page">
           <h1 className="with-borders">
             <div></div>
@@ -353,7 +209,7 @@ const RoomList = () => {
             className="infotop"
             data-tooltip-id="infotop"
             data-tooltip-content="Clique ici pour en savoir plus sur les différents types de partie"
-            src="/assets/images/information.png"
+            src="/static/img/information.png"
             alt="Information"
           />
           <Tooltip id="infotop" />
@@ -364,11 +220,11 @@ const RoomList = () => {
         {/* Ici vous afficherez vos parties en vedette via generateRoomHtml */}
       </article>
 
-      {/*<h1 className="with-borders header-levels">
+      <h1 className="with-borders header-levels">
         <div></div>
         <span>Quêtes & Niveaux</span>
         <div></div>
-      </h1>*/}
+      </h1>
       {/* Composant ou contenu des quêtes */}
 
       <h1 className="with-borders header-waiting">
@@ -391,31 +247,26 @@ const RoomList = () => {
         <GenerateBloc className="d-games" title="Espace détente" />
         <GenerateBloc className="r-games" title="Espace réflexion" />
       </article>
-      {!showForm && (
-        <>
-          <h1>Vous n'avez pas trouvé votre bonheur ?</h1>
+
+      <h1>Vous n'avez pas trouvé votre bonheur ?</h1>
+      <article>
+        <Button
+          data-type="1"
+          className={canCreateGame ? 'creer-partie' : 'creer-partie disabled'}
+        >
+          <img src="/assets/images/hr_v1.png" alt="Icon" /> CRÉER UNE PARTIE
+        </Button>
+      </article>
+
+      {canCreateGame && (
+        <section className="creer-page hidden">
           <article>
-            <Button
-              data-type="1"
-              className={!inGame ? 'creer-partie' : 'creer-partie disabled'}
-              onClick={() => setShowForm(true)}
-            >
-              <img src="/assets/images/hr_v1.png" width={25} height={25} alt="Icon" /> CRÉER UNE PARTIE
-            </Button>
-          </article>
-        </>
-      )}
-      { showForm && !inGame && (
-        <section className="creer-page">
-          <article>
-            <Button className="retour-room" onClick={() => setShowForm(false)}>
-              <a
-                className="back-btn" href="#">
-                <i className="ti ti-arrow-narrow-left fs-2xl" onClick={() => setShowForm(false)}></i></a>
+            <Button className="retour-room" onClick={() => { /* Retour aux salons */ }}>
+              &lt; Revenir <br />aux salons
             </Button>
             <aside className="header-bloc">Créer une partie</aside>
             <aside className="header-advice">
-    Assurez-vous qu’aucune partie similaire à celle que vous souhaitez créer n'existe. Les doublons rendent les temps pour lancer une partie plus longs.
+              Assurez-vous qu’aucune partie similaire à celle que vous souhaitez créer n'existe. Les doublons rendent les temps pour lancer une partie plus longs.
             </aside>
             <aside className="type-partie">
               <header>1 - Choisis le type de partie</header>
@@ -428,16 +279,16 @@ const RoomList = () => {
               </main>
               <footer>
                 <div className="infos-type" data-type="3">
-        Viens t'amuser avant tout, partie rapide et composition définie.
+                  Viens t'amuser avant tout, partie rapide et composition définie.
                 </div>
                 <div className="infos-type active" data-type="1">
-        Parties idéales pour discuter avec ses amis et jouer dans une ambiance détendue.
+                  Parties idéales pour discuter avec ses amis et jouer dans une ambiance détendue.
                 </div>
                 <div className="infos-type" data-type="0">
-        Tu y trouveras de la réflexion et une bonne ambiance. La participation au débat et l'argumentation sont requises.
+                  Tu y trouveras de la réflexion et une bonne ambiance. La participation au débat et l'argumentation sont requises.
                 </div>
                 <div className="infos-type" data-type="2">
-        Règles strictes pour joueurs aimant le challenge. Concentration et participation active. Accroche-toi !
+                  Règles strictes pour joueurs aimant le challenge. Concentration et participation active. Accroche-toi !
                 </div>
               </footer>
             </aside>
@@ -459,16 +310,16 @@ const RoomList = () => {
               <aside>3 - Choisis le temps de débat</aside>
               <aside>
                 <Button className="grey" value="2">
-        2 min
+                  2 min
                 </Button>
                 <Button className="grey active" value="3">
-        3 min
+                  3 min
                 </Button>
                 <Button className="grey" value="4">
-        4 min
+                  4 min
                 </Button>
                 <Button className="grey" value="5">
-        5 min
+                  5 min
                 </Button>
               </aside>
               <aside></aside>
@@ -477,7 +328,7 @@ const RoomList = () => {
               <aside>4 - Options supplémentaires</aside>
               <aside>
                 <Button className="grey" value="whiteFlag">
-        Sans points
+                  Sans points
                 </Button>
                 {/*<Button className="event-option" value="st-patrick">
                   St-Patrick
@@ -507,13 +358,13 @@ const RoomList = () => {
                   Meneur réel
                 </Button>*/}
                 <Button className="grey" value="anonyme" disabled={true}>
-        Anonyme
+                  Anonyme
                 </Button>
                 <Button className="grey" value="selective" disabled={true}>
-        Sélective
+                  Sélective
                 </Button>
                 <Button className="grey" value="privee">
-        Privée
+                  Privée
                 </Button>
               </aside>
               <aside></aside>
@@ -526,7 +377,7 @@ const RoomList = () => {
             </aside>
             <aside className="rules-partie hidden">
               <header>
-      4c - Rajoute des règles à ta partie (laisse vide un champ pour ne pas préciser de règle supplémentaire)
+                4c - Rajoute des règles à ta partie (laisse vide un champ pour ne pas préciser de règle supplémentaire)
               </header>
               <main>
                 <aside>
@@ -547,13 +398,13 @@ const RoomList = () => {
               <aside>5 - Nombre de joueurs</aside>
               <aside>
                 <Button className="grey active" value="8">
-        de 6 j à 24 j
+                  de 6 j à 24 j
                 </Button>
               </aside>
               <aside></aside>
             </aside>
             <aside>
-              <Button className="creer-partie bgblue">CRÉER</Button>
+              <Button className="creer-partie">CRÉER</Button>
             </aside>
           </article>
         </section>
@@ -562,4 +413,4 @@ const RoomList = () => {
   )
 }
 
-export default RoomList
+export default RoomPage
