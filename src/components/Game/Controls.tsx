@@ -294,8 +294,15 @@ const GameControls: React.FC<GameControlsProps> = ({
                         className="button array_selectable sound-tick bglightblue animate__animated animate__bounce animate__infinite"
                         onClick={handleBeReady}
                       >
-                        Je suis prêt(e) !
+                        Je suis prêt{user?.isMale ? '' : 'e'} !
                       </Box>
+                    )}
+
+                    {player && player.ready && (
+                      <p>
+                        Tu es prêt{user?.isMale ? '' : 'e'} !
+                        En attente du lancement par le créateur de la partie
+                      </p>
                     )}
                   </Box>
                 </Box>
