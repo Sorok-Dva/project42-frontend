@@ -5,8 +5,7 @@ import AnimateHeight from 'react-animate-height'
 import Notification from './Notification'
 import Profile from './Profile'
 import Login from 'components/Layouts/navbar/Login'
-import favicon from 'assets/img/favicon.png'
-import logo from 'assets/img/logo.png'
+import logo from 'assets/img/logo2.png'
 import { Img as Image } from 'react-image'
 import { useUser } from 'contexts/UserContext'
 
@@ -89,7 +88,7 @@ const Navbar: React.FC<{
         <div className="py-sm-6 py-3 mx-xxl-20 mx-md-15 mx-3">
           <div className="d-flex align-items-center justify-content-between gap-xxl-10 gap-lg-8 w-100">
             <nav className="navbar-custom d-flex gap-lg-6 align-items-center flex-column flex-lg-row justify-content-start justify-content-lg-between w-100">
-              <div className="top-bar w-100 d-flex align-items-center gap-lg-0 gap-6">
+              <div className="top-bar">
                 <button
                   onClick={() => setNavOpen(!navOpen)}
                   className={clsx(
@@ -107,7 +106,6 @@ const Navbar: React.FC<{
                   className="navbar-brand d-flex align-items-center gap-4"
                   to="/"
                 >
-                  <Image className="w-100 logo1" src={favicon} alt="favicon" />
                   <Image className="w-100 logo2" src={logo} alt="logo" />
                 </Link>
               </div>
