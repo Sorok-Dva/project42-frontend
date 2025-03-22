@@ -208,10 +208,7 @@ const Footer = () => {
               <div className="privacy">
                 <ul>
                   <li>
-                    <Link to="/terms-of-service">Terms & Conditions</Link>
-                  </li>
-                  <li>
-                    <Link to="/privacy">Politique de confidentialité</Link>
+                    <Link to="/terms-of-service">Conditions générales d'utilisation</Link>
                   </li>
                 </ul>
               </div>
@@ -220,7 +217,7 @@ const Footer = () => {
             <div className="col-lg-3">
               <div className="designed">
                 <p>
-                  Designed By <i className="bx bx-heart"></i>{' '}
+                  Crafted with <i className="bx bx-heart animate__bounce animate__infinite"></i> By {' '}
                   <a href="https://github.com/Sorok-Dva" target="_blank" rel="noreferrer">
                     Sorok-Dva
                   </a>

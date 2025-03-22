@@ -29,7 +29,6 @@ import Login from 'components/Auth/LoginForm'
 import Register from 'pages/Register'
 import RecoverPassword from 'pages/RecoverPassword'
 import AboutPage from 'pages/About'
-import PrivacyPolicyPage from 'pages/PrivacyPolicy'
 import TOSPage from 'pages/TermsOfService'
 import UserProfile from 'pages/UserProfile'
 import AdminLayout from 'layouts/Admin'
@@ -93,7 +92,6 @@ const AppContent: React.FC = () => {
               </>
             )}
             <Route path="/about" element={<AboutPage />} />
-            <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms-of-service" element={<TOSPage />} />
             <Route path="/user/:nickname" element={<UserProfile />} />
             <Route path="/users/validate/:token" element={<ValidateUser />} />
