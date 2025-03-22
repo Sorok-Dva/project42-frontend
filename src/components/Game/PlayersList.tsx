@@ -113,7 +113,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                       src={`/assets/images/carte${_player.cardId}.png`}
                     />
                   ) : (gameStarted && _player.alive && !gameFinished) ? (
-                    <span className={`votecount clickable${mostVotes ? ' most_votes' : ''}`}>
+                    <span className={`votecount clickable${mostVotes}`}>
                       {voteCounts[_player.nickname] || 0}
                     </span>
                   ) : null}

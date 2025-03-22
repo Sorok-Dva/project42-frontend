@@ -19,7 +19,6 @@ import { getRandomColor } from 'utils/getRandomColor'
 
 import 'styles/Game.scss'
 import Composition from './Composition'
-import ViewersList from 'components/Game/ViewersList'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',

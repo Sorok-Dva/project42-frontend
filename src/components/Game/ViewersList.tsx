@@ -12,7 +12,6 @@ const ViewersList: React.FC<ViewersListProps> = ({
 }) => {
   let anonymousViewers = 0
 
-  console.log('viewers', viewers)
   return viewers.length > 0 && (
     <>
       <h3 className="text_center toggle-spectators">
