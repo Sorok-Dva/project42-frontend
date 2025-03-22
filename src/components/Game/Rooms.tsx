@@ -109,12 +109,13 @@ const RoomList = () => {
   const [showForm, setShowForm] = useState(false)
   const [gameId, setGameId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
-    name: user?.nickname,
+    name: `Partie de ${user?.nickname}`,
     maxPlayers: 6,
     anonymousVotes: false,
     privateGame: false,
     password: '',
     timer: 3,
+    whiteFlag: false,
   })
 
   useEffect(() => {
@@ -154,10 +155,40 @@ const RoomList = () => {
 
     socket.on('selfLeaveGame', handlePlayerLeft)
 
-    // return () => {
-    //   socket.off('playerLeft', handlePlayerLeft)
-    // }
+    return () => {
+      socket.off('playerLeft', handlePlayerLeft)
+    }
   }, [socket, user])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value,
+    })
+  }
+
+  const handleSubmit = async () => {
+    if (inGame) return
+    try {
+      const response = await axios.post('/api/games/room',
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+      setGameId(response.data.gameId)
+      setInGame(true)
+      window.open(`/game/${response.data.game.id}`, '_blank')
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        alert(error.response.data.error)
+      } else {
+        alert('Erreur lors de la création de la partie.')
+      }
+    }
+  }
 
   const fetchRooms = async () => {
     try {
@@ -271,7 +302,7 @@ const RoomList = () => {
   return (
     <section className="room-page list-room">
       {/* Section Ingame */}
-      {playerRoomId && (
+      {inGame && (
         <section className="ingame-page">
           <h1 className="with-borders">
             <div></div>
@@ -345,53 +376,57 @@ const RoomList = () => {
         </article>
       </div>
 
-      <h1 className="with-borders">
-        <div></div>
-        <span>
+      {!showForm && (
+        <>
+          <h1 className="with-borders">
+            <div></div>
+            <span>
           Lancement rapide{' '}
-          <img
-            className="infotop"
-            data-tooltip-id="infotop"
-            data-tooltip-content="Clique ici pour en savoir plus sur les différents types de partie"
-            src="/assets/images/information.png"
-            alt="Information"
-          />
-          <Tooltip id="infotop" />
-        </span>
-        <div></div>
-      </h1>
-      <article className="featured-games">
-        {/* Ici vous afficherez vos parties en vedette via generateRoomHtml */}
-      </article>
+              <img
+                className="infotop"
+                data-tooltip-id="infotop"
+                data-tooltip-content="Clique ici pour en savoir plus sur les différents types de partie"
+                src="/assets/images/information.png"
+                alt="Information"
+              />
+              <Tooltip id="infotop" />
+            </span>
+            <div></div>
+          </h1>
+          <article className="featured-games">
+            {/* Ici vous afficherez vos parties en vedette via generateRoomHtml */}
+          </article>
 
-      {/*<h1 className="with-borders header-levels">
+          {/*<h1 className="with-borders header-levels">
         <div></div>
         <span>Quêtes & Niveaux</span>
         <div></div>
       </h1>*/}
-      {/* Composant ou contenu des quêtes */}
+          {/* Composant ou contenu des quêtes */}
 
-      <h1 className="with-borders header-waiting">
-        <div></div>
-        <span>Liste des parties en attente</span>
-        <div></div>
-      </h1>
-      <article className="games-list games-waiting">
-        <GenerateBloc className="d-games" title="Espace détente" />
-        <GenerateBloc className="r-games" title="Espace réflexion" />
-      </article>
+          <h1 className="with-borders header-waiting">
+            <div></div>
+            <span>Liste des parties en attente</span>
+            <div></div>
+          </h1>
+          <article className="games-list games-waiting">
+            <GenerateBloc className="d-games" title="Espace détente" />
+            <GenerateBloc className="r-games" title="Espace réflexion" />
+          </article>
 
-      <h1 className="with-borders header-launched">
-        <div></div>
-        <span>Liste des parties en cours</span>
-        <div></div>
-      </h1>
-      <article className="games-list games-launched">
+          <h1 className="with-borders header-launched">
+            <div></div>
+            <span>Liste des parties en cours</span>
+            <div></div>
+          </h1>
+          <article className="games-list games-launched">
 
-        <GenerateBloc className="d-games" title="Espace détente" />
-        <GenerateBloc className="r-games" title="Espace réflexion" />
-      </article>
-      {!showForm && (
+            <GenerateBloc className="d-games" title="Espace détente" />
+            <GenerateBloc className="r-games" title="Espace réflexion" />
+          </article>
+        </>
+      )}
+      {!showForm && !inGame && (
         <>
           <h1>Vous n'avez pas trouvé votre bonheur ?</h1>
           <article>
@@ -430,10 +465,10 @@ const RoomList = () => {
                 <div className="infos-type" data-type="3">
         Viens t'amuser avant tout, partie rapide et composition définie.
                 </div>
-                <div className="infos-type active" data-type="1">
+                <div className="infos-type" data-type="1">
         Parties idéales pour discuter avec ses amis et jouer dans une ambiance détendue.
                 </div>
-                <div className="infos-type" data-type="0">
+                <div className="infos-type active" data-type="0">
         Tu y trouveras de la réflexion et une bonne ambiance. La participation au débat et l'argumentation sont requises.
                 </div>
                 <div className="infos-type" data-type="2">
@@ -444,40 +479,47 @@ const RoomList = () => {
             <aside className="nom-partie">
               <header>2 - Donne un nom à ta partie</header>
               <main>
-                <input id="game-name" maxLength={15} type="text" placeholder="Nom de partie" />
+                <input
+                  id="game-name"
+                  name="name"
+                  maxLength={15}
+                  type="text"
+                  placeholder="Nom de partie"
+                  onChange={handleChange}
+                />
               </main>
             </aside>
             <aside className="not-box">
               <aside></aside>
               <aside>
                 <img src="/assets/images/carte1.png" alt="Carte 1" />
-                <span>Paramétrage de la Partie</span>
+                <h2>Paramétrage de la Partie</h2>
               </aside>
               <aside></aside>
             </aside>
             <aside className="debat-partie">
               <aside>3 - Choisis le temps de débat</aside>
               <aside>
-                <Button className="grey" value="2">
-        2 min
-                </Button>
-                <Button className="grey active" value="3">
-        3 min
-                </Button>
-                <Button className="grey" value="4">
-        4 min
-                </Button>
-                <Button className="grey" value="5">
-        5 min
-                </Button>
+                {[2, 3, 4, 5].map((timerValue) => (
+                  <Button
+                    key={timerValue}
+                    className={`grey ${formData.timer === timerValue ? 'active' : ''}`}
+                    onClick={() => setFormData((prev) => ({ ...prev, timer: timerValue }))}
+                  >
+                    {timerValue} min
+                  </Button>
+                ))}
               </aside>
               <aside></aside>
             </aside>
             <aside className="options-partie">
               <aside>4 - Options supplémentaires</aside>
               <aside>
-                <Button className="grey" value="whiteFlag">
-        Sans points
+                <Button
+                  className={`grey ${formData.whiteFlag ? 'active' : ''}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, whiteFlag: !prev.whiteFlag }))}
+                >
+                  Sans points
                 </Button>
                 {/*<Button className="event-option" value="st-patrick">
                   St-Patrick
@@ -507,53 +549,48 @@ const RoomList = () => {
                   Meneur réel
                 </Button>*/}
                 <Button className="grey" value="anonyme" disabled={true}>
-        Anonyme
+                  Anonyme
                 </Button>
                 <Button className="grey" value="selective" disabled={true}>
-        Sélective
+                  Sélective
                 </Button>
-                <Button className="grey" value="privee">
-        Privée
+                <Button
+                  className={`grey ${formData.privateGame ? 'active' : ''}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, privateGame: !prev.privateGame }))}
+                >
+                  Privée
                 </Button>
               </aside>
               <aside></aside>
             </aside>
-            <aside className="password-partie hidden">
-              <header>4b - Donne un mot de passe à ta partie</header>
-              <main>
-                <input id="game-password" maxLength={15} type="text" placeholder="Mot de passe" />
-              </main>
-            </aside>
-            <aside className="rules-partie hidden">
-              <header>
-      4c - Rajoute des règles à ta partie (laisse vide un champ pour ne pas préciser de règle supplémentaire)
-              </header>
-              <main>
-                <aside>
-                  <input className="option-rule" maxLength={300} type="text" placeholder="Règle 1" />
-                  <span className="count-char">000/300</span>
-                </aside>
-                <aside>
-                  <input className="option-rule" maxLength={300} type="text" placeholder="Règle 2" />
-                  <span className="count-char">000/300</span>
-                </aside>
-                <aside>
-                  <input className="option-rule" maxLength={300} type="text" placeholder="Règle 3" />
-                  <span className="count-char">000/300</span>
-                </aside>
-              </main>
-            </aside>
+
+            {formData.privateGame && (
+              <aside className="password-partie">
+                <header>4b - Donne un mot de passe à ta partie</header>
+                <main>
+                  <input
+                    id="game-password"
+                    name="password"
+                    maxLength={15}
+                    type="text"
+                    placeholder="Mot de passe"
+                    onChange={handleChange}
+                  />
+                </main>
+              </aside>
+            )}
+
             <aside className="nbj-partie">
               <aside>5 - Nombre de joueurs</aside>
               <aside>
                 <Button className="grey active" value="8">
-        de 6 j à 24 j
+                  de 6 j à 24 j
                 </Button>
               </aside>
               <aside></aside>
             </aside>
             <aside>
-              <Button className="creer-partie bgblue">CRÉER</Button>
+              <Button className="creer-partie bgblue" onClick={handleSubmit}>CRÉER</Button>
             </aside>
           </article>
         </section>

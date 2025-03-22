@@ -636,9 +636,10 @@
 .creer-page {
   padding: 10px;
   overflow-wrap: break-word;
+  width: 70%;
   &>article {
-    background: rgba(193, 169, 147, 0.4);
-    border: solid 2px #c9b0a0;
+    background: rgba(var(--p1), 0.4);
+    border: solid 2px rgb(var(--p2));
     border-radius: 20px;
     margin: 20px;
     text-align: center;
@@ -649,7 +650,7 @@
       outline: transparent;
       cursor: pointer;
       border-radius: 6px;
-      background-color: #67100c;
+      background-color: rgb(var(--p2));
       border: solid 2px rgba(0, 0, 0, .5);
       color: #ffefbc;
       font-family: Acme;
@@ -676,19 +677,18 @@
       padding: 20px;
     }
     &>aside.header-bloc {
-      width: 60%;
+      width: 30%;
       text-align: center;
-      font-family: 'Acme';
       font-size: 2.4rem;
-      color: #5a3530;
-      background-color: #f7edcf;
-      background-image: url('https://cdn-prod.loups-garous.online/static/img/background_pres.png');
+      color: rgb(var(--p2));
+      background-color: rgb(var(--p1));
+      background-image: url(https://cdn-prod.loups-garous.online/static/img/background_pres.png);
       background-size: 100% 100%;
       display: flex;
       flex-flow: row nowrap;
       justify-content: center;
       align-items: center;
-      border: solid 2px #c9b0a0;
+      border: rgb(var(--s3));
       border-radius: 10px;
       height: 80px;
     }
@@ -750,10 +750,10 @@
     &>aside.rules-partie {
       display: flex;
       flex-flow: column;
-      border: solid 2px #c9b0a0;
+      border: solid 2px rgb(var(--p2));
       border-radius: 6px;
       width: 80%;
-      background-color: rgba(247, 237, 207, 0.2);
+      background-color: rgba(var(--n4), 0.2);
       &.hidden {
         display: none;
       }
@@ -853,7 +853,7 @@
         }
       }
       &:not(.not-box) {
-        border: solid 2px #c9b0a0;
+        border: solid 2px rgb(var(--s3));
         border-radius: 6px;
         background-color: rgba(247, 237, 207, 0.2);
         aside:first-child {
@@ -871,6 +871,9 @@
         align-items: center;
         flex-flow: row wrap;
       }
+      button:not(:disabled) {
+        color: white;
+      }
       button {
         margin: 4px;
         padding: 6px;
@@ -878,10 +881,8 @@
         font-family: 'Acme';
         border: none;
         cursor: pointer;
-        color: white;
         font-size: 1.2rem;
         border-radius: 6px;
-        background: #38761d;
         filter: saturate(60%);
         &:focus {
           outline: none;
@@ -891,7 +892,7 @@
           border:0;
         }
         &.grey {
-          background: #717c88;
+          background: rgb(var(--s3));;
         }
         &.event-option {
           background: seagreen;
@@ -1023,7 +1024,7 @@
       outline: transparent;
       cursor: pointer;
       border-radius: 6px;
-      background-color: #67100c;
+      background-color: rgb(var(--p1));
       border: solid 2px rgba(0, 0, 0, .5);
       color: #ffefbc;
       font-family: 'Acme';
