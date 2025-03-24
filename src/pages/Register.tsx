@@ -169,29 +169,34 @@ const Register : React.FC = () => {
 
                       <Row className="my-4">
                         <Col xs="12">
-                          <div className="custom-control custom-control-alternative custom-checkbox">
+                          {/* d-flex pour aligner en ligne, align-items-center pour aligner verticalement */}
+                          <div className="d-flex align-items-center">
                             <input
                               className="form-check-input"
                               type="checkbox"
                               id="gridCheck"
                               name="rememberMe"
-                              checked={ isChecked }
-                              onChange={ (e) => setIsChecked(e.target.checked) }
-                            />{ ' ' }
-                            <label className="custom-control-label" htmlFor="customCheckRegister">
-                              <span>
-                                J'accepte {' '}
-                                <Link to="/privacy" target="_blank" className="text-blue" onClick={() => handlePolicyClick()}>
-                                  <b>la Politique de confidentialité</b>
-                                </Link> &{' '}
-                                <Link to="/terms-of-service" target="_blank" className="text-blue" onClick={() => handleTermsClick()}>
-                                  <b>Termes de Service</b>
-                                </Link>
-                              </span>
+                              checked={isChecked}
+                              onChange={(e) => setIsChecked(e.target.checked)}
+                            />
+                            {/* On fait correspondre htmlFor avec l'id du input */}
+                            <label
+                              className="form-check-label ms-2"
+                              htmlFor="gridCheck"
+                            >
+                              J'accepte{' '}
+                              <Link to="/privacy" target="_blank" className="text-blue" onClick={() => handlePolicyClick()}>
+                                <b>la Politique de confidentialité</b>
+                              </Link>
+                              {' '} &{' '}
+                              <Link to="/terms-of-service" target="_blank" className="text-blue" onClick={() => handleTermsClick()}>
+                                <b>les Conditions Générales d'Utilisation</b>
+                              </Link>
                             </label>
                           </div>
                         </Col>
                       </Row>
+
 
                       <div className="text-center">
                         {error && <div className="alert alert-danger text-center">{error}</div>}
