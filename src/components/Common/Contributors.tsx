@@ -40,7 +40,7 @@ const Contributors: React.FC = () => {
             <span>Équipe</span>
             <h2>Découvrez le Créateur Inspiré</h2>
             <p>
-              &quot;Le Sentier des Rêves&quot; est le fruit de ma passion pour l&apos;onirisme et les rêves lucides.
+              &quot;Project 42&quot; est le fruit de ma passion pour l&apos;onirisme et les rêves lucides.
               En tant que créateur unique de cette plateforme, je m&apos;efforce de vous offrir les meilleures ressources et
               une communauté accueillante pour explorer et partager vos expériences oniriques.
               <br/>

@@ -1,6 +1,6 @@
 import React from 'react'
 import Hero from 'components/LandingPage/Hero'
-import ThreeDSwiper from 'components/LandingPage/ThreeDSwiper'
+import TeamMembers from 'components/LandingPage/TeamMembers'
 import TopPlayer from 'components/LandingPage/TopPlayer'
 import Games from 'components/LandingPage/Games'
 import About from 'components/LandingPage/About'
@@ -14,7 +14,7 @@ const LandingPage : React.FC = () => {
       <Games />
       <Cards />
       <About />
-      <ThreeDSwiper />
+      <TeamMembers />
     </main>
   )
 }

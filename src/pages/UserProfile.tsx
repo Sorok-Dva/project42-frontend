@@ -183,7 +183,7 @@ const Profile: React.FC = () => {
                     {userProfile.points} points.
                   </Tooltip>
                   <span className="mt-3">
-                    A rejoint le Sentier des Rêves le { new Date(userProfile.createdAt).toLocaleDateString() }
+                    A rejoint Project 42 le { new Date(userProfile.createdAt).toLocaleDateString() }
                   </span>
                   <ul>
                     <li>{userProfile.totalDreams} rêves (dont {userProfile.publicDreams} publics)</li>

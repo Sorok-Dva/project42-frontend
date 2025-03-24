@@ -60,3 +60,20 @@ code {
 .highlight-row {
   background-color: #4da1f1 !important;
 }
+
+.card-3d ul {
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+}
+.card-3d ul li {
+  display: inline-block;
+  padding: 0 5px;
+}
+.card-3d ul li a {
+  margin-top: 3vh;
+}
+.card-3d ul li a:hover {
+  animation: rubberBand 1s linear;
+}
+

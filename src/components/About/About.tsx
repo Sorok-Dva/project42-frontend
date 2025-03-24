@@ -39,7 +39,7 @@ const About: React.FC = () => {
                   Découvrez le pouvoir caché de vos nuits.
                 </h2>
                 <p>
-                  "Le Sentier des Rêves" est une plateforme dédiée à l&apos;exploration des rêves et de la conscience.
+                  "Project 42" est une plateforme dédiée à l&apos;exploration des rêves et de la conscience.
                   Conçu pour les curieux et les passionnés de l&apos;onirisme, notre site offre des outils et des ressources
                   pour vous aider à naviguer dans le monde fascinant des rêves lucides.
                   Que vous soyez un novice ou un rêveur expérimenté, vous trouverez ici des guides pratiques,
