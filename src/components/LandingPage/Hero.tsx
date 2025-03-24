@@ -65,12 +65,11 @@ const Hero: React.FC = () => {
               <h1 className="hero-title display-one tcn-1 cursor-scale growUp mb-10">
                 <span className="d-block tcp-1">Project 42</span>
               </h1>
-              <a
-                href="#"
+              <button
                 onClick={toggleOpen}
                 className="btn-half-border position-relative d-inline-block py-2 px-6 bgp-1 rounded-pill popupvideo mfp-iframe">
                 Jouer maintenant
-              </a>
+              </button>
             </div>
           </div>
           <div className="col-xl-3 col-md-2 col-sm-4 order-md-last order-lg-1">
