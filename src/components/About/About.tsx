@@ -26,7 +26,7 @@ const About: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="col-lg-6">
               <div
                 className="about-content"
@@ -48,7 +48,7 @@ const About: React.FC = () => {
                   <b>Rejoignez-nous sur ce chemin de découverte intérieure et
                     réveillez le rêveur qui sommeille en vous.</b>
                 </p>
-                
+
                 <div className="row">
                   <div className="col-lg-6 col-sm-6">
                     <ul>
@@ -66,7 +66,7 @@ const About: React.FC = () => {
                       </li>
                     </ul>
                   </div>
-                  
+
                   <div className="col-lg-6 col-sm-6">
                     <ul>
                       <li>
@@ -84,13 +84,13 @@ const About: React.FC = () => {
                     </ul>
                   </div>
                 </div>
-                
+
                 <Link to="/register" className="default-btn">
                   Nous rejoindre
                 </Link>
-                
+
                 <Button
-                  href="https://discord.gg/J7urdBrNcn"
+                  href="vhttps://discord.gg/FBsg7hKK7j"
                   target="_blank"
                   style={ {
                     backgroundColor: '#7289da',
@@ -118,7 +118,7 @@ const About: React.FC = () => {
               <div className="dreams-content">
                 <h2>Explorez et Partagez vos Rêves Lucides</h2>
               </div>
-              
+
               <div className="single-dreams-feature">
                 <i className="flaticon-dream"></i>
                 <h3>Tutoriels pour Rêves Lucides</h3>
@@ -127,7 +127,7 @@ const About: React.FC = () => {
                   expliquée pour vous aider à explorer vos rêves en toute conscience.
                 </p>
               </div>
-              
+
               <div className="single-dreams-feature">
                 <i className="flaticon-community"></i>
                 <h3>Une Communauté pour Partager vos Expériences</h3>
@@ -136,14 +136,14 @@ const About: React.FC = () => {
                   autres utilisateurs et trouvez l&apos;inspiration pour vos propres rêves.
                 </p>
               </div>
-              
+
               <div className="dreams-btn">
                 <Link to="/register" className="default-btn">
                   Nous rejoindre
                 </Link>
               </div>
             </div>
-            
+
             <div className="col-lg-6">
               <div className="row">
                 <div
@@ -159,7 +159,7 @@ const About: React.FC = () => {
                     <p>Tutoriels Disponibles</p>
                   </div>
                 </div>
-                
+
                 <div
                   className="col-lg-6 col-sm-6 counter-nth"
                   data-aos="fade-up"
@@ -173,7 +173,7 @@ const About: React.FC = () => {
                     <p>Utilisateurs Actifs</p>
                   </div>
                 </div>
-                
+
                 <div
                   className="col-lg-6 col-sm-6 counter-nth"
                   data-aos="fade-up"
@@ -187,7 +187,7 @@ const About: React.FC = () => {
                     <p>Rêves Partagés</p>
                   </div>
                 </div>
-                
+
                 <div
                   className="col-lg-6 col-sm-6 counter-nth"
                   data-aos="fade-up"

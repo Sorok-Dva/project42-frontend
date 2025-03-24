@@ -1,13 +1,10 @@
-'use client'
-
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import PasswordStrengthChecker from 'components/Common/PasswordStrengthChecker'
 import { Button } from 'reactstrap'
 import { useUser } from 'contexts/UserContext'
-import { ThemeContext } from 'contexts/ThemeContext'
 
 const ResetPassword: React.FC = () => {
   const { user } = useUser()
@@ -16,14 +13,6 @@ const ResetPassword: React.FC = () => {
 
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-
-  const themeContext = useContext(ThemeContext)
-
-  if (!themeContext) {
-    throw new Error('ThemeContext not found')
-  }
-
-  const { theme } = themeContext
 
   const handleChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value)
@@ -85,9 +74,9 @@ const ResetPassword: React.FC = () => {
       <div className="container">
         <div className="row">
           <div className="col-12">
-            <div className={`contact-form-action ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}>
+            <div className={'contact-form-action bg-dark text-white'}>
               <div className="form-heading text-center">
-                <h3 className={`form-title${theme === 'dark' ? '-dark' : ''}`}>Réinitialiser votre mot de passe</h3>
+                <h3 className={'form-title-dark'}>Réinitialiser votre mot de passe</h3>
                 <p className="reset-desc">
                   Saisissez votre nouveau mot de passe ci-dessous.
                 </p>
@@ -120,7 +109,7 @@ const ResetPassword: React.FC = () => {
                     </div>
                   </div>
 
-                  <PasswordStrengthChecker password={password} theme={theme} />
+                  <PasswordStrengthChecker password={password} />
 
                   <div className="col-12 text-center">
                     <Button className="mt-4" color="primary" type="submit" disabled={!isFormValid()}>

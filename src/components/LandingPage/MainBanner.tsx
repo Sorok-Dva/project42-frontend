@@ -58,7 +58,7 @@ const MainBanner: React.FC = () => {
                     En savoir plus
                   </Link>
 
-                  <Link to="https://discord.gg/J7urdBrNcn" className="default-btn">
+                  <Link to="vhttps://discord.gg/FBsg7hKK7j" className="default-btn">
                     <FaDiscord style={ { marginRight: '8px' } }/> Rejoindre le serveur discord
                   </Link>
                 </div>

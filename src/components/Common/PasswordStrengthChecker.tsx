@@ -3,10 +3,9 @@ import { FaCheck, FaXmark } from 'react-icons/fa6'
 
 interface PasswordStrengthCheckerProps {
   password : string;
-  theme : string;
 }
 
-const PasswordStrengthChecker : React.FC<PasswordStrengthCheckerProps> = ({ password , theme}) => {
+const PasswordStrengthChecker : React.FC<PasswordStrengthCheckerProps> = ({ password }) => {
   const hasUpperCase = /[A-Z]/.test(password)
   const hasLowerCase = /[a-z]/.test(password)
   const hasNumber = /\d/.test(password)
@@ -15,7 +14,7 @@ const PasswordStrengthChecker : React.FC<PasswordStrengthCheckerProps> = ({ pass
 
   return (
     <>
-      <div className={`card mb-3 ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`} style={ { padding: '10px' } }>
+      <div className={'card mb-3 bg-dark text-white'} style={ { padding: '10px' } }>
         <div className="card-body">
           <h5 className="card-title">Force du mot de passe</h5>
           <p className="card-text">
