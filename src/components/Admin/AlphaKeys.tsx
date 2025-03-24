@@ -6,9 +6,8 @@ import {
   Table,
 } from 'reactstrap'
 import { Link } from 'react-router-dom'
-import PageBanner from 'components/Common/PageBanner'
 import { useAuth } from 'contexts/AuthContext'
-import { useUser } from 'contexts/UserContext'
+import { User, useUser } from 'contexts/UserContext'
 import axios from 'axios'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faKey, faCopy } from '@fortawesome/free-solid-svg-icons'
@@ -21,9 +20,10 @@ interface AlphaKey {
   parrain_id: number | null
   createdAt: string
   updatedAt: string
+  user?: Partial<User>
 }
 
-type SortableFields = keyof AlphaKey // Par exemple: 'id' | 'key' | 'used_at' | ...
+type SortableFields = keyof AlphaKey
 
 const AlphaKeys: React.FC = () => {
   const { token } = useAuth()
@@ -71,7 +71,6 @@ const AlphaKeys: React.FC = () => {
   const handleCopy = async (key: string) => {
     try {
       await navigator.clipboard.writeText(key)
-      alert('Clé copiée !')
     } catch {
       alert('Erreur lors de la copie de la clé')
     }
@@ -200,7 +199,7 @@ const AlphaKeys: React.FC = () => {
                   <td>{alphaKey.id}</td>
                   <td>{alphaKey.key}</td>
                   <td>{new Date(alphaKey.createdAt).toLocaleString()}</td>
-                  <td>{alphaKey.used_by ?? '-'}</td>
+                  <td>{alphaKey.used_by ? alphaKey.user?.nickname : '-'}</td>
                   <td>{alphaKey.used_at ? new Date(alphaKey.used_at).toLocaleString() : '-'}</td>
                   <td>{alphaKey.parrain_id ?? '-'}</td>
                   <td>
