@@ -174,6 +174,7 @@ const GamePage = () => {
   if (gameError) {
     return (
       <Box
+        className="game-page"
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -210,6 +211,7 @@ const GamePage = () => {
   if (passwordRequired && !isAuthorized) {
     return (
       <Box
+        className="game-page"
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -264,7 +266,7 @@ const GamePage = () => {
 
   return isAuthorized && creator ? (
     <>
-      <Box display="flex" flexDirection="column" height="100vh"
+      <Box className="game-page" display="flex" flexDirection="column" height="100vh"
         sx={{
           backgroundImage: (isNight || gameFinished) ?
             'url(/assets/images/games/background-night.png)'
