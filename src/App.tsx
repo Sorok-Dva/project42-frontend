@@ -28,7 +28,6 @@ import LandingPage from 'pages/LandingPage'
 import Login from 'components/Auth/LoginForm'
 import Register from 'pages/Register'
 import RecoverPassword from 'pages/RecoverPassword'
-import AboutPage from 'pages/About'
 import TOSPage from 'pages/TermsOfService'
 import UserProfile from 'pages/UserProfile'
 import AdminLayout from 'layouts/Admin'
@@ -91,7 +90,6 @@ const AppContent: React.FC = () => {
                 <Route path="/recover-password" element={<RecoverPassword />} />
               </>
             )}
-            <Route path="/about" element={<AboutPage />} />
             <Route path="/terms-of-service" element={<TOSPage />} />
             <Route path="/user/:nickname" element={<UserProfile />} />
             <Route path="/users/validate/:token" element={<ValidateUser />} />
