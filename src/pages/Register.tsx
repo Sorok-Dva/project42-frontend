@@ -25,6 +25,7 @@ const Register : React.FC = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [nickname, setNickname] = useState('')
+  const [alphaKey, setAlphaKey] = useState('')
   const [showPassword] = useState(false)
   const [error, setError] = useState('')
   const [isChecked, setIsChecked] = useState(false)
@@ -48,6 +49,11 @@ const Register : React.FC = () => {
     return re.test(email)
   }
 
+  const validateAlphaKey = (alphaKey: string): boolean => {
+    const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    return regex.test(alphaKey)
+  }
+
   const validateUsername = (username : string) => {
     return username.length > 4 && username.length < 15 && !isForbiddenNickname(username)
   }
@@ -62,6 +68,7 @@ const Register : React.FC = () => {
       validateUsername(nickname) &&
       validateEmail(email) &&
       validatePassword(password) &&
+      validateAlphaKey(alphaKey) &&
       isChecked /*&&
       isPolicyClicked &&
       isTermsClicked*/
@@ -79,7 +86,7 @@ const Register : React.FC = () => {
     try {
       await axios.post(
         '/api/users/register',
-        { email, password, nickname },
+        { email, password, nickname, alphaKey },
       )
 
       toast.success('Inscription réussie ! Veuillez vérifier votre email pour valider votre compte et finaliser la connexion.',
@@ -116,9 +123,23 @@ const Register : React.FC = () => {
                 <Card className="mt-30 shadow border-0 mb-4">
                   <CardBody className={'px-lg-5 py-lg-5 bg-dark text-white'}>
                     <div className="text-center text-muted mb-4">
-                      <h1>Inscription par email</h1>
+                      <h1>Inscription (bêta)</h1>
                     </div>
                     <Form role="form" onSubmit={handleSubmit}>
+                      <FormGroup className={validateAlphaKey(alphaKey) ? 'has-success' : 'has-danger'}>
+                        <InputGroup className={'input-group-alternative mb-3 bg-dark text-white}'}>
+                          <InputGroupText>
+                            <i className="ni ni-key-25" />
+                          </InputGroupText>
+                          <Input
+                            className={`form-control ${validateAlphaKey(alphaKey) ? 'is-valid' : 'is-invalid'} bg-dark text-white`}
+                            placeholder="Clé Alpha"
+                            type="text"
+                            value={alphaKey}
+                            onChange={(e) => setAlphaKey(e.target.value)}
+                          />
+                        </InputGroup>
+                      </FormGroup>
                       <FormGroup className={validateUsername(nickname) ? 'has-success' : 'has-danger'}>
                         <InputGroup className={'input-group-alternative mb-3 bg-dark text-white}'}>
                           <InputGroupText>
