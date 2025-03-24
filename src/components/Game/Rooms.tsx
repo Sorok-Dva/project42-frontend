@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
 import { Button } from '@mui/material'
 import { Spinner } from 'reactstrap'
@@ -8,17 +8,12 @@ import { useSocket } from 'contexts/SocketContext'
 import { PlayerType, RoomCard, RoomData } from 'hooks/useGame'
 import { useAuth } from 'contexts/AuthContext'
 
-interface Room {
-  id: number
-  name: string
-  creator: string
-  maxPlayers: number
-  currentPlayers: number
-  players: PlayerType[]
-  status: 'waiting' | 'in_progress'
-}
-
-const GenerateBloc: React.FC<{ className: string; title: string }> = ({ className, title }) => {
+const GenerateBloc: React.FC<{
+  className: string;
+  title: string,
+  rooms: RoomData[],
+  inGame: boolean,
+}> = ({ className, title, rooms, inGame }) => {
   return (
     <aside className={className}>
       <header>{title}</header>
@@ -30,14 +25,27 @@ const GenerateBloc: React.FC<{ className: string; title: string }> = ({ classNam
         <aside>Options</aside>
       </article>
       <main>
-        <article className="empty">
-          <div className="spinner-wrapper">
-            <Spinner animation="border" role="status" className="custom-spinner">
-              <span className="sr-only">Chargement en cours</span>
-            </Spinner>
-            <div className="loading-text">Chargement en cours</div>
-          </div>
-        </article>
+        { !rooms && (
+          <article className="empty">
+            <div className="spinner-wrapper">
+              <Spinner animation="border" role="status" className="custom-spinner">
+                <span className="sr-only">Chargement en cours</span>
+              </Spinner>
+              <div className="loading-text">Chargement en cours</div>
+            </div>
+          </article>
+        )}
+
+        { rooms && rooms.length === 0 ? (
+          <article className="empty">
+            <h2>Aucune partie en cours.</h2>
+            {!inGame && (
+              <Button className="creer-partie bgblue">
+                <img src="/assets/images/hr_v1.png" width={25} height={25} alt="Icon" />  CRÉER UNE PARTIE
+              </Button>
+            )}
+          </article>
+        ) : rooms.map((game) => generateRoomHtml(game)) }
       </main>
     </aside>
   )
@@ -60,39 +68,22 @@ const generateCards = (cards: RoomCard[]) => {
 }
 
 const generateRoomHtml = (game: RoomData, featuring: boolean = true): JSX.Element => {
-  const options = []
-  const cards = generateCards(game.cards)
-  const headerContent = featuring ? (
-    <header>
-      Plus que ... place{/*{... > 1 ? 's' : ''}*/} sur {game.maxPlayers} !
-    </header>
-  ) : null
-  const footerContent = featuring ? (
-    <footer>
-      <a className="viewer" target="_blank" rel="noreferrer" href={`/game/${game.id}`}>
-        <img src="/assets/img/voyante_o.png" alt="Observer" style={{ height: 40, verticalAlign: 'middle' }} />
-      </a>
-    </footer>
-  ) : null
-
-  const premiumIcon = null
-  const gmIcon = null
-
   return (
-    <aside className={`featured-game type-${game.type} phase-${game.phase}`}>
-      <header className={`type-${game.type}`}>
-        {premiumIcon} {game.name} {gmIcon}
-      </header>
-      <main>
-        {headerContent}
-        <article>
-          <aside className="room-compo">Composition <br />{cards}</aside>
-          <aside>Options <br />{/*{options}*/}</aside>
-        </article>
-        <footer>par {game.creator}</footer>
-        {footerContent}
-      </main>
-    </aside>
+    <div
+      className={`waiting-game type-${game.type} phase-0`}
+      data-tooltip="${tooltip}">
+      <div className="white-background"></div>
+      <aside>{ game.name }</aside>
+      <aside>{ game.creator }</aside>
+      <aside>.../{ game.maxPlayers }</aside>
+      <aside>...</aside>
+      <div className="big_options"></div>
+      <div className="join-buttons">
+        <a href={ `/game/${ game.id }` } target="_blank"
+          className="button_secondary viewer" rel="noreferrer">Observer</a>
+        <button className="button btn-primary join-nec">Jouer</button>
+      </div>
+    </div>
   )
 }
 
@@ -102,8 +93,10 @@ const RoomList = () => {
   const socket = useSocket().socket
   const [inGame, setInGame] = useState(false)
   const [ingameVisible, setIngameVisible] = useState(inGame)
-  const [roomsWaiting, setRoomsWaiting] = useState<Room[]>([]) // Rooms en attente
-  const [roomsInProgress, setRoomsInProgress] = useState<Room[]>([]) // Rooms en cours
+  const [roomsWaitingFun, setRoomsWaitingFun] = useState<RoomData[]>([]) // Rooms détente en attente
+  const [roomsInProgressFun, setRoomsInProgressFun] = useState<RoomData[]>([]) // Rooms détente en cours
+  const [roomsInProgressSerious, setRoomsInProgressSerious] = useState<RoomData[]>([]) // Rooms reflexion en cours
+  const [roomsWaitingSerious, setRoomsWaitingSerious] = useState<RoomData[]>([]) // Rooms reflexion en attente
   const [playerRoomId, setPlayerRoomId] = useState<number | null>(null) // Room actuelle du joueur
   const [hoveredRow, setHoveredRow] = useState<number | null>(null) // Ligne survolée
   const [showForm, setShowForm] = useState(false)
@@ -191,17 +184,28 @@ const RoomList = () => {
     }
   }
 
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     try {
       const { data } = await axios.get('/api/games/rooms')
-      const waiting = data.filter((room: Room) => room.status === 'waiting')
-      const inProgress = data.filter((room: Room) => room.status === 'in_progress')
-      setRoomsWaiting(waiting)
-      setRoomsInProgress(inProgress)
+      const waitingFun = data.filter((room: RoomData) => room.status === 'waiting' && [1, 3].includes(room.type))
+      const inProgressFun = data.filter((room: RoomData) => room.status === 'in_progress' && [1, 3].includes(room.type))
+      const waitingSerious = data.filter((room: RoomData) => room.status === 'waiting' && [0, 2].includes(room.type))
+      const inProgressSerious = data.filter((room: RoomData) => room.status === 'in_progress' && [0, 2].includes(room.type))
+
+      setRoomsWaitingFun(waitingFun)
+      setRoomsInProgressFun(inProgressFun)
+      setRoomsWaitingSerious(waitingSerious)
+      setRoomsInProgressSerious(inProgressSerious)
     } catch (error) {
       console.error('Erreur lors de la récupération des rooms :', error)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchRooms()
+    const interval = setInterval(fetchRooms, 60000)
+    return () => clearInterval(interval)
+  }, [fetchRooms])
 
   const fetchPlayerRoom = async () => {
     try {
@@ -302,6 +306,26 @@ const RoomList = () => {
     }
   }
 
+  const fillGameList = (rooms: RoomData[], type: string): JSX.Element => {
+    if (rooms.length === 0) {
+      return (
+        <article className="empty">
+          <h2>Aucune partie en cours.</h2>
+          {!inGame && (
+            <Button className="creer-partie" data-type={type}>
+              <img src="/static/img/icon-wolf-head_v2.png" alt="Icon" /> CRÉER UNE PARTIE
+            </Button>
+          )}
+        </article>
+      )
+    }
+    return (
+      <>
+        {rooms.map((game) => generateRoomHtml(game))}
+      </>
+    )
+  }
+
   return (
     <section className="room-page list-room">
       {/* Section Ingame */}
@@ -315,10 +339,8 @@ const RoomList = () => {
           <article>
             { playerRoomId && (
               <>
-                <aside>
-                  <Button className="bgblue" onClick={handleJoinCurrentRoom}> Rejoindre la partie en cours</Button>
-                  <Button className="bgblue" onClick={handleLeaveRoom}>Quitter la partie</Button>
-                </aside>
+                <Button className="btn btn-primary" onClick={handleJoinCurrentRoom}> Rejoindre la partie en cours</Button>
+                <Button className="btn btn-warning" onClick={handleLeaveRoom}>Quitter la partie</Button>
               </>
             )}
           </article>
@@ -388,24 +410,24 @@ const RoomList = () => {
 
       {!showForm && (
         <>
-          <h1 className="with-borders">
-            <div></div>
-            <span>
-          Lancement rapide{' '}
-              <img
-                className="infotop"
-                data-tooltip-id="infotop"
-                data-tooltip-content="Clique ici pour en savoir plus sur les différents types de partie"
-                src="/assets/images/information.png"
-                alt="Information"
-              />
-              <Tooltip id="infotop" />
-            </span>
-            <div></div>
-          </h1>
-          <article className="featured-games">
-            {/* Ici vous afficherez vos parties en vedette via generateRoomHtml */}
-          </article>
+          {/*<h1 className="with-borders">*/}
+          {/*  <div></div>*/}
+          {/*  <span>*/}
+          {/*Lancement rapide{' '}*/}
+          {/*    <img*/}
+          {/*      className="infotop"*/}
+          {/*      data-tooltip-id="infotop"*/}
+          {/*      data-tooltip-content="Clique ici pour en savoir plus sur les différents types de partie"*/}
+          {/*      src="/assets/images/information.png"*/}
+          {/*      alt="Information"*/}
+          {/*    />*/}
+          {/*    <Tooltip id="infotop" />*/}
+          {/*  </span>*/}
+          {/*  <div></div>*/}
+          {/*</h1>*/}
+          {/*<article className="featured-games">*/}
+          {/*   Ici vous afficherez vos parties en vedette via generateRoomHtml */}
+          {/*</article>*/}
 
           {/*<h1 className="with-borders header-levels">
         <div></div>
@@ -420,8 +442,8 @@ const RoomList = () => {
             <div></div>
           </h1>
           <article className="games-list games-waiting">
-            <GenerateBloc className="d-games" title="Espace détente" />
-            <GenerateBloc className="r-games" title="Espace réflexion" />
+            <GenerateBloc className="d-games" title="Espace détente" rooms={roomsWaitingFun} inGame={inGame} />
+            <GenerateBloc className="r-games" title="Espace réflexion" rooms={roomsWaitingSerious} inGame={inGame}/>
           </article>
 
           <h1 className="with-borders header-launched">
@@ -431,8 +453,8 @@ const RoomList = () => {
           </h1>
           <article className="games-list games-launched">
 
-            <GenerateBloc className="d-games" title="Espace détente" />
-            <GenerateBloc className="r-games" title="Espace réflexion" />
+            <GenerateBloc className="d-games" title="Espace détente" rooms={roomsInProgressFun} inGame={inGame} />
+            <GenerateBloc className="r-games" title="Espace réflexion" rooms={roomsInProgressSerious} inGame={inGame} />
           </article>
         </>
       )}

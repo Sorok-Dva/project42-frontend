@@ -65,6 +65,7 @@ export interface RoomData {
   id: number
   creator: string
   name: string
+  status: 'waiting' | 'in_progress' | 'completed'
   type: number
   timer: number
   maxPlayers: number
@@ -95,6 +96,7 @@ export const useGame = (
     creator: '',
     name: 'Chargement...',
     timer: 3,
+    status: 'waiting',
     type: 0,
     maxPlayers: 6,
     isPrivate: true,
