@@ -19,6 +19,8 @@ import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import axios from 'axios'
 import { isForbiddenNickname, isForbiddenEmail } from 'utils/forbiddenNicknames'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faVenusMars } from '@fortawesome/free-solid-svg-icons'
 
 const Register : React.FC = () => {
   const navigate = useNavigate()
@@ -26,12 +28,15 @@ const Register : React.FC = () => {
   const [password, setPassword] = useState('')
   const [nickname, setNickname] = useState('')
   const [alphaKey, setAlphaKey] = useState('')
+  const [gender, setGender] = useState('')
   const [showPassword] = useState(false)
   const [error, setError] = useState('')
   const [isChecked, setIsChecked] = useState(false)
   const [, setIsPolicyClicked] = useState(false)
   const [, setIsTermsClicked] = useState(false)
   const mainRef = useRef<HTMLDivElement>(null)
+
+  const isGenderValid = gender !== ''
 
   useEffect(() => {
     if (mainRef.current) {
@@ -69,6 +74,7 @@ const Register : React.FC = () => {
       validateEmail(email) &&
       validatePassword(password) &&
       validateAlphaKey(alphaKey) &&
+      gender !== '' &&
       isChecked /*&&
       isPolicyClicked &&
       isTermsClicked*/
@@ -86,16 +92,23 @@ const Register : React.FC = () => {
     try {
       await axios.post(
         '/api/users/register',
-        { email, password, nickname, alphaKey },
+        { email, password, nickname, alphaKey, isMale: gender === 'male' },
       )
 
       toast.success('Inscription réussie ! Veuillez vérifier votre email pour valider votre compte et finaliser la connexion.',
         ToastDefaultOptions)
       navigate('/')
     } catch (err: any) {
-      toast.error('Une erreur est survenue lors de votre inscription. Veuillez réessayer.',
-        ToastDefaultOptions)
-      setError(err.response.data.error)
+      const errorData = err.response.data
+      if (errorData.errors && Array.isArray(errorData.errors)) {
+        errorData.errors.forEach((formError : { msg : string }) => {
+          setError(`${error ? `${error}\n` : formError.msg}`)
+          toast.error(formError.msg, ToastDefaultOptions)
+        })
+      } else if (errorData.error) {
+        setError(errorData.error)
+        toast.error(errorData.error, { ...ToastDefaultOptions, autoClose: 30000 })
+      }
     }
   }
 
@@ -143,7 +156,7 @@ const Register : React.FC = () => {
                       <FormGroup className={validateUsername(nickname) ? 'has-success' : 'has-danger'}>
                         <InputGroup className={'input-group-alternative mb-3 bg-dark text-white}'}>
                           <InputGroupText>
-                            <i className="ni ni-hat-3" />
+                            <i className="ni ni-single-02" />
                           </InputGroupText>
                           <Input
                             className={`form-control ${validateUsername(nickname) ? 'is-valid' : 'is-invalid'} bg-dark text-white`}
@@ -167,6 +180,25 @@ const Register : React.FC = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                           />
+                        </InputGroup>
+                      </FormGroup>
+
+                      <FormGroup className={isGenderValid ? 'has-success' : 'has-danger'}>
+                        <InputGroup className="input-group-alternative bg-dark text-white">
+                          <InputGroupText>
+                            <FontAwesomeIcon icon={faVenusMars} />
+                          </InputGroupText>
+                          <Input
+                            type="select"
+                            className={`bg-dark text-white ${isGenderValid ? 'is-valid' : 'is-invalid'}`}
+                            value={gender}
+                            onChange={(e) => setGender(e.target.value)}
+                          >
+                            <option value="">Sélectionner votre genre</option>
+                            <option value="male">Homme</option>
+                            <option value="female">Femme</option>
+                            <option value="other">Autre</option>
+                          </Input>
                         </InputGroup>
                       </FormGroup>
 
@@ -217,7 +249,6 @@ const Register : React.FC = () => {
                           </div>
                         </Col>
                       </Row>
-
 
                       <div className="text-center">
                         {error && <div className="alert alert-danger text-center">{error}</div>}
