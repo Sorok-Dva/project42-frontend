@@ -67,26 +67,6 @@ const generateCards = (cards: RoomCard[]) => {
   })
 }
 
-const generateRoomLine = (game: RoomData, featuring: boolean = true): JSX.Element => {
-  return (
-    <div
-      className={`waiting-game type-${game.type} phase-0`}
-      data-tooltip="${tooltip}">
-      <div className="white-background"></div>
-      <aside>{ game.name }</aside>
-      <aside>{ game.creator }</aside>
-      <aside>{ game.players?.length }/{ game.maxPlayers }</aside>
-      <aside>...</aside>
-      <div className="big_options"></div>
-      <div className="join-buttons">
-        <a href={ `/game/${ game.id }` } target="_blank"
-          className="button_secondary viewer" rel="noreferrer">Observer</a>
-        <button className="button btn-primary join-nec">Jouer</button>
-      </div>
-    </div>
-  )
-}
-
 const RoomList = () => {
   const { user } = useUser()
   const { token } = useAuth()
@@ -304,6 +284,25 @@ const RoomList = () => {
     }
   }
 
+  const generateRoomLine = (game: RoomData, featuring: boolean = true): JSX.Element => {
+    return (
+      <div
+        className={`waiting-game type-${game.type} phase-0`}
+        data-tooltip="${tooltip}">
+        <div className="white-background"></div>
+        <aside>{ game.name }</aside>
+        <aside>{ game.creator }</aside>
+        <aside>{ game.players?.length }/{ game.maxPlayers }</aside>
+        <aside>...</aside>
+        <div className="big_options"></div>
+        <div className="join-buttons">
+          <button className="button btn-primary viewer" onClick={() => handleSpectateRoom(game.id)}>Observer</button>
+          <button className="button btn-primary join-nec" onClick={() => handleJoinRoom(game.id)}>Jouer</button>
+        </div>
+      </div>
+    )
+  }
+
   const fillGameList = (rooms: RoomData[], type: string): JSX.Element => {
     if (rooms.length === 0) {
       return (
@@ -450,7 +449,6 @@ const RoomList = () => {
             <div></div>
           </h1>
           <article className="games-list games-launched">
-
             <GenerateBloc className="d-games" title="Espace détente" rooms={roomsInProgressFun} inGame={inGame} />
             <GenerateBloc className="r-games" title="Espace réflexion" rooms={roomsInProgressSerious} inGame={inGame} />
           </article>
