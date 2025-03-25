@@ -8,48 +8,6 @@ import { useSocket } from 'contexts/SocketContext'
 import { RoomCard, RoomData } from 'hooks/useGame'
 import { useAuth } from 'contexts/AuthContext'
 
-const GenerateBloc: React.FC<{
-  className: string;
-  title: string,
-  rooms: RoomData[],
-  inGame: boolean,
-}> = ({ className, title, rooms, inGame }) => {
-  return (
-    <aside className={className}>
-      <header>{title}</header>
-      <article className="waiting-game title">
-        <div></div>
-        <aside>Nom</aside>
-        <aside>Créateur</aside>
-        <aside>Places</aside>
-        <aside>Options</aside>
-      </article>
-      <main>
-        { !rooms && (
-          <article className="empty">
-            <div className="spinner-wrapper">
-              <Spinner animation="border" role="status" className="custom-spinner">
-                <span className="sr-only">Chargement en cours</span>
-              </Spinner>
-              <div className="loading-text">Chargement en cours</div>
-            </div>
-          </article>
-        )}
-
-        { rooms && rooms.length === 0 ? (
-          <article className="empty">
-            <h2>Aucune partie en cours.</h2>
-            {!inGame && (
-              <Button className="creer-partie bgblue">
-                <img src="/assets/images/hr_v1.png" width={25} height={25} alt="Icon" />  CRÉER UNE PARTIE
-              </Button>
-            )}
-          </article>
-        ) : rooms.map((game) => generateRoomLine(game)) }
-      </main>
-    </aside>
-  )
-}
 
 const generateCards = (cards: RoomCard[]) => {
   return cards.map((c) => {
@@ -303,23 +261,46 @@ const RoomList = () => {
     )
   }
 
-  const fillGameList = (rooms: RoomData[], type: string): JSX.Element => {
-    if (rooms.length === 0) {
-      return (
-        <article className="empty">
-          <h2>Aucune partie en cours.</h2>
-          {!inGame && (
-            <Button className="creer-partie" data-type={type}>
-              <img src="/static/img/icon-wolf-head_v2.png" alt="Icon" /> CRÉER UNE PARTIE
-            </Button>
-          )}
-        </article>
-      )
-    }
+  const GenerateBloc: React.FC<{
+    className: string;
+    title: string,
+    rooms: RoomData[],
+    inGame: boolean,
+  }> = ({ className, title, rooms, inGame }) => {
     return (
-      <>
-        {rooms.map((game) => generateRoomLine(game))}
-      </>
+      <aside className={className}>
+        <header>{title}</header>
+        <article className="waiting-game title">
+          <div></div>
+          <aside>Nom</aside>
+          <aside>Créateur</aside>
+          <aside>Places</aside>
+          <aside>Options</aside>
+        </article>
+        <main>
+          { !rooms && (
+            <article className="empty">
+              <div className="spinner-wrapper">
+                <Spinner animation="border" role="status" className="custom-spinner">
+                  <span className="sr-only">Chargement en cours</span>
+                </Spinner>
+                <div className="loading-text">Chargement en cours</div>
+              </div>
+            </article>
+          )}
+
+          { rooms && rooms.length === 0 ? (
+            <article className="empty">
+              <h2>Aucune partie en cours.</h2>
+              {!inGame && (
+                <Button className="creer-partie bgblue">
+                  <img src="/assets/images/hr_v1.png" width={25} height={25} alt="Icon" />  CRÉER UNE PARTIE
+                </Button>
+              )}
+            </article>
+          ) : rooms.map((game) => generateRoomLine(game)) }
+        </main>
+      </aside>
     )
   }
 
