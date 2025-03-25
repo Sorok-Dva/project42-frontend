@@ -89,37 +89,6 @@ const RoomList = () => {
     }
   }, [socket, user])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    })
-  }
-
-  const handleSubmit = async () => {
-    if (inGame) return
-    try {
-      const response = await axios.post('/api/games/room',
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        })
-      setGameId(response.data.gameId)
-      setPlayerRoomId(response.data.gameId)
-      setInGame(true)
-      window.open(`/game/${response.data.game.id}`, '_blank')
-    } catch (error: any) {
-      if (error.response?.data?.error) {
-        alert(error.response.data.error)
-      } else {
-        alert('Erreur lors de la création de la partie.')
-      }
-    }
-  }
-
   const fetchRooms = useCallback(async () => {
     try {
       const { data } = await axios.get('/api/games/rooms')
@@ -142,6 +111,39 @@ const RoomList = () => {
     const interval = setInterval(fetchRooms, 60000)
     return () => clearInterval(interval)
   }, [fetchRooms])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value,
+    })
+  }
+
+  const handleSubmit = async () => {
+    if (inGame) return
+    try {
+      const response = await axios.post('/api/games/room',
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+      setGameId(response.data.gameId)
+      setPlayerRoomId(response.data.gameId)
+      setInGame(true)
+      setShowForm(false)
+      fetchRooms()
+      window.open(`/game/${response.data.game.id}`, '_blank')
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        alert(error.response.data.error)
+      } else {
+        alert('Erreur lors de la création de la partie.')
+      }
+    }
+  }
 
   const fetchPlayerRoom = async () => {
     try {
@@ -170,6 +172,7 @@ const RoomList = () => {
       })
       setPlayerRoomId(roomId)
       window.open(`/game/${response.data.game.id}`, '_blank')
+      setInGame(true)
       fetchRooms()
     } catch (error: any) {
       if (error.response?.data?.error) {
@@ -193,6 +196,7 @@ const RoomList = () => {
       })
       setPlayerRoomId(roomId)
       window.open(`/game/${response.data.game.id}`, '_blank')
+      setInGame(true)
       fetchRooms()
     } catch (error: any) {
       if (error.response?.data?.error) {
@@ -242,7 +246,7 @@ const RoomList = () => {
     }
   }
 
-  const generateRoomLine = (game: RoomData, featuring: boolean = true): JSX.Element => {
+  const generateRoomLine = (game: RoomData, waitingRoom: boolean = false, featuring: boolean = true): JSX.Element => {
     return (
       <div
         className={`waiting-game type-${game.type} phase-0`}
@@ -253,10 +257,14 @@ const RoomList = () => {
         <aside>{ game.players?.length }/{ game.maxPlayers }</aside>
         <aside>...</aside>
         <div className="big_options"></div>
-        <div className="join-buttons">
-          <button className="button btn-primary viewer" onClick={() => handleSpectateRoom(game.id)}>Observer</button>
-          <button className="button btn-primary join-nec" onClick={() => handleJoinRoom(game.id)}>Jouer</button>
-        </div>
+        { !inGame && (
+          <div className="join-buttons">
+            <button className="button_secondary viewer" onClick={() => handleSpectateRoom(game.id)}>Observer</button>
+            { waitingRoom && (
+              <button className="button btn-primary join-nec" onClick={() => handleJoinRoom(game.id)}>Jouer</button>
+            )}
+          </div>
+        )}
       </div>
     )
   }
@@ -266,7 +274,8 @@ const RoomList = () => {
     title: string,
     rooms: RoomData[],
     inGame: boolean,
-  }> = ({ className, title, rooms, inGame }) => {
+    waiting: boolean,
+  }> = ({ className, title, rooms, inGame, waiting }) => {
     return (
       <aside className={className}>
         <header>{title}</header>
@@ -293,12 +302,12 @@ const RoomList = () => {
             <article className="empty">
               <h2>Aucune partie en cours.</h2>
               {!inGame && (
-                <Button className="creer-partie bgblue">
-                  <img src="/assets/images/hr_v1.png" width={25} height={25} alt="Icon" />  CRÉER UNE PARTIE
+                <Button className="creer-partie" onClick={() => setShowForm(true)}>
+                  <img src="/assets/images/hr_v1.png" width={25} height={25} alt="Icon" /> CRÉER UNE PARTIE
                 </Button>
               )}
             </article>
-          ) : rooms.map((game) => generateRoomLine(game)) }
+          ) : rooms.map((game) => generateRoomLine(game, waiting)) }
         </main>
       </aside>
     )
@@ -420,8 +429,8 @@ const RoomList = () => {
             <div></div>
           </h1>
           <article className="games-list games-waiting">
-            <GenerateBloc className="d-games" title="Espace détente" rooms={roomsWaitingFun} inGame={inGame} />
-            <GenerateBloc className="r-games" title="Espace réflexion" rooms={roomsWaitingSerious} inGame={inGame}/>
+            <GenerateBloc className="d-games" title="Espace détente" rooms={roomsWaitingFun} inGame={inGame} waiting={true} />
+            <GenerateBloc className="r-games" title="Espace réflexion" rooms={roomsWaitingSerious} inGame={inGame} waiting={true}/>
           </article>
 
           <h1 className="with-borders header-launched">
@@ -430,8 +439,8 @@ const RoomList = () => {
             <div></div>
           </h1>
           <article className="games-list games-launched">
-            <GenerateBloc className="d-games" title="Espace détente" rooms={roomsInProgressFun} inGame={inGame} />
-            <GenerateBloc className="r-games" title="Espace réflexion" rooms={roomsInProgressSerious} inGame={inGame} />
+            <GenerateBloc className="d-games" title="Espace détente" rooms={roomsInProgressFun} inGame={inGame} waiting={false}/>
+            <GenerateBloc className="r-games" title="Espace réflexion" rooms={roomsInProgressSerious} inGame={inGame} waiting={false} />
           </article>
         </>
       )}
