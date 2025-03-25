@@ -114,7 +114,7 @@ const App: React.FC = () => {
       const target = (event.target as Element)?.closest('.sound-tick:not(.disabled)')
       if (target) {
         uiTick.currentTime = 0
-        uiTick.play()
+        uiTick.play().catch(() => {})
       }
     }
 

@@ -303,7 +303,7 @@ export const useGame = (
       if (data.sound) {
         const audio = new Audio(`/assets/sounds/${data.sound}.mp3`)
         audio.volume = 0.5
-        audio.play()
+        audio.play().catch(() => {})
       }
       setMessages((prev) => [
         ...prev,
@@ -333,11 +333,11 @@ export const useGame = (
       setMessages((prev) => [...prev, message])
       if (message.sound) {
         const audio = new Audio(`/assets/sounds/${message.sound}.mp3`)
-        audio.play()
+        audio.play().catch(() => {})
       }
       if (message.message.toLowerCase().includes(player?.nickname.toLowerCase())) {
         const audio = new Audio('/assets/sounds/sos.mp3')
-        audio.play()
+        audio.play().catch(() => {})
       }
     })
 
@@ -354,7 +354,7 @@ export const useGame = (
       if (data.sound) {
         const audio = new Audio(`/assets/sounds/${data.sound}.mp3`)
         audio.volume = 0.5
-        audio.play()
+        audio.play().catch(() => {})
       }
     })
 

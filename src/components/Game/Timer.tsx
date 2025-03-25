@@ -36,10 +36,10 @@ const GameTimer: React.FC<GameTimerProps> = ({
         if (newTimeLeft > 0 && newTimeLeft <= 3 && lastSoundPlayed.current !== newTimeLeft) {
           if (newTimeLeft === 1) {
             bip2.currentTime = 0
-            bip2.play()
+            bip2.play().catch(() => {})
           } else {
             bip1.currentTime = 0
-            bip1.play()
+            bip1.play().catch(() => {})
           }
           lastSoundPlayed.current = newTimeLeft
         }
