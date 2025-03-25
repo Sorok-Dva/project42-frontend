@@ -8,7 +8,11 @@ interface SocketContextType {
 const SocketContext = createContext<SocketContextType | undefined>(undefined)
 
 export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const socket = io({
+  const ENDPOINT = process.env.NODE_ENV === 'production'
+    ? 'https://project42.sorokdva.eu'
+    : 'http://localhost:3010'
+
+  const socket = io(ENDPOINT, {
     auth: { token: localStorage.getItem('token') },
     transports: ['websocket'],
   })
