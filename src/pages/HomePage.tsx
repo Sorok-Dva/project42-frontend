@@ -9,11 +9,6 @@ const DashboardContainer = styled.div`
   padding: 2rem;
 `
 
-const WelcomeMessage = styled.div`
-  text-align: center;
-  margin-bottom: 2rem;
-`
-
 const GridContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -26,10 +21,6 @@ const HomePage = () => {
     <>
       <MainBanner />
       <DashboardContainer>
-        <WelcomeMessage id="dashboard">
-          <h2>Trouver une partie.</h2>
-        </WelcomeMessage>
-
         <GridContainer>
           <RoomList />
         </GridContainer>
