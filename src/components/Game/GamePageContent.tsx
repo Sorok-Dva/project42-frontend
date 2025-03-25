@@ -154,14 +154,13 @@ const GamePage = () => {
     if (!socket || !gameId) return
     if (confirm('Êtes-vous sûr de vouloir quitter la partie ?')) {
       try {
-        if (player) {
-          const response = await leaveGame(token)
-          if (response.message) {
-            socket.emit('leaveRoom', {
-              roomId: gameId,
-              player: { id: user?.id, nickname: user?.nickname },
-            })
-          }
+        const response = await leaveGame(token)
+        if (response.message) {
+          socket.emit('leaveRoom', {
+            roomId: gameId,
+            player: player ? { id: user?.id, nickname: user?.nickname } : null,
+            viewer,
+          })
         }
         localStorage.removeItem(`game_auth_${gameId}`)
         setGameError('Vous avez bien quitté la partie. Vous pouvez fermer cet onglet.')

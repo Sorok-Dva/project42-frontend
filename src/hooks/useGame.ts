@@ -291,9 +291,11 @@ export const useGame = (
 
     // 1) Rejoint la room si pas déjà fait
     if (!hasJoined && isAuthorized) {
+      console.log('useGame viewer', viewer)
       socket.emit('joinRoom', {
         roomId: gameId,
-        player: { id: user.id, nickname: user.nickname },
+        player: viewer ? null : { id: user.id, nickname: user.nickname },
+        viewer,
       })
       setHasJoined(true)
     }

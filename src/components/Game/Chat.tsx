@@ -190,6 +190,7 @@ const Chat: React.FC<ChatProps> = ({
               messages={messages}
               highlightedPlayers={highlightedPlayers}
               player={player}
+              viewer={viewer}
               isNight={isNight}
               gameFinished={gameFinished}
               handleMentionClick={handleMentionClick}
