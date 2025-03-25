@@ -1,6 +1,5 @@
 import useDropdown from 'hooks/useDropdown'
 import avatar1 from 'assets/img/avatar1.png'
-import avatar2 from 'assets/img/avatar2.png'
 import clsx from 'clsx'
 import { Img as Image } from 'react-image'
 import { Link } from 'react-router-dom'
@@ -30,27 +29,10 @@ const Notification: React.FC = () => {
               <div className="card-info">
                 <span className="card-title d-block tcn-1">
                   {' '}
-                  Cristofer Dorwart
+                  Pseudo
                 </span>
                 <span className="card-text d-block tcn-1 fs-sm">
-                  Winners The Last Game
-                </span>
-              </div>
-            </div>
-          </Link>
-          <Link to="#">
-            <div className="card-item d-flex align-items-center gap-4">
-              <div className="card-img-area">
-                <Image
-                  className="w-100 rounded-circle"
-                  src={avatar2}
-                  alt="profile"
-                />
-              </div>
-              <div className="card-info">
-                <span className="card-title d-block tcn-1"> Piter Maio </span>
-                <span className="card-text d-block tcn-1 fs-sm">
-                  Accept your challenge
+                  Demande d'ami
                 </span>
               </div>
             </div>
@@ -60,80 +42,10 @@ const Notification: React.FC = () => {
               <div className="card-info">
                 <span className="card-title d-block tcn-1">
                   {' '}
-                  Copa Punto Gamer{' '}
+                  Partie #1 terminée{' '}
                 </span>
                 <span className="card-text d-block tcn-1 fs-sm">
-                  Tournament start
-                </span>
-              </div>
-            </div>
-          </Link>
-          <Link to="#">
-            <div className="card-item d-flex align-items-center gap-4">
-              <div className="card-info">
-                <span className="card-title d-block tcn-1"> Daily Bonus </span>
-                <span className="card-text d-block tcn-1 fs-sm">
-                  Tournament start
-                </span>
-              </div>
-            </div>
-          </Link>
-          <Link to="#">
-            <div className="card-item d-flex align-items-center gap-4">
-              <div className="card-img-area">
-                <Image
-                  className="w-100 rounded-circle"
-                  src={avatar1}
-                  alt="profile"
-                />
-              </div>
-              <div className="card-info">
-                <span className="card-title d-block tcn-1">
-                  {' '}
-                  Cristofer Dorwart
-                </span>
-                <span className="card-text d-block tcn-1 fs-sm">
-                  Winners The Last Game
-                </span>
-              </div>
-            </div>
-          </Link>
-          <Link to="#">
-            <div className="card-item d-flex align-items-center gap-4">
-              <div className="card-img-area">
-                <Image
-                  className="w-100 rounded-circle"
-                  src={avatar2}
-                  alt="profile"
-                />
-              </div>
-              <div className="card-info">
-                <span className="card-title d-block tcn-1"> Piter Maio </span>
-                <span className="card-text d-block tcn-1 fs-sm">
-                  Accept your challenge
-                </span>
-              </div>
-            </div>
-          </Link>
-          <Link to="#">
-            <div className="card-item d-flex align-items-center gap-4">
-              <div className="card-info">
-                <span className="card-title d-block tcn-1">
-                  {' '}
-                  Copa Punto Gamer{' '}
-                </span>
-                <span className="card-text d-block tcn-1 fs-sm">
-                  Tournament start
-                </span>
-              </div>
-            </div>
-          </Link>
-          <Link to="#">
-            <div className="card-item d-flex align-items-center gap-4">
-              <div className="card-info">
-                <span className="card-title d-block tcn-1"> Daily Bonus </span>
-                <span className="card-text d-block tcn-1 fs-sm">
-                  Tournament start
+                  Vous avez gagné
                 </span>
               </div>
             </div>
