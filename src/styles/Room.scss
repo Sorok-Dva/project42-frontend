@@ -118,7 +118,7 @@
     outline: transparent;
     cursor: pointer;
     border-radius: 6px;
-    background-color: #67100c;
+    background-color: rgb(var(--p1));
     border: solid 2px rgba(0, 0, 0, .5);
     color: #ffefbc;
     font-family: 'Acme';
@@ -257,7 +257,7 @@
       a:not(:first-child),
       button {
         // Play
-        background-color: #67100c;
+        background-color: rgb(var(--p1));
         width: 150px;
         height: 42px;
 
@@ -1134,7 +1134,7 @@
         border: solid 2px black;
         flex: 1 1 auto;
         &:first-child {
-          background-color: #67100c;
+          background-color: rgb(var(--p1));
         }
         &:not(:first-child) {
           background-color: #1f690c;
@@ -1181,7 +1181,7 @@
       font-size: 20px;
       font-family: Acme;
       border: solid 2px black;
-      background-color: #67100c;
+      background-color: rgb(var(--p1));
       color: #ffefbc;
       cursor: pointer;
       &:focus {
@@ -2527,7 +2527,7 @@ Fin ancien css halloween */
       outline: transparent;
       cursor: pointer;
       border-radius: 6px;
-      background-color: #67100c;
+      background-color: rgb(var(--p1));
       border: solid 2px rgba(0, 0, 0, .5);
       color: #ffefbc;
       font-family: Acme;

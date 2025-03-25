@@ -4792,7 +4792,7 @@ button.buy-bonus:focus {
   z-index: 999;
 
   >div {
-    background: #67100c;
+    background: rgb(var(--p1));
     padding: 20px 30px;
     font-size: 2.3em;
     text-align: center;
