@@ -30,7 +30,7 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@mui/icons-material": "^6.0.2",
     "@mui/material": "^6.0.2",
-    "@sentry/cli": "^2.33.1",
+    "@sentry/cli": "^2.42.4",
     "@sentry/react": "^8.26.0",
     "@tabler/icons-react": "^3.11.0",
     "@testing-library/jest-dom": "^5.17.0",
