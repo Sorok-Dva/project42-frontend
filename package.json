@@ -18,7 +18,7 @@
     "compile:scss": "sass src/assets/scss/argon-dashboard-react.scss src/assets/css/argon-dashboard-react.css",
     "minify:scss": "sass src/assets/scss/argon-dashboard-react.scss src/assets/css/argon-dashboard-react.min.css --style compressed",
     "build:scss": "npm run compile:scss && npm run minify:scss && npm run map:scss",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org sentier-des-reves --project sdr-frontend ./build && sentry-cli sourcemaps upload --org sentier-des-reves --project sdr-frontend ./build"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org project42 --project p42-frontend ./build && sentry-cli sourcemaps upload --org project42 --project p42-frontend ./build"
   },
   "proxy": "http://localhost:3010/",
   "dependencies": {
