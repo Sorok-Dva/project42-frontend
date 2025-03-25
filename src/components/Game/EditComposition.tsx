@@ -257,13 +257,13 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
               <div
                 className="button array_clickable sound-tick sound-unselect"
                 data-tooltip-id={String(i)}
-                data-tooltip-content="Enlever un Loup-Garou"
+                data-tooltip-content="Enlever un Alien"
                 onClick={() => updateAliens('remove')}
               >–</div>
               <div
                 className="button array_clickable sound-tick sound-select"
                 data-tooltip-id={String(i)}
-                data-tooltip-content="Ajouter un Loup-Garou"
+                data-tooltip-content="Ajouter un Alien"
                 onClick={() => updateAliens('add')}
               >+</div>
             </div>
