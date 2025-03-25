@@ -5,7 +5,7 @@ import { Spinner } from 'reactstrap'
 import { Tooltip } from 'react-tooltip'
 import { useUser } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
-import { PlayerType, RoomCard, RoomData } from 'hooks/useGame'
+import { RoomCard, RoomData } from 'hooks/useGame'
 import { useAuth } from 'contexts/AuthContext'
 
 const GenerateBloc: React.FC<{
@@ -45,7 +45,7 @@ const GenerateBloc: React.FC<{
               </Button>
             )}
           </article>
-        ) : rooms.map((game) => generateRoomHtml(game)) }
+        ) : rooms.map((game) => generateRoomLine(game)) }
       </main>
     </aside>
   )
@@ -67,7 +67,7 @@ const generateCards = (cards: RoomCard[]) => {
   })
 }
 
-const generateRoomHtml = (game: RoomData, featuring: boolean = true): JSX.Element => {
+const generateRoomLine = (game: RoomData, featuring: boolean = true): JSX.Element => {
   return (
     <div
       className={`waiting-game type-${game.type} phase-0`}
@@ -75,7 +75,7 @@ const generateRoomHtml = (game: RoomData, featuring: boolean = true): JSX.Elemen
       <div className="white-background"></div>
       <aside>{ game.name }</aside>
       <aside>{ game.creator }</aside>
-      <aside>.../{ game.maxPlayers }</aside>
+      <aside>{ game.players?.length }/{ game.maxPlayers }</aside>
       <aside>...</aside>
       <div className="big_options"></div>
       <div className="join-buttons">
@@ -92,13 +92,11 @@ const RoomList = () => {
   const { token } = useAuth()
   const socket = useSocket().socket
   const [inGame, setInGame] = useState(false)
-  const [ingameVisible, setIngameVisible] = useState(inGame)
   const [roomsWaitingFun, setRoomsWaitingFun] = useState<RoomData[]>([]) // Rooms détente en attente
   const [roomsInProgressFun, setRoomsInProgressFun] = useState<RoomData[]>([]) // Rooms détente en cours
   const [roomsInProgressSerious, setRoomsInProgressSerious] = useState<RoomData[]>([]) // Rooms reflexion en cours
   const [roomsWaitingSerious, setRoomsWaitingSerious] = useState<RoomData[]>([]) // Rooms reflexion en attente
   const [playerRoomId, setPlayerRoomId] = useState<number | null>(null) // Room actuelle du joueur
-  const [hoveredRow, setHoveredRow] = useState<number | null>(null) // Ligne survolée
   const [showForm, setShowForm] = useState(false)
   const [gameId, setGameId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
@@ -321,7 +319,7 @@ const RoomList = () => {
     }
     return (
       <>
-        {rooms.map((game) => generateRoomHtml(game))}
+        {rooms.map((game) => generateRoomLine(game))}
       </>
     )
   }
@@ -426,7 +424,7 @@ const RoomList = () => {
           {/*  <div></div>*/}
           {/*</h1>*/}
           {/*<article className="featured-games">*/}
-          {/*   Ici vous afficherez vos parties en vedette via generateRoomHtml */}
+          {/*   Ici vous afficherez vos parties en vedette via generateRoomLine */}
           {/*</article>*/}
 
           {/*<h1 className="with-borders header-levels">

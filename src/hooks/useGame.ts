@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Socket } from 'socket.io-client'
 import {
   fetchGameDetails,
@@ -73,6 +73,7 @@ export interface RoomData {
   password?: string
   phase: number
   cards: RoomCard[]
+  players?: Partial<PlayerType>[]
   createdAt: Date
   updatedAt: Date
 }
