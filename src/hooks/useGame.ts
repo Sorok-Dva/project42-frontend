@@ -245,9 +245,9 @@ export const useGame = (
      * @returns {Promise<void>} A promise that resolves when the room data is successfully loaded or stops due to invalid conditions.
      */
     const loadRoomData = async () => {
-      if (!gameId || !token) return
+      if (!gameId) return
       try {
-        const data = await fetchGameDetails(gameId, token)
+        const data = await fetchGameDetails(gameId, token ?? null)
         if (data.error) {
           setGameError(data.error)
         } else {

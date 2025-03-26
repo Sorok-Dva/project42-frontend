@@ -4,12 +4,12 @@ import { RoomCard } from 'hooks/useGame'
 /**
  * Récupère les détails d'une partie (gameDetails) (roomData + player courant)
  */
-export const fetchGameDetails = async (gameId: string, token?: string) => {
-  const response = await axios.get(`/api/games/room/${gameId}`, {
+export const fetchGameDetails = async (gameId: string, token?: string | null) => {
+  const response = await axios.get(`/api/games/room/${gameId}`, token ? {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  })
+  } : {})
   return response.data
 }
 
