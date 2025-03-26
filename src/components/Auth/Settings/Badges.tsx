@@ -32,7 +32,6 @@ const ProfileAchievements: React.FC = () => {
   const [favorites, setFavorites] = useState<{ [slot: number]: Badge | null }>(() => {
     const initial: { [slot: number]: Badge | null } = {}
     for (let slot = 1; slot <= 6; slot++) {
-      console.log('slot', slot, 'favorites', achievements.favorites[slot])
       initial[slot] = achievements.favorites[slot] ?? null
     }
     return initial
