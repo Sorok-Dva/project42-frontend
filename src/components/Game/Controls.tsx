@@ -476,13 +476,14 @@ const GameControls: React.FC<GameControlsProps> = ({
               <Box id="block_infos">
                 <h3>Archive de la partie {roomData.name}</h3>
                 <Box>
+                  <CardImage cardId={cardsIds[roomData.phase] ?? cardId} isArchive={true}/>
                   <Box id="block_infos">
                     <Box style={{ marginTop: '1rem', marginLeft: '2rem' }}>
                       <h3 dangerouslySetInnerHTML={{ __html: winStates[roomData.phase] }} />
                       <p><b>Durée de la partie</b>: {getGameDuration()}</p>
                     </Box>
                   </Box>
-                  <CardImage cardId={cardsIds[roomData.phase] ?? cardId} />
+
                 </Box>
                 <Box className="block_content_section mt-4">
                   <Box

@@ -1,9 +1,9 @@
 import React from 'react'
 import { Box } from '@mui/material'
 
-const CardImage = React.memo(function CardImage({ cardId }: { cardId?: number}) {
+const CardImage = React.memo(function CardImage({ cardId, isArchive = false }: { cardId?: number, isArchive?: boolean}) {
   return (
-    <Box id="card_wrapper" className="card_animation">
+    <Box id={`card_wrapper${isArchive ? '_archive' : ''}`} className="card_animation">
       <Box id="card_flipper" className="card_animation">
         <img
           className="card_role"
