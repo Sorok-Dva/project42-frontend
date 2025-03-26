@@ -118,11 +118,6 @@ const GamePage = () => {
     setIsCreator(player?.nickname === creator?.nickname)
   }, [creator])
 
-  function isDateMoreThan10MinutesOld(date: Date) {
-    const tenMinutesAgo = Date.now() - 600000
-    return new Date(date).getTime() < tenMinutesAgo
-  }
-
   /**
    * Requête pour recharger certains détails du jeu (ex : titre, etc.)
    * @todo check if this is used anymore
@@ -262,6 +257,8 @@ const GamePage = () => {
       </Box>
     )
   }
+
+  console.log(isAuthorized, creator)
 
   return isAuthorized && creator ? (
     <>
