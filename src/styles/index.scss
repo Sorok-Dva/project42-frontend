@@ -5845,3 +5845,190 @@ button.buy-bonus:focus {
 .type-8 { // Blitz
   background-color: #f3c53d;
 }
+
+
+/*
+  BUTTONS
+  */
+
+.button_secondary {
+  min-height: 30px;
+  padding: 5px 10px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.1);
+  text-align: center;
+  color: #fff;
+  text-decoration: none;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+
+  &.light {
+    border: 1px solid rgba(0, 0, 0, .2);
+    background-color: rgba(0, 0, 0, .05);
+    color: #000;
+  }
+
+  &.positive {
+    background-color: rgba(10, 123, 26, .6);
+    color: #fff;
+    font-weight: bold;
+
+    &:hover {
+      background-color: rgba(10, 123, 26, .3);
+    }
+  }
+
+  &.negative {
+    background-color: rgba(154, 36, 37, .6);
+    color: #fff;
+    font-weight: bold;
+
+    &:hover {
+      background-color: rgba(154, 36, 37, .3);
+    }
+  }
+
+  &.neutral {
+    background-color: #eee;
+    border: 1px solid #aaa;
+    color: #888;
+
+    &:hover {
+      background-color: #e0e0e0;
+    }
+  }
+
+  &:not(.disabled):hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+  }
+}
+
+.buttons {
+  text-align: center;
+  margin-top: 10px;
+
+  .button_secondary:not(:last-of-type) {
+    margin-right: 10px;
+  }
+}
+
+.button {
+  @extend h3;
+  @extend .bgred;
+  @extend .rounded;
+
+  min-height: 40px;
+  padding: 11px 20px;
+  display: inline-block;
+  box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.2), inset 0 -2px 2px rgba(0, 0, 0, 0.5);
+  transition: background-color 0.2s ease;
+  border: none;
+  text-decoration: none;
+
+  color: #ffffff;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &.unclickable {
+    cursor: default;
+  }
+
+  &.disabled,
+  &[disabled] {
+    background-color: #181f30;
+    cursor: default;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  &.bgred:not(.disabled):hover {
+    background-color: #0d4c73;
+  }
+}
+
+.buttons_array {
+  height: 40px;
+  display: inline-flex;
+  border-radius: 5px;
+  overflow: hidden;
+
+  .button {
+    background-color: transparent;
+    height: inherit;
+    min-width: 40px;
+    line-height: 40px;
+    text-align: center;
+    padding: 0 10px;
+    box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.2), inset 0 -2px 2px rgba(0, 0, 0, 0.5), inset 2px 0 0 rgba(255, 255, 255, 0.1), inset -2px 0 0 rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease;
+    border-radius: 0;
+  }
+
+  .button_clickable,
+  .array_selectable,
+  .button_clickable img,
+  .array_selectable img {
+    cursor: pointer;
+  }
+
+  .button.selected {
+    background-color: #982626;
+  }
+
+  .buttons_array_text {
+    @extend h3;
+    @extend .bgred;
+
+    min-height: 40px;
+    padding: 11px 20px;
+    display: inline-block;
+    box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.2), inset 0 -2px 2px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.array_selectable:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.bgred .button.array_clickable:not(.disabled):hover,
+.bgred .button.array_selectable:hover,
+.bgred .button.selected:hover {
+  cursor: pointer;
+  background-color: #ac2b2b;
+}
+
+.bglightbrown .button.array_clickable:not(.disabled):hover,
+.bglightbrown .button.array_selectable:hover,
+.bglightbrown .button.selected:hover {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, .1);
+}
+
+.bglightbrown .button.array_clickable.disabled {
+  background-color: #795245;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.button.array_selectable img {
+  max-width: 22px;
+  max-height: 24px;
+  margin-top: 10px;
+  opacity: 0.7;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+  transition: opacity 0.2s ease;
+}
+
+.button.array_selectable:hover img,
+.button.selected img {
+  opacity: 1;
+}
