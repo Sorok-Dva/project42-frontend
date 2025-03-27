@@ -69,7 +69,6 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
 
   const handleSelectionChange = (event: any) => {
     const { value } = event.target
-    console.log('value', value)
     setSelectedTargets(typeof value === 'string' ? value.split(',').map(Number) : value)
   }
 
@@ -116,7 +115,6 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   if (!actionRequest) return null
 
   if (actionRequest && actionRequest.action.card === 5) {
-    console.log('actionRequest', actionRequest)
     return <PhaseActionCard5
       roomId={roomId}
       actionRequest={actionRequest as any}
@@ -128,7 +126,6 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   }
 
   if (actionRequest && actionRequest.action.card === 20) {
-    console.log('actionRequest', actionRequest)
     return <PhaseActionCard20
       roomId={roomId}
       actionRequest={actionRequest as any}

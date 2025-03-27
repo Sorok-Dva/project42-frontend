@@ -63,7 +63,6 @@ const PlayersList: React.FC<PlayersListProps> = ({
   const handleKickPlayer = (nickname: string) => {
     if (!isCreator || !socket || gameStarted) return
     try {
-      console.log('Kicking player:', nickname)
       socket.emit('kickPlayer', {
         roomId: gameId,
         nickname,

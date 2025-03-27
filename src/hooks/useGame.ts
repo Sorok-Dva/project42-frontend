@@ -212,8 +212,6 @@ export const useGame = (
         .filter((player: PlayerType) => player.playerId !== creator?.playerId)
         .every((player: PlayerType) => player.ready)
 
-      console.log(creator, playersData)
-      console.log(allPlayersReady, playersData.length === roomData.maxPlayers)
       if (allPlayersReady && playersData.length === roomData.maxPlayers) {
         setCanStartGame(true)
       } else {
@@ -368,7 +366,6 @@ export const useGame = (
     })
 
     socket.on('newCreator', (creatorData: PlayerType) => {
-      console.log('newCreator', creatorData)
       setCreator(creatorData)
     })
 

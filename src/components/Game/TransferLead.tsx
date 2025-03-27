@@ -16,7 +16,6 @@ const TransferLeadModal: FC<TransferLeadModalProps> = ({ roomId, creator, player
   const transferLead = async (player: number) => {
     try {
       const response = await transferCreatorRights(String(roomId), String(player))
-      console.log(response)
       onClose()
     } catch (e) {
       console.error(e)

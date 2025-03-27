@@ -258,8 +258,6 @@ const GamePage = () => {
     )
   }
 
-  console.log(isAuthorized, creator)
-
   return isAuthorized && creator ? (
     <>
       <Box className="game-page" display="flex" flexDirection="column" height="100vh"

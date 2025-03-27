@@ -48,7 +48,6 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
       targets: [selectedDeathTarget],
       type: 'death'
     })
-    console.log('submit phaseActionResponse in death')
   }
 
   const handleLifeSubmit = () => {
@@ -63,7 +62,6 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
     setAlienVictim(null)
   }
 
-  console.log('elixirUsed', deathElixirUsed, lifeElixirUsed)
   return (
     <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', mt: 2 }}>
       <Typography variant="h6">{actionRequest.action.message}</Typography>
