@@ -89,9 +89,9 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
   useEffect(() => {
     const fetchuser = async () => {
       try {
-        const response = await axios.get(`/api/users/${nickname}`, {
+        const response = await axios.get(`/api/users/${nickname}`, token ? {
           headers: { Authorization: `Bearer ${token}` },
-        })
+        } : {})
         setUser(response.data.user)
         setSelfProfile(response.data.self)
         setRole(rolify(response.data.user.role.name))
