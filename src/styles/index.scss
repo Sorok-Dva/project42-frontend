@@ -6032,3 +6032,34 @@ button.buy-bonus:focus {
 .button.selected img {
   opacity: 1;
 }
+
+/*
+BLOCKS STYLES
+*/
+
+.block {
+  display: flex;
+  flex-flow: column nowrap;
+  overflow: hidden;
+}
+
+.shadow {
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
+}
+
+.rounded {
+  border-radius: 5px;
+
+  .block_header {
+    border-radius: 5px 5px 0 0;
+  }
+}
+
+.block_header {
+  width: 100%;
+  font-size: 16px;
+  color: white;
+  padding: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
