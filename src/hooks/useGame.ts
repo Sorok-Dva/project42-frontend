@@ -326,6 +326,10 @@ export const useGame = (
       if (updatedPlayers.length >= roomData.maxPlayers) setCanBeReady(true)
     })
 
+    socket.on('updateViewers', (updatedViewers: Viewer[]) => {
+      setViewers(updatedViewers)
+    })
+
     socket.on('newMessage', (message) => {
       if (message.channel === 2 && isNight) {
         socket.emit('shaman_listen', message)
