@@ -42,8 +42,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
   const filteredMessages = useMemo(() => {
     return messages.filter((msg) => {
       if (msg.channel === 0) return true
-      if (msg.channel === 3 && player && ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected)) return true
       if (msg.channel === 1 && viewer) return true
+      if (msg.channel === 3 && player && ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected)) return true
       if (msg.channel === 2 && player && !player.alive) return true
       if (msg.channel === 2 && player && player.card?.id === 10 && player.alive && isNight) return true
       if (msg.channel === 3 && player && player.card?.id === 12 && player.alive && isNight) return true

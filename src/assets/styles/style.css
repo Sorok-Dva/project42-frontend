@@ -2367,7 +2367,7 @@ Banner Two Area Style
   overflow: hidden;
 }
 .main-banner-area-two .banner-text {
-  top: 20px;
+  top: 50%;
 }
 .main-banner-area-two .banner-img {
   position: relative;
