@@ -7,7 +7,7 @@ import {
   CellMeasurerCache,
   ListRowRenderer,
 } from 'react-virtualized'
-import { PlayerType, Viewer } from 'hooks/useGame'
+import { Message, PlayerType, Viewer } from 'hooks/useGame'
 
 /**
  * Supprime les éventuels tags HTML d'une chaîne de caractères.
@@ -18,18 +18,6 @@ function stripHTML(input: string) {
   const tempDiv = document.createElement('div')
   tempDiv.innerHTML = input
   return tempDiv.textContent || tempDiv.innerText || ''
-}
-
-export interface Message {
-  nickname: string
-  message: string
-  playerId: number
-  channel: number
-  isMeneur: boolean
-  isPerso: boolean
-  isMsgSite: boolean
-  icon: string | null
-  createdAt: Date
 }
 
 interface ChatMessagesProps {
@@ -162,7 +150,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
                 {cleanNickname && cleanNickname !== 'Système' && (
                   <>
                     <b
-                      className="msg-nickname"
+                      className={`msg-nickname ${msg.cssClass}`}
                       data-highlight-nickname={cleanNickname}
                       dangerouslySetInnerHTML={{
                         __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname,

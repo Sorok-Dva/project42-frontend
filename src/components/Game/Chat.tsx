@@ -2,22 +2,10 @@ import React, { useState } from 'react'
 import { ListItem, ListItemText } from '@mui/material'
 import { Box, TextField } from '@mui/material'
 import { List } from '@mui/material'
-import { PlayerType, Viewer } from 'hooks/useGame'
+import { Message, PlayerType, Viewer } from 'hooks/useGame'
 import { User } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
 import ChatMessages from 'components/Game/ChatMessage'
-
-interface Message {
-  nickname: string
-  message: string
-  playerId: number
-  channel: number
-  isMeneur: boolean
-  isPerso: boolean
-  isMsgSite: boolean
-  icon: string | null
-  createdAt: Date
-}
 
 interface ChatProps {
   gameId: string

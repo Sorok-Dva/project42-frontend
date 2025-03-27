@@ -17,6 +17,7 @@ export interface Message {
   isMeneur: boolean
   isPerso: boolean
   isMsgSite: boolean
+  cssClass?: string | null
   createdAt: Date
 }
 
