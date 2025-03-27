@@ -293,7 +293,7 @@ export const useGame = (
     if (!hasJoined && isAuthorized) {
       socket.emit('joinRoom', {
         roomId: gameId,
-        player: !player ? null : { id: player.playerId, nickname: player.nickname },
+        player: !user ? null : { id: user.id, nickname: user.nickname },
         viewer,
       })
       setHasJoined(true)
