@@ -324,7 +324,7 @@ const GameControls: React.FC<GameControlsProps> = ({
               <Box className="block_scrollable_content">
                 <Box className="block_content_section">
                   <Box className="game-options">
-                    <Box className="premium-options">
+                    <Box>
                       <Box id="crea_places">
                         <Box
                           className="buttons_array buttons_array_small bglightblue">
