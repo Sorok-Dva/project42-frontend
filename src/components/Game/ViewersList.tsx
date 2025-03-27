@@ -21,9 +21,9 @@ const ViewersList: React.FC<ViewersListProps> = ({
           if (!_viewer.user) anonymousViewers += 1
           return (
             <>
-              {viewer?.user?.nickname && (
+              {_viewer?.user?.nickname && (
                 <div className='list_player'>
-                  <span className='player sound-tick' data-profile={ viewer?.user?.nickname || 'Anonyme' }>{ viewer?.user?.nickname || 'Anonyme' }</span>
+                  <span className='player sound-tick' data-profile={ _viewer.user.nickname }>{ _viewer.user.nickname }</span>
                 </div>
               )}
             </>
@@ -32,7 +32,7 @@ const ViewersList: React.FC<ViewersListProps> = ({
         {anonymousViewers > 0 && (
           <div className='list_player'>
             <span className='player'>
-              <i>{anonymousViewers} spectateur(s) anonyme(s)</i>
+              <i>{anonymousViewers} spectateur{anonymousViewers > 1 ? 's' : ''} anonyme{anonymousViewers > 1 ? 's' : ''}</i>
             </span>
           </div>
         ) }
