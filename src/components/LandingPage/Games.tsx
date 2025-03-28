@@ -1,6 +1,5 @@
-import bitcoin from 'assets/img/bitcoin.png'
 import diamond from 'assets/img/diamond.png'
-import gameConsole from 'assets/img/game-console2.png'
+// import gameConsole from 'assets/img/game-console2.png'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Img as Image } from 'react-image'
@@ -72,7 +71,7 @@ const Games: React.FC = () => {
       </div>
       {/* <!-- game console animation --> */}
       <div className="game-console-area">
-        <Image className="w-100" src={gameConsole} alt="game-console" />
+        {/*<Image className="w-100" src={gameConsole} alt="game-console" />*/}
       </div>
       <div className="red-ball top-50"></div>
       <div className="tournament-wrapper">
@@ -117,16 +116,6 @@ const Games: React.FC = () => {
                       </div>
                       <div className="hr-line line3"></div>
                       <div className="card-info d-flex align-items-center gap-3 flex-wrap my-5">
-                        <div className="price-money bgn-3 d-flex align-items-center gap-3 py-2 px-3 h-100">
-                          <div className="d-flex align-items-center gap-2">
-                            <Image
-                              className="w-100"
-                              src={bitcoin}
-                              alt="bitcoin"
-                            />
-                            <span className="tcn-1 fs-sm">75</span>
-                          </div>
-                        </div>
                         <div className="ticket-fee bgn-3 d-flex align-items-center gap-1 py-2 px-3 h-100">
                           <i className="ti ti-cog fs-base tcp-2"></i>
                           <span className="tcn-1 fs-sm">Options</span>

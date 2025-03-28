@@ -1,12 +1,13 @@
+import React from 'react'
 import useDropdown from 'hooks/useDropdown'
-import avatar1 from 'assets/img/avatar1.png'
 import clsx from 'clsx'
 import { Img as Image } from 'react-image'
 import { Link } from 'react-router-dom'
 import Button from '../Button'
-import React from 'react'
+import { useUser } from 'contexts/UserContext'
 
 const Notification: React.FC = () => {
+  const { user } = useUser()
   const { open, ref, toggleOpen } = useDropdown()
   return (
     <div ref={ref} className="position-relative flex-shrink-0">
@@ -22,7 +23,7 @@ const Notification: React.FC = () => {
               <div className="card-img-area">
                 <Image
                   className="w-100 rounded-circle"
-                  src={avatar1}
+                  src={user?.avatar || '/img/defaultAvatar.png'}
                   alt="profile"
                 />
               </div>
