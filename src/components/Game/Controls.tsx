@@ -110,7 +110,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleStartGame = async () => {
-    if (!gameId || gameStarted || gameFinished || !canStartGame) return
+    if (!gameId || gameStarted || gameFinished || !canStartGame || !token) return
     try {
       await startGame(gameId, token)
       fetchGameDetails()
