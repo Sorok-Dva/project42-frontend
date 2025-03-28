@@ -315,20 +315,22 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
           <div className="compo_row">
             <div className="compo_category">
               <h3>Aliens</h3>
-              {renderCards([2, 20, 21])}
+              {/* @TODO make 21*/}
+              {renderCards([2, 20])}
             </div>
             <div className="compo_category">
               <h3>Personnages solitaires</h3>
               {renderCards([9, 15, 19])}
             </div>
-            <div className="compo_category">
+            {/*<div className="compo_category">
               <h3>Autres</h3>
               {renderCards([11])}
-            </div>
+            </div>*/}
           </div>
           <div className="compo_category">
             <h3>Innocents</h3>
-            {renderCards([1, 3, 4, 5, 6, 7, 8, 10, 12, 13, 16, 17])}
+            {/* @TODO make 8*/}
+            {renderCards([1, 3, 4, 5, 6, 7, 10, 12, 13, 16, 17])}
           </div>
         </div>
       </div>
