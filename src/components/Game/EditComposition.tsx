@@ -143,6 +143,9 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
     case 21:
       limit = 10
       break
+    case 23:
+      limit = 12
+      break
     case 26:
       limit = 11
       break
@@ -327,7 +330,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
           <div className="compo_category">
             <h3>Innocents</h3>
             {/* @TODO make 8*/}
-            {renderCards([1, 3, 4, 5, 6, 7, 10, 12, 13, 16, 17, 22])}
+            {renderCards([1, 3, 4, 5, 6, 7, 10, 12, 13, 16, 17, 22, 23])}
           </div>
         </div>
       </div>
