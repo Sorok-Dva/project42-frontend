@@ -65,8 +65,10 @@ const LoginForm: React.FC<{
 
         navigate('/')
         if (toggle) toggle()
-      } else if (response.status === 400) {
-        const errorData = await response.data
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorData = await error?.response?.data
         if (errorData.errors && Array.isArray(errorData.errors)) {
           errorData.errors.forEach((error : { msg : string }) => {
             setError(error.msg)
@@ -76,9 +78,9 @@ const LoginForm: React.FC<{
           setError(errorData.error)
           toast.error(errorData.error, { ...ToastDefaultOptions, autoClose: 30000 })
         }
+      } else {
+        toast.error('Une erreur est survenue.', { ...ToastDefaultOptions, autoClose: 30000 })
       }
-    } catch (err) {
-      toast.error('Une erreur est survenue.', { ...ToastDefaultOptions, autoClose: 30000 })
     }
   }
   return (
