@@ -88,6 +88,8 @@ const GamePage = () => {
     coupleList,
     slots,
     isArchive,
+    isInn,
+    innList,
     setIsArchive,
     setSlots,
     setPlayer,
@@ -328,6 +330,7 @@ const GamePage = () => {
                 slots={slots}
                 setSlots={setSlots}
                 setRoomData={setRoomData}
+                isInn={isInn}
               />
             </Box>
           </Box>
@@ -363,6 +366,7 @@ const GamePage = () => {
                 gameStarted={gameStarted}
                 gameFinished={gameFinished}
                 isArchive={isArchive}
+                isInn={isInn}
               />
             )}
           </Box>
@@ -393,6 +397,8 @@ const GamePage = () => {
               brothersList={brothersList}
               coupleList={coupleList}
               isNight={isNight}
+              isInn={isInn}
+              innList={innList}
             />
           </Box>
         </Box>
