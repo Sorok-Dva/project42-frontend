@@ -47,7 +47,7 @@ export const fetchChatMessages = async (gameId: string, token: string | null) =>
  */
 export const startGame = async (gameId: string, token: string | null) => {
   try {
-    const response = await axios.post(`/api/games/room/${gameId}/start`, {
+    const response = await axios.post(`/api/games/room/${gameId}/start`, {}, {
       headers: { Authorization: `Bearer ${token}` },
     })
     return response.data
