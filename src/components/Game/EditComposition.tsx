@@ -126,43 +126,40 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
   }
 
   const cardLimit = (id: number) => {
-    let limite = 0
+    let limit = 0
     switch (id) {
     case 16:
-      limite = 10
+      limit = 10
       break
     case 17:
-      limite = 10
+      limit = 10
       break
     case 19:
-      limite = 8
+      limit = 8
       break
     case 20:
-      limite = 10
+      limit = 10
       break
     case 21:
-      limite = 10
-      break
-    case 22:
-      limite = 10
+      limit = 10
       break
     case 26:
-      limite = 11
+      limit = 11
       break
     case 29:
-      limite = 10
+      limit = 10
       break
     case 31:
-      limite = 12
+      limit = 12
       break
     default:
       break
     }
-    return limite
+    return limit
   }
 
   const handleCardClick = (i: number, current: number) => {
-    if (i === 1 || i === 2) return
+    if (i === 1 || i === 2 || (cardLimit(i) > slots)) return
 
     let defaultValue = 1
     if (i === 16) defaultValue = 2
@@ -330,7 +327,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
           <div className="compo_category">
             <h3>Innocents</h3>
             {/* @TODO make 8*/}
-            {renderCards([1, 3, 4, 5, 6, 7, 10, 12, 13, 16, 17])}
+            {renderCards([1, 3, 4, 5, 6, 7, 10, 12, 13, 16, 17, 22])}
           </div>
         </div>
       </div>
