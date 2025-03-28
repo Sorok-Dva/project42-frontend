@@ -60,7 +60,10 @@ const Register : React.FC = () => {
   }
 
   const validateUsername = (username : string) => {
-    return username.length > 4 && username.length < 15 && !isForbiddenNickname(username)
+    const validRegex = /^[a-zA-Z][a-z0-9]{2,9}$/
+    return username.length > 3 && username.length < 10
+      && !isForbiddenNickname(username)
+      && validRegex.test(username)
   }
 
   const validatePassword = (password : string) => {
