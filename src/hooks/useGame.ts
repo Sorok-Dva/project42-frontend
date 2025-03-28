@@ -132,6 +132,8 @@ export const useGame = (
   const [coupleList, setCoupleList] = useState<string[]>([])
   const [slots, setSlots] = useState<number>(roomData.maxPlayers)
   const [isArchive, setIsArchive] = useState<boolean>(false)
+  const [isInn, setIsInn] = useState<boolean>(false)
+  const [innList, setInnList] = useState<string[]>([])
 
   /**
    * Asynchronously handles the submission of a password for game authentication.
@@ -408,6 +410,13 @@ export const useGame = (
       setCoupleList(list)
     })
 
+    socket.on('inn_list', (list: string[]) => {
+      if (list.includes(player?.nickname || 'Joueur introuvable')) {
+        setIsInn(true)
+        setInnList(list)
+      }
+    })
+
     socket.on('dead', () => {
       setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, alive: false } : null)
     })
@@ -451,6 +460,7 @@ export const useGame = (
       socket.off('updateCards')
       socket.off('alienList')
       socket.off('coupleList')
+      socket.off('inn_list')
       socket.off('dead')
       socket.off('dissolve')
       socket.off('error')
@@ -483,6 +493,8 @@ export const useGame = (
     coupleList,
     slots,
     isArchive,
+    isInn,
+    innList,
     setIsArchive,
     setSlots,
     setPlayer,
