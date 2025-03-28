@@ -76,10 +76,10 @@ const LoginForm: React.FC<{
           })
         } else if (errorData.error) {
           setError(errorData.error)
-          toast.error(errorData.error, { ...ToastDefaultOptions, autoClose: 30000 })
+          toast.error(errorData.error, ToastDefaultOptions)
         }
       } else {
-        toast.error('Une erreur est survenue.', { ...ToastDefaultOptions, autoClose: 30000 })
+        toast.error('Une erreur est survenue.', ToastDefaultOptions)
       }
     }
   }
