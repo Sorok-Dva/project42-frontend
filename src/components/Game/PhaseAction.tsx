@@ -32,7 +32,10 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   const { user } = useUser()
   const [actionRequest, setActionRequest] = useState<PhaseActionRequest | null>(null)
   const [selectedTargets, setSelectedTargets] = useState<number[]>([])
+  const [selectedNickname, setSelectedNickname] = useState<string | null>(null)
   const [alienVictim, setAlienVictim] = useState<{nickname: string, id: number} | null>(null)
+  const [showForm, setShowForm] = useState<boolean>(true)
+  const [hint, setHint] = useState<string | null>(null)
 
   useEffect(() => {
     if (!socket || !user || !player || !roomId) return
@@ -70,6 +73,14 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   const handleSelectionChange = (event: any) => {
     const { value } = event.target
     setSelectedTargets(typeof value === 'string' ? value.split(',').map(Number) : value)
+
+    if (typeof value === 'number') {
+      const selectedTarget = actionRequest
+        ?.eligibleTargets.find(target => target.id === value)
+      if (selectedTarget) {
+        setSelectedNickname(selectedTarget.nickname)
+      }
+    }
   }
 
   const handleSubmit = () => {
@@ -109,7 +120,12 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     const resetAction = [3, 4, 6, 7, 8, 15, 20].includes(actionRequest.action.card)
     if (resetAction) setActionRequest(null)
 
+    if (actionRequest.action.card === 22) {
+      setHint(`Vous avez sélectionner <strong>${selectedNickname}</strong>. Vous pouvez maintenant lui envoyer un message via le tchat.`)
+      setShowForm(false)
+    }
     setSelectedTargets([])
+    setSelectedNickname(null)
   }
 
   if (!actionRequest) return null
@@ -137,7 +153,8 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   return (
     <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', mt: 2 }}>
       <Typography variant="h6">{actionRequest.action.message}</Typography>
-      { actionRequest.action.targetCount > 0 && (
+      { hint && (<Box className='mt-2'><b dangerouslySetInnerHTML={{ __html: hint }} /></Box>) }
+      { showForm && actionRequest.action.targetCount > 0 && (
         <>
           <FormControl fullWidth sx={{ mt: 1 }}>
             <InputLabel id="phase-action-select-label">Sélectionnez</InputLabel>
