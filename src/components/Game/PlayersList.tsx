@@ -39,6 +39,8 @@ interface PlayersListProps {
   brothersList: string[]
   coupleList: string[]
   isNight: boolean
+  isInn: boolean
+  innList: string[]
 }
 
 const PlayersList: React.FC<PlayersListProps> = ({
@@ -59,6 +61,8 @@ const PlayersList: React.FC<PlayersListProps> = ({
   brothersList,
   coupleList,
   isNight,
+  isInn,
+  innList,
 }) => {
   const handleKickPlayer = (nickname: string) => {
     if (!isCreator || !socket || gameStarted) return
@@ -124,7 +128,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                         data-tooltip-content={`${_player.nickname === player?.nickname ? 'Vous êtes une soeur.' : 'Ce joueur est votre soeur.'}`}
                         data-tooltip-id={`${_player.nickname}_sister`}
                       />
-                      <Tooltip id={`${_player.nickname}_brother`} />
+                      <Tooltip id={`${_player.nickname}_sister`} />
                     </>
                   ) }
 
@@ -136,7 +140,19 @@ const PlayersList: React.FC<PlayersListProps> = ({
                         data-tooltip-content={`${_player.nickname === player?.nickname ? 'Vous êtes un frère.' : 'Ce joueur est votre frère.'}`}
                         data-tooltip-id={`${_player.nickname}_brother`}
                       />
-                      <Tooltip id={`${_player.nickname}_sister`} />
+                      <Tooltip id={`${_player.nickname}_brother`} />
+                    </>
+                  ) }
+
+                  { innList.includes(_player.nickname) && isNight && !gameFinished && (
+                    <>
+                      <img
+                        className="suspicious_card disabled"
+                        src={'/assets/images/carte23.png'}
+                        data-tooltip-content={`${_player.nickname === player?.nickname ? 'Vous êtes invité par l\'Aubergiste de la station.' : 'Ce joueur est invité par l\'Aubergiste de la station.'}`}
+                        data-tooltip-id={`${_player.nickname}_inn`}
+                      />
+                      <Tooltip id={`${_player.nickname}_inn`} />
                     </>
                   ) }
 

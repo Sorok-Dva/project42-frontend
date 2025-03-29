@@ -22,17 +22,20 @@ interface PhaseActionRequest {
 interface PhaseActionProps {
   player: PlayerType
   roomId: number
+  isInn: boolean
 }
 
 const PhaseAction: React.FC<PhaseActionProps> = ({
   player,
   roomId,
+  isInn,
 }) => {
   const { socket } = useSocket()
   const { user } = useUser()
   const [actionRequest, setActionRequest] = useState<PhaseActionRequest | null>(null)
   const [selectedTargets, setSelectedTargets] = useState<number[]>([])
   const [selectedNickname, setSelectedNickname] = useState<string | null>(null)
+  const [selectedNicknames, setSelectedNicknames] = useState<string[]>([])
   const [alienVictim, setAlienVictim] = useState<{nickname: string, id: number} | null>(null)
   const [showForm, setShowForm] = useState<boolean>(true)
   const [hint, setHint] = useState<string | null>(null)
@@ -43,6 +46,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     socket.on('phaseActionRequest', (data: PhaseActionRequest) => {
       if (!data) {
         setActionRequest(null)
+        setHint(null)
         return
       }
       if (
@@ -74,6 +78,12 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     const { value } = event.target
     setSelectedTargets(typeof value === 'string' ? value.split(',').map(Number) : value)
 
+    const targetNicknames = (typeof value === 'string' ? value.split(',').map(Number) : value)
+    setSelectedNicknames(targetNicknames.map((id: number) => {
+      const selectedTarget = actionRequest
+        ?.eligibleTargets.find(target => target.id === id)
+      if (selectedTarget) return selectedTarget.nickname
+    }).join(', '))
     if (typeof value === 'number') {
       const selectedTarget = actionRequest
         ?.eligibleTargets.find(target => target.id === value)
@@ -110,6 +120,15 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
         ...payload,
         targets: selectedTargets,
       })
+    } else if (actionRequest.action.card === 23) {
+      if (selectedTargets.length > 3) {
+        alert('Veuillez sélectionner exactement trois joueurs ou moins.')
+        return
+      }
+      socket.emit('phaseActionResponse', {
+        ...payload,
+        targets: selectedTargets,
+      })
     } else {
       socket.emit('phaseActionResponse', {
         ...payload,
@@ -120,10 +139,16 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     const resetAction = [3, 4, 6, 7, 8, 15, 20].includes(actionRequest.action.card)
     if (resetAction) setActionRequest(null)
 
-    if (actionRequest.action.card === 22) {
+    if (actionRequest.action.card === 22 && selectedNickname) {
       setHint(`Vous avez sélectionner <strong>${selectedNickname}</strong>. Vous pouvez maintenant lui envoyer un message via le tchat.`)
       setShowForm(false)
     }
+
+    if (actionRequest.action.card === 23 && selectedNicknames) {
+      setHint(`Vous avez invité <strong>${selectedNicknames}</strong>. Vous pouvez maintenant discuter entre vous via le tchat.`)
+      setShowForm(false)
+    }
+
     setSelectedTargets([])
     setSelectedNickname(null)
   }
@@ -154,6 +179,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', mt: 2 }}>
       <Typography variant="h6">{actionRequest.action.message}</Typography>
       { hint && (<Box className='mt-2'><b dangerouslySetInnerHTML={{ __html: hint }} /></Box>) }
+      { isInn && (<Box className='mt-2'>Vous avez été invité par l'aubergiste de la station ! Vous pouvez maintenant discuter entre vous.</Box>) }
       { showForm && actionRequest.action.targetCount > 0 && (
         <>
           <FormControl fullWidth sx={{ mt: 1 }}>

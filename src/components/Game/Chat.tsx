@@ -21,6 +21,7 @@ interface ChatProps {
   isArchive: boolean
   messages: Message[]
   highlightedPlayers: { [nickname: string]: string }
+  isInn: boolean
 }
 
 const Chat: React.FC<ChatProps> = ({
@@ -37,6 +38,7 @@ const Chat: React.FC<ChatProps> = ({
   gameStarted,
   gameFinished,
   isArchive,
+  isInn,
 }) => {
   const { socket } = useSocket()
   const [newMessage, setNewMessage] = useState('')
@@ -90,6 +92,12 @@ const Chat: React.FC<ChatProps> = ({
           && gameStarted
           && !gameFinished
         ) channelToSend = 5
+
+        if ((isNight
+          && isInn
+          && gameStarted
+          && !gameFinished) || (isNight && (player?.card?.id === 23))
+        ) channelToSend = 6
 
         socket.emit('sendMessage', {
           roomId: gameId,
@@ -182,6 +190,7 @@ const Chat: React.FC<ChatProps> = ({
               isNight={isNight}
               gameFinished={gameFinished}
               handleMentionClick={handleMentionClick}
+              isInn={isInn}
             />
           </Box>
         </Box>

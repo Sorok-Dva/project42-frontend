@@ -38,6 +38,7 @@ interface GameControlsProps {
   isArchive: boolean
   setSlots: React.Dispatch<React.SetStateAction<number>>
   setRoomData: React.Dispatch<React.SetStateAction<RoomData>>
+  isInn: boolean
 }
 
 /**
@@ -59,6 +60,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   setSlots,
   setRoomData,
   isArchive,
+  isInn,
 }) => {
   const { token } = useAuth()
   const { user } = useUser()
@@ -445,7 +447,7 @@ const GameControls: React.FC<GameControlsProps> = ({
               <GameTimer gameStarted={ gameStarted }
                 gameFinished={ gameFinished }/>
               <PhaseAction player={ player }
-                roomId={ Number(gameId!) }/>
+                roomId={ Number(gameId!) } isInn={isInn} />
             </Box>
           </Box>
           {memoizedCardImage}

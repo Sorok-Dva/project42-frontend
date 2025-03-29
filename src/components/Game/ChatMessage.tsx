@@ -28,6 +28,7 @@ interface ChatMessagesProps {
   isNight: boolean
   gameFinished: boolean
   handleMentionClick: (nickname: string) => void
+  isInn: boolean
 }
 
 const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
@@ -38,6 +39,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
   isNight,
   gameFinished,
   handleMentionClick,
+  isInn,
 }) => {
   const filteredMessages = useMemo(() => {
     return messages.filter((msg) => {
@@ -49,6 +51,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
       if (msg.channel === 3 && player && player.card?.id === 12 && player.alive && isNight) return true
       if (msg.channel === 4 && player && player.card?.id === 16 && isNight) return true
       if (msg.channel === 5 && player && player.card?.id === 17 && isNight) return true
+      if (msg.channel === 6 && player && player.card?.id === 23 && isNight) return true
+      if (msg.channel === 6 && player && isInn && isNight) return true
       if (gameFinished) return true
       return false
     })
@@ -91,6 +95,9 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
       }
       if (msg.channel === 3 && cleanNickname !== 'Système' && player && player.card?.id === 12 && isNight) {
         cleanNickname = '(Alien)'
+      }
+      if (msg.channel === 6 && player && player.card?.id !== 23 && isNight) {
+        cleanNickname = '(Anonyme)'
       }
       const escapedMessage = stripHTML(msg.message)
       const highlightColor = cleanNickname ? (highlightedPlayers[cleanNickname] || 'transparent') : 'transparent'
@@ -161,6 +168,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
                     {msg.channel === 3 && <>&nbsp;<span className="chat-badge-alien">Alien</span></>}
                     {msg.channel === 4 && <>&nbsp;<span className="chat-badge-sister">Soeur</span></>}
                     {msg.channel === 5 && <>&nbsp;<span className="chat-badge-brother">Frère</span></>}
+                    {msg.channel === 6 && <>&nbsp;<span className="chat-badge-inn">Auberge</span></>}
                     {': '}
                   </>
                 )}
