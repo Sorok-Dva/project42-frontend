@@ -2206,7 +2206,7 @@ p.compo-hidden {
   transform: rotate3d(0, 0, 1, 45deg);
   box-shadow: 2px 2px 2px rgba(0, 0, 0, .2);
   transition: opacity 0.3s ease;
-  background-color: black;
+  background-color: #ffffffc2;
 
   &.bavarde,
   &.bavard {
@@ -3288,7 +3288,7 @@ kbd {
 }
 
 .compo_edit_card .role_amount {
-  color: #5E1717;
+  color: rgb(var(--p2));;
 }
 
 .compo_edit_card img,
