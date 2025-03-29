@@ -1633,6 +1633,10 @@ tr.dead span {
   color: #069;
 }
 
+.canal_6 { /* Auberge */
+  color: #0acc5a;
+}
+
 .canal_guide {
   /* Guide/Disciple */
   color: #000000;
@@ -5476,6 +5480,9 @@ button.buy-bonus:focus {
   .canal_5 {
     color:#2d9ad1
   }
+  .canal_6 {
+    color: #0acc5a;
+  }
   .canal_2,.canal_perso {
     color:#bababa
   }
@@ -5490,7 +5497,7 @@ button.buy-bonus:focus {
   hr {
     filter: invert(1); opacity: .2;
   }
-  .pseudo-homme {
+  .pseudo-homme /* genders class here */ {
     color: #94adff !important;
   }
   .pseudo-femme {
