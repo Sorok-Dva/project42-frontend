@@ -46,7 +46,6 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     socket.on('phaseActionRequest', (data: PhaseActionRequest) => {
       if (!data) {
         setActionRequest(null)
-        setHint(null)
         return
       }
       if (
@@ -59,6 +58,8 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
 
     socket.on('phaseEnded', () => {
       setActionRequest(null)
+      setHint(null)
+      setShowForm(true)
     })
 
     socket.on('alienElimination', (victim) => {
