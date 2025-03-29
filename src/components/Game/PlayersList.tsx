@@ -115,7 +115,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                       className="suspicious_card disabled"
                       src={`/assets/images/carte${_player.cardId}.png`}
                     />
-                  ) : (gameStarted && _player.alive && !gameFinished) ? (
+                  ) : (gameStarted && _player.alive && !isNight && !gameFinished) ? (
                     <span className={`votecount clickable${!isNight ? mostVotes : ''}`}>
                       {voteCounts[_player.nickname] || 0}
                     </span>
@@ -216,9 +216,13 @@ const PlayersList: React.FC<PlayersListProps> = ({
                     && player
                     && isCreator
                     && creatorNickname !== _player.nickname && (
-                    <span className="clickable crea_kick sound-tick"
-                      onClick={ () => handleKickPlayer(_player.nickname) }
-                      data-tooltip="...">→</span>
+                    <>
+                      <span className="clickable crea_kick sound-tick"
+                        onClick={ () => handleKickPlayer(_player.nickname) }
+                        data-tooltip-html={`Expulser <strong>${_player.nickname}</strong> de la partie`}
+                        data-tooltip-id={`kick_${_player.nickname}`}>→</span>
+                      <Tooltip id={`kick_${_player.nickname}`} />
+                    </>
                   )
                   }
                 </div>
