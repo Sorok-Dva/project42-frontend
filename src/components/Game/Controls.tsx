@@ -399,9 +399,9 @@ const GameControls: React.FC<GameControlsProps> = ({
                   <Box className="button_secondary sound-tick crea_lead" onClick={handleTransferCreator}>
                     Léguer les droits du salon
                   </Box>
-                  <Box className="button_secondary sound-tick join_spec">
+                  {/*<Box className="button_secondary sound-tick join_spec">
                     <span>Rejoindre les spectateurs</span>
-                  </Box>
+                  </Box>*/}
 
                   { ['SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator']
                     .includes(user?.role as string) && (
