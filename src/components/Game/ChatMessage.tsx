@@ -51,8 +51,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
       if (msg.channel === 3 && player && player.card?.id === 12 && player.alive && isNight) return true
       if (msg.channel === 4 && player && player.card?.id === 16 && isNight) return true
       if (msg.channel === 5 && player && player.card?.id === 17 && isNight) return true
-      if (msg.channel === 6 && player && player.card?.id === 23 && isNight) return true
-      if (msg.channel === 6 && player && isInn && isNight) return true
+      if (msg.channel === 6 && player && player.card?.id === 23) return true
+      if (msg.channel === 6 && player && isInn) return true
       if (gameFinished) return true
       return false
     })
