@@ -74,25 +74,33 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
       socket.off('alienElimination')
     }
   }, [socket, user, player, roomId])
-
   const handleSelectionChange = (event: any) => {
     const { value } = event.target
-    setSelectedTargets(typeof value === 'string' ? value.split(',').map(Number) : value)
 
-    const targetNicknames = (typeof value === 'string' ? value.split(',').map(Number) : value)
-    setSelectedNicknames(targetNicknames.map((id: number) => {
-      const selectedTarget = actionRequest
-        ?.eligibleTargets.find(target => target.id === id)
-      if (selectedTarget) return selectedTarget.nickname
-    }).join(', '))
-    if (typeof value === 'number') {
-      const selectedTarget = actionRequest
-        ?.eligibleTargets.find(target => target.id === value)
+    const newValue = Array.isArray(value) ? value : [value]
+    setSelectedTargets(newValue)
+
+    // Construction de la chaîne des nicknames à partir des ids.
+    setSelectedNicknames(
+      newValue.map((id: number) => {
+        const selectedTarget = actionRequest?.eligibleTargets.find(
+          (target) => target.id === id
+        )
+        return selectedTarget ? selectedTarget.nickname : ''
+      })
+    )
+
+    // Pour la sélection unique, mettre à jour selectedNickname.
+    if (!Array.isArray(value)) {
+      const selectedTarget = actionRequest?.eligibleTargets.find(
+        (target) => target.id === value
+      )
       if (selectedTarget) {
         setSelectedNickname(selectedTarget.nickname)
       }
     }
   }
+
 
   const handleSubmit = () => {
     if (!socket || !actionRequest) return
@@ -184,13 +192,19 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
       { showForm && actionRequest.action.targetCount > 0 && (
         <>
           <FormControl fullWidth sx={{ mt: 1 }}>
-            <InputLabel id="phase-action-select-label">Sélectionnez</InputLabel>
+            <InputLabel
+              id="phase-action-select-label"
+              sx={{ color: 'white' }}
+            >
+              Sélectionnez
+            </InputLabel>
             <Select
               labelId="phase-action-select-label"
               multiple={actionRequest.action.targetCount > 1}
               value={selectedTargets}
               label="Sélectionnez"
               onChange={handleSelectionChange}
+              sx={{ color: 'white' }}
             >
               {actionRequest.eligibleTargets.map((target) => (
                 <MenuItem key={target.id} value={target.id}>
