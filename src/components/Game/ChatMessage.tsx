@@ -88,6 +88,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
       { index, key, parent, style }: { index: number; key: string; parent: any; style: React.CSSProperties }
     ) => {
       const msg = filteredMessages[index]
+      const uniqueKey = String(msg.playerId) + String(msg.createdAt) // ou msg.id si vous en avez un
+
       let cleanNickname = stripHTML(msg.nickname)
 
       if (msg.channel === 2 && player && player.card?.id === 10 && isNight) {
@@ -112,7 +114,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
 
       return (
         <CellMeasurer
-          key={key}
+          key={uniqueKey}
           cache={cache}
           parent={parent}
           columnIndex={0}
