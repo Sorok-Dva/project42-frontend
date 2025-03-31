@@ -1240,8 +1240,11 @@ tr.dead span {
   opacity: 0;
 
   &.visible {
-    bottom: 50px;
+    bottom: 0px;
     opacity: 1;
+    cursor: pointer;
+    z-index: 5;
+    font-weight: bolder;
   }
 
   &.visible.mdj {
@@ -1253,7 +1256,7 @@ tr.dead span {
 
 #scroll_chat {
   width: 140px;
-  height: 20px;
+  height: 25px;
   background-color: #1b253e;
   cursor: pointer;
 }
@@ -1265,8 +1268,6 @@ tr.dead span {
 }
 
 #block_chat_game {
-  padding-top: 10px;
-
   .pseudo-homme {
     color: #031c6f;
   }

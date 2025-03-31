@@ -1,19 +1,7 @@
-import React, { useMemo, useCallback, useRef, useEffect } from 'react'
+import React, { useMemo, useCallback, useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
 import { Box, Typography } from '@mui/material'
-import {
-  AutoSizer,
-  List,
-  CellMeasurer,
-  CellMeasurerCache,
-  ListRowRenderer,
-} from 'react-virtualized'
 import { Message, PlayerType, Viewer } from 'hooks/useGame'
 
-/**
- * Supprime les éventuels tags HTML d'une chaîne de caractères.
- * @param {string} input - La chaîne à nettoyer.
- * @returns {string} La chaîne sans balises HTML.
- */
 function stripHTML(input: string) {
   const tempDiv = document.createElement('div')
   tempDiv.innerHTML = input
@@ -21,17 +9,22 @@ function stripHTML(input: string) {
 }
 
 interface ChatMessagesProps {
-  messages: Message[]
-  highlightedPlayers: { [nickname: string]: string }
-  player?: PlayerType
-  viewer?: Viewer
-  isNight: boolean
-  gameFinished: boolean
-  handleMentionClick: (nickname: string) => void
-  isInn: boolean
+  messages: Message[];
+  highlightedPlayers: { [nickname: string]: string };
+  player?: PlayerType;
+  viewer?: Viewer;
+  isNight: boolean;
+  gameFinished: boolean;
+  handleMentionClick: (nickname: string) => void;
+  isInn: boolean;
+  onUnreadChange: (unread: number) => void;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
+export interface ChatMessagesHandle {
+  scrollToBottom: () => void;
+}
+
+const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(({
   messages,
   highlightedPlayers,
   player,
@@ -40,7 +33,9 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
   gameFinished,
   handleMentionClick,
   isInn,
-}) => {
+  onUnreadChange,
+}, ref) => {
+  // Filtrer les messages selon la logique définie
   const filteredMessages = useMemo(() => {
     return messages.filter((msg) => {
       if (msg.channel === 0) return true
@@ -56,7 +51,58 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
       if (gameFinished) return true
       return false
     })
-  }, [messages, player, viewer, isNight, gameFinished])
+  }, [messages, player, viewer, isNight, gameFinished, isInn])
+
+  // Référence du conteneur scrollable
+  const containerRef = useRef<HTMLDivElement>(null)
+  // Dernier nombre de messages vus (lorsque l'utilisateur était en bas)
+  const lastSeenCount = useRef(filteredMessages.length)
+
+  // Expose scrollToBottom via la ref
+  useImperativeHandle(ref, () => ({
+    scrollToBottom: () => {
+      if (containerRef.current) {
+        containerRef.current.scrollTo({ top: containerRef.current.scrollHeight, behavior: 'smooth' })
+        lastSeenCount.current = filteredMessages.length
+        onUnreadChange(0)
+      }
+    },
+  }), [filteredMessages.length, onUnreadChange])
+
+  // Fonction de vérification du scroll (retourne true si on est en bas)
+  const isUserAtBottom = useCallback((): boolean => {
+    if (!containerRef.current) return false
+    const { scrollTop, clientHeight, scrollHeight } = containerRef.current
+    const threshold = 100 // marge d'erreur
+    return scrollTop + clientHeight >= scrollHeight - threshold
+  }, [])
+
+  // Lorsqu'un nouveau message arrive, attendre un court délai pour que le DOM se mette à jour,
+  // puis scroller automatiquement si l'utilisateur est en bas ou mettre à jour le badge sinon.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (containerRef.current) {
+        if (isUserAtBottom()) {
+          containerRef.current.scrollTo({ top: containerRef.current.scrollHeight, behavior: 'smooth' })
+          lastSeenCount.current = filteredMessages.length
+          onUnreadChange(0)
+        } else {
+          onUnreadChange(filteredMessages.length - lastSeenCount.current)
+        }
+      }
+    }, 50)
+    return () => clearTimeout(timer)
+  }, [filteredMessages, isUserAtBottom, onUnreadChange])
+
+  // Gestion du scroll de l'utilisateur pour mettre à jour lastSeenCount quand il atteint le bas
+  const handleScroll = useCallback(() => {
+    if (containerRef.current) {
+      if (isUserAtBottom()) {
+        lastSeenCount.current = filteredMessages.length
+        onUnreadChange(0)
+      }
+    }
+  }, [filteredMessages.length, isUserAtBottom, onUnreadChange])
 
   const highlightMention = useCallback((message: string, nickname: string) => {
     if (!nickname) return message
@@ -64,166 +110,120 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({
     return message.replace(regex, `<span style="background-color: #ff9100">${nickname}</span>`)
   }, [])
 
-  // Création du cache pour les mesures (hauteur variable, largeur fixe)
-  const cache = useMemo(
-    () =>
-      new CellMeasurerCache({
-        fixedWidth: true,
-        defaultHeight: 30,
-      }),
-    []
-  )
-
-  const listRef = useRef<List>(null)
-
-  // À chaque mise à jour des messages filtrés, défiler vers le dernier message
-  useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollToRow(filteredMessages.length - 1)
-    }
-  }, [filteredMessages])
-
-  const rowRenderer: ListRowRenderer = useCallback(
-    (
-      { index, key, parent, style }: { index: number; key: string; parent: any; style: React.CSSProperties }
-    ) => {
-      const msg = filteredMessages[index]
-      const uniqueKey = String(msg.playerId) + String(msg.createdAt) // ou msg.id si vous en avez un
-
-      let cleanNickname = stripHTML(msg.nickname)
-
-      if (msg.channel === 2 && player && player.card?.id === 10 && isNight) {
-        cleanNickname = '(Anonyme)'
-      }
-      if (msg.channel === 3 && cleanNickname !== 'Système' && player && player.card?.id === 12 && isNight) {
-        cleanNickname = '(Alien)'
-      }
-
-      const escapedMessage = stripHTML(msg.message)
-      const highlightColor = cleanNickname ? (highlightedPlayers[cleanNickname] || 'transparent') : 'transparent'
-      const shouldHighlight = cleanNickname !== 'Système' && cleanNickname !== 'Modération'
-
-      let processedMessage
-      if (cleanNickname === 'Modération' || cleanNickname === 'Système') {
-        processedMessage = msg.message
-      } else if (cleanNickname && shouldHighlight && player) {
-        processedMessage = highlightMention(escapedMessage, player.nickname)
-      } else {
-        processedMessage = escapedMessage
-      }
-
-      return (
-        <CellMeasurer
-          key={uniqueKey}
-          cache={cache}
-          parent={parent}
-          columnIndex={0}
-          rowIndex={index}
-        >
-          {({ registerChild }: { registerChild: (el: HTMLElement | null) => void }) => (
-            <div ref={registerChild} style={style}>
-              <Typography
-                variant="body1"
-                className={`canal_${msg.channel}`}
-                style={{
-                  backgroundColor: highlightColor,
-                  padding: '4px',
-                  borderRadius: '4px',
-                }}
-                onClick={(e) => {
-                  const target = e.target as HTMLElement
-                  if (target.classList.contains('msg-nickname')) {
-                    const nickname = target.getAttribute('data-highlight-nickname')
-                    if (nickname && handleMentionClick) {
-                      handleMentionClick(nickname)
-                    }
-                  }
-                }}
+  return (
+    <Box ref={containerRef} sx={{ height: '100%', overflowY: 'auto', p: 1 }} onScroll={handleScroll}>
+      {/* Box des règles en haut du chat */}
+      <Box className="canal_meneur game-rules" sx={{ mb: 2 }}>
+        <div>
+          Rappel : vous êtes sur une partie <span className="bullet-game type-0"></span> <b>Normale</b> :<br />
+          <ul>
+            <li>Il est strictement <b>interdit d'insulter</b> un autre joueur et d'avoir une attitude malsaine. Toute forme d'<b>anti-jeu</b> sera sanctionnée.</li>
+            <li>Le dévoilement est <b>interdit</b> et <b>sanctionné</b> systématiquement. Il est aussi <b>interdit</b> de donner toute forme d'indice sur son rôle.</li>
+            <li>Tous les joueurs <b>doivent</b> participer au débat. Il n'est pas autorisé d'être <b>AFK</b>.</li>
+          </ul>
+          Soyez courtois et aimable. Bon jeu ! <br /><br />
+          <b>Rappel :</b> ne divulguez <b>jamais</b> vos informations privées sur le jeu.
+        </div>
+        <hr />
+      </Box>
+      {/* Affichage des messages */}
+      {filteredMessages.map((msg, index) => {
+        let cleanNickname = stripHTML(msg.nickname)
+        if (msg.channel === 2 && player && player.card?.id === 10 && isNight) {
+          cleanNickname = '(Anonyme)'
+        }
+        if (msg.channel === 3 && cleanNickname !== 'Système' && player && player.card?.id === 12 && isNight) {
+          cleanNickname = '(Alien)'
+        }
+        const escapedMessage = stripHTML(msg.message)
+        const highlightColor = cleanNickname ? (highlightedPlayers[cleanNickname] || 'transparent') : 'transparent'
+        const shouldHighlight = cleanNickname !== 'Système' && cleanNickname !== 'Modération'
+        let processedMessage = ''
+        if (cleanNickname === 'Modération' || cleanNickname === 'Système') {
+          processedMessage = msg.message
+        } else if (cleanNickname && shouldHighlight && player) {
+          processedMessage = highlightMention(escapedMessage, player.nickname)
+        } else {
+          processedMessage = escapedMessage
+        }
+        const uniqueKey = `${msg.playerId}-${msg.createdAt}-${index}`
+        return (
+          <Typography
+            key={uniqueKey}
+            variant="body1"
+            className={`canal_${msg.channel}`}
+            sx={{
+              backgroundColor: highlightColor,
+              borderRadius: 1,
+            }}
+            onClick={(e) => {
+              const target = e.target as HTMLElement
+              if (target.classList.contains('msg-nickname')) {
+                const nickname = target.getAttribute('data-highlight-nickname')
+                if (nickname) handleMentionClick(nickname)
+              }
+            }}
+          >
+            {cleanNickname !== 'Système' && (
+              <span className="msg-date">
+                [{new Date(String(msg.createdAt)).toLocaleTimeString()}]{' '}
+              </span>
+            )}
+            {msg.icon && !msg.isMeneur && !msg.isPerso && (
+              <img
+                src={`/assets/images/${msg.icon}`}
+                className="msg-icon"
+                alt="message icon"
+              />
+            )}
+            {cleanNickname && cleanNickname !== 'Système' && (
+              <>
+                <b
+                  className={`msg-nickname ${msg.cssClass}`}
+                  data-highlight-nickname={cleanNickname}
+                  dangerouslySetInnerHTML={{
+                    __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname,
+                  }}
+                ></b>
+                {msg.channel === 1 && <>&nbsp;<span className="chat-badge-specta">Spectateur</span></>}
+                {msg.channel === 2 && <>&nbsp;<span className="chat-badge-dead">Mort</span></>}
+                {msg.channel === 3 && <>&nbsp;<span className="chat-badge-alien">Alien</span></>}
+                {msg.channel === 4 && <>&nbsp;<span className="chat-badge-sister">Soeur</span></>}
+                {msg.channel === 5 && <>&nbsp;<span className="chat-badge-brother">Frère</span></>}
+                {msg.channel === 6 && <>&nbsp;<span className="chat-badge-inn">Auberge</span></>}
+                {': '}
+              </>
+            )}
+            {(msg.isMeneur || msg.isPerso || msg.isMsgSite) ? (
+              <Box
+                className={
+                  msg.isMeneur
+                    ? 'canal_meneur'
+                    : msg.isPerso
+                      ? 'canal_perso'
+                      : msg.isMsgSite
+                        ? 'canal_msg_site'
+                        : ''
+                }
               >
-                {cleanNickname !== 'Système' && (
-                  <span className="msg-date">
-                    [{new Date(String(msg.createdAt)).toLocaleTimeString()}]{' '}
-                  </span>
-                )}
-
-                {msg.icon && !msg.isMeneur && !msg.isPerso && (
+                {msg.icon && (
                   <img
                     src={`/assets/images/${msg.icon}`}
                     className="msg-icon"
                     alt="message icon"
                   />
                 )}
-
-                {cleanNickname && cleanNickname !== 'Système' && (
-                  <>
-                    <b
-                      className={`msg-nickname ${msg.cssClass}`}
-                      data-highlight-nickname={cleanNickname}
-                      dangerouslySetInnerHTML={{
-                        __html: cleanNickname === 'Modération' ? msg.nickname : cleanNickname,
-                      }}
-                    ></b>
-                    {msg.channel === 1 && <>&nbsp;<span className="chat-badge-specta">Spectateur</span></>}
-                    {msg.channel === 2 && <>&nbsp;<span className="chat-badge-dead">Mort</span></>}
-                    {msg.channel === 3 && <>&nbsp;<span className="chat-badge-alien">Alien</span></>}
-                    {msg.channel === 4 && <>&nbsp;<span className="chat-badge-sister">Soeur</span></>}
-                    {msg.channel === 5 && <>&nbsp;<span className="chat-badge-brother">Frère</span></>}
-                    {msg.channel === 6 && <>&nbsp;<span className="chat-badge-inn">Auberge</span></>}
-                    {': '}
-                  </>
-                )}
-
-                {(msg.isMeneur || msg.isPerso || msg.isMsgSite) ? (
-                  <div
-                    className={
-                      msg.isMeneur
-                        ? 'canal_meneur'
-                        : msg.isPerso
-                          ? 'canal_perso'
-                          : msg.isMsgSite
-                            ? 'canal_msg_site'
-                            : ''
-                    }
-                  >
-                    {msg.icon && (
-                      <img
-                        src={`/assets/images/${msg.icon}`}
-                        className="msg-icon"
-                        alt="message icon"
-                      />
-                    )}
-                    <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
-                  </div>
-                ) : (
-                  <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
-                )}
-              </Typography>
-            </div>
-          )}
-        </CellMeasurer>
-      )
-    },
-    [filteredMessages, highlightedPlayers, player, isNight, highlightMention, handleMentionClick, cache]
-  )
-
-  return (
-    <AutoSizer>
-      {({ height, width }: { height: number; width: number }) => (
-        <List
-          ref={listRef}
-          width={width}
-          height={height}
-          rowCount={filteredMessages.length}
-          rowHeight={cache.rowHeight}
-          deferredMeasurementCache={cache}
-          rowRenderer={rowRenderer}
-          overscanRowCount={3}
-        />
-      )}
-    </AutoSizer>
+                <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
+              </Box>
+            ) : (
+              <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
+            )}
+          </Typography>
+        )
+      })}
+    </Box>
   )
 })
 
 ChatMessages.displayName = 'ChatMessages'
-
 export default ChatMessages

@@ -1,36 +1,34 @@
-import React, { useState } from 'react'
-import { ListItem, ListItemText } from '@mui/material'
-import { Box, TextField } from '@mui/material'
-import { List } from '@mui/material'
+import React, { useState, useRef, useCallback } from 'react'
+import { Box, TextField, List, ListItem, ListItemText } from '@mui/material'
 import { Message, PlayerType, Viewer } from 'hooks/useGame'
 import { User } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
-import ChatMessages from 'components/Game/ChatMessage'
+import ChatMessages, { ChatMessagesHandle } from 'components/Game/ChatMessage'
 
 interface ChatProps {
-  gameId: string
-  players?: PlayerType[]
-  playerId?: string | number
-  player?: PlayerType
-  user?: User
-  viewer?: Viewer
-  userRole?: string
-  isNight: boolean
-  gameStarted: boolean
-  gameFinished: boolean
-  isArchive: boolean
-  messages: Message[]
-  highlightedPlayers: { [nickname: string]: string }
-  isInn: boolean
+  gameId: string;
+  players?: PlayerType[];
+  playerId?: string | number;
+  player?: PlayerType;
+  user?: User;
+  viewer?: Viewer;
+  userRole?: string;
+  isNight: boolean;
+  gameStarted: boolean;
+  gameFinished: boolean;
+  isArchive: boolean;
+  messages: Message[];
+  highlightedPlayers: { [nickname: string]: string };
+  isInn: boolean;
 }
 
 const Chat: React.FC<ChatProps> = ({
   gameId,
-  playerId,
   players,
+  playerId,
   player,
-  viewer,
   user,
+  viewer,
   userRole,
   messages,
   highlightedPlayers,
@@ -45,60 +43,63 @@ const Chat: React.FC<ChatProps> = ({
   const [currentCommand, setCurrentCommand] = useState('')
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [unreadCount, setUnreadCount] = useState(0)
 
-  const inputRef = React.useRef<HTMLInputElement>(null)
+  const chatMessagesRef = useRef<ChatMessagesHandle>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const handleUnreadChange = useCallback((count: number) => {
+    setUnreadCount(count)
+  }, [])
 
   const developerCommand = ['startPhase', 'endPhase', 'listCards']
   const handleSendMessage = () => {
     if (isArchive) return
     const trimmedMessage = newMessage.trim()
     if (!trimmedMessage || !socket) return
-
     try {
       if (trimmedMessage.startsWith('/')) {
         if (userRole !== 'User') {
-          // Commande de modération
           const commandString = trimmedMessage.slice(1).trim()
           const [command, arg, ...rest] = commandString.split(' ')
           const text = rest.join(' ')
-
-          socket.emit(developerCommand.includes(command) ? 'developerCommand' : 'moderationCommand', {
-            command,
-            arg,
-            text,
-            roomId: gameId,
-            playerId,
-            currentUserRole: userRole,
-            moderator: user,
-          })
+          socket.emit(
+            developerCommand.includes(command) ? 'developerCommand' : 'moderationCommand',
+            {
+              command,
+              arg,
+              text,
+              roomId: gameId,
+              playerId,
+              currentUserRole: userRole,
+              moderator: user,
+            }
+          )
         }
       } else {
         let channelToSend = player ? 0 : viewer ? 1 : null
         if (channelToSend === null) return
-        if (isNight
-          && ([2, 9, 20, 21].includes(player?.card?.id || -1) || player?.isInfected)
-          && gameStarted
-          && !gameFinished
-        ) channelToSend = 3
-
-        if (isNight
-          && player?.card?.id === 16
-          && gameStarted
-          && !gameFinished
-        ) channelToSend = 4
-
-        if (isNight
-          && (player?.card?.id === 17)
-          && gameStarted
-          && !gameFinished
-        ) channelToSend = 5
-
-        if ((isNight
-          && isInn
-          && gameStarted
-          && !gameFinished) || (isNight && (player?.card?.id === 23))
-        ) channelToSend = 6
-
+        if (
+          isNight &&
+          ([2, 9, 20, 21].includes(player?.card?.id || -1) || player?.isInfected) &&
+          gameStarted &&
+          !gameFinished
+        )
+          channelToSend = 3
+        if (isNight && player?.card?.id === 16 && gameStarted && !gameFinished)
+          channelToSend = 4
+        if (
+          isNight &&
+          player?.card?.id === 17 &&
+          gameStarted &&
+          !gameFinished
+        )
+          channelToSend = 5
+        if (
+          (isNight && isInn && gameStarted && !gameFinished) ||
+          (isNight && player?.card?.id === 23)
+        )
+          channelToSend = 6
         socket.emit('sendMessage', {
           roomId: gameId,
           playerId,
@@ -116,16 +117,12 @@ const Chat: React.FC<ChatProps> = ({
 
   const handleInputChange = (value: string) => {
     setNewMessage(value)
-
     if (userRole === 'User') return
-
     const words = value.trim().split(' ')
     const command = words[0]?.startsWith('/') ? words[0].slice(1) : ''
     const arg = words[1] || ''
     const hasAdditionalArgs = words.length > 2
-
     setCurrentCommand(command)
-
     if (
       [
         'kick', 'ban', 'mute', 'unmute', 'nick', 'crea', 'card',
@@ -134,10 +131,10 @@ const Chat: React.FC<ChatProps> = ({
       && !hasAdditionalArgs
     ) {
       const searchQuery = arg.toLowerCase()
-      const filteredSuggestions = players
-        ?.filter((p) => p.nickname.toLowerCase().includes(searchQuery) && p.id !== playerId)
-        .map((p) => p.nickname) || []
-
+      const filteredSuggestions =
+        players
+          ?.filter((p) => p.nickname.toLowerCase().includes(searchQuery) && p.id !== playerId)
+          .map((p) => p.nickname) || []
       setSuggestions(filteredSuggestions)
     } else {
       setSuggestions([])
@@ -151,38 +148,32 @@ const Chat: React.FC<ChatProps> = ({
   }
 
   const handleMentionClick = (nickname: string) => {
-    setNewMessage((prevMessage) => `${prevMessage.trim()} @${nickname} `)
+    setNewMessage((prev) => `${prev.trim()} @${nickname} `)
     inputRef.current?.focus()
-  }
-
-  const stripHTML = (input: string) => {
-    const tempDiv = document.createElement('div')
-    tempDiv.innerHTML = input
-    return tempDiv.textContent || tempDiv.innerText || ''
   }
 
   return (
     <Box display="flex" flexDirection="column" height="100%">
-      <Box flex={ 1 } id="block_chat" className="shadow rounded" p={ 2 }
-        overflow="auto">
-        <Box id="block_chat_content"
-          className="block_scrollable_wrapper scrollbar-dark">
-          <Box id="block_chat_game" className="block_scrollable_content" sx={{ flex: 1, height: '100%' }}>
-            <Box className="canal_meneur game-rules">
-              <div>Rappel : vous êtes sur une partie <span className='bullet-game type-0'></span> <b>Normale</b> :<br />
-                <ul>
-                  <li>Il est strictement <b>interdit d'insulter</b> un autre joueur et d'avoir une attitude malsaine. Toute forme d'<b>anti-jeu</b> sera sanctionnée.</li>
-                  <li>Le dévoilement est <b>interdit</b> et <b>sanctionné</b> systématiquement. Il est aussi <b>interdit</b> de donner toute forme d'indice sur son rôle.</li>
-                  <li>Tous les joueurs <b>doivent</b> participer au débat. Il n'est pas autorisé d'être <b>AFK</b>.</li>
-                </ul>
-                Soyez courtois et aimable. Bon jeu ! <br /> <br />
-                <b>Rappel :</b> ne divulguez <b>jamais</b> vos informations privées sur le jeu.
+      {/* Conteneur scrollable pour le chat */}
+      <Box flex={1} id="block_chat" className="shadow rounded" p={2} overflow="auto">
+        <Box id="block_chat_content" className="block_scrollable_wrapper scrollbar-dark" sx={{ height: '100%' }}>
+          <Box id="block_chat_game" className="block_scrollable_content" sx={{ height: '100%' }}>
+            {/* Badge des nouveaux messages en position sticky */}
+            {unreadCount > 0 && (
+              <div
+                id="scroll_chat"
+                className="visible"
+                onClick={() => {
+                  chatMessagesRef.current?.scrollToBottom()
+                  setUnreadCount(0)
+                }}
+              >
+                {unreadCount} nouveau{unreadCount > 1 ? 'x' : ''} message{unreadCount > 1 ? 's' : ''}
               </div>
-              <hr />
-            </Box>
-            <div id="scroll_chat"></div>
+            )}
             <div id="load_chat">Chargement des messages plus anciens...</div>
             <ChatMessages
+              ref={chatMessagesRef}
               messages={messages}
               highlightedPlayers={highlightedPlayers}
               player={player}
@@ -191,11 +182,16 @@ const Chat: React.FC<ChatProps> = ({
               gameFinished={gameFinished}
               handleMentionClick={handleMentionClick}
               isInn={isInn}
+              onUnreadChange={handleUnreadChange}
             />
           </Box>
         </Box>
       </Box>
-      { (!isArchive && (player || viewer?.user?.id || (!player && ['SuperAdmin', 'Admin', 'Developer', 'Moderator', 'ModeratorTest'].includes(userRole as string)))) && (
+      {(!isArchive &&
+        (player ||
+          viewer?.user?.id ||
+          (!player &&
+            ['SuperAdmin', 'Admin', 'Developer', 'Moderator', 'ModeratorTest'].includes(userRole as string)))) && (
         <div id="block_chat_post">
           <div className="chat_send">
             <TextField
@@ -217,18 +213,16 @@ const Chat: React.FC<ChatProps> = ({
                     e.preventDefault()
                   } else if (e.key === 'Enter') {
                     if (selectedIndex === -1) {
-                      // Si aucune sélection, on prend la première suggestion
                       setSelectedIndex(0)
                       setNewMessage(`/${currentCommand} ${suggestions[0]} `)
                       setSuggestions([])
                       e.preventDefault()
                     } else if (selectedIndex >= 0) {
-                      // Si une suggestion est sélectionnée, l'insérer
                       const chosenNickname = suggestions[selectedIndex]
                       setNewMessage(`/${currentCommand} ${chosenNickname} `)
-                      setSelectedIndex(-1) // Réinitialise l'index sélectionné
-                      setSuggestions([]) // Cache les suggestions
-                      e.preventDefault() // Empêche l'envoi immédiat du message
+                      setSelectedIndex(-1)
+                      setSuggestions([])
+                      e.preventDefault()
                     }
                   }
                 } else if (e.key === 'Enter') {
