@@ -194,14 +194,13 @@ const Chat: React.FC<ChatProps> = ({
             ['SuperAdmin', 'Admin', 'Developer', 'Moderator', 'ModeratorTest'].includes(userRole as string)))) && (
         <div id="block_chat_post">
           <div className="chat_send">
-            <TextField
-              fullWidth
+            <input
+              type="text"
               id="block_chat_message"
               className="mousetrap"
-              variant="outlined"
               placeholder="Écrire un message..."
               value={newMessage}
-              inputRef={inputRef}
+              ref={inputRef}
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={(e) => {
                 if (suggestions.length > 0) {
@@ -229,11 +228,9 @@ const Chat: React.FC<ChatProps> = ({
                   handleSendMessage()
                 }
               }}
-              inputProps={{
-                style: { zIndex: 1, height: 'auto' },
-                maxLength: 500,
-                autoFocus: true,
-              }}
+              style={{ width: '100%', zIndex: 5, padding: '4xp' }}
+              maxLength={500}
+              autoFocus
               autoComplete="off"
             />
           </div>
