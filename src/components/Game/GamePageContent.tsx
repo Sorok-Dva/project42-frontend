@@ -168,6 +168,7 @@ const GamePage = () => {
   }
 
   if (gameError) {
+    const isLeaveMessage = gameError.includes('Vous avez bien quitté la partie.')
     return (
       <Box
         className="game-page"
@@ -191,10 +192,13 @@ const GamePage = () => {
             boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)'
           }}
         >
-          <Typography variant="h5" gutterBottom>
-            ❌Erreur
-          </Typography>
-          <div className="alert alert-danger mt-2">
+          { !isLeaveMessage && (
+            <Typography variant="h5" gutterBottom>
+              ❌Erreur
+            </Typography>
+          )}
+
+          <div className={`alert alert-${isLeaveMessage ? 'success' : 'danger'} mt-2`}>
             <Typography variant="body1" sx={{ marginBottom: '1rem' }}>
               {gameError}
             </Typography>
