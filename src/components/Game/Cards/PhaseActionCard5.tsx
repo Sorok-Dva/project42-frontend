@@ -113,7 +113,7 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
       )}
 
       {deathElixirUsed && lifeElixirUsed && (
-        <Typography variant="subtitle1" sx={{ mt: 4 }}>Vous avez utilisé tout vos elixirs.</Typography>
+        <Typography variant="subtitle1" sx={{ mt: 4 }}>Vous avez utilisé tout vos élixirs.</Typography>
       )}
     </Box>
   )
