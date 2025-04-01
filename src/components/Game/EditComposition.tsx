@@ -329,8 +329,8 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
           </div>
           <div className="compo_category">
             <h3>Innocents</h3>
-            {/* @TODO make 8*/}
-            {renderCards([1, 3, 4, 5, 6, 7, 10, 12, 13, 16, 17, 22, 23])}
+            {/* @TODO make 8 & 12 */}
+            {renderCards([1, 3, 4, 5, 6, 7, 10, 13, 16, 17, 22, 23])}
           </div>
         </div>
       </div>
