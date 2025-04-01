@@ -8,6 +8,7 @@ import Login from 'components/Layouts/navbar/Login'
 import logo from 'assets/img/logo2.png'
 import { Img as Image } from 'react-image'
 import { useUser } from 'contexts/UserContext'
+import Friends from 'components/Layouts/navbar/Friends'
 
 const menuData = [
   {
@@ -210,6 +211,7 @@ const Navbar: React.FC<{
               { !user ? (<Login />)
                 :(
                   <>
+                    <Friends />
                     <Notification />
                     <Profile />
                   </>
