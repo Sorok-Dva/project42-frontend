@@ -90,3 +90,13 @@ code {
     opacity: 1;
   }
 }
+
+.bg-discord {
+  background-color: #5865F2;
+}
+.bg-discord-dark {
+  background-color: #4752C4;
+}
+.focus\:ring-discord:focus {
+  --tw-ring-color: rgba(88, 101, 242, 0.5);
+}
