@@ -60,14 +60,14 @@ const AppContent: React.FC = () => {
   const isAdminRoute = location.pathname.startsWith('/admin')
   const isGameRoute = location.pathname.startsWith('/game')
 
-  if (serverMaintenance) {
+  if (serverMaintenance && !user?.isAdmin) {
     return (
       <Routes>
-        <Route path="/maintenance" element={<MaintenancePage />} />
-        <Route path="*" element={<Navigate to="/maintenance" />} />
+        <Route path="*" element={<MaintenancePage />} />
       </Routes>
     )
   }
+
   return (
     <>
       {!isGameRoute && (<Navbar isTransparent={true} />) }
