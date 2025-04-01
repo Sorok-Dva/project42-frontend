@@ -15,6 +15,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { UserProvider, useUser } from 'contexts/UserContext'
 import { AuthProvider } from 'contexts/AuthContext'
 import { ErrorProvider, useError } from 'contexts/ErrorContext'
+import { MaintenanceProvider, useMaintenance } from 'contexts/MaintenanceContext'
 
 import GoogleTagManager from 'components/GoogleTagManager'
 import Navbar from 'components/Layouts/navbar/Navbar'
@@ -48,14 +49,25 @@ import { SocketProvider } from 'contexts/SocketContext'
 import ModalProvider from 'contexts/ModalProvider'
 import GlobalClickListener from 'components/GlobalClickListener'
 import SplitTextAnimations from 'utils/SplitTextAnim'
+import MaintenancePage from 'pages/Maintenance'
+
 
 const AppContent: React.FC = () => {
+  const { serverMaintenance } = useMaintenance()
   const { serverError } = useError()
   const { user } = useUser()
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
   const isGameRoute = location.pathname.startsWith('/game')
 
+  if (serverMaintenance) {
+    return (
+      <Routes>
+        <Route path="/maintenance" element={<MaintenancePage />} />
+        <Route path="*" element={<Navigate to="/maintenance" />} />
+      </Routes>
+    )
+  }
   return (
     <>
       {!isGameRoute && (<Navbar isTransparent={true} />) }
@@ -125,22 +137,24 @@ const App: React.FC = () => {
   }, [])
 
   return (
-    <ErrorProvider>
-      <AuthProvider>
-        <UserProvider>
-          <SocketProvider>
-            <ModalProvider>
-              <GlobalClickListener />
-              <GoogleTagManager />
-              <Notifier />
-              <AppContent />
-              <ScrollToTop />
-              <SplitTextAnimations />
-            </ModalProvider>
-          </SocketProvider>
-        </UserProvider>
-      </AuthProvider>
-    </ErrorProvider>
+    <MaintenanceProvider>
+      <ErrorProvider>
+        <AuthProvider>
+          <UserProvider>
+            <SocketProvider>
+              <ModalProvider>
+                <GlobalClickListener />
+                <GoogleTagManager />
+                <Notifier />
+                <AppContent />
+                <ScrollToTop />
+                <SplitTextAnimations />
+              </ModalProvider>
+            </SocketProvider>
+          </UserProvider>
+        </AuthProvider>
+      </ErrorProvider>
+    </MaintenanceProvider>
   )
 }
 
