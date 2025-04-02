@@ -44,7 +44,7 @@ const Friends: React.FC = () => {
     return () => {
       window.removeEventListener('friendsChanged', fetchFriendships)
     }
-  }, [])
+  }, [open])
 
   const fetchFriendships = async () => {
     try {

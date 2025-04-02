@@ -67,7 +67,7 @@ const Notifications: React.FC = () => {
     if (token && token !== 'undefined') {
       fetchNotifications()
     }
-  }, [token])
+  }, [token, open])
 
   // Marquer une notification comme lue
   const markAsRead = async (id: number) => {
