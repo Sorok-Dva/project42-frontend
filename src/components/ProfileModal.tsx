@@ -10,6 +10,7 @@ import RenderGameLine from 'components/Profile/RenderGameLine'
 import AchievementBadge from 'components/Profile/AchievementBadge'
 import Actions from './Profile/Actions'
 import Details from './Profile/Details'
+import Activity from 'components/Profile/Activity'
 
 interface AchievementResult { [favorite: number]:  {
     id: number
@@ -71,6 +72,10 @@ export interface User {
       nextLevelTo?: number
     }]
   },
+  activity: {
+    state: 'ingame' | 'pregame' | 'spectator' | 'none' | string;
+    gameId?: number;
+  }
   createdAt: Date;
 }
 
@@ -367,6 +372,9 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
               </div>
             </div>
 
+            { user && relation !== 'me' && user.activity.state !== 'none' && (
+              <Activity user={user} relation={relation} />
+            )}
             { user && (
               <div className="profile-tabs">
                 <Details user={user} relation={relation} />
