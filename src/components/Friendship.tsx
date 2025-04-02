@@ -123,7 +123,7 @@ const FriendshipComponent: React.FC<FriendshipProps> = ({
             src={friendship.avatar}
             alt={`Avatar de ${friendship.nickname}`}
             data-profile={friendship.nickname}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: 'pointer', border: `2px solid ${friendship.isOnline ? 'green' : 'red'}` }}
           />
         </div>
         <div className="card-info">

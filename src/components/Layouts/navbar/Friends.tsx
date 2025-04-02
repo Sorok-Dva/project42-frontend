@@ -17,6 +17,7 @@ export interface Friendship {
   status: 'pending' | 'refused' | 'accepted'
   requesterId: number
   addresseeId: number
+  isOnline: boolean
 }
 
 interface User {
@@ -29,6 +30,8 @@ const Friends: React.FC = () => {
   const { open, ref, toggleOpen } = useDropdown()
 
   const [friendships, setFriendships] = useState<Friendship[]>([])
+  const [acceptedFriends, setAcceptedFriends] = useState<Friendship[]>([])
+  const [onlineFriends, setOnlineFriends] = useState<Friendship[]>([])
   const [showAddFriendInput, setShowAddFriendInput] = useState<boolean>(false)
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [searchResults, setSearchResults] = useState<User[]>([])
@@ -51,6 +54,8 @@ const Friends: React.FC = () => {
         },
       })
       setFriendships(response.data)
+      setAcceptedFriends(response.data.filter(f => f.status === 'accepted'))
+      setOnlineFriends(response.data.filter(f => f.isOnline && f.status === 'accepted'))
     } catch (error) {
       console.error('Erreur lors du chargement des amitiés', error)
     }
@@ -121,11 +126,11 @@ const Friends: React.FC = () => {
 
   return (
     <div ref={ref} className="position-relative flex-shrink-0">
-      <Button onClick={toggleOpen} classes="ntf-btn fs-2xl">
+      <Button onClick={toggleOpen} classes="ntf-btn fs-2xl" badgeCount={onlineFriends.length} type='friends'>
         <i className="ti ti-users"></i>
       </Button>
       <div className={clsx('notification-area p-4', { open: open })} data-lenis-prevent>
-        <h3>Mes amis</h3>
+        <h3>Mes amis ({onlineFriends.length} / {acceptedFriends.length})</h3>
         <hr />
         <div className="notification-card d-grid gap-4" data-tilt>
           {friendships.length === 0 && <h5>Vous n'avez pas encore d'amis.</h5>}
