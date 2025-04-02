@@ -82,7 +82,7 @@ interface ProfileModalProps {
 const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
   const { token } = useAuth()
   const [user, setUser] = useState<User | null>(null)
-  const [selfProfile, setSelfProfile] = useState<boolean>(false)
+  const [relation, setRelation] = useState<'me' | 'friend' | 'waiting' | 'none'>('none')
   const [error, setError] = useState<string | null>(null)
   const [role, setRole] = useState<{ name: string, color: string } | null>(null)
 
@@ -93,7 +93,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
           headers: { Authorization: `Bearer ${token}` },
         } : {})
         setUser(response.data.user)
-        setSelfProfile(response.data.self)
+        setRelation(response.data.relation)
         setRole(rolify(response.data.user.role.name))
       } catch (e: any) {
         if (e.response?.data.error) {
@@ -230,7 +230,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                             </div>
                           </div>
                         ))
-                      ) : selfProfile ? (
+                      ) : relation === 'me' ? (
                         <p>
                           Tu n'as pas encore indiqué quels étaient tes badges favoris.
                           Fais le vite dans l'onglet <strong>Badges et titre</strong> de ton Compte !
@@ -245,7 +245,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                     <div className="profil-info-game">
                       {/* Dernières parties */}
                       <div className="resume-last-game">
-                        {user.playedGames === 0 && selfProfile ? (
+                        {user.playedGames === 0 && relation === 'me' ? (
                           <p>
                               Tu viens seulement de débarquer dans la station Mir.
                             <br />
@@ -315,7 +315,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                               </li>
                             </ul>
                           </a>
-                        ) : selfProfile ? (
+                        ) : relation === 'me' ? (
                         // C'est mon profil et je n'ai pas de station
                           <div>
                             <p>
@@ -346,7 +346,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                       </div>
                     </div>
 
-                    <Actions data={user} relation='me' />
+                    <Actions data={user} relation={relation} />
                   </>
                 ): (
                   <div
@@ -369,7 +369,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
 
             { user && (
               <div className="profile-tabs">
-                <Details user={user} relation="me" />
+                <Details user={user} relation={relation} />
               </div>
             )}
           </div>
