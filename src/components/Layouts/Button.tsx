@@ -7,9 +7,10 @@ type BtnProps = {
   children: React.ReactNode;
   onClick?: () => void;
   badgeCount?: number;
+  type?: 'friends' | 'notifications';
 };
 
-const Button = ({ classes, children, onClick, badgeCount = 0 }: BtnProps) => {
+const Button = ({ classes, children, onClick, badgeCount = 0, type }: BtnProps) => {
   const [x, setX] = useState(0)
   const [y, setY] = useState(0)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -41,7 +42,7 @@ const Button = ({ classes, children, onClick, badgeCount = 0 }: BtnProps) => {
           left: `${left}px`,
           width: `${badgeSize}px`,
           height: `${badgeSize}px`,
-          backgroundColor: 'red',
+          backgroundColor: type === 'friends' ? 'green' : 'red',
           color: 'white',
           borderRadius: '50%',
           display: 'flex',
