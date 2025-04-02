@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react'
 import { toast } from 'react-toastify'
 import { Link } from 'react-router-dom'
 
+const notifSound = new Audio('/assets/sounds/notif.mp3')
+
 const LevelUpNotif = ({ title }: { title: string }) => (
   <Link to="/user/profile">
     <div className="msg-container">
@@ -107,6 +109,8 @@ const Notifications = ({ token }: { token: string }) => {
               if (data.title.includes('ami')) {
                 window.dispatchEvent(new CustomEvent('friendsChanged'))
               }
+              notifSound.currentTime = 0
+              notifSound.play().catch(() => {})
               break
             default:
               console.warn('Unhandled event type:', data.event)
