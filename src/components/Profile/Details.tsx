@@ -207,7 +207,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, relation }) => {
             style={{ display: activeTab === 'badge' ? 'block' : 'none' }}
           >
             <div className="achievements">
-              {badgesArray.length > 0 ? (
+              {badgesArray.length > 0 && badgesArray.filter((b: any) => b.level > 0).length !== 0 ? (
                 badgesArray.map((a: any, index: number) => {
                   if (a.level > 0) {
                     return (
