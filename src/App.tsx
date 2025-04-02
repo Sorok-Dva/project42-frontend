@@ -113,7 +113,7 @@ const AppContent: React.FC = () => {
         )}
       </Routes>
       {(!isAdminRoute && !isGameRoute) && <Footer />}
-      <ToastContainer position="bottom-right" autoClose={5000} hideProgressBar />
+      <ToastContainer position="bottom-right" autoClose={5000} hideProgressBar style={{ zIndex: 9999 }} />
     </>
   )
 }
