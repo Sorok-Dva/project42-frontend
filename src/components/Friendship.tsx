@@ -122,6 +122,8 @@ const FriendshipComponent: React.FC<FriendshipProps> = ({
             className="w-100 rounded-circle"
             src={friendship.avatar}
             alt={`Avatar de ${friendship.nickname}`}
+            data-profile={friendship.nickname}
+            style={{ cursor: 'pointer' }}
           />
         </div>
         <div className="card-info">
