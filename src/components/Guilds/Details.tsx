@@ -44,7 +44,7 @@ const GuildDetails: React.FC<GuildDetailsProps> = ({
 
   useEffect(() => {
     if (user?.guildMembership?.guild.id === guild.id) setBelongsToGuild(true)
-  }, [])
+  }, [user, guild])
 
   useEffect(() => {
     const fetchPermissions = async () => {
