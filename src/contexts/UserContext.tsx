@@ -27,6 +27,7 @@ export interface User {
   validated: boolean;
   lastNicknameChange: Date;
   level: number;
+  points?: number;
   title: string;
   signature?: string;
   premium?: Date | null;
