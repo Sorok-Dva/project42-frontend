@@ -162,18 +162,20 @@ const GuildDetails: React.FC<GuildDetailsProps> = ({
                   Annonces
                 </button>
               </li>
-              <li className="nav-item" role="presentation">
-                <button
-                  className="nav-link"
-                  id="parent-tab1"
-                  data-bs-toggle="pill"
-                  data-bs-target="#pills-parent4"
-                  role="tab"
-                  aria-selected="true"
-                >
-                  Candidatures
-                </button>
-              </li>
+              { belongsToGuild && (
+                <li className="nav-item" role="presentation">
+                  <button
+                    className="nav-link"
+                    id="parent-tab1"
+                    data-bs-toggle="pill"
+                    data-bs-target="#pills-parent4"
+                    role="tab"
+                    aria-selected="true"
+                  >
+                    Candidatures
+                  </button>
+                </li>
+              )}
             </ul>
             <div className="tab-content" id="pills-tabContent">
               <div
@@ -219,70 +221,72 @@ const GuildDetails: React.FC<GuildDetailsProps> = ({
               <div className="tab-pane fade" id="pills-parent3" role="tabpanel">
 
               </div>
-              <div
-                className="tab-pane fade show"
-                id="pills-parent4"
-                role="tabpanel"
-              >
-                <div className="player-list-wrapper">
-                  <ul className="player-list d-grid gap-6">
-                    { applications.length === 0 && (
-                      <li className="d-between bgn-4 py-sm-4 py-3 px-sm-8 px-3 rounded">
-                        <div className="d-flex gap-3 align-items-center">
-                          <h2>Aucune candidatures</h2>
-                        </div>
-                      </li>
-                    )}
-                    { applications.map(application => {
-                      return (
-                        <li key={application.userId} className="d-between bgn-4 py-sm-4 py-3 px-sm-8 px-3 rounded">
+              { belongsToGuild && (
+                <div
+                  className="tab-pane fade show"
+                  id="pills-parent4"
+                  role="tabpanel"
+                >
+                  <div className="player-list-wrapper">
+                    <ul className="player-list d-grid gap-6">
+                      { applications.length === 0 && (
+                        <li className="d-between bgn-4 py-sm-4 py-3 px-sm-8 px-3 rounded">
                           <div className="d-flex gap-3 align-items-center">
-                            <div className="player-img">
-                              <Image
-                                className="rounded-circle"
-                                src={application.user.avatar}
-                                alt="player"
-                                style={{ width: '50px'}}
-                              />
-                            </div>
-                            <h5 className="player-name tcn-1 cursor-pointer" data-profile={ application.user.nickname }>{ application.user.nickname }</h5>
-                            ({ application.user.points} points)
-                            { application.motivationText && (
-                              <>
-                                <span
-                                  data-tooltip-html={`<strong>Motivation :</strong> ${application.motivationText}`}
-                                  data-tooltip-id={`motivation_${application.id}`}
-                                >
-                                  <FontAwesomeIcon icon={faCommentDots} />
-                                  <Tooltip id={`motivation_${application.id}`} />
-                                </span>
-                              </>
-                            )}
-                          </div>
-                          <div className="player-type">
-                            { permissions.level > 1 && (
-                              <>
-                                <Button
-                                  className="btn btn-success"
-                                  onClick={() => handleAcceptApplication(application.id, true, application.user.nickname)}
-                                >
-                                  Accepter
-                                </Button>
-                                <Button
-                                  className="btn btn-danger"
-                                  onClick={() => handleAcceptApplication(application.id, false, application.user.nickname)}
-                                >
-                                  Refuser
-                                </Button>
-                              </>
-                            )}
+                            <h2>Aucune candidatures</h2>
                           </div>
                         </li>
-                      )
-                    })}
-                  </ul>
+                      )}
+                      { applications.map(application => {
+                        return (
+                          <li key={application.userId} className="d-between bgn-4 py-sm-4 py-3 px-sm-8 px-3 rounded">
+                            <div className="d-flex gap-3 align-items-center">
+                              <div className="player-img">
+                                <Image
+                                  className="rounded-circle"
+                                  src={application.user.avatar}
+                                  alt="player"
+                                  style={{ width: '50px'}}
+                                />
+                              </div>
+                              <h5 className="player-name tcn-1 cursor-pointer" data-profile={ application.user.nickname }>{ application.user.nickname }</h5>
+                              ({ application.user.points} points)
+                              { application.motivationText && (
+                                <>
+                                  <span
+                                    data-tooltip-html={`<strong>Motivation :</strong> ${application.motivationText}`}
+                                    data-tooltip-id={`motivation_${application.id}`}
+                                  >
+                                    <FontAwesomeIcon icon={faCommentDots} />
+                                    <Tooltip id={`motivation_${application.id}`} />
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                            <div className="player-type">
+                              { permissions.level > 1 && (
+                                <>
+                                  <Button
+                                    className="btn btn-success"
+                                    onClick={() => handleAcceptApplication(application.id, true, application.user.nickname)}
+                                  >
+                                    Accepter
+                                  </Button>
+                                  <Button
+                                    className="btn btn-danger"
+                                    onClick={() => handleAcceptApplication(application.id, false, application.user.nickname)}
+                                  >
+                                    Refuser
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
