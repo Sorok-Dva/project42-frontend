@@ -23,12 +23,12 @@ const menuData = [
   },
   {
     id: 3,
-    title: 'Guildes',
+    title: 'Stations',
     submenus: [
       {
         id: 1,
         title: 'Liste',
-        url: '/guilds/',
+        url: '/stations/',
       },
     ],
   },
@@ -44,7 +44,7 @@ const menuData = [
       {
         id: 2,
         title: 'Guildes',
-        url: '/leaderboard/guilds',
+        url: '/leaderboard/stations',
       },
     ],
   },
