@@ -172,7 +172,7 @@ const GuildDetails: React.FC<GuildDetailsProps> = ({
                     role="tab"
                     aria-selected="true"
                   >
-                    Candidatures
+                    Candidatures { applications.length > 0 ? (<b>({applications.length})</b>) : `(${applications.length})`}
                   </button>
                 </li>
               )}
