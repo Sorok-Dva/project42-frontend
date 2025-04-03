@@ -7,6 +7,9 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { Button } from '@mui/material'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCommentDots } from '@fortawesome/free-solid-svg-icons'
+import { Tooltip } from 'react-tooltip'
 
 interface GuildDetailsProps {
   guild: Guild
@@ -25,7 +28,7 @@ export interface GuildApplication {
   id: number;
   userId: number;
   guildId: number;
-  motivation: string;
+  motivationText: string;
   user: User;
 }
 
@@ -83,9 +86,36 @@ const GuildDetails: React.FC<GuildDetailsProps> = ({
     fetchApplications()
   }, [])
 
-  const handleAcceptApplication = (userId: number) => {
-    alert(userId)
+  const handleAcceptApplication = async (id: number, isAccepted: boolean, nickname: string) => {
+    if (permissions.level <= 1) return
+    try {
+      const response = await axios.get(`/api/guilds/${guild.id}/application/${id}/${isAccepted ? 'accept' : 'refuse'}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.status === 200) {
+        setApplications(applications.filter(a => a.id !== id))
+        toast.success(`Vous avez ${isAccepted ? 'accepté' : 'refusé'} la candidature de ${nickname} avec succès.`, ToastDefaultOptions)
+        if (isAccepted) window.dispatchEvent(new CustomEvent('reloadGuildData'))
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorData = await error?.response?.data
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          errorData.errors.forEach((error : { msg : string }) => {
+            toast.error(error.msg, ToastDefaultOptions)
+          })
+        } else if (errorData.error) {
+          toast.error(errorData.error, ToastDefaultOptions)
+        }
+      } else {
+        toast.error('Une erreur est survenue.', ToastDefaultOptions)
+      }
+    }
   }
+
   return (
     <section className="player-details-section pb-120">
       <div className="container">
@@ -176,6 +206,7 @@ const GuildDetails: React.FC<GuildDetailsProps> = ({
                             <h5 className="player-name tcn-1 cursor-pointer" data-profile={ member.user.nickname }>{ member.user.nickname }</h5>
                             <div className="player-badge">
                               { isLeader && (<i className="ti ti-crown fs-2xl" style={{ color: 'gold' }}></i>)}
+                              ({ member.user.points} points)
                             </div>
                           </div>
                           <span className="player-type">{ guildRoles[member.role] }</span>
@@ -216,19 +247,30 @@ const GuildDetails: React.FC<GuildDetailsProps> = ({
                             </div>
                             <h5 className="player-name tcn-1 cursor-pointer" data-profile={ application.user.nickname }>{ application.user.nickname }</h5>
                             ({ application.user.points} points)
+                            { application.motivationText && (
+                              <>
+                                <span
+                                  data-tooltip-html={`<strong>Motivation :</strong> ${application.motivationText}`}
+                                  data-tooltip-id={`motivation_${application.id}`}
+                                >
+                                  <FontAwesomeIcon icon={faCommentDots} />
+                                  <Tooltip id={`motivation_${application.id}`} />
+                                </span>
+                              </>
+                            )}
                           </div>
                           <div className="player-type">
                             { permissions.level > 1 && (
                               <>
                                 <Button
-                                  className="button button-success"
-                                  onClick={() => handleAcceptApplication(application.id)}
+                                  className="btn btn-success"
+                                  onClick={() => handleAcceptApplication(application.id, true, application.user.nickname)}
                                 >
                                   Accepter
                                 </Button>
                                 <Button
-                                  className="button button-danger"
-                                  onClick={() => handleAcceptApplication(application.id)}
+                                  className="btn btn-danger"
+                                  onClick={() => handleAcceptApplication(application.id, false, application.user.nickname)}
                                 >
                                   Refuser
                                 </Button>

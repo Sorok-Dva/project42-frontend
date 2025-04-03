@@ -15,6 +15,7 @@ const GuildDetailsView = () => {
   useEffect(() => {
     const fetchGuild = async () => {
       try {
+        setLoading(true)
         const response = await axios.get<Guild>(`/api/guilds/info/${tag}`)
         setGuild(response.data)
       } catch (err: any) {
@@ -25,6 +26,12 @@ const GuildDetailsView = () => {
     }
 
     fetchGuild()
+
+    window.addEventListener('reloadGuildData', fetchGuild)
+
+    return () => {
+      window.removeEventListener('reloadGuildData', fetchGuild)
+    }
   }, [])
   return (
     <>
