@@ -1,0 +1,18 @@
+.guilds-page {
+  .guilds-create {
+    width: 500px;
+    margin: 10px auto;
+    padding: 15px;
+    color: #fff;
+    text-align: center;
+
+    p {
+      margin: .8em 0;
+    }
+
+    button.disabled {
+      background-color: rgba(0, 0, 0, .5);
+      cursor: not-allowed;
+    }
+  }
+}
