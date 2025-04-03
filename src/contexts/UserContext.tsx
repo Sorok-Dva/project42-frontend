@@ -29,10 +29,20 @@ export interface User {
   level: number;
   title: string;
   signature?: string;
-  premium?: Date;
+  premium?: Date | null;
   token: string;
   behaviorPoints?: number;
   moderatorPoints?: number;
+  guildMembership?: {
+    role: string;
+    guild: {
+      id: number;
+      name: string;
+      tag: string;
+      leader: number;
+      banner: string;
+    }
+  },
 }
 
 interface UserContextType {
