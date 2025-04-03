@@ -17,6 +17,8 @@ import { AuthProvider } from 'contexts/AuthContext'
 import { ErrorProvider, useError } from 'contexts/ErrorContext'
 import { MaintenanceProvider, useMaintenance } from 'contexts/MaintenanceContext'
 
+import Bootstrap from 'components/Layouts/Bootstrap'
+
 import GoogleTagManager from 'components/GoogleTagManager'
 import Navbar from 'components/Layouts/navbar/Navbar'
 import Footer from 'components/Layouts/Footer'
@@ -30,7 +32,6 @@ import Login from 'components/Auth/LoginForm'
 import Register from 'pages/Register'
 import RecoverPassword from 'pages/RecoverPassword'
 import TOSPage from 'pages/TermsOfService'
-import UserProfile from 'pages/UserProfile'
 import AdminLayout from 'layouts/Admin'
 import UserList from 'pages/admin/users/UserList'
 import AdminUserProfile from 'pages/admin/users/UserProfile'
@@ -50,7 +51,8 @@ import ModalProvider from 'contexts/ModalProvider'
 import GlobalClickListener from 'components/GlobalClickListener'
 import SplitTextAnimations from 'utils/SplitTextAnim'
 import MaintenancePage from 'pages/Maintenance'
-
+import Guilds from 'pages/GuildsList'
+import Guild from 'pages/GuildPage'
 
 const AppContent: React.FC = () => {
   const { serverMaintenance } = useMaintenance()
@@ -103,11 +105,12 @@ const AppContent: React.FC = () => {
               </>
             )}
             <Route path="/terms-of-service" element={<TOSPage />} />
-            <Route path="/user/:nickname" element={<UserProfile />} />
             <Route path="/users/validate/:token" element={<ValidateUser />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/community/leaderboard" element={<Leaderboard />} />
             <Route path="/game/:id" element={<GamePage />} />
+            <Route path="/stations" element={<Guilds />} />
+            <Route path="/station/:id" element={<Guild />} />
             <Route path="*" element={<NotFound />} />
           </>
         )}
@@ -143,12 +146,14 @@ const App: React.FC = () => {
           <UserProvider>
             <SocketProvider>
               <ModalProvider>
-                <GlobalClickListener />
-                <GoogleTagManager />
-                <Notifier />
-                <AppContent />
-                <ScrollToTop />
-                <SplitTextAnimations />
+                <Bootstrap>
+                  <GlobalClickListener />
+                  <GoogleTagManager />
+                  <Notifier />
+                  <AppContent />
+                  <ScrollToTop />
+                  <SplitTextAnimations />
+                </Bootstrap>
               </ModalProvider>
             </SocketProvider>
           </UserProvider>
