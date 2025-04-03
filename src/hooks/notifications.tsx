@@ -90,7 +90,7 @@ const Notifications = ({ token }: { token: string }) => {
           if (data.token === token) {
             // Incrémente le compteur à chaque notification reçue
             setNotificationCount(prev => prev + 1)
-
+            window.dispatchEvent(new CustomEvent('notifsUpdated'))
             switch (data.event) {
             case 'levelUp':
               toast.success(<LevelUpNotif title={data.title} />)

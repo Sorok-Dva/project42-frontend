@@ -66,6 +66,12 @@ const Notifications: React.FC = () => {
   useEffect(() => {
     if (token && token !== 'undefined') {
       fetchNotifications()
+
+      window.addEventListener('notifsUpdated', fetchNotifications)
+
+      return () => {
+        window.removeEventListener('notifsUpdated', fetchNotifications)
+      }
     }
   }, [token, open])
 
