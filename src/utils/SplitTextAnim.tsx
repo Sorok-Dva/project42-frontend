@@ -4,7 +4,11 @@ import { useEffect } from 'react'
 import SplitType from 'split-type'
 import { useLocation } from 'react-router-dom'
 
-const SplitTextAnimations = () => {
+interface SplitTextAnimationsProps {
+  trigger?: number
+}
+
+const SplitTextAnimations = ({ trigger }: SplitTextAnimationsProps) => {
   const location = useLocation()
   const pathname = location.pathname
 
@@ -12,9 +16,10 @@ const SplitTextAnimations = () => {
     if (window.innerWidth >= 992) {
       gsap.registerPlugin(ScrollTrigger)
 
-      // Destroy all existing ScrollTrigger instances
+      // Détruire tous les ScrollTrigger existants pour éviter les doublons
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
 
+      // Appliquer SplitType sur tous les éléments ayant la classe .title-anim
       new SplitType('.title-anim', {
         types: ['chars', 'words'],
       })
@@ -22,7 +27,6 @@ const SplitTextAnimations = () => {
       const titleAnims = document.querySelectorAll('.title-anim')
       titleAnims.forEach((titleAnim) => {
         const charElements = titleAnim.querySelectorAll('.char')
-
         charElements.forEach((char, index) => {
           const tl2 = gsap.timeline({
             scrollTrigger: {
@@ -47,12 +51,10 @@ const SplitTextAnimations = () => {
       })
 
       const titleElements = document.querySelectorAll('.title-anim')
-
       titleElements.forEach((el) => {
-        const triggerEl = el as gsap.DOMTarget
-        gsap.to(triggerEl, {
+        gsap.to(el, {
           scrollTrigger: {
-            trigger: triggerEl,
+            trigger: el,
             start: 'top 100%',
             markers: false,
             onEnter: () => {
@@ -64,8 +66,7 @@ const SplitTextAnimations = () => {
         })
       })
     }
-  }, [pathname])
-
+  }, [pathname, trigger])
   return null
 }
 
