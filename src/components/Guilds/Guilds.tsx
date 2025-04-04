@@ -24,6 +24,7 @@ export interface Guild {
   money: number;
   createdAt: Date;
   members: {
+    isOnline: boolean;
     id: number;
     userId: number;
     role: string;
