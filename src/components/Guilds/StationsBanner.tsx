@@ -3,7 +3,7 @@ import { Img as Image } from 'react-image'
 
 const Banner = () => {
   return (
-    <section className="teams-section pb-sm-10 pb-6 pt-120 mt-lg-0 mt-sm-15 mt-10">
+    <section className="teams-section pb-sm-10 pb-6 mt-lg-0 mt-sm-15 mt-10">
       <div className="container">
         <div className="row">
           <div className="col-12">
