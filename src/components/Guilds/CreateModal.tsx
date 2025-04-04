@@ -11,6 +11,7 @@ import {
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { useAuth } from 'contexts/AuthContext'
+import { useUser } from 'contexts/UserContext'
 import { useNavigate } from 'react-router-dom'
 
 interface CreateGuildModalProps {
@@ -20,6 +21,7 @@ interface CreateGuildModalProps {
 
 const CreateGuildModal: FC<CreateGuildModalProps> = ({ canCreate, onClose }) => {
   const { token } = useAuth()
+  const { reloadUser } = useUser()
   const navigate = useNavigate()
 
   const [error, setError] = useState<string | null>(null)
@@ -58,6 +60,7 @@ const CreateGuildModal: FC<CreateGuildModalProps> = ({ canCreate, onClose }) => 
         onClose()
         toast.success(`Votre station [${tag}] ${name} a été créée avec succès !`, ToastDefaultOptions)
 
+        await reloadUser(true)
         navigate(`/station/${tag}`)
       }
     } catch (error) {
