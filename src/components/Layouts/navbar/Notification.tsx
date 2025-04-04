@@ -24,17 +24,7 @@ const Notifications: React.FC = () => {
   const { open, ref, toggleOpen } = useDropdown()
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [loading, setLoading] = useState<boolean>(false)
-  const baseTitleRef = useRef(document.title)
   const [notificationCount, setNotificationCount] = useState<number>(0)
-
-  // Actualiser le titre de l'onglet en fonction du nombre de notifications non lues
-  useEffect(() => {
-    if (notificationCount > 0) {
-      document.title = `(${notificationCount}) ${baseTitleRef.current}`
-    } else {
-      document.title = baseTitleRef.current
-    }
-  }, [notificationCount])
 
   // Réinitialiser le compteur lorsque la page redevient active
   useEffect(() => {
