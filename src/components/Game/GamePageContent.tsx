@@ -349,7 +349,7 @@ const GamePage = () => {
             height="85vh"
           >
             {loading ? (
-              <Container className="loader-container">
+              <Container className="loader-container loader-container-two">
                 <div className="spinner-wrapper">
                   <Spinner className="custom-spinner" />
                   <div className="loading-text">Chargement du chat...</div>

@@ -2,6 +2,14 @@
     align-items: center;
 }
 
+.loader-container-two {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}
+
 .spinner-container {
     display: flex;
     justify-content: center;
