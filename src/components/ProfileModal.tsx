@@ -11,6 +11,7 @@ import AchievementBadge from 'components/Profile/AchievementBadge'
 import Actions from './Profile/Actions'
 import Details from './Profile/Details'
 import Activity from 'components/Profile/Activity'
+import { Tooltip } from 'react-tooltip'
 
 interface AchievementResult { [favorite: number]:  {
     id: number
@@ -54,6 +55,7 @@ export interface User {
   guild: {
     id: number;
     name: string;
+    banner: string | null;
     tag: string;
     picture: string;
     border: string;
@@ -295,7 +297,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                         {user.guild ? (
                           <a
                             className="profile-infos-hamlet"
-                            href={`/station?tag=${user.guild.tag}`}
+                            href={`/station/${user.guild.tag}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
@@ -303,20 +305,23 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                               className={`hamlet-banner ${
                                 user.guild.border ? `hamlet-border-${user.guild.border}` : ''
                               }`}
-                              style={{ backgroundImage: `url(${user.guild.picture})` }}
+                              style={{ backgroundImage: `url(${user.guild.banner ? user.guild.banner : '/img/stations_banner.png'})` }}
                             ></div>
                             <h2>
-                              {user.guild.name} <br />
                               <small>[{user.guild.tag}]</small>
+                              {user.guild.name}
                             </h2>
                             <ul className="hamlet-details">
-                              <li data-tooltip={`Rôle de ${user.nickname} dans sa station`}>
+                              <li
+                                data-tooltip-content={`Rôle de ${user.nickname} dans sa station`}
+                                data-tooltip-id="role-tooltip"
+                              >
                                 <img src="/assets/images/icon-capitaine.png" alt="Rôle" />{' '}
                                 {user.guild.role}
-                                {user.guild.role !== 'maire' && !user.isMale ? 'e' : ''}
+                                <Tooltip id="role-tooltip"/>
                               </li>
                               <li data-tooltip="Joueurs membres de la station">
-                                <img src="/assets/images/icon-people.png" alt="Membres" /> {user.guild.membersCount}/100
+                                <img src="/assets/images/icon-people.png" alt="Membres" /> {user.guild.membersCount}/50
                               </li>
                             </ul>
                           </a>
