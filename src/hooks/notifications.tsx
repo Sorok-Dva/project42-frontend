@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { toast } from 'react-toastify'
 import { Link } from 'react-router-dom'
+import { useUser } from 'contexts/UserContext'
 
 const notifSound = new Audio('/assets/sounds/notif.mp3')
 
@@ -49,6 +50,7 @@ const DefaultNotif = ({
 )
 
 const Notifications = ({ token }: { token: string }) => {
+  const { reloadUser } = useUser()
   const [notificationCount, setNotificationCount] = useState(0)
   const baseTitleRef = useRef(document.title)
 
@@ -108,6 +110,17 @@ const Notifications = ({ token }: { token: string }) => {
               toast.info(<DefaultNotif title={data.title} message={data.content} />)
               if (data.title.includes('ami')) {
                 window.dispatchEvent(new CustomEvent('friendsChanged'))
+              }
+              if (data.title.includes('été expulsé de ta station')) {
+                reloadUser(true)
+                window.dispatchEvent(new CustomEvent('reloadGuildData'))
+              }
+              if (data.title.includes('candidature a été acceptée')) {
+                reloadUser(true)
+                window.dispatchEvent(new CustomEvent('reloadGuildData'))
+              }
+              if (data.title.includes('veut rejoindre ta station')) {
+                window.dispatchEvent(new CustomEvent('reloadGuildData'))
               }
               notifSound.currentTime = 0
               notifSound.play().catch(() => {})
