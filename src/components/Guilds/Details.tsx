@@ -202,7 +202,8 @@ const GuildDetails: React.FC<GuildDetailsProps> = ({
                                 className="rounded-circle"
                                 src={member.user.avatar}
                                 alt="player"
-                                style={{ width: '50px'}}
+                                style={{ width: '50px', cursor: 'pointer', border: `2px solid ${(member.isOnline || member.userId === user?.id) ? 'green' : 'red'}`}}
+                                data-profile={ member.user.nickname }
                               />
                             </div>
                             <h5 className="player-name tcn-1 cursor-pointer" data-profile={ member.user.nickname }>{ member.user.nickname }</h5>
