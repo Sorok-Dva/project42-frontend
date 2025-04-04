@@ -34,6 +34,7 @@ const GuildDetailsView = () => {
 
     return () => {
       window.removeEventListener('reloadGuildData', fetchGuild)
+      document.title = 'Project 42'
     }
   }, [])
   return (
