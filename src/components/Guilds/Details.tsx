@@ -116,6 +116,37 @@ const GuildDetails: React.FC<GuildDetailsProps> = ({
     }
   }
 
+  const handleKickUser = async (userId: number, nickname: string) => {
+    try {
+      if (confirm('Voulez vous vraiment expulser ce joueur de votre station ?')) {
+        const response = await axios.post(`/api/guilds/${guild.id}/kick/${userId}`, {}, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        if (response.status === 200) {
+          toast.info(`Vous avez bien expulsé ${nickname} de votre station.`, ToastDefaultOptions)
+          window.dispatchEvent(new CustomEvent('reloadGuildData'))
+        }
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorData = await error?.response?.data
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          errorData.errors.forEach((error : { msg : string }) => {
+            toast.error(error.msg, ToastDefaultOptions)
+          })
+        } else if (errorData.error) {
+          toast.error(errorData.error, ToastDefaultOptions)
+        }
+      } else {
+        toast.error('Une erreur est survenue.', ToastDefaultOptions)
+        console.log(error)
+      }
+    }
+  }
+
   return (
     <section className="player-details-section pb-120">
       <div className="container">
@@ -228,7 +259,7 @@ const GuildDetails: React.FC<GuildDetailsProps> = ({
                                   className="btn btn-danger"
                                   data-tooltip-html={`Expulser <b>${member.user.nickname}</b> de la station.`}
                                   data-tooltip-id={`kick_${member.userId}`}
-                                  onClick={() => console.log('ok')}
+                                  onClick={() => handleKickUser(member.userId, member.user.nickname)}
                                 >
                                   <FontAwesomeIcon icon={faSignOutAlt} />
                                 </Button>
