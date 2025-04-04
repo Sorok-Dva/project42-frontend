@@ -178,7 +178,7 @@ const GuildDetails: React.FC<GuildDetailsProps> = ({
                   role="tab"
                   aria-selected="true"
                 >
-                  Membres
+                  Membres ({guild.members.length})
                 </button>
               </li>
               <li className="nav-item" role="presentation">
