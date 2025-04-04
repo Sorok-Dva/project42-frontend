@@ -10,6 +10,7 @@ import { Autoplay, Navigation } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import axios from 'axios'
 import { User } from 'components/ProfileModal'
+import SplitTextAnimations from 'utils/SplitTextAnim'
 
 const TopPlayer: React.FC = () => {
   const [topPlayers, setTopPlayers] = useState<User[]>([])
@@ -63,6 +64,7 @@ const TopPlayer: React.FC = () => {
   }, [])
   return topPlayers && (
     <section className="top-player-section pt-120 pb-120" id="top-player">
+      <SplitTextAnimations trigger={topPlayers.length} />
       {/* <!-- sword animation --> */}
       <div className="sword-area" id="sword-area">
         <Image className="w-100" src={sword} alt="sword" />
@@ -131,7 +133,7 @@ const TopPlayer: React.FC = () => {
                           </span>
                         </div>
                         <div>
-                          <h5 className="player-name tcn-1 mb-1">
+                          <h5 className="player-name tcn-1 mb-1 title-anim">
                             {user.nickname}
                           </h5>
                           <span className="tcn-6 fs-sm">{ user.title }</span>

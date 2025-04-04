@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react'
 import { RoomData } from 'hooks/useGame'
 import axios from 'axios'
 import useDropdown from 'hooks/useDropdown'
+import SplitTextAnimations from 'utils/SplitTextAnim'
 
 
 const Games: React.FC = () => {
@@ -65,6 +66,7 @@ const Games: React.FC = () => {
   }, [])
   return (
     <section className="tournament-section pb-120" id="tournament-hero">
+      <SplitTextAnimations trigger={topRooms.length} />
       {/* <!-- Diamond animation --> */}
       <div className="diamond-area">
         <Image className="w-100" src={diamond} alt="diamond" />
@@ -108,7 +110,7 @@ const Games: React.FC = () => {
                     <div className="tournament-content px-xl-4 px-sm-2">
                       <div className="tournament-info mb-5">
                         <Link to={`/game/${room.id}`} className="d-block">
-                          <h4 className="tournament-title tcn-1 mb-1 cursor-scale growDown">
+                          <h4 className="tournament-title tcn-1 mb-1 cursor-scale growDown title-anim">
                             {room.name}
                           </h4>
                         </Link>
