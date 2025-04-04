@@ -13,7 +13,7 @@ import React, { useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 
 import { UserProvider, useUser } from 'contexts/UserContext'
-import { AuthProvider } from 'contexts/AuthContext'
+import { AuthProvider, useAuth } from 'contexts/AuthContext'
 import { ErrorProvider, useError } from 'contexts/ErrorContext'
 import { MaintenanceProvider, useMaintenance } from 'contexts/MaintenanceContext'
 
@@ -57,6 +57,7 @@ import Guild from 'pages/GuildPage'
 const AppContent: React.FC = () => {
   const { serverMaintenance } = useMaintenance()
   const { serverError } = useError()
+  const { token } = useAuth()
   const { user } = useUser()
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
@@ -81,19 +82,23 @@ const AppContent: React.FC = () => {
           </>
         ) : (
           <>
-            {user ? (
+            {token ? (
               <>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/account/settings" element={<UserSettingsPage />} />
-                { user.isAdmin && (
-                  <Route element={<AdminRoute />}>
-                    <Route path="/admin" element={<AdminLayout />}>
-                      <Route path="home" element={<AdminDashboard />} />
-                      <Route path="users" element={<UserList />} />
-                      <Route path="users/:id" element={<AdminUserProfile />} />
-                      <Route path="alpha-keys" element={<AdminAlphaKeys />} />
-                    </Route>
-                  </Route>
+                { user && (
+                  <>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/account/settings" element={<UserSettingsPage />} />
+                    { user.isAdmin && (
+                      <Route element={<AdminRoute />}>
+                        <Route path="/admin" element={<AdminLayout />}>
+                          <Route path="home" element={<AdminDashboard />} />
+                          <Route path="users" element={<UserList />} />
+                          <Route path="users/:id" element={<AdminUserProfile />} />
+                          <Route path="alpha-keys" element={<AdminAlphaKeys />} />
+                        </Route>
+                      </Route>
+                    )}
+                  </>
                 )}
               </>
             ) : (
