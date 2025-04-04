@@ -62,7 +62,7 @@ const StationBanner: React.FC<StationBannerProps> = ({
   const leaderNickname = guild.members.find(m => guild.leader === m.userId)?.user.nickname || ''
 
   return (
-    <section className="team-profile-banner pb-50 pt-120 mt-lg-0 mt-sm-15 mt-10">
+    <section className="team-profile-banner pb-50 mt-lg-0 mt-sm-15 mt-10">
       <div className="container position-relative">
         <div className="row">
           <div className="col-12">
