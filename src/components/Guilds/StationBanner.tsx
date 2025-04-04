@@ -1,10 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Img as Image } from 'react-image'
 import { Link } from 'react-router-dom'
 import star from 'assets/img/star.png'
 import trophy2 from 'assets/img/tropy2.png'
 import wallet2 from 'assets/img/wallet2.png'
 import { Guild } from './Guilds'
+import { Button } from 'reactstrap'
+import { useUser } from 'contexts/UserContext'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { ToastDefaultOptions } from 'utils/toastOptions'
+import { useAuth } from 'contexts/AuthContext'
+import JoinGuildModal from 'components/Guilds/JoinModal'
 
 interface StationBannerProps {
   guild: Guild
@@ -13,8 +20,43 @@ interface StationBannerProps {
 const StationBanner: React.FC<StationBannerProps> = ({
   guild,
 })=> {
+  const { token } = useAuth()
+  const { user, reloadUser } = useUser()
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false)
+  const [joinGuild, setJoinGuild] = useState<Guild | null>(null)
+
   const goToBack = () => {
     window.history.back()
+  }
+
+  const handleLeaveGuild = async () => {
+    try {
+      if (confirm('Voulez vous vraiment quitter votre station ?')) {
+        const response = await axios.post('/api/guilds/leave', {}, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        if (response.status === 200) {
+          toast.warn('Vous avez bien quitté votre station', ToastDefaultOptions)
+          window.dispatchEvent(new CustomEvent('reloadGuildData'))
+          reloadUser(true)
+        }
+      }
+    } catch (err: any) {
+      console.log('failed to leave guild', err)
+    }
+  }
+
+  const handleJoinGuild = async (guild: Guild) => {
+    if (!user) return
+    setIsJoinModalOpen(true)
+    setJoinGuild(guild)
+  }
+
+  const closeJoinGuild = async () => {
+    setIsJoinModalOpen(false)
   }
 
   const leaderNickname = guild.members.find(m => guild.leader === m.userId)?.user.nickname || ''
@@ -59,18 +101,22 @@ const StationBanner: React.FC<StationBannerProps> = ({
                     </div>
                   </div>
                 </div>
-                <ul className="player-lists d-md-flex align-items-center d-none">
-                  {guild.members.slice(0, 5).map((member) => (
-                    <li key={member.id} className="rounded-circle overflow-hidden me-n4">
-                      <Image src={member.user.avatar} alt={member.user.nickname} />
-                    </li>
-                  ))}
-                  {guild.members.length > 5 && (
-                    <li className="rounded-circle overflow-hidden me-n4">
-                      +{guild.members.length - 5}
-                    </li>
+                <div className="player-lists d-md-flex align-items-center d-none">
+                  { !user?.guildMembership && (
+                    <Button
+                      onClick={() => handleJoinGuild(guild)}
+                      className="btn-half-border position-relative d-inline-block py-2 px-6 rounded-pill z-2">
+                      Demander à rejoindre
+                    </Button>
                   )}
-                </ul>
+                  { user?.guildMembership?.guild.id === guild.id && (
+                    <Button
+                      onClick={handleLeaveGuild}
+                      className="btn-half-border position-relative d-inline-block py-2 px-6 rounded-pill z-2 bgred">
+                      Quitter la station
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -113,6 +159,10 @@ const StationBanner: React.FC<StationBannerProps> = ({
           </div>
         </div>
       </div>
+
+      {isJoinModalOpen && (
+        <JoinGuildModal guild={joinGuild} onClose={closeJoinGuild} />
+      )}
     </section>
   )
 }
