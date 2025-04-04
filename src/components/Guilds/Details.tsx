@@ -8,7 +8,7 @@ import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { Button } from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCommentDots } from '@fortawesome/free-solid-svg-icons'
+import { faArrowAltCircleUp, faCommentDots, faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
 import { Tooltip } from 'react-tooltip'
 
 interface GuildDetailsProps {
@@ -212,7 +212,31 @@ const GuildDetails: React.FC<GuildDetailsProps> = ({
                               ({ member.user.points} points)
                             </div>
                           </div>
-                          <span className="player-type">{ guildRoles[member.role] }</span>
+                          <span className="player-type">
+                            { guildRoles[member.role] }
+                            { (permissions.level > 1 && member.userId !== user?.id) && (
+                              <>
+                                <Button
+                                  className="btn btn-success"
+                                  data-tooltip-html={`Promouvoir <b>${member.user.nickname}</b> dans la station.`}
+                                  data-tooltip-id={`promote_${member.userId}`}
+                                  onClick={() => console.log('ok')}
+                                >
+                                  <FontAwesomeIcon icon={faArrowAltCircleUp} />
+                                </Button>
+                                <Button
+                                  className="btn btn-danger"
+                                  data-tooltip-html={`Expulser <b>${member.user.nickname}</b> de la station.`}
+                                  data-tooltip-id={`kick_${member.userId}`}
+                                  onClick={() => console.log('ok')}
+                                >
+                                  <FontAwesomeIcon icon={faSignOutAlt} />
+                                </Button>
+                                <Tooltip id={`promote_${member.userId}`} />
+                                <Tooltip id={`kick_${member.userId}`} />
+                              </>
+                            )}
+                          </span>
                         </li>
                       )
                     })}
