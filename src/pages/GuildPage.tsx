@@ -20,6 +20,7 @@ const GuildDetailsView = () => {
         setLoading(true)
         const response = await axios.get<Guild>(`/api/guilds/info/${ tag }`)
         setGuild(response.data)
+        document.title = `Station ${response.data.name} [${response.data.tag}] - Project 42`
       } catch (err : any) {
         console.log('failed to fetch guild data', err)
       } finally {
@@ -60,15 +61,17 @@ const GuildDetailsView = () => {
           className="absolute z-5 h-full flex items-center pointer-events-none"
           style={ { left: '1%', width: '100%' } }>
           <motion.div
-            animate={ {
-              scale: [1, 1.03, 1],
-              rotate: [0, 1, 0, -1, 0],
-            } }
-            transition={ {
-              duration: 20,
+            animate={{
+              scale: [1, 1.08, 1.02, 1.08, 1], // Augmentation de l'effet d'échelle
+              rotate: [0, 2, 0, -2, 0], // Rotation plus prononcée
+              y: [0, -15, 5, -15, 0], // Ajout d'un mouvement vertical
+            }}
+            transition={{
+              duration: 60, // Durée plus longue pour un effet plus majestueux
               repeat: Number.POSITIVE_INFINITY,
               ease: 'easeInOut',
-            } }
+              times: [0, 0.25, 0.5, 0.75, 1], // Synchronisation des mouvements
+            }}
             className="relative"
             style={ { width: '100%', maxWidth: '730px' } }
           >
