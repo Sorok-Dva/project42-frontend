@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Img as Image } from 'react-image'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Tooltip } from 'react-tooltip'
 import { User, useUser } from 'contexts/UserContext'
 import CreateGuildModal from 'components/Guilds/CreateModal'
@@ -34,6 +34,7 @@ export interface Guild {
 const Guilds = () => {
   const { token } = useAuth()
   const { user } = useUser()
+  const navigate = useNavigate()
   const [canCreateStation, setCanCreateStation] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false)
@@ -187,7 +188,8 @@ const Guilds = () => {
                       <div className="col-12">
                         <div className="parallax-guild-banner-area parallax-container">
                           <Image
-                            className="w-100 rounded-5 parallax-img"
+                            onClick={() => navigate(`/station/${guild.tag}`)}
+                            className="w-100 rounded-5 parallax-img cursor-pointer"
                             src={guild.banner ? guild.banner : '/img/stations_banner.png'}
                             alt="Banniere de la station"
                           />
