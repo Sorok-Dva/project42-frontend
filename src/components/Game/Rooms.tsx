@@ -74,15 +74,15 @@ const RoomList = () => {
     if (!socket || !user) return
 
     const handlePlayerLeft = (data: { message: string }) => {
-      alert(data.message.includes(user?.nickname))
+    /* alert(data.message.includes(user.nickname))
 
-      if (data.message.includes(user?.nickname)) {
+      if (data.message.includes(user.nickname)) {
         setPlayerRoomId(null)
         fetchRooms()
-      }
+      }*/
     }
 
-    socket.on('selfLeaveGame', handlePlayerLeft)
+    socket.on('playerLeft', handlePlayerLeft)
 
     return () => {
       socket.off('playerLeft', handlePlayerLeft)
@@ -257,12 +257,17 @@ const RoomList = () => {
         <aside>{ game.players?.length }/{ game.maxPlayers }</aside>
         <aside>...</aside>
         <div className="big_options"></div>
-        { !inGame && (
+        { !inGame ? (
           <div className="join-buttons">
             <button className="button_secondary viewer" onClick={() => handleSpectateRoom(game.id)}>Observer</button>
             { waitingRoom && (
               <button className="button btn-primary join-nec" onClick={() => handleJoinRoom(game.id)}>Jouer</button>
             )}
+          </div>
+        ) : (inGame && game.id === playerRoomId) && (
+          <div className="join-buttons">
+            <button className="button_secondary viewer" onClick={handleLeaveRoom}>Quitter la partie</button>
+            <button className="button btn-primary" onClick={handleJoinCurrentRoom}>Rejoindre la partie</button>
           </div>
         )}
       </div>
