@@ -119,26 +119,29 @@ const Notifications: React.FC = () => {
         ) : (
           <div className="notification-card d-grid gap-4" data-tilt>
             {notifications.map(notification => (
-              <Link to="#" key={notification.id}>
-                <div key={notification.id} className="card-item d-flex align-items-center gap-4" style={{ borderColor: notification.isRead ? 'green' : 'yellow' }}>
-                  {/*<div className="card-img-area"></div>*/}
-                  <div className="card-info">
-                    <b className="card-title d-block tcn-1" dangerouslySetInnerHTML={{ __html: notification.title }} /><br/>
-                    <span className="card-text d-block tcn-1 fs-sm" dangerouslySetInnerHTML={{ __html: notification.message }} />
-                    <small><i>{new Date(notification.createdAt).toLocaleString()}</i></small>
-                    <div>
-                      {!notification.isRead && (
-                        <button className="btn btn-success me-2" onClick={() => markAsRead(notification.id)}>
-                          <FontAwesomeIcon icon={faEye} />
+              <>
+                <Link to="#" key={notification.id}>
+                  <div key={notification.id} className="card-item d-flex align-items-center gap-4" style={{ borderColor: notification.isRead ? 'green' : 'yellow' }}>
+                    {/*<div className="card-img-area"></div>*/}
+                    <div className="card-info">
+                      <b className="card-title d-block tcn-1" dangerouslySetInnerHTML={{ __html: notification.title }} /><br/>
+                      <span className="card-text d-block tcn-1 fs-sm" dangerouslySetInnerHTML={{ __html: notification.message }} />
+                      <small><i>{new Date(notification.createdAt).toLocaleString()}</i></small>
+                      <div>
+                        {!notification.isRead && (
+                          <button className="btn btn-success me-2" onClick={() => markAsRead(notification.id)}>
+                            <FontAwesomeIcon icon={faEye} />
+                          </button>
+                        )}
+                        <button className="btn btn-danger" onClick={() => deleteNotification(notification.id)}>
+                          <FontAwesomeIcon icon={faTrash} />
                         </button>
-                      )}
-                      <button className="btn btn-danger" onClick={() => deleteNotification(notification.id)}>
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+                <hr/>
+              </>
             ))}
           </div>
         )}
