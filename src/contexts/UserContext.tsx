@@ -1,4 +1,11 @@
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react'
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './AuthContext'
 import { useError } from './ErrorContext'
@@ -47,12 +54,13 @@ export interface User {
 }
 
 interface UserContextType {
-  user : User | null;
-  setUser : (user : User | null) => void;
-  logout : () => void;
-  login : (user : Omit<User, 'behaviorPoints' | 'moderatorPoints'>, token : string) => void;
-  isAdmin : boolean;
-  navigateTo : (path : string) => void;
+  user: User | null;
+  setUser: (user : User | null) => void;
+  logout: () => void;
+  login: (user : Omit<User, 'behaviorPoints' | 'moderatorPoints'>, token : string) => void;
+  isAdmin: boolean;
+  navigateTo: (path : string) => void;
+  reloadUser: (forceReload?: boolean) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -71,36 +79,40 @@ export const UserProvider : React.FC<{ children : ReactNode }> = ({ children }) 
     navigate(path)
   }
 
-  useEffect(() => {
-    const token = localStorage.getItem('token')
+  const logout = useCallback(() => {
+    setUser(null)
+    localStorage.removeItem('token')
+    navigateTo('/')
+  }, [navigateTo])
 
-    if (token && !user && !stopRequest) {
+  const fetchMe = useCallback((forceReload?: boolean) => {
+    const token = localStorage.getItem('token')
+    if (token && (!stopRequest || forceReload)) {
       callApi('/api/users/me', {
         headers: {
-          Authorization: `Bearer ${ token }`,
+          Authorization: `Bearer ${token}`,
         },
       })
         .then((data) => {
           setUser(data)
+          setStopRequest(true)
         })
         .catch((error) => {
+          setStopRequest(true)
           const forbidden = error.message.includes('403')
           if (forbidden) {
             logout()
           } else {
             setServerError(error)
             setUser(null)
-            setStopRequest(true)
           }
         })
     }
-  }, [setServerError, user, callApi, stopRequest])
+  }, [user, stopRequest, callApi, logout, setServerError])
 
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem('token')
-    navigateTo('/')
-  }
+  useEffect(() => {
+    fetchMe(false)
+  }, [fetchMe])
 
   const login = (user: User, token: string) => {
     setUser(user)
@@ -112,7 +124,7 @@ export const UserProvider : React.FC<{ children : ReactNode }> = ({ children }) 
   const isAdmin = user?.roleId === 1
 
   return (
-    <UserContext.Provider value={ { user, setUser, logout, login, isAdmin, navigateTo } }>
+    <UserContext.Provider value={ { user, setUser, logout, login, isAdmin, navigateTo, reloadUser: fetchMe  } }>
       { children }
     </UserContext.Provider>
   )
