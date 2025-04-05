@@ -298,7 +298,7 @@ const Chat: React.FC<ChatProps> = ({
               onClick={ handleSendMessage }
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-r-lg transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5"
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mt-2"
                 viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
