@@ -2171,6 +2171,7 @@ p.compo-hidden {
   height: 75px !important;
 }
 
+/* Card styles for composition */
 .role img.carte {
   position: absolute;
   top: 0;
@@ -2208,27 +2209,27 @@ p.compo-hidden {
   top: 5px;
   right: 5px;
   transform: rotate3d(0, 0, 1, 45deg);
-  box-shadow: 2px 2px 2px rgba(0, 0, 0, .2);
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
   transition: opacity 0.3s ease;
   background-color: #ffffffc2;
+}
 
-  &.bavarde,
-  &.bavard {
-    transform: none;
-    border-radius: 9px;
-    padding: 0px 5px;
-    font-weight: bold;
-    font-size: 12px;
-    color: white;
-  }
+.role_amount.bavarde,
+.role_amount.bavard {
+  transform: none;
+  border-radius: 9px;
+  padding: 0px 5px;
+  font-weight: bold;
+  font-size: 12px;
+  color: white;
+}
 
-  &.bavarde {
-    background-color: #8e338a;
-  }
+.role_amount.bavarde {
+  background-color: #8e338a;
+}
 
-  &.bavard {
-    background-color: #577048;
-  }
+.role_amount.bavard {
+  background-color: #577048;
 }
 
 .role_amount span {
@@ -3148,6 +3149,12 @@ kbd {
   transition: transform 1s cubic-bezier(0.8, 0, 0, 1), opacity 1s cubic-bezier(0.8, 0, 0, 1);
 }
 
+#explicRole.visible {
+  transform: translate(-50%, 0);
+  opacity: 1;
+  pointer-events: all;
+}
+
 #explicRole>div {
   padding: 1px;
   background: transparent url(../assets/images/background-role.png) top center/100% no-repeat;
@@ -3244,7 +3251,7 @@ kbd {
 .compo_category h3 {
   flex: 0 0 100%;
   text-align: center;
-  background-color: rgba(255, 255, 255, .1);
+  background-color: rgba(255, 255, 255, 0.1);
   padding: 5px;
   height: 28px;
   border-radius: 14px;
@@ -3265,34 +3272,34 @@ kbd {
   flex-flow: column nowrap;
   align-items: center;
   text-align: center;
-  background-color: rgba(255, 255, 255, .1);
+  background-color: rgba(255, 255, 255, 0.1);
   margin: 10px 5px 5px 5px;
   border-radius: 5px;
   padding: 10px;
   transition: all .3s ease;
+}
 
-  &:not(.uneditable) {
-    cursor: pointer;
-  }
+.compo_edit_card:not(.uneditable) {
+  cursor: pointer;
+}
 
-  &.card_unavailable {
-    cursor: not-allowed !important;
-    background-color: rgba(0, 0, 0, .2);
-  }
+.compo_edit_card.card_unavailable {
+  cursor: not-allowed !important;
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .compo_edit_card:not(.card_unavailable):not(.card_selected):not(.card_disabled):not([data-id-card="1"]):hover {
-  background-color: rgba(255, 255, 255, .2);
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .compo_edit_card.card_selected {
   background-color: #982626;
   color: #e6c585;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, .2);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
 
 .compo_edit_card .role_amount {
-  color: rgb(var(--p2));;
+  color: rgb(var(--p2));
 }
 
 .compo_edit_card img,
@@ -3321,28 +3328,29 @@ kbd {
 .role_choice_card b {
   display: flex;
   align-items: center;
-  text-shadow: 0 2px 2px rgba(0, 0, 0, .2);
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
   font-size: 12px;
   margin-top: 10px;
   height: 30px;
 }
 
-.compo_edit_card[data-id-card="1"][data-state="0"],
-.compo_edit_card[data-id-card="2"][data-state="0"],
-.compo_edit_card[data-id-card="1"][data-state="1"],
-.compo_edit_card[data-id-card="2"][data-state="1"] {
-  .role_amount {
-    opacity: 0;
-  }
+.compo_edit_card[data-id-card="1"][data-state="0"] .role_amount,
+.compo_edit_card[data-id-card="2"][data-state="0"] .role_amount,
+.compo_edit_card[data-id-card="1"][data-state="1"] .role_amount,
+.compo_edit_card[data-id-card="2"][data-state="1"] .role_amount {
+  opacity: 0;
+}
 
-  .card_wrapper img:nth-child(2) {
-    opacity: 0;
-  }
+.compo_edit_card[data-id-card="1"][data-state="0"] .card_wrapper img:nth-child(2),
+.compo_edit_card[data-id-card="2"][data-state="0"] .card_wrapper img:nth-child(2),
+.compo_edit_card[data-id-card="1"][data-state="1"] .card_wrapper img:nth-child(2),
+.compo_edit_card[data-id-card="2"][data-state="1"] .card_wrapper img:nth-child(2) {
+  opacity: 0;
 }
 
 .compo_edit_card[data-id-card="2"][data-state="0"] .decrement_wolves {
-  background-color: rgba(0, 0, 0, .2);
-  color: rgba(255, 255, 255, .5);
+  background-color: rgba(0, 0, 0, 0.2);
+  color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
 }
 

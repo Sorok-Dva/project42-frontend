@@ -112,20 +112,6 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(({
 
   return (
     <Box ref={containerRef} sx={{ height: '100%', overflowY: 'auto', p: 1 }} onScroll={handleScroll}>
-      {/* Box des règles en haut du chat */}
-      <Box className="canal_meneur game-rules" sx={{ mb: 2 }}>
-        <div>
-          Rappel : vous êtes sur une partie <span className="bullet-game type-0"></span> <b>Normale</b> :<br />
-          <ul>
-            <li>Il est strictement <b>interdit d'insulter</b> un autre joueur et d'avoir une attitude malsaine. Toute forme d'<b>anti-jeu</b> sera sanctionnée.</li>
-            <li>Le dévoilement est <b>interdit</b> et <b>sanctionné</b> systématiquement. Il est aussi <b>interdit</b> de donner toute forme d'indice sur son rôle.</li>
-            <li>Tous les joueurs <b>doivent</b> participer au débat. Il n'est pas autorisé d'être <b>AFK</b>.</li>
-          </ul>
-          Soyez courtois et aimable. Bon jeu ! <br /><br />
-          <b>Rappel :</b> ne divulguez <b>jamais</b> vos informations privées sur le jeu.
-        </div>
-        <hr />
-      </Box>
       {/* Affichage des messages */}
       {filteredMessages.map((msg, index) => {
         let cleanNickname = stripHTML(msg.nickname)

@@ -1,7 +1,7 @@
-import React, { FC, useState } from 'react'
-import 'styles/Modal.css'
+import React, { FC, useEffect, useState } from 'react'
 import { PlayerType } from 'hooks/useGame'
 import { transferCreatorRights } from 'services/gameService'
+import { createPortal } from 'react-dom'
 
 interface TransferLeadModalProps {
   roomId: number
@@ -12,6 +12,12 @@ interface TransferLeadModalProps {
 
 const TransferLeadModal: FC<TransferLeadModalProps> = ({ roomId, creator, players, onClose }) => {
   const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
 
   const transferLead = async (player: number) => {
     try {
@@ -47,7 +53,7 @@ const TransferLeadModal: FC<TransferLeadModalProps> = ({ roomId, creator, player
     )
   }
 
-  return (
+  const modalContent = (
     <div className="modal-overlay" onClick={handleOverlayClick}>
       <div
         className="modal-container"
@@ -77,6 +83,8 @@ const TransferLeadModal: FC<TransferLeadModalProps> = ({ roomId, creator, player
       </div>
     </div>
   )
+
+  return mounted && typeof document !== 'undefined' ? createPortal(modalContent, document.body) : null
 }
 
 export default TransferLeadModal

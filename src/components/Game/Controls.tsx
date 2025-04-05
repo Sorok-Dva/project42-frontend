@@ -1,7 +1,5 @@
-import React, { useMemo, useRef, useState } from 'react'
-import { Box } from '@mui/material'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHeart, faHeartCircleXmark } from '@fortawesome/free-solid-svg-icons'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import { usePermissions } from 'hooks/usePermissions'
 import {
   addBotToGame,
@@ -72,7 +70,12 @@ const GameControls: React.FC<GameControlsProps> = ({
   const [isTransferLeadOpen, setIsTransferLeadOpen] = useState(false)
   const [isFavoriteArchive, setIsFavoriteArchive] = useState<boolean>(false)
   const [favoriteComment, setFavoriteComment] = useState<string>('')
+  const [mounted, setMounted] = useState(false)
 
+  useEffect(() => {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
   const openEditComposition = () => {
     if (!isCreator || isArchive) return
     setIsEditCompositionOpen(true)
@@ -263,278 +266,338 @@ const GameControls: React.FC<GameControlsProps> = ({
   const cardId = player?.card?.id
   const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} />, [cardId])
 
-  return (
-    <Box id="block_actions">
-      { !gameStarted && !gameFinished && (
-        <Box id="block_ami" className="block rounded bgblue">
-          <Box className="block_header">
-            <h3>Inviter vos amis</h3>
-          </Box>
+  // Rendu conditionnel selon l'état du jeu
+  if (!gameStarted && !gameFinished) {
+    return (
+      <div className="space-y-4">
+        {/* Bloc d'invitation */ }
+        <motion.div
+          className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
+          initial={ { opacity: 0, y: 20 } }
+          animate={ { opacity: 1, y: 0 } }
+          transition={ { duration: 0.5 } }
+        >
+          <div
+            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+            <h3 className="text-lg font-bold text-white">Inviter vos amis</h3>
+          </div>
+        </motion.div>
 
-          <Box className="block_content block_scrollable_wrapper scrollbar-light">
-            <Box className="block_scrollable_content">
-              <Box className="invite_show">
-                <Box className="invite_friends">Chargement...</Box>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-      )}
+        {/* Options pour les joueurs non créateurs */ }
+        { !isCreator && (
+          <motion.div
+            className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
+            initial={ { opacity: 0, y: 20 } }
+            animate={ { opacity: 1, y: 0 } }
+            transition={ { duration: 0.5, delay: 0.1 } }
+          >
+            <div
+              className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+              <h3 className="text-lg font-bold text-white">Options de la
+                partie</h3>
+            </div>
 
-      {!isCreator && !gameStarted && !gameFinished && (
-        <>
-          <Box id="block_options" className="block rounded bgblue">
-            <Box className="block_header">
-              <h3>Options de la partie</h3>
-            </Box>
-            <Box className="block_content block_scrollable_wrapper scrollbar-light">
-              <Box className="block_scrollable_content">
-                <Box className="block_content_section text-center">
-                  <Box>
-                    {player && canBeReady && !player.ready && (
-                      <Box
-                        className="button array_selectable sound-tick bglightblue animate__animated animate__bounce animate__infinite"
-                        onClick={handleBeReady}
-                      >
-                        Je suis prêt{user?.isMale ? '' : 'e'} !
-                      </Box>
-                    )}
-
-                    {player && player.ready && (
-                      <p>
-                        Tu es prêt{user?.isMale ? '' : 'e'} !
-                        En attente du lancement par le créateur de la partie
-                      </p>
-                    )}
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-          <hr/>
-        </>
-      )}
-
-      {isCreator && !gameStarted && !gameFinished && (
-        <>
-          <Box id="block_crea" className="block rounded bgblue">
-            <Box className="block_header">
-              <h3>Configurer la partie</h3>
-            </Box>
-            <Box
-              className="block_content block_scrollable_wrapper scrollbar-light">
-              <Box className="block_scrollable_content">
-                <Box className="block_content_section">
-                  <Box className="game-options">
-                    <Box>
-                      <Box id="crea_places">
-                        <Box
-                          className="buttons_array buttons_array_small bglightblue">
-                          {/*$places == 6 || $places == count($joueurs))*/ }
-                          <Box
-                            className="button array_clickable sound-tick sound-unselect"
-                            data-tooltip="Supprimer une place"
-                            onClick={ removePlace }>–
-                          </Box>
-
-                          <Box className="button unclickable"><span
-                            className="places">{ slots }</span> places
-                          </Box>
-
-                          {/*if (($salonType < 2 && $places == 50) || ($salonType == 2 && $places == 30)):*/ }
-                          <Box
-                            className="button array_clickable sound-tick sound-select"
-                            onClick={ addPlace }>+
-                          </Box>
-                        </Box>
-                      </Box>
-                      <Box id="crea_debat">
-                        <Box
-                          className="buttons_array buttons_array_small bglightblue mt-1">
-                          {/*if (isset($debateMin) && $debate == $debateMin)*/ }
-                          <Box
-                            className="button array_clickable sound-tick sound-unselect"
-                            onClick={ removeTimer }>–
-                          </Box>
-
-                          <Box className="button unclickable">
-                            <span
-                              className="debat">{ timer }</span> min
-                            de débat
-                          </Box>
-
-                          {/*if (isset($debateMax) && $debate == $debateMax)*/ }
-                          <Box
-                            className="button array_clickable sound-tick sound-select"
-                            onClick={ addTimer }>+
-                          </Box>
-                        </Box>
-                      </Box>
-
-                      {/*<Box id="crea_params">
-                        <Box className="buttons_array bglightblue">
-                          <Box
-                            className="button array_selectable sound-tick selected'"
-                            data-action="cacheVote">
-                            <img src="/assets/images/icon-votecache.png"
-                              alt="Cacher les votes"/>
-                          </Box>
-
-                          <Box
-                            className="button array_selectable sound-tick selected"
-                            data-action="muteSpec">
-                            <img src="/assets/images/icon-mutespec.png"
-                              alt="Muter les spectateurs"/>
-                          </Box>
-                        </Box>
-                      </Box>*/}
-                    </Box>
-                  </Box>
-
-                  <Box onClick={openEditComposition}
-                    className="button sound-tick rounded bglightblue">
-                    <h3>Gérer la composition</h3>
-                  </Box>
-
-                  <Box className="button_secondary sound-tick crea_lead" onClick={handleTransferCreator}>
-                    Léguer les droits du salon
-                  </Box>
-                  {/*<Box className="button_secondary sound-tick join_spec">
-                    <span>Rejoindre les spectateurs</span>
-                  </Box>*/}
-
-                  { ['SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator']
-                    .includes(user?.role as string) && (
-                    <Box style={{ width: '100%' }}>
-                      <Box className="flex-row gutter">
-                        { canEditGame && (
-                          <Box className="button_secondary sound-tick">
-                            Modifier le salon
-                          </Box>
-                        ) }
-                        { canAddBot && (
-                          <Box className="button_secondary sound-tick"
-                            onClick={ handleAddBot }>Ajouter un bot
-                          </Box>
-                        ) }
-                      </Box>
-                    </Box>
-                  ) }
-
-                  <Box id="crea_launch" className="block_content_section">
-                    <Box
-                      className={ `button sound-tick rounded bglightblue ${ !canStartGame ? 'disabled': 'animation-bounce' }` }
-                      onClick={ handleStartGame }
+            <div className="p-4 text-center">
+              { player && canBeReady && !player.ready ? (
+                <motion.button
+                  className="sound-tick px-6 py-3 bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 text-white rounded-lg shadow-lg shadow-green-500/20 animate-pulse"
+                  whileHover={ { scale: 1.05 } }
+                  whileTap={ { scale: 0.95 } }
+                  onClick={ handleBeReady }
+                >
+                  Je suis prêt{ user?.isMale ? '': 'e' } !
+                </motion.button>
+              ): player && player.ready ? (
+                <div className="bg-black/40 rounded-lg p-4 text-blue-300">
+                  <div className="flex items-center justify-center mb-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-green-500 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      <h3>Lancer la partie</h3>
-                    </Box>
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-        </>
-      ) }
+                      <path strokeLinecap="round" strokeLinejoin="round"
+                        strokeWidth={ 2 } d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span
+                      className="text-green-400 font-medium">Tu es prêt{ user?.isMale ? '': 'e' } !</span>
+                  </div>
+                  <p>En attente du lancement par le créateur de la partie</p>
+                </div>
+              ): null }
+            </div>
+          </motion.div>
+        ) }
 
-      { player && gameStarted && !gameFinished ? (
-        <>
-          <Box id="block_ia"
-            className="shadow rounded bgblue game-started">
-            <Box id="block_infos">
-              <p className="wait_for_card_reveal">
-                Vous êtes <strong>{ player.card?.name }</strong>.<br/>
-              </p>
-              <GameTimer gameStarted={ gameStarted }
-                gameFinished={ gameFinished }/>
-              <PhaseAction player={ player }
-                roomId={ Number(gameId!) } isInn={isInn} />
-            </Box>
-          </Box>
-          {memoizedCardImage}
-        </>
-      ): <>
-        { isArchive && (() => {
-          const cardId = 1
-          const winStates: Record<number, string> = {
-            90: 'Les <b>Aliens infiltrés</b> ont gagné !',
-            91: 'Les <b>Membres de la station</b> ont gagné !',
-            92: 'Les <b>Amoureux</b> ont gagné !',
-            94: 'Le <b>Maître des Ondes</b> a gagné !',
-            95: 'Le <b>Séraphin</b> a gagné !',
-            99: 'Tout le monde est mort !',
-          }
+        {/* Options pour le créateur */ }
+        { isCreator && (
+          <motion.div
+            className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
+            initial={ { opacity: 0, y: 20 } }
+            animate={ { opacity: 1, y: 0 } }
+            transition={ { duration: 0.5, delay: 0.2 } }
+          >
+            <div
+              className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+              <h3 className="text-lg font-bold text-white">Configurer la
+                partie</h3>
+            </div>
 
-          const cardsIds: Record<number, number> = {
-            90: 2,
-            91: 1,
-            92: 6,
-            94: 15,
-            95: 9,
-            99: -1,
-          }
+            <div className="p-4 space-y-4">
+              {/* Nombre de places */ }
+              <div className="flex items-center justify-center space-x-2">
+                <button
+                  className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                  onClick={ removePlace }
+                  disabled={ slots <= 6 }
+                >
+                  –
+                </button>
+                <div className="px-4 py-2 bg-black/40 rounded-lg text-white">
+                  <span className="font-bold">{ slots }</span> places
+                </div>
+                <button
+                  className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                  onClick={ addPlace }
+                  disabled={ slots >= 24 }
+                >
+                  +
+                </button>
+              </div>
 
-          return (
-            <Box id="block_ia" className="shadow rounded bgblue game-started spectator">
-              <Box id="block_infos">
-                <h3>Archive de la partie {roomData.name}</h3>
-                <Box>
-                  <CardImage cardId={cardsIds[roomData.phase] ?? cardId} isArchive={true}/>
-                  <Box id="block_infos">
-                    <Box style={{ marginTop: '1rem', marginLeft: '2rem' }}>
-                      <h3 dangerouslySetInnerHTML={{ __html: winStates[roomData.phase] }} />
-                      <p><b>Durée de la partie</b>: {getGameDuration()}</p>
-                    </Box>
-                  </Box>
+              {/* Temps de débat */ }
+              <div className="flex items-center justify-center space-x-2">
+                <button
+                  className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                  onClick={ removeTimer }
+                  disabled={ timer <= 2 }
+                >
+                  –
+                </button>
+                <div className="px-4 py-2 bg-black/40 rounded-lg text-white">
+                  <span className="font-bold">{ timer }</span> min de débat
+                </div>
+                <button
+                  className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                  onClick={ addTimer }
+                  disabled={ timer >= 5 }
+                >
+                  +
+                </button>
+              </div>
 
-                </Box>
-                <Box className="block_content_section mt-4">
-                  <Box
-                    className="button sound-tick rounded bglightblue heart"
-                    onClick={handleAddFavorite}
+              {/* Boutons d'action */ }
+              <div className="space-y-2">
+                <motion.button
+                  className="sound-tick w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20"
+                  whileHover={ { scale: 1.02 } }
+                  whileTap={ { scale: 0.98 } }
+                  onClick={ openEditComposition }
+                >
+                  Gérer la composition
+                </motion.button>
+
+                <motion.button
+                  className="sound-tick w-full px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all"
+                  whileHover={ { scale: 1.02 } }
+                  whileTap={ { scale: 0.98 } }
+                  onClick={ handleTransferCreator }
+                >
+                  Léguer les droits du salon
+                </motion.button>
+
+                { user?.role && canAddBot && (
+                  <motion.button
+                    className="sound-tick w-full px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all"
+                    whileHover={ { scale: 1.02 } }
+                    whileTap={ { scale: 0.98 } }
+                    onClick={ handleAddBot }
                   >
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      { !isFavoriteArchive ? (
-                        <>
-                          <FontAwesomeIcon icon={faHeart} style={{ color: 'pink', fontSize: '1.5em' }} />
-                          Ajouter à mes favoris
-                        </>
-                      ): (
-                        <>
-                          <FontAwesomeIcon icon={faHeartCircleXmark} style={{ color: 'pink', fontSize: '1.5em' }} />
-                          Retirer de mes favoris
-                        </>
-                      )}
-                    </h3>
-                  </Box>
-                  { isFavoriteArchive && (
-                    <Box
-                      className="button sound-tick rounded bglightblue heart"
-                    >
-                      <textarea
-                        value={favoriteComment}
-                        onChange={(e) => setFavoriteComment(e.target.value)}
-                        placeholder="Un commentaire sur cette partie ? 😊"
-                        className="border rounded p-2 w-full"
-                        cols={40}
-                        rows={4}
-                      />
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-            </Box>
-          )
-        })()}
-      </> }
+                    Ajouter un bot
+                  </motion.button>
+                ) }
 
-      {isEditCompositionOpen && (
-        <EditCompoModal roomId={roomData.id} onClose={closeEditComposition} />
-      )}
-      {isTransferLeadOpen && (
-        <TransferLeadModal roomId={roomData.id} players={players} creator={roomData.creator} onClose={closeTransferLead} />
-      )}
-    </Box>
-  )
+                {isEditCompositionOpen && (
+                  <EditCompoModal roomId={roomData.id} onClose={closeEditComposition} />
+                )}
+                {isTransferLeadOpen && (
+                  <TransferLeadModal roomId={roomData.id} players={players} creator={roomData.creator} onClose={closeTransferLead} />
+                )}
+              </div>
+
+              {/* Bouton de lancement */ }
+              <motion.button
+                className={ `sound-tick w-full px-6 py-3 bg-gradient-to-r ${
+                  canStartGame
+                    ? 'from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 animate-pulse'
+                    : 'from-gray-600 to-gray-800 opacity-70 cursor-not-allowed'
+                } text-white rounded-lg shadow-lg shadow-green-500/20 transition-all` }
+                whileHover={ canStartGame ? { scale: 1.05 }: {} }
+                whileTap={ canStartGame ? { scale: 0.95 }: {} }
+                onClick={ handleStartGame }
+                disabled={ !canStartGame }
+              >
+                <span className="text-lg font-bold">Lancer la partie</span>
+              </motion.button>
+            </div>
+          </motion.div>
+        ) }
+      </div>
+    )
+  }
+
+  // Partie en cours
+  if (player && gameStarted && !gameFinished) {
+    return (
+      <div className="space-y-4">
+        <motion.div
+          className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
+          initial={ { opacity: 0, y: 20 } }
+          animate={ { opacity: 1, y: 0 } }
+          transition={ { duration: 0.5 } }
+        >
+          <div
+            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+            <h3 className="text-lg font-bold text-white">Informations</h3>
+          </div>
+
+          <div className="p-4">
+            <div className="bg-black/40 rounded-lg p-3 mb-4">
+              <p className="text-center text-blue-200 mb-2">
+                Vous êtes <span
+                  className="strong font-bold">{ player.card?.name }</span>
+              </p>
+
+              {/* Carte du joueur */ }
+              <div className="flex justify-center mb-4">
+                <div className="relative">
+                  <img
+                    src={ `/assets/images/carte${ player.card?.id }.png` }
+                    alt={ player.card?.name }
+                    className="w-30 h-30 object-cover rounded-md border-2 border-blue-500/50"
+                  />
+                  <div
+                    className="absolute inset-0 bg-blue-500/10 rounded-md"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Timer */ }
+            <GameTimer gameStarted={ gameStarted }
+              gameFinished={ gameFinished }/>
+
+            {/* Actions de phase */ }
+            <PhaseAction player={ player } roomId={ Number(gameId!) }
+              isInn={ isInn }/>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // Partie terminée (archive)
+  if (isArchive) {
+    const cardId = 1
+    const winStates: Record<number, string> = {
+      90: 'Les <b>Aliens infiltrés</b> ont gagné !',
+      91: 'Les <b>Membres de la station</b> ont gagné !',
+      92: 'Les <b>Amoureux</b> ont gagné !',
+      94: 'Le <b>Maître des Ondes</b> a gagné !',
+      95: 'Le <b>Séraphin</b> a gagné !',
+      99: 'Tout le monde est mort !',
+    }
+
+    const cardsIds: Record<number, number> = {
+      90: 2,
+      91: 1,
+      92: 6,
+      94: 15,
+      95: 9,
+      99: -1,
+    }
+
+    return (
+      <div className="space-y-4">
+        <motion.div
+          className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
+          initial={ { opacity: 0, y: 20 } }
+          animate={ { opacity: 1, y: 0 } }
+          transition={ { duration: 0.5 } }
+        >
+          <div
+            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+            <h3 className="text-lg font-bold text-white">Archive de la
+              partie { roomData.name }</h3>
+          </div>
+
+          <div className="p-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4 mb-4">
+              <div className="relative">
+                <img
+                  src={ `/assets/images/carte${cardsIds[roomData.phase] ?? cardId}.png` }
+                  alt="Carte gagnante"
+                  className="w-24 h-32 object-cover rounded-md border-2 border-blue-500/50"
+                />
+                <div
+                  className="absolute inset-0 bg-blue-500/10 rounded-md"></div>
+              </div>
+
+              <div className="flex-1">
+                <h3
+                  className="text-xl font-bold mb-2 text-white"
+                  dangerouslySetInnerHTML={ { __html: winStates[roomData.phase] || 'Partie terminée' } }
+                />
+                <p className="text-blue-300">
+                  <span
+                    className="font-bold">Durée de la partie:</span> { getGameDuration() }
+                </p>
+              </div>
+            </div>
+
+            {/* Boutons d'action */ }
+            <div className="space-y-3">
+              <motion.button
+                className={ `w-full px-4 py-2 flex items-center justify-center gap-2 sound-tick ${
+                  !isFavoriteArchive
+                    ? 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700'
+                    : 'bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900'
+                } text-white rounded-lg transition-all shadow-lg` }
+                whileHover={ { scale: 1.02 } }
+                whileTap={ { scale: 0.98 } }
+                onClick={ handleAddFavorite }
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5"
+                  viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    fillRule="evenodd"
+                    d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                { !isFavoriteArchive ? 'Ajouter à mes favoris': 'Retirer de mes favoris' }
+              </motion.button>
+
+              { isFavoriteArchive && (
+                <div className="bg-black/40 rounded-lg p-3">
+                  <textarea
+                    value={ favoriteComment }
+                    onChange={ (e) => setFavoriteComment(e.target.value) }
+                    placeholder="Un commentaire sur cette partie ? 😊"
+                    className="w-full bg-black/40 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    rows={ 4 }
+                  />
+                </div>
+              ) }
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  return null
 }
 
 export default GameControls
+

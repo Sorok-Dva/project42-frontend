@@ -1,9 +1,10 @@
 import React, { FC, useEffect, useState } from 'react'
 import { Tooltip } from 'react-tooltip'
-import 'styles/Modal.css'
+import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
-import { Card, RoomCard } from 'hooks/useGame'
+import type { Card, RoomCard } from 'hooks/useGame'
 import { useGameContext } from 'contexts/GameContext'
+import { createPortal } from 'react-dom'
 
 interface EditCompoModalProps {
   roomId: number
@@ -15,6 +16,12 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
   const [cards, setCards] = useState<Record<number, RoomCard>>({})
   const [allCards, setAllCards] = useState<Record<number, Card>>({})
   const { slots, setSlots, setRoomData } = useGameContext()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
 
   useEffect(() => {
     const fetchCards = async () => {
@@ -43,46 +50,44 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
     if (manualUsedSlots > slots && manualUsedSlots <= 24) setSlots(manualUsedSlots)
     if (remainingSlots > 0) {
       if (!cards[1] || cards[1].quantity !== remainingSlots) {
-        setCards(prevCards => ({
+        setCards((prevCards) => ({
           ...prevCards,
           1: {
             id: 1,
             quantity: remainingSlots,
             roomId,
             cardId: 1,
-            card: allCards[1]
-          }
+            card: allCards[1],
+          },
         }))
       }
     } else if (cards[1]) {
-      setCards(prevCards => {
+      setCards((prevCards) => {
         const updatedCards = { ...prevCards }
         delete updatedCards[1]
         return updatedCards
       })
     }
 
-    setRoomData(prevRoomData => ({
+    setRoomData((prevRoomData) => ({
       ...prevRoomData,
-      cards: Object.values(cards)
+      cards: Object.values(cards),
     }))
-  }, [slots, cards, allCards, roomId])
+  }, [slots, cards, allCards, roomId, setRoomData, setSlots])
 
-  const updateAliens = (action: 'add' | 'remove') => {
+  const updateAliens = (action: 'add' | 'remove', event: React.MouseEvent) => {
+    event.stopPropagation()
     const alienCardId = 2
     if (!allCards[alienCardId]) {
       console.error('La carte Alien n\'existe pas dans les cartes disponibles.')
       return
     }
 
-    setCards(prevCards => {
+    setCards((prevCards) => {
       const newCards = { ...prevCards }
 
       if (action === 'add') {
-        const totalCards = Object.values(newCards).reduce(
-          (sum, card) => sum + (card.quantity || 0),
-          0
-        )
+        const totalCards = Object.values(newCards).reduce((sum, card) => sum + (card.quantity || 0), 0)
         if (totalCards + 1 > 24) {
           const crewCard = newCards[1]
           if (crewCard && crewCard.quantity > 0) {
@@ -107,9 +112,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
       }
 
       const updatedQuantity =
-        action === 'add'
-          ? currentAlienCard.quantity + 1
-          : Math.max(0, currentAlienCard.quantity - 1)
+        action === 'add' ? currentAlienCard.quantity + 1 : Math.max(0, currentAlienCard.quantity - 1)
 
       if (updatedQuantity === 0) {
         const { [alienCardId]: _, ...restCards } = newCards
@@ -162,7 +165,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
   }
 
   const handleCardClick = (i: number, current: number) => {
-    if (i === 1 || i === 2 || (cardLimit(i) > slots)) return
+    if (i === 1 || i === 2 || cardLimit(i) > slots) return
 
     let defaultValue = 1
     if (i === 16) defaultValue = 2
@@ -170,7 +173,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
 
     const newValue = current === 0 ? defaultValue : 0
 
-    setCards(prevCards => ({
+    setCards((prevCards) => ({
       ...prevCards,
       [i]: prevCards[i]
         ? { ...prevCards[i], quantity: newValue }
@@ -179,8 +182,8 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
           quantity: newValue,
           roomId: roomId,
           cardId: i,
-          card: allCards[i]
-        }
+          card: allCards[i],
+        },
     }))
   }
 
@@ -258,13 +261,15 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
                 className="button array_clickable sound-tick sound-unselect"
                 data-tooltip-id={String(i)}
                 data-tooltip-content="Enlever un Alien"
-                onClick={() => updateAliens('remove')}
-              >–</div>
+                onClick={(e) => updateAliens('remove', e)}
+              >
+                –
+              </div>
               <div
                 className="button array_clickable sound-tick sound-select"
                 data-tooltip-id={String(i)}
                 data-tooltip-content="Ajouter un Alien"
-                onClick={() => updateAliens('add')}
+                onClick={(e) => updateAliens('add', e)}
               >+</div>
             </div>
           )}
@@ -274,68 +279,82 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
     })
   }
 
-  const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
-      onClose()
-    }
-  }
-
   if (error) {
     return (
-      <div className="modal-overlay" onClick={handleOverlayClick}>
-        <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+      <AnimatePresence>
+        <div className="modal-overlay" onClick={onClose}>
+          <motion.div
+            className="modal-container"
+            style={{ width: '1300px' }}
+            initial={{ scale: 0.9, y: 20, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.9, y: 20, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h2 className="text-center">Modifier la composition de jeu</h2>
+              <button className="close-btn" onClick={onClose}>
+                &times;
+              </button>
+            </div>
+            <div className="modal-content">
+              <div className="alert alert-danger">{error}</div>
+            </div>
+          </motion.div>
+        </div>
+      </AnimatePresence>
+    )
+  }
+
+  const modalContent = (
+    <AnimatePresence>
+      <div className="modal-overlay" onClick={onClose}>
+        <motion.div
+          className="modal-container"
+          style={{ width: '1300px' }}
+          initial={{ scale: 0.9, y: 20, opacity: 0 }}
+          animate={{ scale: 1, y: 0, opacity: 1 }}
+          exit={{ scale: 0.9, y: 20, opacity: 0 }}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="modal-header">
-            <h2>Modifier la composition de jeu</h2>
+            <h2 className="text-center">Modifier la composition de jeu</h2>
             <button className="close-btn" onClick={onClose}>
               &times;
             </button>
           </div>
           <div className="modal-content">
-            <div className="alert alert-danger">{error}</div>
+            {error ? (
+              <div className="alert alert-danger">{error}</div>
+            ) : (
+              <>
+                <div className="compo_row">
+                  <div className="compo_category">
+                    <h3>Aliens</h3>
+                    {/* @TODO make 21*/}
+                    {renderCards([2, 20])}
+                  </div>
+                  <div className="compo_category">
+                    <h3>Personnages solitaires</h3>
+                    {/* @TODO make 21*/}
+                    {renderCards([9, 15, 19])}
+                  </div>
+                </div>
+                <div className="compo_category">
+                  <h3>Innocents</h3>
+                  {/* @TODO make 8 & 12 */}
+                  {renderCards([1, 3, 4, 5, 6, 7, 10, 13, 16, 17, 22, 23])}
+                </div>
+              </>
+            )}
           </div>
-        </div>
+        </motion.div>
       </div>
-    )
-  }
-
-  return (
-    <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div
-        className="modal-container"
-        style={{ width: '1300px' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="modal-header">
-          <h2 className="text-center">Modifier la composition de jeu</h2>
-          <button className="close-btn" onClick={onClose}>
-            &times;
-          </button>
-        </div>
-        <div className="modal-content">
-          <div className="compo_row">
-            <div className="compo_category">
-              <h3>Aliens</h3>
-              {/* @TODO make 21*/}
-              {renderCards([2, 20])}
-            </div>
-            <div className="compo_category">
-              <h3>Personnages solitaires</h3>
-              {renderCards([9, 15, 19])}
-            </div>
-            {/*<div className="compo_category">
-              <h3>Autres</h3>
-              {renderCards([11])}
-            </div>*/}
-          </div>
-          <div className="compo_category">
-            <h3>Innocents</h3>
-            {/* @TODO make 8 & 12 */}
-            {renderCards([1, 3, 4, 5, 6, 7, 10, 13, 16, 17, 22, 23])}
-          </div>
-        </div>
-      </div>
-    </div>
+    </AnimatePresence>
   )
+
+  return mounted && typeof document !== 'undefined' ? createPortal(modalContent, document.body) : null
 }
 
 export default EditCompoModal
+
