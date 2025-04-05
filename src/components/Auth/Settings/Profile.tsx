@@ -53,7 +53,6 @@ const Profile : React.FC<{
     }
   }
 
-  // Gestion du changement de fichier pour l'avatar
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -69,6 +68,9 @@ const Profile : React.FC<{
       return
     }
     setAvatarFile(file)
+    // Optionnel : mise à jour immédiate de l'aperçu de l'avatar
+    const previewUrl = URL.createObjectURL(file)
+    setUser({ ...user, avatar: previewUrl })
   }
 
   // Fonction d'upload de l'avatar
@@ -212,11 +214,21 @@ const Profile : React.FC<{
           </div>
 
           <div className="p-6">
+            {/* Affichage de l'avatar de l'utilisateur */}
+            <div className="flex justify-center mb-4">
+              <img
+                src={user.avatar}
+                alt="User Avatar"
+                className="w-50 h-50 rounded-full object-cover"
+              />
+            </div>
+
             <p className="text-blue-300 mb-6">
               Personnalise ton avatar en sélectionnant ton image (PNG, JPG/JPEG ou GIF, max 10 Mo) !
             </p>
             <input
               type="file"
+              name="avatar"
               accept=".png, .jpg, .jpeg, .gif"
               onChange={handleFileChange}
               className="block w-full text-sm text-gray-500
