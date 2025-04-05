@@ -37,7 +37,7 @@ export interface User {
   points?: number;
   title: string;
   signature?: string;
-  premium?: Date | null;
+  premium?: Date;
   token: string;
   behaviorPoints?: number;
   moderatorPoints?: number;
