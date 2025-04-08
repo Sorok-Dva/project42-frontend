@@ -14,7 +14,7 @@ import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import GameTimer from './Timer'
 import PhaseAction from './PhaseAction'
-import { PlayerType, RoomData } from 'hooks/useGame'
+import { PlayerType, RoomData, Viewer } from 'hooks/useGame'
 import EditCompoModal from 'components/Game/EditComposition'
 import TransferLeadModal from 'components/Game/TransferLead'
 import axios from 'axios'
@@ -25,6 +25,7 @@ interface GameControlsProps {
   roomData: RoomData
   player: PlayerType | null
   players: PlayerType[]
+  viewer: Viewer | null
   isCreator: boolean
   canBeReady: boolean
   canStartGame: boolean
@@ -51,6 +52,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   canStartGame,
   player,
   players,
+  viewer,
   gameStarted,
   gameFinished,
   setGameStarted,
@@ -479,6 +481,36 @@ const GameControls: React.FC<GameControlsProps> = ({
             {/* Actions de phase */ }
             <PhaseAction player={ player } roomId={ Number(gameId!) }
               isInn={ isInn }/>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+  if ((!player || viewer) && gameStarted && !gameFinished) {
+    return (
+      <div className="space-y-4">
+        <motion.div
+          className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
+          initial={ { opacity: 0, y: 20 } }
+          animate={ { opacity: 1, y: 0 } }
+          transition={ { duration: 0.5 } }
+        >
+          <div
+            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+            <h3 className="text-lg font-bold text-white">Informations</h3>
+          </div>
+
+          <div className="p-4">
+            <div className="bg-black/40 rounded-lg p-3 mb-4">
+              <p className="text-center text-blue-200 mb-2">
+                Vous êtes <span className="strong font-bold">spectateur</span>
+              </p>
+            </div>
+
+            {/* Timer */ }
+            <GameTimer gameStarted={ gameStarted }
+              gameFinished={ gameFinished }/>
+
           </div>
         </motion.div>
       </div>
