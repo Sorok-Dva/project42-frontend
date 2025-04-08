@@ -486,6 +486,7 @@ const GameControls: React.FC<GameControlsProps> = ({
       </div>
     )
   }
+
   if ((!player || viewer) && gameStarted && !gameFinished) {
     return (
       <div className="space-y-4">
@@ -518,7 +519,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   // Partie terminée (archive)
-  if (isArchive) {
+  if (isArchive || gameFinished) {
     const cardId = 1
     const winStates: Record<number, string> = {
       90: 'Les <b>Aliens infiltrés</b> ont gagné !',
@@ -553,17 +554,8 @@ const GameControls: React.FC<GameControlsProps> = ({
           </div>
 
           <div className="p-4">
-            <div className="flex flex-col sm:flex-row items-center gap-4 mb-4">
-              <div className="relative">
-                <img
-                  src={ `/assets/images/carte${cardsIds[roomData.phase] ?? cardId}.png` }
-                  alt="Carte gagnante"
-                  className="w-24 h-32 object-cover rounded-md border-2 border-blue-500/50"
-                />
-                <div
-                  className="absolute inset-0 bg-blue-500/10 rounded-md"></div>
-              </div>
-
+            <CardImage cardId={cardsIds[roomData.phase] ?? cardId} isArchive={true}/>
+            <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 mb-4">
               <div className="flex-1">
                 <h3
                   className="text-xl font-bold mb-2 text-white"
