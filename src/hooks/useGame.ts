@@ -384,6 +384,19 @@ export const useGame = (
       setIsNight(nightStarted)
     })
 
+    socket.on('gameStarted', async () => {
+      setGameStarted(true)
+      setIsNight(true)
+      const data = await fetchGameDetails(gameId, token ?? null)
+      if (data.error) {
+        setGameError(data.error)
+      }
+      setRoomData(data.room)
+      setPlayer(data.player)
+      setViewer(data.viewer)
+      setCreator(data.creator)
+    })
+
     socket.on('gameFinished', (room: RoomData) => {
       // @todo join viewers channel
       setGameFinished(true)
