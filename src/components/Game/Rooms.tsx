@@ -234,7 +234,7 @@ const RoomList = () => {
         setPlayerRoomId(null)
         setInGame(false)
         localStorage.removeItem(`game_auth_${playerRoomId}`)
-        alert('Vous avez bien quitter votre partie.')
+        alert('Vous avez bien quitté votre partie.')
         fetchRooms()
       }
     } catch (error: any) {
