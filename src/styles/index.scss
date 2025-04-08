@@ -805,8 +805,8 @@ tr.dead span {
   width: 100px;
   height: 100px;
   position: absolute;
-  top: 110px;
-  left: calc((((100% - 11*10px)/12*3 + (10px*2))/2) + 10px);
+  top: 50%;
+  left: calc(((100% - 110px) / 3* 4 + 20px) / 2 + 10px);
   transform: translate3d(-50%, -50%, 0);
   z-index: 2;
   transition: margin .3s ease;
@@ -835,8 +835,6 @@ tr.dead span {
 
 @keyframes cardMove {
   0% {
-    top: 60px;
-    left: calc((((100% - 11*10px)/12*3 + (10px*2))/2) + 10px);
     transform: translate3d(-50%, -50%, 0) rotate3d(0, 0, 0, 0deg)
   }
 
@@ -857,8 +855,6 @@ tr.dead span {
   }
 
   100% {
-    top: 60px;
-    left: calc((((100% - 11*10px)/12*3 + (10px*2))/2) + 10px);
     transform: translate3d(-50%, -50%, 0) rotate3d(0, 0, 0, 0deg)
   }
 }
@@ -942,6 +938,81 @@ tr.dead span {
   justify-content: center;
 }
 
+/*
+* Timer ribbon
+*/
+
+.ribbon-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 300px;
+  height: 50px;
+  background: linear-gradient(to bottom, #2a4365, #1a365d);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+.ribbon-container.low-time {
+  background: linear-gradient(to bottom, #9b2c2c, #742a2a);
+  animation: pulse 1.5s infinite;
+}
+
+.ribbon-left, .ribbon-right {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  top: 0;
+}
+
+.ribbon-left {
+  left: -15px;
+  border-width: 25px 15px 25px 0;
+  border-color: transparent #1a365d transparent transparent;
+}
+
+.ribbon-right {
+  right: -15px;
+  border-width: 25px 0 25px 15px;
+  border-color: transparent transparent transparent #1a365d;
+}
+
+.low-time .ribbon-left {
+  border-color: transparent #742a2a transparent transparent;
+}
+
+.low-time .ribbon-right {
+  border-color: transparent transparent transparent #742a2a;
+}
+
+.ribbon-content {
+  flex: 1;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.timer-display {
+  font-size: 1.75rem;
+  font-family: monospace;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
 
 /*
 * Save as favorite game
