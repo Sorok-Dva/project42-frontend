@@ -550,7 +550,7 @@ const GameControls: React.FC<GameControlsProps> = ({
           <div
             className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
             <h3 className="text-lg font-bold text-white">Archive de la
-              partie { roomData.name }</h3>
+              partie { roomData.name.replace('Partie de', ' de') }</h3>
           </div>
 
           <div className="p-4">
