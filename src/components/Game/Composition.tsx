@@ -17,11 +17,15 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData }) => {
     image?: string
   } | null>(null)
 
-  // État pour gérer le montage du portail
   const [mounted, setMounted] = useState(false)
+  const [isFolded, setIsFolded] = useState(false)
 
   // Référence pour le bloc explicatif
   const explicRef = useRef<HTMLDivElement>(null)
+
+  const toggleFold = () => {
+    setIsFolded((prev) => !prev)
+  }
 
   useEffect(() => {
     setMounted(true)
@@ -55,9 +59,9 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData }) => {
   return (
     <div className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden mb-4">
       {/* En-tête */}
-      <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30 flex items-center justify-between">
+      <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30 flex items-center justify-between" onClick={toggleFold}>
         <h3 className="text-lg font-bold text-white">Composition de jeu</h3>
-        <div className="text-xs text-blue-300 cursor-help" title="Plier la composition">
+        <motion.div className="text-xs text-blue-300 cursor-pointer" title="Plier la composition" animate={{ rotate: isFolded ? 180 : 0 }} transition={{ duration: 0.3 }}>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path
               fillRule="evenodd"
@@ -65,66 +69,76 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData }) => {
               clipRule="evenodd"
             />
           </svg>
-        </div>
+        </motion.div>
       </div>
 
       {/* Contenu */}
-      <div className="p-4 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/30 scrollbar-track-black/20">
-        <div className="flex flex-wrap justify-center">
-          {roomData.cards.map((roomCard, i) => {
-            const cardName = roomCard.card.name
-            const cardDesc = roomCard.card.description
-            const cardImg = `/assets/images/carte${roomCard.cardId}.png`
-            const isOdd = i % 2 === 0
+      <AnimatePresence>
+        {!isFolded && (
+          <motion.div
+            className="p-4 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/30 scrollbar-track-black/20"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex flex-wrap justify-center">
+              {roomData.cards.map((roomCard, i) => {
+                const cardName = roomCard.card.name
+                const cardDesc = roomCard.card.description
+                const cardImg = `/assets/images/carte${roomCard.cardId}.png`
+                const isOdd = i % 2 === 0
 
-            return (
-              <motion.div
-                key={i}
-                className="relative cursor-pointer group w-16 h-16 sound-tick"
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleCardClick(cardName, cardDesc, cardImg)}
-                title={cardName}
-                data-tooltip-id={String(roomCard.card.id)}
-                data-tooltip-content={cardName}
-              >
-                {roomCard.quantity > 1 ? (
-                  <div className="relative w-full h-full">
-                    <img
-                      src={cardImg || '/placeholder.svg'}
-                      alt={cardName}
-                      className={`cursor-pointer absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-md filter drop-shadow-md transition-all duration-300
+                return (
+                  <motion.div
+                    key={i}
+                    className="relative cursor-pointer group w-16 h-16 sound-tick"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleCardClick(cardName, cardDesc, cardImg)}
+                    title={cardName}
+                    data-tooltip-id={String(roomCard.card.id)}
+                    data-tooltip-content={cardName}
+                  >
+                    {roomCard.quantity > 1 ? (
+                      <div className="relative w-full h-full">
+                        <img
+                          src={cardImg || '/placeholder.svg'}
+                          alt={cardName}
+                          className={`cursor-pointer absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-md filter drop-shadow-md transition-all duration-300
                       ${isOdd ? 'scale-[0.6] rotate-[10deg]' : 'scale-[0.6] -rotate-[10deg]'}
                       group-hover:scale-100 group-hover:rotate-0 group-hover:z-10`}
-                    />
-                    <img
-                      src={cardImg || '/placeholder.svg'}
-                      alt={cardName}
-                      className={`cursor-pointer absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-md filter drop-shadow-md transition-all duration-300
+                        />
+                        <img
+                          src={cardImg || '/placeholder.svg'}
+                          alt={cardName}
+                          className={`cursor-pointer absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-md filter drop-shadow-md transition-all duration-300
                       ${!isOdd ? 'scale-[0.6] rotate-[10deg]' : 'scale-[0.6] -rotate-[10deg]'}
                       group-hover:opacity-0`}
-                    />
-                    <div className="absolute z-[1] w-[18px] h-[18px] leading-[18px] top-[5px] right-[5px] rotate-45 shadow-md bg-white/75 transition-opacity duration-300 group-hover:opacity-0">
-                      <span className="block -rotate-45 text-xs font-bold text-center">{roomCard.quantity}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <img
-                    src={cardImg || '/placeholder.svg'}
-                    alt={cardName}
-                    className={`cursor-pointer absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-md filter drop-shadow-md transition-all duration-300
+                        />
+                        <div className="absolute z-[1] w-[18px] h-[18px] leading-[18px] top-[5px] right-[5px] rotate-45 shadow-md bg-white/75 transition-opacity duration-300 group-hover:opacity-0">
+                          <span className="block -rotate-45 text-xs font-bold text-center">{roomCard.quantity}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <img
+                        src={cardImg || '/placeholder.svg'}
+                        alt={cardName}
+                        className={`cursor-pointer absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-md filter drop-shadow-md transition-all duration-300
                     ${isOdd ? 'scale-[0.6] rotate-[10deg]' : 'scale-[0.6] -rotate-[10deg]'}
                     group-hover:scale-100 group-hover:rotate-0 group-hover:z-10`}
-                  />
-                )}
+                      />
+                    )}
 
-                { mounted && (
-                  createPortal(<Tooltip id={String(roomCard.card.id)} />, document.body)
-                )}
-              </motion.div>
-            )
-          })}
-        </div>
-      </div>
+                    { mounted && (
+                      createPortal(<Tooltip id={String(roomCard.card.id)} />, document.body)
+                    )}
+                  </motion.div>
+                )
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Bloc explicatif avec Portal */}
       {mounted &&
