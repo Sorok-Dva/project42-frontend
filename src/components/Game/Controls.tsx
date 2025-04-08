@@ -264,7 +264,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const cardId = player?.card?.id
-  const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} />, [cardId])
+  const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} isArchive={isArchive} />, [cardId, isArchive])
 
   // Rendu conditionnel selon l'état du jeu
   if (!gameStarted && !gameFinished) {
@@ -465,22 +465,11 @@ const GameControls: React.FC<GameControlsProps> = ({
           <div className="p-4">
             <div className="bg-black/40 rounded-lg p-3 mb-4">
               <p className="text-center text-blue-200 mb-2">
-                Vous êtes <span
-                  className="strong font-bold">{ player.card?.name }</span>
+                Vous êtes <span className="strong font-bold">{player.card?.name}</span>
               </p>
 
-              {/* Carte du joueur */ }
-              <div className="flex justify-center mb-4">
-                <div className="relative">
-                  <img
-                    src={ `/assets/images/carte${ player.card?.id }.png` }
-                    alt={ player.card?.name }
-                    className="w-30 h-30 object-cover rounded-md border-2 border-blue-500/50"
-                  />
-                  <div
-                    className="absolute inset-0 bg-blue-500/10 rounded-md"></div>
-                </div>
-              </div>
+              {/* Carte du joueur */}
+              <div className="flex justify-center mb-4 relative h-32">{memoizedCardImage}</div>
             </div>
 
             {/* Timer */ }

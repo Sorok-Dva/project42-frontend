@@ -79,6 +79,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
       socket.off('alienElimination')
     }
   }, [socket, user, player, roomId])
+
   const handleSelectionChange = (event: any) => {
     const { value } = event.target
 
@@ -147,7 +148,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     } else {
       socket.emit('phaseActionResponse', {
         ...payload,
-        targetId: selectedTargets[0] ?? -1,
+        targetId: Number(selectedTargets[0]) ?? -1,
       })
     }
 
@@ -170,8 +171,8 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
       setShowForm(false)
     }
 
-    setSelectedTargets([])
-    setSelectedNickname(null)
+    // setSelectedTargets([])
+    // setSelectedNickname(null)
   }
 
   if (!actionRequest) return null

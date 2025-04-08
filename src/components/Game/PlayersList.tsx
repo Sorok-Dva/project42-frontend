@@ -176,7 +176,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                       </div>
                     )}
                     {alienList.includes(_player.nickname) && (
-                      <span className="inline-block px-1 text-xs bg-green-900/60 text-green-300 rounded">Alien</span>
+                      <span className="inline-block px-1 text-xs bg-orange-900/60 text-orange-300 rounded">Alien</span>
                     )}
                     {sistersList.includes(_player.nickname) && (
                       <span className="inline-block px-1 text-xs bg-purple-900/60 text-purple-300 rounded">Soeur</span>
@@ -206,7 +206,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                           data-tooltip-content="Ce joueur a été infecté."
                           data-tooltip-id={`${_player.nickname}_infected`}></div>
                         <Tooltip id={`${_player.nickname}_infected`} />
-                        <span className="inline-block px-1 text-xs bg-green-900/60 text-green-300 rounded">Infecté</span>
+                        <span className="inline-block px-1 text-xs bg-orange-900/60 text-orange-300 rounded">Infecté</span>
                       </>
                     )}
                     {innList.includes(_player.nickname) && isNight && (

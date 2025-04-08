@@ -78,34 +78,38 @@ const GameTimer: React.FC<GameTimerProps> = ({ gameStarted, gameFinished }) => {
 
   if (!gameStarted || gameFinished || timeLeft === null) return null
 
+  const isLowTime = timeLeft <= 10
+
   return (
-    <div className="mb-4">
+    <div className="mb-4 relative">
       <motion.div
-        className="bg-black/40 rounded-lg p-3 flex items-center justify-center"
+        className={`ribbon-container ${isLowTime ? 'low-time' : ''}`}
         animate={{
-          boxShadow:
-            timeLeft <= 10
-              ? ['0 0 0 rgba(239, 68, 68, 0.4)', '0 0 20px rgba(239, 68, 68, 0.7)', '0 0 0 rgba(239, 68, 68, 0.4)']
-              : 'none',
+          boxShadow: isLowTime
+            ? ['0 0 0 rgba(239, 68, 68, 0.4)', '0 0 20px rgba(239, 68, 68, 0.7)', '0 0 0 rgba(239, 68, 68, 0.4)']
+            : 'none',
         }}
         transition={{
           duration: 2,
-          repeat: timeLeft <= 10 ? Number.POSITIVE_INFINITY : 0,
+          repeat: isLowTime ? Number.POSITIVE_INFINITY : 0,
           repeatType: 'loop',
         }}
       >
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-1 text-2xl font-bold">
-            <span className={`${timeLeft <= 10 ? 'text-red-400' : 'text-blue-300'}`}>
-              {timeLeft ? formatTime(timeLeft, 'min') : '-'}
-            </span>
-            <span className="text-gray-400">:</span>
-            <span className={`${timeLeft <= 10 ? 'text-red-400' : 'text-blue-300'}`}>
-              {timeLeft ? formatTime(timeLeft, 'sec') : '--'}
-            </span>
+        <div className="ribbon-left"></div>
+        <div className="ribbon-content">
+          <div className="flex items-center justify-center">
+            <div className="timer-display">
+              <span className={isLowTime ? 'text-red-400' : 'text-white'}>
+                {timeLeft ? formatTime(timeLeft, 'min') : '-'}
+              </span>
+              <span className="text-gray-300">:</span>
+              <span className={isLowTime ? 'text-red-400' : 'text-white'}>
+                {timeLeft ? formatTime(timeLeft, 'sec') : '--'}
+              </span>
+            </div>
           </div>
-          <div className="text-xs text-gray-400 mt-1">Temps restant</div>
         </div>
+        <div className="ribbon-right"></div>
       </motion.div>
     </div>
   )
