@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { usePermissions } from 'hooks/usePermissions'
 import {
@@ -66,18 +66,12 @@ const GameControls: React.FC<GameControlsProps> = ({
   const { user } = useUser()
   const { checkPermission } = usePermissions()
   const canAddBot = checkPermission('godPowers', 'addBot')
-  const canEditGame = checkPermission('game', 'edit')
   const [timer, setTimer] = useState<number>(3)
   const [isEditCompositionOpen, setIsEditCompositionOpen] = useState(false)
   const [isTransferLeadOpen, setIsTransferLeadOpen] = useState(false)
   const [isFavoriteArchive, setIsFavoriteArchive] = useState<boolean>(false)
   const [favoriteComment, setFavoriteComment] = useState<string>('')
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-    return () => setMounted(false)
-  }, [])
   const openEditComposition = () => {
     if (!isCreator || isArchive) return
     setIsEditCompositionOpen(true)
