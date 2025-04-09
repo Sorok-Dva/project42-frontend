@@ -176,12 +176,13 @@ const InvitationBlock: React.FC<InvitationBlockProps> = ({ gameId, players, isCr
                 key={index}
                 className={`px-3 py-2 rounded-lg flex items-center justify-between ${
                   invitedPlayers.includes(player.id)
-                    ? 'bg-green-600/30 border border-green-500/50 text-green-300'
+                    ? 'bg-green-600/30 border border-green-500/50 text-green-300 cursor-not-allowed'
                     : 'bg-black/40 border border-blue-500/30 hover:bg-black/60 text-white'
                 }`}
                 onClick={() => inviteFriendToGame(player.id)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                disabled={invitedPlayers.includes(player.id)}
               >
                 <span>{player.nickname}</span>
                 {invitedPlayers.includes(player.id) ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
