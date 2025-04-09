@@ -19,6 +19,7 @@ import EditCompoModal from 'components/Game/EditComposition'
 import TransferLeadModal from 'components/Game/TransferLead'
 import axios from 'axios'
 import CardImage from 'components/Game/CardImage'
+import Invitations from './Invitations'
 
 interface GameControlsProps {
   gameId: string | undefined
@@ -267,17 +268,7 @@ const GameControls: React.FC<GameControlsProps> = ({
     return (
       <div className="space-y-4">
         {/* Bloc d'invitation */ }
-        <motion.div
-          className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
-          initial={ { opacity: 0, y: 20 } }
-          animate={ { opacity: 1, y: 0 } }
-          transition={ { duration: 0.5 } }
-        >
-          <div
-            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
-            <h3 className="text-lg font-bold text-white">Inviter vos amis</h3>
-          </div>
-        </motion.div>
+        <Invitations gameId={gameId} players={players} isCreator={isCreator} />
 
         {/* Options pour les joueurs non créateurs */ }
         { !isCreator && (
@@ -321,7 +312,25 @@ const GameControls: React.FC<GameControlsProps> = ({
                   </div>
                   <p>En attente du lancement par le créateur de la partie</p>
                 </div>
-              ): null }
+              ): (
+                <div className="bg-black/40 rounded-lg p-4 text-blue-300">
+                  <div className="flex items-center justify-center mb-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-red-500 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round"
+                        strokeWidth={ 2 } d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span
+                      className="text-red-400 font-medium">En attente de lancement</span>
+                  </div>
+                  <p>Il manque x joueurs</p>
+                </div>
+              ) }
             </div>
           </motion.div>
         ) }
