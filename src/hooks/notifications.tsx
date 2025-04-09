@@ -49,6 +49,47 @@ const DefaultNotif = ({
   </div>
 )
 
+const GameInvitationNotif = ({
+  invitationData,
+}: {
+  invitationData: {
+    text: string
+    invitation: { gameId: number; invitationLink: string; playersCount: number }
+    actions: { label: string; action: string }[]
+  }
+}) => {
+  // Gère l'action en fonction du type de bouton cliqué
+  const handleAction = (action: string) => {
+    if (action === 'join') {
+      window.open(invitationData.invitation.invitationLink, '_blank', 'noopener')
+    } else if (action === 'observer') {
+      window.open(`${invitationData.invitation.invitationLink}?spectate=true`, '_blank', 'noopener')
+    } else if (action === 'decline') {
+      // Pour refuser, on se contente ici de fermer le toast
+      toast.dismiss()
+    }
+  }
+
+  return (
+    <div className="msg-container">
+      <div dangerouslySetInnerHTML={{ __html: invitationData.text }} />
+      <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
+        {invitationData.actions.map((btn, idx) => (
+          <button
+            key={idx}
+            onClick={() => handleAction(btn.action)}
+            className={`btn btn-${
+              btn.action === 'join' ? 'primary' : btn.action === 'observer' ? 'info' : 'danger'
+            }`}
+          >
+            {btn.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 const Notifications = ({ token }: { token: string }) => {
   const { reloadUser } = useUser()
   const [notificationCount, setNotificationCount] = useState(0)
@@ -106,6 +147,18 @@ const Notifications = ({ token }: { token: string }) => {
             case 'achievement':
               toast.info(<AchievementNotif title={data.title} content={data.content} id={data.id} />)
               break
+            case 'game_invitation': {
+              let invitationData = null
+              try {
+                invitationData = JSON.parse(data.content)
+              } catch (e) {
+                console.error('Failed to parse invitation data:', e)
+              }
+              if (invitationData) {
+                toast.info(<GameInvitationNotif invitationData={invitationData} />)
+              }
+              break
+            }
             case 'notification':
               toast.info(<DefaultNotif title={data.title} message={data.content} />)
               if (data.title.includes('ami')) {
@@ -122,12 +175,13 @@ const Notifications = ({ token }: { token: string }) => {
               if (data.title.includes('veut rejoindre ta station')) {
                 window.dispatchEvent(new CustomEvent('reloadGuildData'))
               }
-              notifSound.currentTime = 0
-              notifSound.play().catch(() => {})
               break
             default:
               console.warn('Unhandled event type:', data.event)
             }
+
+            notifSound.currentTime = 0
+            notifSound.play().catch(() => {})
           }
         } catch (e) {
           console.error('Error parsing event data:', e)
