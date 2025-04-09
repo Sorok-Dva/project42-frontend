@@ -20,10 +20,12 @@ import TransferLeadModal from 'components/Game/TransferLead'
 import axios from 'axios'
 import CardImage from 'components/Game/CardImage'
 import Invitations from './Invitations'
+import { useSocket } from 'contexts/SocketContext'
 
 interface GameControlsProps {
   gameId: string | undefined
   roomData: RoomData
+  creator: PlayerType
   player: PlayerType | null
   players: PlayerType[]
   viewer: Viewer | null
@@ -51,6 +53,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   fetchGameDetails,
   canBeReady,
   canStartGame,
+  creator,
   player,
   players,
   viewer,
@@ -65,6 +68,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 }) => {
   const { token } = useAuth()
   const { user } = useUser()
+  const { socket } = useSocket()
   const { checkPermission } = usePermissions()
   const canAddBot = checkPermission('godPowers', 'addBot')
   const [timer, setTimer] = useState<number>(3)
@@ -260,6 +264,12 @@ const GameControls: React.FC<GameControlsProps> = ({
     return `${minutes} min ${seconds} sec`
   }
 
+  const handleBipNotReadyPlayers = () => {
+    if (!socket || !gameId || gameStarted || gameFinished || !isCreator) return
+
+    socket.emit('bipNotReadyPlayers', gameId)
+  }
+
   const cardId = player?.card?.id
   const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} isArchive={isArchive} />, [cardId, isArchive])
 
@@ -388,7 +398,6 @@ const GameControls: React.FC<GameControlsProps> = ({
           </motion.div>
         ) }
 
-
         {/* Options pour le créateur */ }
         { isCreator && (
           <motion.div
@@ -476,6 +485,18 @@ const GameControls: React.FC<GameControlsProps> = ({
                     Ajouter un bot
                   </motion.button>
                 ) }
+
+                {/* Bouton pour bipper les joueurs non prêts - visible uniquement quand le salon est plein */}
+                {players.length === slots && players.filter(p => p.nickname !== creator.nickname).some(p => !p.ready) && (
+                  <motion.button
+                    className="sound-tick w-full px-4 py-2 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white rounded-lg transition-all shadow-lg shadow-orange-500/20 animate-pulse"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleBipNotReadyPlayers}
+                  >
+                    Bipper les joueurs non prêts ({players.filter(p => !p.ready).length - 1})
+                  </motion.button>
+                )}
 
                 {isEditCompositionOpen && (
                   <EditCompoModal roomId={roomData.id} onClose={closeEditComposition} />
