@@ -295,8 +295,8 @@ const GameControls: React.FC<GameControlsProps> = ({
                   Je suis prêt{ user?.isMale ? '': 'e' } !
                 </motion.button>
               ): player && player.ready ? (
-                <div className="bg-black/40 rounded-lg p-4 text-blue-300">
-                  <div className="flex items-center justify-center mb-2">
+                <div className="bg-gradient-to-r from-black/60 to-blue-900/20 rounded-lg p-4 border border-blue-500/30">
+                  <div className="flex items-center justify-center mb-3">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-6 w-6 text-green-500 mr-2"
@@ -304,36 +304,90 @@ const GameControls: React.FC<GameControlsProps> = ({
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round"
-                        strokeWidth={ 2 } d="M5 13l4 4L19 7"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span
-                      className="text-green-400 font-medium">Tu es prêt{ user?.isMale ? '': 'e' } !</span>
+                    <span className="text-green-400 font-medium">Tu es prêt{user?.isMale ? '' : 'e'} !</span>
                   </div>
-                  <p>En attente du lancement par le créateur de la partie</p>
+
+                  {/* Progression des joueurs prêts */}
+                  <div className="mb-3">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-blue-300">Joueurs prêts</span>
+                      <span className="text-white font-medium">{(players.filter(p => p.ready).length + 1)}/{players.length}</span>
+                    </div>
+                    <div className="w-full bg-black/40 rounded-full h-2.5">
+                      <div
+                        className="bg-gradient-to-r from-green-500 to-green-700 h-2.5 rounded-full"
+                        style={{ width: `${((players.filter(p => p.ready).length + 1) / players.length) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Message d'attente */}
+                  <div className="text-center">
+                    {players.length < 6 ? (
+                      <p className="text-yellow-300">
+                        <span className="inline-block animate-pulse mr-1">⚠️</span>
+                        Il faut au moins 6 joueurs pour commencer
+                      </p>
+                    ) : (players.filter(p => !p.ready).length - 1) > 0 ? (
+                      <p className="text-blue-300">
+                        En attente de {(players.filter(p => !p.ready).length + 1)} joueur{players.filter(p => !p.ready).length > 1 ? 's' : ''}
+                      </p>
+                    ) : (
+                      <p className="text-green-400">
+                        <span className="inline-block animate-pulse mr-1">✓</span>
+                        Tous les joueurs sont prêts !
+                      </p>
+                    )}
+                    <p className="text-gray-400 text-sm mt-1">En attente du lancement par le créateur</p>
+                  </div>
                 </div>
               ): (
-                <div className="bg-black/40 rounded-lg p-4 text-blue-300">
-                  <div className="flex items-center justify-center mb-2">
+                <div className="bg-gradient-to-r from-black/60 to-blue-900/20 rounded-lg p-4 border border-blue-500/30">
+                  <div className="flex items-center justify-center mb-3">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-red-500 mr-2"
+                      className="h-6 w-6 text-yellow-500 mr-2"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round"
-                        strokeWidth={ 2 } d="M5 13l4 4L19 7"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <span
-                      className="text-red-400 font-medium">En attente de lancement</span>
+                    <span className="text-yellow-400 font-medium">En attente de joueurs</span>
                   </div>
-                  <p>Il manque x joueurs</p>
+
+                  {/* Progression des joueurs */}
+                  <div className="mb-3">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-blue-300">Joueurs connectés</span>
+                      <span className="text-white font-medium">{players.length}/{ slots }</span>
+                    </div>
+                    <div className="w-full bg-black/40 rounded-full h-2.5">
+                      <div
+                        className="bg-gradient-to-r from-yellow-500 to-yellow-700 h-2.5 rounded-full"
+                        style={{ width: `${Math.min((players.length / slots) * 100, 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Message d'attente */}
+                  <div className="text-center">
+                    <p className="text-yellow-300">
+                      <span className="inline-block animate-pulse mr-1">⚠️</span>
+                      Il manque {Math.max(slots - players.length, 0)} joueur{Math.max(slots - players.length, 0) > 1 ? 's' : ''} pour commencer
+                    </p>
+                    <p className="text-gray-400 text-sm mt-1">
+                      Cliquez sur "Je suis prêt" quand suffisamment de joueurs seront connectés
+                    </p>
+                  </div>
                 </div>
               ) }
             </div>
           </motion.div>
         ) }
+
 
         {/* Options pour le créateur */ }
         { isCreator && (
