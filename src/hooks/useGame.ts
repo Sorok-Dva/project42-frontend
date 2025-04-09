@@ -403,6 +403,10 @@ export const useGame = (
       setIsNight(true)
     })
 
+    socket.on('updateMaxPlayers', (maxPlayers: number) => {
+      setSlots(maxPlayers)
+    })
+
     socket.on('updateCards', (cards: RoomCard[]) => {
       setRoomData(prevRoom => ({ ...prevRoom, cards }))
     })
@@ -471,6 +475,7 @@ export const useGame = (
       socket.off('nightStarted')
       socket.off('gameStarted')
       socket.off('gameFinished')
+      socket.off('updateMaxPlayers')
       socket.off('updateCards')
       socket.off('alienList')
       socket.off('coupleList')
