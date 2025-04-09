@@ -23,7 +23,7 @@ export interface Friend {
 
 const InvitationBlock: React.FC<InvitationBlockProps> = ({ gameId, players, isCreator }) => {
   const { token } = useAuth()
-  const [copiedPlayer, setCopiedPlayer] = useState<string | null>(null)
+  const [invitedPlayers, setInvitedPlayers] = useState<number[]>([])
   const [copiedLink, setCopiedLink] = useState(false)
   const [discordAnnouncementSent, setDiscordAnnouncementSent] = useState(false)
   const [friends, setFriends] = useState<Friend[]>([])
@@ -76,14 +76,6 @@ const InvitationBlock: React.FC<InvitationBlockProps> = ({ gameId, players, isCr
     setTimeout(() => setCopiedLink(false), 2000)
   }
 
-  // Copier le message d'invitation pour un joueur spécifique
-  const copyPlayerInvitation = (playerName: string) => {
-    const message = `Hey ${playerName}, rejoins-moi dans la partie Project 42 ! Voici le lien: ${invitationLink}`
-    navigator.clipboard.writeText(message)
-    setCopiedPlayer(playerName)
-    setTimeout(() => setCopiedPlayer(null), 2000)
-  }
-
   // Envoyer une annonce sur Discord
   const sendDiscordAnnouncement = async () => {
     if (discordAnnouncementSent || !gameId) return
@@ -111,6 +103,27 @@ const InvitationBlock: React.FC<InvitationBlockProps> = ({ gameId, players, isCr
     }
   }
 
+  const inviteFriendToGame = async (friendId: number) => {
+    try {
+      await axios.post(
+        '/api/friends/invite/game',
+        {
+          friendId,
+          gameId,
+          playersCount: players.length,
+          invitationLink,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      toast.success('Invitation envoyée avec succès !', ToastDefaultOptions)
+      setInvitedPlayers(prev => [...prev, friendId])
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de l\'invitation :', error)
+      toast.error('Erreur lors de l\'envoi de l\'invitation.', ToastDefaultOptions)
+    }
+  }
 
   return (
     <motion.div
@@ -158,27 +171,27 @@ const InvitationBlock: React.FC<InvitationBlockProps> = ({ gameId, players, isCr
         {/* Liste des joueurs */}
         <div className="space-y-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {friends.map((player, index) => (
+            {friends.filter(f => f !== null).map((player, index) => (
               <motion.button
                 key={index}
                 className={`px-3 py-2 rounded-lg flex items-center justify-between ${
-                  copiedPlayer === player.nickname
+                  invitedPlayers.includes(player.id)
                     ? 'bg-green-600/30 border border-green-500/50 text-green-300'
                     : 'bg-black/40 border border-blue-500/30 hover:bg-black/60 text-white'
                 }`}
-                onClick={() => copyPlayerInvitation(player.nickname)}
+                onClick={() => inviteFriendToGame(player.id)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <span>{player.nickname}</span>
-                {copiedPlayer === player.nickname ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+                {invitedPlayers.includes(player.id) ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
               </motion.button>
             ))}
           </div>
         </div>
 
         {/* Message si aucun joueur */}
-        {friends.length === 0 && (
+        {friends.filter(f => f !== null).length === 0 && (
           <div className="bg-black/40 rounded-lg p-4 text-center">
             <p className="text-gray-400">Aucun ami disponible pour le moment.</p>
           </div>
