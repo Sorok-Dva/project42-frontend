@@ -258,7 +258,6 @@ const PlayersList: React.FC<PlayersListProps> = ({
                     <button
                       className="w-6 h-6 rounded-full bg-red-900/40 flex items-center justify-center text-red-300 hover:text-white hover:bg-red-900/60 transition-colors"
                       onClick={() => handleKickPlayer(_player.nickname)}
-                      title={`Expulser ${_player.nickname} de la partie`}
                       data-tooltip-html={`Expulser <strong>${_player.nickname}</strong> de la partie`}
                       data-tooltip-id={`kick_${_player.nickname}`}
                     >
@@ -274,6 +273,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                           clipRule="evenodd"
                         />
                       </svg>
+                      <Tooltip id={`kick_${_player.nickname}`} />
                     </button>
                   )}
                 </div>
