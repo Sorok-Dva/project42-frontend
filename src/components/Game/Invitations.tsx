@@ -59,6 +59,7 @@ const InvitationBlock: React.FC<InvitationBlockProps> = ({ gameId, players, isCr
       }
     }
     fetchFriends()
+    setInterval(fetchFriends, 30000)
   }, [])
 
   // Vérifier si une annonce a déjà été envoyée
