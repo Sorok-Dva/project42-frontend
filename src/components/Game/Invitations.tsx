@@ -91,7 +91,10 @@ const InvitationBlock: React.FC<InvitationBlockProps> = ({ gameId, players, isCr
     try {
       await axios.post(
         `/api/discord/game/waiting/${gameId}`,
-        {},
+        {
+          invitationLink,
+          playersCount: players.length,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`
