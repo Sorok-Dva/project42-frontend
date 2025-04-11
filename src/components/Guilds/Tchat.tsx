@@ -248,9 +248,9 @@ const GuildChat : React.FC = () => {
                 { messages.map((msg) => (
                   <div
                     key={ new Date(msg.createdAt).getTime() }
-                    className={ `mb-2 ${ msg.isSystem ? 'bg-blue-900/20 border border-blue-500/30 rounded-lg p-2': '' }` }
+                    className={ `mb-2 ${msg.userId === -1 || (msg.user?.nickname ?? msg.nickname) === 'Système' ? 'bg-blue-900/20 border border-blue-500/30 rounded-lg p-2': '' }` }
                   >
-                    { (msg.userId === -1 ||  (msg.user?.nickname ?? msg.nickname) === 'Système') ? (
+                    { (msg.userId === -1 || (msg.user?.nickname ?? msg.nickname) === 'Système') ? (
                       <div
                         className="text-blue-300 text-sm"><span dangerouslySetInnerHTML={{ __html: msg.message }} /></div>
                     ): (
