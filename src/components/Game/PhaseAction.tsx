@@ -80,31 +80,50 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     }
   }, [socket, user, player, roomId])
 
-  const handleSelectionChange = (event: any) => {
-    const { value } = event.target
+  const handleSelectionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    // Récupérer toutes les options sélectionnées
+    const selectedValues = Array.from(event.target.selectedOptions, (option) => option.value)
 
-    const newValue = Array.isArray(value) ? value : [value]
-    setSelectedTargets(newValue)
+    // Comme vos IDs sont des nombres, on peut faire une conversion
+    const selectedIds = selectedValues.map((val) => Number(val))
+
+    setSelectedTargets(selectedIds)
 
     // Construction de la chaîne des nicknames à partir des ids.
     setSelectedNicknames(
-      newValue.map((id: number) => {
+      selectedIds.map((id) => {
         const selectedTarget = actionRequest?.eligibleTargets.find(
-          (target) => target.id === id
+          (target) => target.id === id,
         )
         return selectedTarget ? selectedTarget.nickname : ''
       })
     )
 
-    // Pour la sélection unique, mettre à jour selectedNickname.
-    if (!Array.isArray(value)) {
+    // Pour la sélection unique, on peut mettre à jour selectedNickname si besoin
+    if (selectedIds.length === 1) {
       const selectedTarget = actionRequest?.eligibleTargets.find(
-        (target) => target.id === value
+        (target) => target.id === selectedIds[0],
       )
       if (selectedTarget) {
         setSelectedNickname(selectedTarget.nickname)
       }
     }
+  }
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLSelectElement>, targetCount: number) => {
+    e.preventDefault()
+    const select = e.currentTarget
+    const option = e.target as HTMLOptionElement
+    const value = Number(option.value)
+    if ((selectedTargets.length + 1 > targetCount) && !selectedTargets.includes(value)) {
+      alert(`Vous ne pouvez pas sélectionner plus de ${targetCount} joueurs`)
+      return
+    }
+    // Modification de la sélection
+    setSelectedTargets((prev) =>
+      prev.includes(value) ? prev.filter((id) => id !== value) : [...prev, value]
+    )
+
   }
 
   const handleSubmit = () => {
@@ -262,6 +281,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
               multiple={ actionRequest.action.targetCount > 1 }
               value={ selectedTargets.map(String) }
               onChange={ handleSelectionChange }
+              onMouseDown={(e) => handleMouseDown(e, actionRequest?.action.targetCount)}
               className="w-full bg-black/60 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               size={ Math.min(actionRequest.eligibleTargets.length, 5) }
             >
