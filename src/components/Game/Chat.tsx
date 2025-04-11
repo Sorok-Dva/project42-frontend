@@ -182,7 +182,7 @@ const Chat: React.FC<ChatProps> = ({
 
   return (
     <motion.div
-      className="flex flex-col h-full bg-gradient-to-r from-black/90 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
+      className="flex flex-col h-full bg-gradient-to-r from-black/90 to-blue-950/20 backdrop-blur-xl rounded-xl border border-blue-500/30 overflow-hidden"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
