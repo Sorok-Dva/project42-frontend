@@ -39,14 +39,7 @@ interface OnlineUser {
 
 const GuildChat : React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<GuildMessage[]>([{
-    id: 0,
-    userId: -1,
-    nickname: 'Système',
-    message: 'Bienvenue dans le tchat de votre station !',
-    createdAt: new Date(),
-    isSystem: true,
-  }])
+  const [messages, setMessages] = useState<GuildMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [unreadCount, setUnreadCount] = useState(0)
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([])
@@ -103,7 +96,14 @@ const GuildChat : React.FC = () => {
     const fetchGuildsMessagesAndMembers = async () => {
       try {
         const responseMessages = await axios.get<GuildMessage[]>(`/api/guilds/messages/${ user?.guildMembership?.guild.id }`)
-        setMessages((prev) => [...prev, ...responseMessages.data])
+        setMessages(() => [{
+          id: 0,
+          userId: -1,
+          nickname: 'Système',
+          message: 'Bienvenue dans le tchat de votre station !',
+          createdAt: new Date(),
+          isSystem: true,
+        }, ...responseMessages.data])
         const responseMembers = await axios.get<{ members: OnlineUser[]}>(`/api/guilds/${ user?.guildMembership?.guild.id }/connected`)
         setOnlineUsers(responseMembers.data.members)
       } catch (err : any) {
@@ -247,12 +247,12 @@ const GuildChat : React.FC = () => {
                 {/* Messages */ }
                 { messages.map((msg) => (
                   <div
-                    key={ msg.id }
+                    key={ new Date(msg.createdAt).getTime() }
                     className={ `mb-2 ${ msg.isSystem ? 'bg-blue-900/20 border border-blue-500/30 rounded-lg p-2': '' }` }
                   >
-                    { msg.isSystem ? (
+                    { (msg.userId === -1 ||  (msg.user?.nickname ?? msg.nickname) === 'Système') ? (
                       <div
-                        className="text-blue-300 text-sm">{ msg.message }</div>
+                        className="text-blue-300 text-sm"><span dangerouslySetInnerHTML={{ __html: msg.message }} /></div>
                     ): (
                       <>
                         <div className="flex items-center gap-1">
