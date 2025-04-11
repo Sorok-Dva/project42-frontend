@@ -24,7 +24,6 @@ export interface Friend {
 const InvitationBlock: React.FC<InvitationBlockProps> = ({ gameId, players, isCreator }) => {
   const { token } = useAuth()
   const [invitedPlayers, setInvitedPlayers] = useState<number[]>([])
-  const [copiedLink, setCopiedLink] = useState(false)
   const [discordAnnouncementSent, setDiscordAnnouncementSent] = useState(false)
   const [friends, setFriends] = useState<Friend[]>([])
 
@@ -69,13 +68,6 @@ const InvitationBlock: React.FC<InvitationBlockProps> = ({ gameId, players, isCr
       setDiscordAnnouncementSent(true)
     }
   }, [gameId])
-
-  // Copier le lien d'invitation
-  const copyInvitationLink = () => {
-    navigator.clipboard.writeText(invitationLink)
-    setCopiedLink(true)
-    setTimeout(() => setCopiedLink(false), 2000)
-  }
 
   // Envoyer une annonce sur Discord
   const sendDiscordAnnouncement = async () => {
@@ -138,37 +130,6 @@ const InvitationBlock: React.FC<InvitationBlockProps> = ({ gameId, players, isCr
       </div>
 
       <div className="p-4">
-        {/* Lien d'invitation */}
-        <div className="mb-4">
-          <p className="text-blue-300 mb-2">Lien d'invitation à la partie:</p>
-          <div className="flex">
-            <input
-              type="text"
-              value={invitationLink}
-              readOnly
-              className="flex-1 bg-black/40 border border-blue-500/30 rounded-l-lg px-3 py-2 text-white focus:outline-none"
-            />
-            <motion.button
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-r-lg transition-colors flex items-center justify-center"
-              onClick={copyInvitationLink}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {copiedLink ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-            </motion.button>
-          </div>
-        </div>
-
-        {/* Séparateur */}
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-blue-500/30"></div>
-          </div>
-          <div className="relative flex justify-center">
-            <span className="bg-black/60 px-3 text-sm text-blue-300">ou inviter directement</span>
-          </div>
-        </div>
-
         {/* Liste des joueurs */}
         <div className="space-y-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
