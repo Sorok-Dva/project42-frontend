@@ -20,6 +20,7 @@ import { getRandomColor } from 'utils/getRandomColor'
 
 import 'styles/Game.scss'
 import Composition from './Composition'
+import { parallaxStars, staticStars } from 'utils/animations'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -199,8 +200,24 @@ const GamePage = () => {
     const isLeaveMessage = gameError.includes('Vous avez bien quitté la partie.')
     return (
       <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
+        <div className="absolute inset-0 z-0">{ staticStars }</div>
+
+        {/* Nébuleuses colorées */ }
+        <div className="absolute inset-0 z-0">
+          <div
+            className="absolute inset-0 opacity-40"
+            style={ {
+              background:
+                'radial-gradient(circle at 70% 30%, rgba(111, 66, 193, 0.6), transparent 60%), radial-gradient(circle at 30% 70%, rgba(59, 130, 246, 0.6), transparent 60%), radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.3), transparent 70%)',
+            } }
+          />
+        </div>
+
+        {/* Étoiles avec parallaxe */ }
+        <div className="absolute inset-0 z-1">{ parallaxStars }</div>
+
         <motion.div
-          className={`bg-black/60 backdrop-blur-md rounded-xl border ${isLeaveMessage ? 'border-green-500/30' : 'border-red-500/30'} p-8 max-w-md text-center`}
+          className={`z-20 bg-black/60 backdrop-blur-md rounded-xl border ${isLeaveMessage ? 'border-green-500/30' : 'border-red-500/30'} p-8 max-w-md text-center`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -211,10 +228,10 @@ const GamePage = () => {
           </h1>
           <p className="text-gray-300 mb-6">{gameError}</p>
           <button
-            onClick={() => window.history.back()}
+            onClick={() => window.close()}
             className={`px-4 py-2 ${isLeaveMessage ? 'bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900' : 'bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900'} text-white rounded-lg transition-all`}
           >
-            Retour
+            Fermer
           </button>
         </motion.div>
       </div>
@@ -224,6 +241,22 @@ const GamePage = () => {
   if (passwordRequired && !isAuthorized) {
     return (
       <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
+        <div className="absolute inset-0 z-0">{ staticStars }</div>
+
+        {/* Nébuleuses colorées */ }
+        <div className="absolute inset-0 z-0">
+          <div
+            className="absolute inset-0 opacity-40"
+            style={ {
+              background:
+                'radial-gradient(circle at 70% 30%, rgba(111, 66, 193, 0.6), transparent 60%), radial-gradient(circle at 30% 70%, rgba(59, 130, 246, 0.6), transparent 60%), radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.3), transparent 70%)',
+            } }
+          />
+        </div>
+
+        {/* Étoiles avec parallaxe */ }
+        <div className="absolute inset-0 z-1">{ parallaxStars }</div>
+
         <motion.div
           className="bg-black/60 backdrop-blur-md rounded-xl border border-blue-500/30 p-8 max-w-md w-full"
           initial={{ opacity: 0, y: 20 }}
