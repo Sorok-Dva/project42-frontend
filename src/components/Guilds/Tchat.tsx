@@ -68,6 +68,9 @@ const GuildChat : React.FC = () => {
 
     socket.on('guildMessage', (message : GuildMessage) => {
       setMessages((prev) => [...prev, message])
+      if (!isOpen) {
+        setUnreadCount((prev) => prev + 1)
+      }
     })
 
     socket.on('updateUsers', (users : OnlineUser[]) => {
