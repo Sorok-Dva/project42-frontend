@@ -198,7 +198,7 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
             <Typography
               key={uniqueKey}
               variant="body1"
-              className={`canal_${msg.channel}`}
+              className={`canal_${msg.channel} ${cleanNickname === 'Modération' ? '!bg-red-900/20 border !border-red-500/30 rounded-lg p-2': '' }`}
               sx={{
                 backgroundColor: highlightColor,
                 borderRadius: 1,
