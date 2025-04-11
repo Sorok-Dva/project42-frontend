@@ -34,7 +34,7 @@ export interface Guild {
 
 const Guilds = () => {
   const { token } = useAuth()
-  const { user } = useUser()
+  const { user, reloadUser } = useUser()
   const navigate = useNavigate()
   const [canCreateStation, setCanCreateStation] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -93,6 +93,7 @@ const Guilds = () => {
         if (response.status === 200) {
           setHasLeft(true)
           toast.warn('Vous avez bien quitté votre station', ToastDefaultOptions)
+          reloadUser(true)
         }
       }
     } catch (err: any) {
