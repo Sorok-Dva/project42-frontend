@@ -132,3 +132,70 @@ code {
   background-position: 0% 50%;
   animation: gradient-scroll 5s linear infinite;
 }
+
+.tooltip-content {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.tooltip-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.tooltip-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tooltip-item {
+  display: flex;
+  align-items: center;
+  padding: 0.375rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tooltip-item:last-child {
+  border-bottom: none;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.status-online {
+  background-color: #10b981;
+}
+
+.status-away {
+  background-color: #f59e0b;
+}
+
+.status-busy {
+  background-color: #ef4444;
+}
+
+.status-offline {
+  background-color: #6b7280;
+}
+
+.username {
+  flex: 1;
+  font-size: 0.875rem;
+  color: #e5e7eb;
+}
+
+.status-text {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-left: 0.5rem;
+}
