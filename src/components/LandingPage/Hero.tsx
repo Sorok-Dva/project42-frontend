@@ -75,7 +75,7 @@ const Hero: React.FC = () => {
           <div className="col-xl-3 col-md-2 col-sm-4 order-md-last order-lg-1">
             <div className="hero-banner-area">
               <div className="hero-banner-bg">
-                <Image className="w-100" src={bg1} alt="banner" />
+                {/*<Image className="w-100" src={bg1} alt="banner" />*/}
               </div>
               <div className="hero-banner-img">
                 <Image className="w-100 hero" src={hero} alt="banner" />
