@@ -5,6 +5,7 @@ import { Viewer } from 'hooks/useGame'
 import { Tooltip } from 'react-tooltip'
 import { faUserAstronaut } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faHeart } from '@fortawesome/free-solid-svg-icons/faHeart'
 
 interface Player {
   nickname: string
@@ -184,11 +185,11 @@ const PlayersList: React.FC<PlayersListProps> = ({
                     {brothersList.includes(_player.nickname) && (
                       <span className="inline-block px-1 text-xs bg-blue-900/60 text-blue-300 rounded">Frère</span>
                     )}
-                    {coupleList.includes(_player.nickname) || _player.inLove && (
+                    {(coupleList.includes(_player.nickname) || _player.inLove) && (
                       <>
-                        <div className="badge-lovers"
+                        <span className="inline-block px-1 text-red-300"
                           data-tooltip-content={_player.inLove ? 'Ce joueur était en couple.' : 'Vous êtes en couple !'}
-                          data-tooltip-id="lover"></div>
+                          data-tooltip-id="lover"><FontAwesomeIcon icon={faHeart}/></span>
                         <Tooltip id="lover" />
                       </>
                     )}
@@ -202,14 +203,16 @@ const PlayersList: React.FC<PlayersListProps> = ({
                     )}
                     {_player.isInfected && (
                       <>
-                        <div className="badge-alien"
+                        <div className="inline-block px-1"
                           data-tooltip-content="Ce joueur a été infecté."
-                          data-tooltip-id={`${_player.nickname}_infected`}></div>
+                          data-tooltip-id={`${_player.nickname}_infected`}>
+                          <span className="inline-block px-1 text-xs bg-orange-900/60 text-orange-300 rounded">Infecté</span>
+                        </div>
                         <Tooltip id={`${_player.nickname}_infected`} />
-                        <span className="inline-block px-1 text-xs bg-orange-900/60 text-orange-300 rounded">Infecté</span>
+
                       </>
                     )}
-                    {innList.includes(_player.nickname) && isNight && (
+                    {(innList.includes(_player.nickname) && isNight) && (
                       <span className="inline-block px-1 text-xs bg-yellow-900/60 text-yellow-300 rounded">
                         Auberge
                       </span>
@@ -217,7 +220,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   </div>
 
                   {/* Indication de vote */}
-                  {!isNight && _player.target && !gameFinished && (
+                  {(!isNight && _player.target && !gameFinished) && (
                     <span className="text-sm text-gray-400">→ {_player.target}</span>
                   )}
                 </div>

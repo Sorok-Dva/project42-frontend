@@ -586,6 +586,64 @@ GLOBAL
     }
 
   }
+
+  [class^="badge-"] {
+    height: 18px;
+    width: 18px;
+    margin-left: 8px;
+    font-size: 0;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .2));
+  }
+
+  .badge-alien {
+    background: transparent url(../assets/images/badge-wolf_v2.png) center/cover;
+  }
+
+  .badge-jdf {
+    background: transparent url(../assets/images/badge-jdf.png) center/cover;
+  }
+
+  .badge-lapinb {
+    background: transparent url(../assets/images/badge-lapinb.png) center/cover;
+  }
+
+  .badge-guide {
+    background: transparent url(../assets/images/badge-guide.png) center/cover;
+  }
+
+  .badge-captain {
+    background: transparent url(../assets/images/badge-captain.png) center/cover;
+  }
+
+  .badge-lovers {
+    background: transparent url(../assets/images/badge-lovers.png) center/cover;
+  }
+
+  .badge-no-vote {
+    background: transparent url(../assets/images/badge-no-vote.png) center/cover;
+  }
+
+  .badge-easter {
+    background: transparent url(../assets/images/easter-egg.png) center/cover;
+  }
+
+  .badge-explosive-present {
+    background: transparent url(../assets/images/cadeau-explosif.png) center/cover;
+  }
+
+  .badge-creme-solaire {
+    background: transparent url(../assets/images/sun.png) center/cover;
+  }
+
+  .badge-discord {
+    background: transparent url(../assets/images/badge-discord.png) center/cover;
+    position: absolute;
+    right: 10px;
+
+    &.badge-discord-unavailable {
+      opacity: .2;
+    }
+  }
 }
 
 .modal-container {
