@@ -353,8 +353,8 @@ export const useGame = (
       }
     })
 
-    socket.on('playerKicked', (data: { nickname: string; sound: string }) => {
-      if (data.nickname === player?.nickname) {
+    socket.on('playerKicked', (data: { arg: string; sound: string }) => {
+      if (player?.nickname && data.arg === player.nickname) {
         setGameError('Vous avez été expulsé de la partie.')
       }
       if (data.sound) {
