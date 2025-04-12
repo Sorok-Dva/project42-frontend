@@ -21,6 +21,7 @@ import axios from 'axios'
 import CardImage from 'components/Game/CardImage'
 import Invitations from './Invitations'
 import { useSocket } from 'contexts/SocketContext'
+import { Tooltip } from 'react-tooltip'
 
 interface GameControlsProps {
   gameId: string | undefined
@@ -242,6 +243,15 @@ const GameControls: React.FC<GameControlsProps> = ({
     }
   }
 
+  const handleJoinGame = async () => {
+    if (!gameId || gameStarted || gameFinished) return
+    try {
+      // @TODO
+    } catch (error) {
+      console.error('Erreur lors du join room:', error)
+    }
+  }
+
   const closeTransferLead = async () => {
     setIsTransferLeadOpen(false)
   }
@@ -274,7 +284,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} isArchive={isArchive} />, [cardId, isArchive])
 
   // Rendu conditionnel selon l'état du jeu
-  if (!gameStarted && !gameFinished) {
+  if (player && !gameStarted && !gameFinished) {
     return (
       <div className="space-y-4">
         {/* Bloc d'invitation */ }
@@ -565,7 +575,7 @@ const GameControls: React.FC<GameControlsProps> = ({
     )
   }
 
-  if ((!player || viewer) && gameStarted && !gameFinished) {
+  if ((!player || viewer) && !gameFinished) {
     return (
       <div className="space-y-4">
         <motion.div
@@ -586,10 +596,39 @@ const GameControls: React.FC<GameControlsProps> = ({
               </p>
             </div>
 
-            {/* Timer */ }
-            <GameTimer gameStarted={ gameStarted }
-              gameFinished={ gameFinished }/>
+            {viewer && !gameStarted && !gameFinished && (
+              <motion.button
+                className={`sound-tick w-full px-4 py-2 transition-all rounded-lg ${
+                  players.length >= slots
+                    ? 'bg-red-900/20 text-red-300 border border-red-500/30 opacity-70 cursor-not-allowed'
+                    : 'bg-blue-600/40 hover:bg-blue-600/60 text-blue-300 hover:text-white border border-blue-500/30'
+                }`}
+                whileHover={players.length >= slots ? {} : { scale: 1.02 }}
+                whileTap={players.length >= slots ? {} : { scale: 0.98 }}
+                onClick={handleJoinGame}
+                disabled={players.length >= slots}
+                data-tooltip-id="join_game"
+                data-tooltip-content={players.length >= slots ? 'Vous ne pouvez pas rejoindre, la partie est pleine.' : 'Rejoindre le salon de jeu'}
+              >
+                Rejoindre la partie
+                <Tooltip id="join_game" />
+              </motion.button>
+            )}
 
+            {/* Timer */ }
+            { gameStarted &&  (
+              <GameTimer gameStarted={ gameStarted } gameFinished={ gameFinished }/>
+            )}
+
+            {!viewer && !gameFinished && (
+              <motion.button
+                className="sound-tick w-full px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all"
+                whileHover={ { scale: 1.02 } }
+                whileTap={ { scale: 0.98 } }
+              >
+                S'inscrire !
+              </motion.button>
+            )}
           </div>
         </motion.div>
       </div>
