@@ -14,7 +14,8 @@ export interface Friendship {
   id: number
   nickname: string
   avatar: string
-  status: 'pending' | 'refused' | 'accepted'
+  friendshipStatus: 'pending' | 'refused' | 'accepted'
+  status: 'online' | 'away' | 'busy' | 'offline'
   requesterId: number
   addresseeId: number
   isOnline: boolean
@@ -54,8 +55,8 @@ const Friends: React.FC = () => {
         },
       })
       setFriendships(response.data)
-      setAcceptedFriends(response.data.filter(f => f.status === 'accepted'))
-      setOnlineFriends(response.data.filter(f => f.isOnline && f.status === 'accepted'))
+      setAcceptedFriends(response.data.filter(f => f.friendshipStatus === 'accepted'))
+      setOnlineFriends(response.data.filter(f => f.isOnline && f.friendshipStatus === 'accepted'))
     } catch (error) {
       console.error('Erreur lors du chargement des amitiés', error)
     }

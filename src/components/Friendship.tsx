@@ -44,7 +44,7 @@ const FriendshipComponent: React.FC<FriendshipProps> = ({
     })
       .then(() => {
         setFriendships(friendships.map((f) =>
-          f.id === friendship.id ? { ...f, status: 'accepted' } : f))
+          f.id === friendship.id ? { ...f, friendshipStatus: 'accepted' } : f))
         toast.info(`Vous avez accepté la demande d'ami de <b>${friendship.nickname}</b>.`, ToastDefaultOptions)
       })
       .catch((err) => {
@@ -84,7 +84,7 @@ const FriendshipComponent: React.FC<FriendshipProps> = ({
 
   let actionButtons = null
 
-  if (friendship.status === 'pending') {
+  if (friendship.friendshipStatus === 'pending') {
     // Si le joueur connecté est celui qui a envoyé la demande, afficher "Annuler la demande"
     if (currentUserId === friendship.requesterId) {
       actionButtons = (
@@ -106,7 +106,7 @@ const FriendshipComponent: React.FC<FriendshipProps> = ({
         </>
       )
     }
-  } else if (friendship.status === 'accepted') {
+  } else if (friendship.friendshipStatus === 'accepted') {
     actionButtons = (
       <button className="btn btn-warning" onClick={handleRemoveFriend}>
         Retirer l’ami
