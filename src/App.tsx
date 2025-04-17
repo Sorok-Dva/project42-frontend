@@ -54,7 +54,7 @@ import MaintenancePage from 'pages/Maintenance'
 import Guilds from 'pages/GuildsList'
 import Guild from 'pages/GuildPage'
 
-import GuildChat from 'components/Guilds/Tchat'
+import Tchat from 'components/HomePage/Tchat'
 
 const AppContent: React.FC = () => {
   const { serverMaintenance } = useMaintenance()
@@ -78,7 +78,7 @@ const AppContent: React.FC = () => {
       {!isGameRoute && (
         <>
           <Navbar isTransparent={true} />
-          { user?.guildMembership && <GuildChat />}
+          { user?.guildMembership && <Tchat />}
         </>
       )}
       <Routes>
