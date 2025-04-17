@@ -33,7 +33,7 @@ export interface PrivateMessage {
   senderId: number
   receiverId: number
   message: string
-  timestamp: Date
+  createdAt: Date
   read: boolean
 }
 
