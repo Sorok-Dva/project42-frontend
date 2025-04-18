@@ -41,6 +41,7 @@ interface GameControlsProps {
   isArchive: boolean
   setSlots: React.Dispatch<React.SetStateAction<number>>
   setRoomData: React.Dispatch<React.SetStateAction<RoomData>>
+  setPlayer: React.Dispatch<React.SetStateAction<PlayerType | null>>
   isInn: boolean
 }
 
@@ -66,6 +67,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   setRoomData,
   isArchive,
   isInn,
+  setPlayer,
 }) => {
   const { token } = useAuth()
   const { user } = useUser()
@@ -138,10 +140,14 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleBeReady = async () => {
-    if (!gameId || !player || gameStarted || gameFinished) return
+    if (!gameId || !player || !canBeReady || gameStarted || gameFinished) return
     try {
       const response = await setPlayerReady(gameId, token)
       if (response.status === 200) {
+        setPlayer(p => {
+          if (p) return {...p, ready: true}
+          else return null
+        })
         player.ready = true
       }
     } catch (error) {

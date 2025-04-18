@@ -390,6 +390,7 @@ const GamePage = () => {
                 setRoomData={setRoomData}
                 isInn={isInn}
                 viewer={viewer}
+                setPlayer={setPlayer}
               />
             </Box>
           </Box>
