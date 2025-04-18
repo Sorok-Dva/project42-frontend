@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { usePermissions } from 'hooks/usePermissions'
 import {
@@ -79,6 +79,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const [isTransferLeadOpen, setIsTransferLeadOpen] = useState(false)
   const [isFavoriteArchive, setIsFavoriteArchive] = useState<boolean>(false)
   const [favoriteComment, setFavoriteComment] = useState<string>('')
+  const [replayGameId, setReplayGameId] = useState<number | null>(null)
 
   const openEditComposition = () => {
     if (!isCreator || isArchive) return
@@ -103,6 +104,40 @@ const GameControls: React.FC<GameControlsProps> = ({
       } else {
         alert(e)
       }
+    }
+  }
+
+  useEffect(() => {
+    if (!socket) return
+
+    const onReplayed = ({ newGameId, creator }: { newGameId: number, creator: string }) => {
+      setReplayGameId(newGameId)
+    }
+
+    socket.on('gameReplayed', onReplayed)
+    return () => { socket.off('gameReplayed', ({ newGameId }) => setReplayGameId(newGameId)) }
+  }, [socket])
+
+  const handleReplay = async () => {
+    if (!roomData.id || !gameFinished || !token) return
+    try {
+      const response = await axios.post(
+        `/api/games/room/${roomData.id}/replay`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      const newGame = response.data.game
+      setReplayGameId(newGame.id)
+      window.location.href = `/game/${newGame.id}`
+    } catch (e: any) {
+      console.error('Erreur lors du relancement :', e)
+      alert(e.response?.data?.error || 'Erreur lors du relancement de la partie')
+    }
+  }
+
+  const handleJoinReplayed = () => {
+    if (replayGameId) {
+      window.location.href = `/game/${replayGameId}`
     }
   }
 
@@ -725,6 +760,29 @@ const GameControls: React.FC<GameControlsProps> = ({
                   />
                 </div>
               ) }
+
+              {/* Replay controls for creator */}
+              {isCreator && !replayGameId && (
+                <motion.button
+                  className="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleReplay}
+                >
+                  Relancer la partie
+                </motion.button>
+              )}
+
+              {replayGameId && (
+                <motion.button
+                  className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow-lg"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleJoinReplayed}
+                >
+                  Rejoindre la nouvelle partie
+                </motion.button>
+              )}
             </div>
           </div>
         </motion.div>
