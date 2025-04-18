@@ -197,6 +197,8 @@ const GamePage = () => {
   }
 
   if (gameError) {
+    localStorage.setItem('gameFinished', 'true')
+
     const isLeaveMessage = gameError.includes('Vous avez bien quitté la partie.')
     return (
       <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">

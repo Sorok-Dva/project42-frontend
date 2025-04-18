@@ -47,12 +47,21 @@ const RoomList = () => {
     whiteFlag: false,
   })
 
+  const channel = new BroadcastChannel('site-channel')
+
   useEffect(() => {
     fetchRooms()
     fetchPlayerRoom()
 
     socket.on('roomsUpdated', fetchRooms)
-
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'gameFinished') {
+        fetchRooms()
+        setPlayerRoomId(null)
+        setInGame(false)
+        localStorage.removeItem('gameFinished')
+      }
+    })
     return () => {
       socket.off('roomsUpdated')
     }
