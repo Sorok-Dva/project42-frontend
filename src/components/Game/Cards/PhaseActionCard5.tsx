@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
 import { useSocket } from 'contexts/SocketContext'
 import { useUser } from 'contexts/UserContext'
 
@@ -35,8 +34,8 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
   const { user } = useUser()
   const [selectedDeathTarget, setSelectedDeathTarget] = useState<number | ''>('')
 
-  const handleDeathChange = (event: any) => {
-    setSelectedDeathTarget(event.target.value)
+  const handleDeathChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedDeathTarget(Number(event.target.value))
   }
 
   const handleDeathSubmit = () => {
@@ -63,59 +62,65 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
   }
 
   return (
-    <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', mt: 2 }}>
-      <Typography variant="h6">{actionRequest.action.message}</Typography>
+    <div className="p-4 mt-4 border border-blue-500/30 rounded-lg bg-black/40 backdrop-blur-sm">
+      <h3 className="text-lg font-bold text-white">{actionRequest.action.message}</h3>
 
       {/* Section Potion de Mort */}
-      { !deathElixirUsed && (
-        <>
-          <Typography variant="subtitle1" sx={{ mt: 2 }}>Elixir de Mort :</Typography>
-          <FormControl fullWidth sx={{ mt: 1 }}>
-            <InputLabel id="death-select-label">Sélectionnez une cible</InputLabel>
-            <Select
-              labelId="death-select-label"
+      {!deathElixirUsed && (
+        <div className="mt-4">
+          <h4 className="text-base font-medium text-blue-300 mb-2">Elixir de Mort :</h4>
+          <div className="relative">
+            <select
+              className="w-full bg-black/60 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none"
               value={selectedDeathTarget}
-              label="Sélectionnez une cible"
               onChange={handleDeathChange}
             >
+              <option value="" disabled>Sélectionnez une cible</option>
               {actionRequest.eligibleTargets.map((target) => (
-                <MenuItem key={target.id} value={target.id}>
+                <option key={target.id} value={target.id}>
                   {target.nickname}
-                </MenuItem>
+                </option>
               ))}
-            </Select>
-          </FormControl>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2 }}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
+          <button
+            className={`mt-3 px-4 py-2 rounded-lg transition-colors ${
+              selectedDeathTarget === ''
+                ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white'
+            }`}
             onClick={handleDeathSubmit}
             disabled={selectedDeathTarget === ''}
           >
             Utiliser Elixir de Mort
-          </Button>
-        </>
+          </button>
+        </div>
       )}
 
       {/* Section elixir de Vie */}
       {alienVictim && (
-        <>
-          <Typography variant="subtitle1" sx={{ mt: 4 }}>Elixir de Vie :</Typography>
-          <Button
-            variant="contained"
-            color="secondary"
-            sx={{ mt: 1 }}
+        <div className="mt-6">
+          <h4 className="text-base font-medium text-blue-300 mb-2">Elixir de Vie :</h4>
+          <button
+            className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 text-white rounded-lg transition-colors"
             onClick={handleLifeSubmit}
           >
             Sauver {alienVictim.nickname}
-          </Button>
-        </>
+          </button>
+        </div>
       )}
 
       {deathElixirUsed && lifeElixirUsed && (
-        <Typography variant="subtitle1" sx={{ mt: 4 }}>Vous avez utilisé tout vos élixirs.</Typography>
+        <div className="mt-6 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+          <p className="text-blue-300">Vous avez utilisé tous vos élixirs.</p>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 
