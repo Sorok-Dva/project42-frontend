@@ -8,6 +8,7 @@ import { Tooltip } from 'react-tooltip'
 import type { Conversation, GuildMessage, OnlineUser, PrivateMessage } from 'types/tchat'
 import { Friendship } from 'components/Layouts/navbar/Friends'
 import { useAuth } from 'contexts/AuthContext'
+import { Container, Spinner } from 'reactstrap'
 
 const UnifiedChat: React.FC = () => {
   const { socket } = useSocket()
@@ -27,8 +28,9 @@ const UnifiedChat: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [hasJoined, setHasJoined] = useState(false)
   const [contacts, setContacts] = useState<Friendship[]>([])
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [footerVisible, setFooterVisible] = useState(false)
 
+  const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const tooltipId = 'chat-users-tooltip'
 
@@ -46,7 +48,7 @@ const UnifiedChat: React.FC = () => {
     if (socket) {
       socket.on('privateMessage', (message: PrivateMessage) => {
         audioNotif.currentTime = 0
-        audioNotif.play().catch()
+        audioNotif.play().catch(() => {})
 
         setPrivateMessages(prev => [...prev, message])
 
@@ -83,7 +85,7 @@ const UnifiedChat: React.FC = () => {
 
       socket.on('guildMessage', (message: GuildMessage) => {
         audioNotif.currentTime = 0
-        audioNotif.play().catch()
+        audioNotif.play().catch(() => {})
         setGuildMessages((prev) => [...prev, message])
         if (!isOpen || view !== 'guild') {
           setGuildUnreadCount((prev) => prev + 1)
@@ -102,6 +104,20 @@ const UnifiedChat: React.FC = () => {
       }
     }
   }, [socket, user, hasJoined, isOpen, view])
+
+  useEffect(() => {
+    const footer = document.getElementById('site-footer')
+    if (!footer) return
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        console.log('footerVisible =', entry.isIntersecting)
+        setFooterVisible(entry.isIntersecting)
+      },
+      { threshold: 0 }
+    )
+    obs.observe(footer)
+    return () => obs.disconnect()
+  }, [])
 
   // Défiler vers le bas quand de nouveaux messages arrivent
   useEffect(() => {
@@ -184,6 +200,21 @@ const UnifiedChat: React.FC = () => {
           },
         })
         setConversations(response.data)
+
+      } catch (error) {
+        console.error('Erreur lors de la récupération des conversations:', error)
+      }
+    }
+
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await axios.get<number>('/api/private/unreadCount', {
+          headers: {
+            Authorization: `Bearer ${ token }`,
+          },
+        })
+        setUnreadCount(prev => prev + response.data)
+
       } catch (error) {
         console.error('Erreur lors de la récupération des conversations:', error)
       }
@@ -191,6 +222,7 @@ const UnifiedChat: React.FC = () => {
 
     fetchFriendships()
     fetchLastMessages()
+    fetchUnreadCount()
   }, [isOpen])
 
   useEffect(() => {
@@ -258,42 +290,6 @@ const UnifiedChat: React.FC = () => {
     setNewMessage('')
   }
 
-
-  // Simuler la réception de nouveaux messages de guilde
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Math.random() > 0.7) {
-        const users = ['GalaxyQueen', 'NebulaCaptain', 'VoidWalker', 'StarDust', 'CosmicRay']
-        const contents = [
-          'Quelqu\'un a des ressources de tritium à échanger?',
-          'Je viens de terminer une mission de niveau 5!',
-          'La nouvelle mise à jour est incroyable!',
-          'Qui veut former une équipe pour le raid de ce weekend?',
-          'J\'ai trouvé un artefact rare dans le secteur Omega!',
-        ]
-
-        const randomUser = users[Math.floor(Math.random() * users.length)]
-        const randomContent = contents[Math.floor(Math.random() * contents.length)]
-
-        const newMsg: GuildMessage = {
-          id: Math.random(),
-          userId: Math.random(),
-          nickname: randomUser,
-          message: randomContent,
-          createdAt: new Date(),
-        }
-
-        setGuildMessages((prev) => [...prev, newMsg])
-
-        if (!isOpen || view !== 'guild') {
-          setGuildUnreadCount((prev) => prev + 1)
-        }
-      }
-    }, 15000) // Nouveau message potentiel toutes les 15 secondes
-
-    return () => clearInterval(interval)
-  }, [isOpen, view])
-
   // Défiler vers le bas quand de nouveaux messages arrivent
   useEffect(() => {
     if (isOpen && messagesEndRef.current) {
@@ -307,26 +303,6 @@ const UnifiedChat: React.FC = () => {
       setGuildUnreadCount(0)
     }
   }, [isOpen, view])
-
-  // Simuler des connexions/déconnexions aléatoires
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Math.random() > 0.8) {
-        setContacts((prev) => {
-          const newContacts = [...prev]
-          const randomIndex = Math.floor(Math.random() * newContacts.length)
-
-          // Changer le statut aléatoirement
-          const statuses: ('online' | 'away' | 'busy' | 'offline')[] = ['online', 'away', 'busy', 'offline']
-          newContacts[randomIndex].status = statuses[Math.floor(Math.random() * statuses.length)]
-
-          return newContacts
-        })
-      }
-    }, 10000)
-
-    return () => clearInterval(interval)
-  }, [])
 
   const openConversation = (conversation: Conversation) => {
     setActiveConversation(conversation)
@@ -404,10 +380,7 @@ const UnifiedChat: React.FC = () => {
     `
   }
 
-  // Nombre de contacts en ligne
-  const onlineContactsCount = contacts.filter((c) => c.status === 'online').length
-
-  // Nombre total de messages non lus (privés + guilde)
+  const onlineContactsCount = contacts.filter((c) => c.isOnline).length
   const totalUnreadCount = unreadCount + guildUnreadCount
 
   const generateGuildMembersTooltipContent = () => {
@@ -431,7 +404,13 @@ const UnifiedChat: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-0 w-50 right-80 z-[100]">
+    <div className={`
+      fixed
+      right-80
+      z-[100]
+      ${footerVisible ? 'bottom-[70px]' : 'bottom-0'}
+      ${isOpen ? 'w-25' : ''}
+    `}>
       {/* Bouton du chat */}
       { !isOpen && (
         <div className="relative">
@@ -485,11 +464,11 @@ const UnifiedChat: React.FC = () => {
                         ?.nickname as string)}
                   </h3>
                   <div
-                    className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${
+                    className={`bottom-0 right-0 w-3 h-3 rounded-full ${
                       getStatusColor(
                         getOtherParticipant(
                           conversations.find((c) => c.id === activeConversation.id) as Conversation
-                        )?.status as string
+                        )?.isOnline ? 'online' : 'offline',
                       )
                     } border-2 border-black`}
                   />
@@ -728,6 +707,14 @@ const UnifiedChat: React.FC = () => {
                   className="h-[350px] overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-blue-500/30 scrollbar-track-black/20"
                   ref={chatContainerRef}
                 >
+                  { loading && (
+                    <Container className="loader-container loader-container-two">
+                      <div className="spinner-wrapper">
+                        <Spinner className="custom-spinner" />
+                        <div className="loading-text">Chargement de votre conversation avec {activeConversation?.participants.filter(n => n.nickname !== user?.nickname || '')[0].nickname}...</div>
+                      </div>
+                    </Container>
+                  )}
                   {privateMessages.map((msg, i) => {
                     const isFromMe = msg.senderId === user?.id
 
@@ -735,7 +722,7 @@ const UnifiedChat: React.FC = () => {
                       <div key={i} className={`mb-3 flex ${isFromMe ? 'justify-end' : 'justify-start'}`}>
                         <div
                           className={`max-w-[80%] rounded-lg px-3 py-2 ${
-                            isFromMe
+                            !isFromMe
                               ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
                               : 'bg-black/40 border border-blue-500/20 text-white'
                           }`}
