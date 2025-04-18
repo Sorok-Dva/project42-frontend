@@ -358,7 +358,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                       </p>
                     ) : (players.filter(p => !p.ready).length - 1) > 0 ? (
                       <p className="text-blue-300">
-                        En attente de {(players.filter(p => !p.ready).length + 1)} joueur{players.filter(p => !p.ready).length > 1 ? 's' : ''}
+                        En attente de {(players.filter(p => !p.ready).length - 1)} joueur{players.filter(p => !p.ready).length - 1 > 1 ? 's' : ''}
                       </p>
                     ) : (
                       <p className="text-green-400">

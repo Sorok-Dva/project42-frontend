@@ -281,7 +281,9 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
               multiple={ actionRequest.action.targetCount > 1 }
               value={ selectedTargets.map(String) }
               onChange={ handleSelectionChange }
-              onMouseDown={(e) => handleMouseDown(e, actionRequest?.action.targetCount)}
+              { ...(actionRequest.action.targetCount > 1
+                ? { onMouseDown: (e: any) => handleMouseDown(e, actionRequest.action.targetCount) }
+                : {}) }
               className="w-full bg-black/60 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               size={ Math.min(actionRequest.eligibleTargets.length, 5) }
             >
