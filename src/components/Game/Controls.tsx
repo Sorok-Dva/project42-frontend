@@ -569,7 +569,7 @@ const GameControls: React.FC<GameControlsProps> = ({
             </div>
 
             {/* Timer */ }
-            <GameTimer gameStarted={ gameStarted }
+            <GameTimer gameId={gameId || ''} gameStarted={ gameStarted }
               gameFinished={ gameFinished }/>
 
             {/* Actions de phase */ }
@@ -623,7 +623,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
             {/* Timer */ }
             { gameStarted &&  (
-              <GameTimer gameStarted={ gameStarted } gameFinished={ gameFinished }/>
+              <GameTimer gameId={gameId || ''} gameStarted={ gameStarted } gameFinished={ gameFinished }/>
             )}
 
             {!viewer && !gameFinished && (

@@ -1,53 +1,57 @@
-import type React from 'react'
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useSocket } from 'contexts/SocketContext'
 
 interface GameTimerProps {
+  gameId: string
   gameStarted: boolean
   gameFinished: boolean
 }
 
-const GameTimer: React.FC<GameTimerProps> = ({ gameStarted, gameFinished }) => {
+const GameTimer: React.FC<GameTimerProps> = ({ gameId, gameStarted, gameFinished }) => {
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [phase, setPhase] = useState<number | null>(null)
   const { socket } = useSocket()
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const lastSoundPlayed = useRef<number | null>(null)
 
+  const updateTimer = (limitPhase: string) => {
+    if (intervalRef.current) clearInterval(intervalRef.current) // Évite les multiples intervals
+
+    const calculateTimeLeft = () => {
+      const phaseEndTime = new Date(limitPhase).getTime()
+      const diff = phaseEndTime - new Date().getTime()
+      const newTimeLeft = diff > 0 ? Math.ceil(diff / 1000) : 0
+
+      setTimeLeft(diff > 0 ? Math.ceil(diff / 1000) : 0)
+
+      // 🔊 Jouer un son quand il reste 3s, 2s, ou 1s (évite de rejouer inutilement)
+      if (newTimeLeft > 0 && newTimeLeft <= 3 && lastSoundPlayed.current !== newTimeLeft) {
+        if (newTimeLeft === 1 && bip2) {
+          bip2.currentTime = 0
+          bip2.play().catch(() => {})
+        } else if (bip1) {
+          bip1.currentTime = 0
+          bip1.play().catch(() => {})
+        }
+        lastSoundPlayed.current = newTimeLeft
+      }
+    }
+
+    calculateTimeLeft()
+    intervalRef.current = setInterval(calculateTimeLeft, 1000)
+  }
+
+  useEffect(() => {
+    socket.emit('getTimer', { roomId: gameId })
+  }, [gameStarted])
+
   // Sons pour le compte à rebours
   const bip1 = typeof Audio !== 'undefined' ? new Audio('/assets/sounds/bip1.mp3') : null
   const bip2 = typeof Audio !== 'undefined' ? new Audio('/assets/sounds/bip2.mp3') : null
 
   useEffect(() => {
-    if (!socket || !gameStarted || gameFinished) return
-
-    const updateTimer = (limitPhase: string) => {
-      if (intervalRef.current) clearInterval(intervalRef.current) // Évite les multiples intervals
-
-      const calculateTimeLeft = () => {
-        const phaseEndTime = new Date(limitPhase).getTime()
-        const diff = phaseEndTime - new Date().getTime()
-        const newTimeLeft = diff > 0 ? Math.ceil(diff / 1000) : 0
-
-        setTimeLeft(diff > 0 ? Math.ceil(diff / 1000) : 0)
-
-        // 🔊 Jouer un son quand il reste 3s, 2s, ou 1s (évite de rejouer inutilement)
-        if (newTimeLeft > 0 && newTimeLeft <= 3 && lastSoundPlayed.current !== newTimeLeft) {
-          if (newTimeLeft === 1 && bip2) {
-            bip2.currentTime = 0
-            bip2.play().catch(() => {})
-          } else if (bip1) {
-            bip1.currentTime = 0
-            bip1.play().catch(() => {})
-          }
-          lastSoundPlayed.current = newTimeLeft
-        }
-      }
-
-      calculateTimeLeft()
-      intervalRef.current = setInterval(calculateTimeLeft, 1000)
-    }
+    if (!gameStarted || gameFinished) return
 
     socket.on('timerUpdated', ({ limitPhase }) => {
       if (!limitPhase) return
