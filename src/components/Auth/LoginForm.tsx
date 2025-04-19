@@ -51,6 +51,7 @@ const LoginForm: React.FC<{
           level: payload.level,
           title: payload.title,
           token: payload.token,
+          discordId: payload.discordId,
         }, token)
 
         toast.success(`Vous êtes maintenant connecté ! Bienvenue ${payload.nickname}.`, {
