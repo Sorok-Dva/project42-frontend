@@ -37,6 +37,7 @@ export interface User {
   points?: number;
   title: string;
   signature?: string;
+  discordId?: string;
   premium?: Date;
   token: string;
   behaviorPoints?: number;
@@ -57,7 +58,7 @@ interface UserContextType {
   user: User | null;
   setUser: (user : User | null) => void;
   logout: () => void;
-  login: (user : Omit<User, 'behaviorPoints' | 'moderatorPoints'>, token : string) => void;
+  login: (user : Omit<User, 'behaviorPoints' | 'moderatorPoints'>, token : string, returnToHome?: boolean) => void;
   isAdmin: boolean;
   navigateTo: (path : string) => void;
   reloadUser: (forceReload?: boolean) => void;
@@ -114,11 +115,11 @@ export const UserProvider : React.FC<{ children : ReactNode }> = ({ children }) 
     fetchMe(false)
   }, [fetchMe])
 
-  const login = (user: User, token: string) => {
+  const login = (user: User, token: string, returnTomHome = true) => {
     setUser(user)
     setToken(token)
     localStorage.setItem('token', token)
-    navigateTo('/')
+    if (returnTomHome) navigateTo('/')
   }
 
   const isAdmin = user?.roleId === 1

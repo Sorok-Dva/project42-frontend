@@ -44,6 +44,7 @@ const ValidateUser: React.FC = () => {
               level: payload.level,
               title: payload.title,
               token: payload.token,
+              discordId: payload.discordId,
             }, token)
             if (!user) navigate('/')
             else navigate('/settings')
