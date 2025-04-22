@@ -68,10 +68,11 @@ const Chat: React.FC<ChatProps> = ({
 
     try {
       if (trimmedMessage.startsWith('/')) {
+        const commandString = trimmedMessage.slice(1).trim()
+        const [command, arg, ...rest] = commandString.split(' ')
+        const text = rest.join(' ')
+
         if (userRole !== 'User') {
-          const commandString = trimmedMessage.slice(1).trim()
-          const [command, arg, ...rest] = commandString.split(' ')
-          const text = rest.join(' ')
           socket.emit(
             developerCommand.includes(command)
               ? 'developerCommand'
@@ -84,6 +85,18 @@ const Chat: React.FC<ChatProps> = ({
               playerId,
               currentUserRole: userRole,
               moderator: user,
+            }
+          )
+        } else {
+          socket.emit('command',
+            {
+              command,
+              arg,
+              text,
+              roomId: gameId,
+              playerId,
+              currentUserRole: userRole,
+              user,
             }
           )
         }
