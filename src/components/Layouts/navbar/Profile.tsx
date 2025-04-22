@@ -61,9 +61,6 @@ const Profile: React.FC = () => {
           <Link to="#" data-profile={user.nickname} className="account-item">
             Voir mon profil
           </Link>
-          <Link to="/chat" className="account-item">
-            Messages
-          </Link>
           <Link to="/account/settings" className="account-item">
             Mon compte
           </Link>
