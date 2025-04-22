@@ -6,7 +6,7 @@ export const ROLE_PERMISSIONS = {
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
       'startPhase', 'endPhase', 'kill', 'revive',
-      'listCards', '42',
+      'listCards', 'mp', '42',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
@@ -26,7 +26,7 @@ export const ROLE_PERMISSIONS = {
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
       'startPhase', 'endPhase', 'kill', 'revive',
-      'listCards', '42',
+      'listCards', 'mp', '42',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
@@ -46,7 +46,7 @@ export const ROLE_PERMISSIONS = {
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
       'startPhase', 'endPhase', 'kill', 'revive',
-      'listCards', '42',
+      'listCards', 'mp', '42',
     ],
     godPowers: [],
     animationPowers: [
@@ -61,7 +61,7 @@ export const ROLE_PERMISSIONS = {
     game: ['create', 'edit', 'dissolve', 'view', 'bypassPassword'],
     gamePowers: [
       'modo', 'warn', 'kick', 'ban', 'mute', 'unmute',
-      'crea', '42',
+      'crea', 'mp', '42',
     ],
     godPowers: [],
     animationPowers: [],
@@ -74,7 +74,7 @@ export const ROLE_PERMISSIONS = {
   ModeratorTest: {
     game: ['create', 'edit', 'view'],
     gamePowers: [
-      'modo', 'warn', 'kick', 'mute', 'unmute', '42',
+      'modo', 'warn', 'kick', 'mute', 'unmute', 'mp', '42',
     ],
     godPowers: [],
     animationPowers: [],
@@ -84,7 +84,7 @@ export const ROLE_PERMISSIONS = {
   },
   Animator: {
     game: ['create', 'view'],
-    gamePowers: [ 'addTimer', 'removeTimer', 'setTimer', 'message', 'messageTo', '42' ],
+    gamePowers: [ 'addTimer', 'removeTimer', 'setTimer', 'message', 'mp', '42' ],
     godPowers: [ 'setNight', 'setDay' ],
     animationPowers: [
       'music', 'video', 'image', 'dice', 'text', 'timer',
