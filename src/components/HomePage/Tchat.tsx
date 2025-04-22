@@ -186,7 +186,7 @@ const UnifiedChat: React.FC = () => {
             Authorization: `Bearer ${token}`,
           },
         })
-        setContacts(response.data.filter(f => f.friendshipStatus === 'accepted'))
+        setContacts(response.data)
       } catch (error) {
         console.error('Erreur lors du chargement des amitiés', error)
       }
