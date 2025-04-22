@@ -208,12 +208,12 @@ const UnifiedChat: React.FC = () => {
 
     const fetchUnreadCount = async () => {
       try {
-        const response = await axios.get<number>('/api/private/unreadCount', {
+        const response = await axios.get<{ unreadCount: number }>('/api/private/unreadCount', {
           headers: {
             Authorization: `Bearer ${ token }`,
           },
         })
-        setUnreadCount(prev => prev + response.data)
+        setUnreadCount(response.data.unreadCount)
 
       } catch (error) {
         console.error('Erreur lors de la récupération des conversations:', error)
