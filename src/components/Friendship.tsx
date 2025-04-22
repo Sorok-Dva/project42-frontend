@@ -24,7 +24,7 @@ const FriendshipComponent: React.FC<FriendshipProps> = ({
   const currentUserId = user?.id
 
   const handleCancelRequest = () => {
-    axios.delete(`/api/friends/${friendship.id}`, {
+    axios.delete(`/api/friends/${friendship.requesterId === user?.id ? friendship.addresseeId : friendship.requesterId }`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(() => {
@@ -39,7 +39,7 @@ const FriendshipComponent: React.FC<FriendshipProps> = ({
 
   const handleAcceptRequest = () => {
     // Supposons que vous ayez une route pour accepter la demande : PUT /api/friends/:id/accept
-    axios.put(`/api/friends/${friendship.id}/accept`, {}, {
+    axios.put(`/api/friends/${friendship.requesterId === user?.id ? friendship.addresseeId : friendship.requesterId }/accept`, {}, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(() => {
@@ -55,7 +55,7 @@ const FriendshipComponent: React.FC<FriendshipProps> = ({
 
   const handleRefuseRequest = () => {
     // Pour refuser, on supprime la demande (DELETE /api/friends/:id)
-    axios.delete(`/api/friends/${friendship.id}`, {
+    axios.delete(`/api/friends/${friendship.requesterId === user?.id ? friendship.addresseeId : friendship.requesterId }`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(() => {
@@ -69,7 +69,7 @@ const FriendshipComponent: React.FC<FriendshipProps> = ({
   }
 
   const handleRemoveFriend = () => {
-    axios.delete(`/api/friends/${friendship.id}`, {
+    axios.delete(`/api/friends/${friendship.requesterId === user?.id ? friendship.addresseeId : friendship.requesterId }`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(() => {
