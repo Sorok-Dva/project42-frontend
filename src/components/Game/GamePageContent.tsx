@@ -142,6 +142,7 @@ const GamePage = () => {
 
     return () => {
       socket.offAny()
+      socket.off('bipNotReadyPlayers')
     }
   }, [socket, player])
 

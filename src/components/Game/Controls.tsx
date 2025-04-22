@@ -180,11 +180,7 @@ const GameControls: React.FC<GameControlsProps> = ({
     try {
       const response = await setPlayerReady(gameId, token)
       if (response.status === 200) {
-        setPlayer(p => {
-          if (p) return {...p, ready: true}
-          else return null
-        })
-        player.ready = true
+        setPlayer({ ...player, ready: true })
       }
     } catch (error) {
       console.error('Erreur lors du set ready:', error)
