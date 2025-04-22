@@ -164,6 +164,7 @@ const Chat: React.FC<ChatProps> = ({
         'kill',
         'revive',
         'achievement',
+        'mp'
       ].includes(command) &&
       !hasAdditionalArgs
     ) {
