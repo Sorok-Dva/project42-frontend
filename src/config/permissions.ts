@@ -10,7 +10,7 @@ export const ROLE_PERMISSIONS = {
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
-      'music', 'video', 'image', 'dice', 'text', 'timer',
+      'music', 'video', 'img', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
     site: [
@@ -30,7 +30,7 @@ export const ROLE_PERMISSIONS = {
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
-      'music', 'video', 'image', 'dice', 'text', 'timer',
+      'music', 'video', 'img', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
     site: [
@@ -50,7 +50,7 @@ export const ROLE_PERMISSIONS = {
     ],
     godPowers: [],
     animationPowers: [
-      'music', 'video', 'image', 'dice', 'text', 'timer',
+      'music', 'video', 'img', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
     site: [
@@ -87,7 +87,7 @@ export const ROLE_PERMISSIONS = {
     gamePowers: [ 'addTimer', 'removeTimer', 'setTimer', 'message', 'mp', '42' ],
     godPowers: [ 'setNight', 'setDay' ],
     animationPowers: [
-      'music', 'video', 'image', 'dice', 'text', 'timer',
+      'music', 'video', 'img', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
     site: [],
