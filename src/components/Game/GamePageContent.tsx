@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Box } from '@mui/material'
 import { Container, Spinner } from 'reactstrap'
 import { useParams } from 'react-router-dom'
@@ -42,6 +42,11 @@ const GamePage = () => {
   const { socket } = useSocket()
 
   const [highlightedPlayers, setHighlightedPlayers] = useState<{ [nickname: string]: string }>({})
+
+  const [audioPlaying, setAudioPlaying] = useState<boolean>(false)
+  const [audioTrack, setAudioTrack] = useState<{ title: string; artist: string; url: string } | null>(null)
+  const [audioVolume, setAudioVolume] = useState<number>(0.5)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   /**
    * Toggles the highlighting of a player based on their nickname.
@@ -140,9 +145,28 @@ const GamePage = () => {
       }
     })
 
+    socket.on('music', (data: { title: string; artist: string; url: string }) => {
+      setAudioTrack(data)
+      if (audioRef.current) {
+        audioRef.current.src = data.url
+        audioRef.current.volume = audioVolume
+        audioRef.current.play().catch((err) => console.error('Erreur lors de la lecture audio:', err))
+        setAudioPlaying(true)
+      }
+    })
+
+    socket.on('stopMusic', () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        setAudioPlaying(false)
+      }
+    })
+
     return () => {
       socket.offAny()
       socket.off('bipNotReadyPlayers')
+      socket.off('music')
+      socket.off('stopMusic')
     }
   }, [socket, player])
 
@@ -196,6 +220,67 @@ const GamePage = () => {
       }
     }
   }
+
+  /**
+   * Gérer la lecture/pause de l'audio
+   */
+  const handleToggleAudio = () => {
+    if (!audioRef.current || !audioTrack) return
+
+    if (audioPlaying) {
+      audioRef.current.pause()
+    } else {
+      audioRef.current.play().catch((err) => console.error('Erreur lors de la lecture audio:', err))
+    }
+
+    setAudioPlaying(!audioPlaying)
+  }
+
+  /**
+   * Gérer le changement de volume
+   */
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = Number.parseFloat(e.target.value)
+    setAudioVolume(newVolume)
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume
+    }
+  }
+
+  // Créer et gérer l'élément audio
+  useEffect(() => {
+    audioRef.current = new Audio()
+    audioRef.current.volume = audioVolume
+
+    // 2) Dès que la piste se termine, on enlève le player
+    const handleEnded = () => {
+      setAudioPlaying(false)
+      setAudioTrack(null)
+    }
+    audioRef.current.addEventListener('ended', handleEnded)
+
+    if (audioTrack) {
+      audioRef.current.src = audioTrack.url
+      if (audioPlaying) {
+        audioRef.current.play().catch((err) => console.error('Erreur lors de la lecture audio:', err))
+      }
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ''
+        audioRef.current.removeEventListener('ended', handleEnded)
+      }
+    }
+  }, [])
+
+  // Mettre à jour le volume lorsqu'il change
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = audioVolume
+    }
+  }, [audioVolume])
 
   if (gameError) {
     localStorage.setItem('gameFinished', 'true')
@@ -327,7 +412,58 @@ const GamePage = () => {
             </div>
 
             {!isArchive && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
+                {audioTrack && (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-black/40 border border-blue-500/30 rounded-lg">
+                    <motion.button
+                      className={`w-6 h-6 flex items-center justify-center rounded-full ${audioPlaying ? 'bg-purple-600' : 'bg-blue-600'} text-white`}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={handleToggleAudio}
+                    >
+                      {audioPlaying ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-3 w-3"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-3 w-3"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </motion.button>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-white font-medium truncate max-w-[100px]">Titre</span>
+                      <span className="text-xs text-blue-300 truncate max-w-[100px]">Artiste</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={audioVolume}
+                      onChange={handleVolumeChange}
+                      className="w-16 h-1 bg-blue-500/30 rounded-lg appearance-none cursor-pointer"
+                    />
+                  </div>
+                )}
                 <motion.button
                   className="px-3 py-1 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all flex items-center gap-1"
                   whileHover={{ scale: 1.05 }}
