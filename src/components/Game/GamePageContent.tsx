@@ -146,7 +146,16 @@ const GamePage = () => {
     })
 
     socket.on('music', (data: { title: string; artist: string; url: string }) => {
-      setAudioTrack(data)
+      const ytMatch = data.url.match(
+        /(?:youtube\.com\/(?:watch\?.*?v=)|youtu\.be\/)([A-Za-z0-9_-]{11})(?=[?&]|$)/
+      )
+      console.log(ytMatch)
+      const videoId = ytMatch ? ytMatch[1] : null
+      const audioUrl = videoId
+        ? `${process.env.REACT_APP_SITE_URL}/api/server/youtube/audio?videoId=${videoId}`
+        : data.url
+      console.log(audioUrl)
+      setAudioTrack({ ...data, url: audioUrl })
       if (audioRef.current) {
         audioRef.current.src = data.url
         audioRef.current.volume = audioVolume
