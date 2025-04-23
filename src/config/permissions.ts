@@ -6,7 +6,7 @@ export const ROLE_PERMISSIONS = {
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
       'startPhase', 'endPhase', 'kill', 'revive',
-      'listCards', 'mp', '42',
+      'listCards', 'mp', '42', 'forceReload',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
@@ -26,7 +26,7 @@ export const ROLE_PERMISSIONS = {
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
       'startPhase', 'endPhase', 'kill', 'revive',
-      'listCards', 'mp', '42',
+      'listCards', 'mp', '42', 'forceReload',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
@@ -46,7 +46,7 @@ export const ROLE_PERMISSIONS = {
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
       'startPhase', 'endPhase', 'kill', 'revive',
-      'listCards', 'mp', '42',
+      'listCards', 'mp', '42', 'forceReload',
     ],
     godPowers: [],
     animationPowers: [

@@ -446,6 +446,18 @@ export const useGame = (
       setGameError('Le salon a été détruit par la modération.')
     })
 
+    socket.on('forceReload', async () => {
+      // Purge du cache (Cache API)
+      if ('caches' in window) {
+        const cacheNames = await caches.keys()
+        await Promise.all(cacheNames.map(name => caches.delete(name)))
+      }
+      // Rechargement forcé avec cache-bust
+      const url = new URL(window.location.href)
+      url.searchParams.set('_', Date.now().toString())
+      window.location.replace(url.toString())
+    })
+
     socket.on('error', (error: any) => {
       setMessages((prev) => [
         ...prev,
@@ -482,6 +494,7 @@ export const useGame = (
       socket.off('inn_list')
       socket.off('dead')
       socket.off('dissolve')
+      socket.off('forceReload')
       socket.off('error')
     }
   }, [socket, gameId, user, player, hasJoined, isAuthorized, isNight, roomData.maxPlayers])
