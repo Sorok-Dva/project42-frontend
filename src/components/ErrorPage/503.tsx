@@ -30,7 +30,7 @@ const CustomErrorContent: React.FC = () => {
                 />
                 <h1>Service Temporairement Indisponible</h1>
                 <p>
-                  Nous sommes désolé, mais le serveur est actuellement indisponible. Veuillez réessayer plus tard.
+                  Nous sommes désolés, mais le serveur est actuellement indisponible. Veuillez réessayer plus tard.
                 </p>
                 <p>
                   <i>Vous pouvez aussi rejoindre notre serveur discord pour être notifié lorsque le serveur sera de nouveau disponible</i>
