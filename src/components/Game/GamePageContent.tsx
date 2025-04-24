@@ -157,7 +157,7 @@ const GamePage = () => {
       console.log(audioUrl)
       setAudioTrack({ ...data, url: audioUrl })
       if (audioRef.current) {
-        audioRef.current.src = data.url
+        audioRef.current.src = audioUrl
         audioRef.current.volume = audioVolume
         audioRef.current.play().catch((err) => console.error('Erreur lors de la lecture audio:', err))
         setAudioPlaying(true)
