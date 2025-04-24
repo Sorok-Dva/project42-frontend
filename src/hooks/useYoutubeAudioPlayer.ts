@@ -17,17 +17,25 @@ interface YouTubePlayer {
 }
 
 export function useYouTubeAudioPlayer(
-  containerRef: React.RefObject<HTMLDivElement>,
   onVideoInfo: (info: { video_id: string; title: string; author: string }) => void,
   onPlayerEnd?: () => void
 ) {
-  const playerRef = useRef<YouTubePlayer | null>(null)
-  const pendingVideoRef = useRef<string | null>(null)
+  const playerRef = useRef<YouTubePlayer|null>(null)
+  const pendingVideoRef = useRef<string|null>(null)
+  // on va garder la <div> YouTube hors de React
+  const containerElRef = useRef<HTMLDivElement|null>(null)
 
   useEffect(() => {
+    // 1) créer le container imperativement
+    const container = document.createElement('div')
+    container.style.cssText = 'width:0;height:0;overflow:hidden;position:absolute;'
+    document.body.appendChild(container)
+    containerElRef.current = container
+
+    // 2) loader l’API si besoin, puis instancier le player
     function createPlayer() {
-      if (!containerRef.current) return
-      playerRef.current = new window.YT.Player(containerRef.current, {
+      if (!window.YT || !containerElRef.current) return
+      playerRef.current = new window.YT.Player(containerElRef.current, {
         height: '0',
         width: '0',
         videoId: '',
@@ -44,8 +52,7 @@ export function useYouTubeAudioPlayer(
         events: {
           onReady: (e: any) => {
             if (pendingVideoRef.current) {
-              playerRef.current!
-                .loadVideoById(pendingVideoRef.current)
+              playerRef.current!.loadVideoById(pendingVideoRef.current)
               playerRef.current!.playVideo()
               pendingVideoRef.current = null
             }
@@ -74,8 +81,13 @@ export function useYouTubeAudioPlayer(
     }
 
     return () => {
+      // destruction propre
       playerRef.current?.destroy()
       playerRef.current = null
+      // retirer le container imperativement
+      if (containerElRef.current && containerElRef.current.parentNode) {
+        containerElRef.current.parentNode.removeChild(containerElRef.current)
+      }
       window.onYouTubeIframeAPIReady = () => {}
     }
   }, [onVideoInfo, onPlayerEnd])
@@ -88,7 +100,6 @@ export function useYouTubeAudioPlayer(
       pendingVideoRef.current = videoId
     }
   }
-
   const playVideo = () => playerRef.current?.playVideo()
   const pause     = () => playerRef.current?.pauseVideo()
   const setVolume = (v: number) =>

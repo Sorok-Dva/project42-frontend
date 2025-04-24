@@ -55,7 +55,6 @@ const GamePage = () => {
   } | null>(null)
   const [audioVolume, setAudioVolume] = useState<number>(0.5)
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const ytContainerRef = useRef<HTMLDivElement>(null)
 
   const handleVideoInfo = useCallback((info: { video_id: string; title: string; author: string }) => {
     setAudioTrack(prev =>
@@ -71,7 +70,7 @@ const GamePage = () => {
   }, [])
 
   const { loadAndPlay, playVideo, pause, setVolume: setYTVolume } =
-    useYouTubeAudioPlayer(ytContainerRef, handleVideoInfo, handlePlayerEnd)
+    useYouTubeAudioPlayer(handleVideoInfo, handlePlayerEnd)
   /**
    * Toggles the highlighting of a player based on their nickname.
    * If the player is already highlighted, they will be removed from the highlighted list.
@@ -684,10 +683,6 @@ const GamePage = () => {
           </div>
         </div>
       )}
-      <div
-        ref={ytContainerRef}
-        style={{ width: 0, height: 0, overflow: 'hidden', position: 'absolute' }}
-      />
     </>
   )
 }
