@@ -17,6 +17,7 @@ interface YouTubePlayer {
 }
 
 export function useYouTubeAudioPlayer(
+  containerRef: React.RefObject<HTMLDivElement>,
   onVideoInfo: (info: { video_id: string; title: string; author: string }) => void,
   onPlayerEnd?: () => void
 ) {
@@ -24,9 +25,9 @@ export function useYouTubeAudioPlayer(
   const pendingVideoRef = useRef<string | null>(null)
 
   useEffect(() => {
-    const createPlayer = () => {
-      // création du player AVEC origin + host
-      new window.YT.Player('yt-audio-player', {
+    function createPlayer() {
+      if (!containerRef.current) return
+      playerRef.current = new window.YT.Player(containerRef.current, {
         height: '0',
         width: '0',
         videoId: '',
@@ -41,19 +42,18 @@ export function useYouTubeAudioPlayer(
           host: 'https://www.youtube.com',
         },
         events: {
-          onReady: (event: any) => {
-            playerRef.current = event.target as YouTubePlayer
+          onReady: (e: any) => {
             if (pendingVideoRef.current) {
-              playerRef.current.loadVideoById(pendingVideoRef.current)
-              playerRef.current.playVideo()
+              playerRef.current!
+                .loadVideoById(pendingVideoRef.current)
+              playerRef.current!.playVideo()
               pendingVideoRef.current = null
             }
           },
           onStateChange: (evt: any) => {
             const state = evt.data
             if (state === window.YT.PlayerState.PLAYING) {
-              const info = (evt.target as YouTubePlayer).getVideoData()
-              onVideoInfo(info)
+              onVideoInfo(evt.target.getVideoData())
             }
             if (state === window.YT.PlayerState.ENDED) {
               onPlayerEnd?.()
