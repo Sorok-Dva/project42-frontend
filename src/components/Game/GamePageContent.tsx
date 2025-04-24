@@ -8,6 +8,7 @@ import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
 import { useGameContext } from 'contexts/GameContext'
+import { useYouTubeAudioPlayer } from 'hooks/useYoutubeAudioPlayer'
 
 import {
   fetchGameDetails,
@@ -44,10 +45,28 @@ const GamePage = () => {
   const [highlightedPlayers, setHighlightedPlayers] = useState<{ [nickname: string]: string }>({})
 
   const [audioPlaying, setAudioPlaying] = useState<boolean>(false)
-  const [audioTrack, setAudioTrack] = useState<{ title: string; artist: string; url: string } | null>(null)
+  const [audioTrack, setAudioTrack] = useState<{
+    title: string
+    artist: string
+    url?: string
+    videoId?: string
+    // 'src' = flux MP3, 'youtube' = IFrame
+    type: 'src' | 'youtube'
+  } | null>(null)
   const [audioVolume, setAudioVolume] = useState<number>(0.5)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
+  const handleVideoInfo = useCallback((info: { video_id: string; title: string; author: string }) => {
+    console.log('YT metadata:', info)
+    setAudioTrack(prev =>
+      prev && prev.type === 'youtube'
+        ? { ...prev, title: info.title, artist: info.author }
+        : prev
+    )
+  }, [setAudioTrack])
+
+  const { loadAndPlay, playVideo, pause, setVolume: setYTVolume } =
+    useYouTubeAudioPlayer(handleVideoInfo)
   /**
    * Toggles the highlighting of a player based on their nickname.
    * If the player is already highlighted, they will be removed from the highlighted list.
@@ -145,21 +164,31 @@ const GamePage = () => {
       }
     })
 
-    socket.on('music', (data: { title: string; artist: string; url: string }) => {
+    socket.on('music', (data) => {
+      // STOPPE toujours tout d'abord
+      pause()
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ''
+      }
+
+      if (!data.url || data.url === '') return
+
       const ytMatch = data.url.match(
         /(?:youtube\.com\/(?:watch\?.*?v=)|youtu\.be\/)([A-Za-z0-9_-]{11})(?=[?&]|$)/
       )
-      console.log(ytMatch)
-      const videoId = ytMatch ? ytMatch[1] : null
-      const audioUrl = videoId
-        ? `${process.env.REACT_APP_SITE_URL}/api/server/youtube/audio?videoId=${videoId}`
-        : data.url
-      console.log(audioUrl)
-      setAudioTrack({ ...data, url: audioUrl })
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl
-        audioRef.current.volume = audioVolume
-        audioRef.current.play().catch((err) => console.error('Erreur lors de la lecture audio:', err))
+      const videoId = ytMatch?.[1] ?? null
+
+      if (videoId) {
+        setAudioTrack({ title: data.title, artist: data.artist, videoId, type: 'youtube' })
+        loadAndPlay(videoId)    // pourra être mis en attente
+        setAudioPlaying(true)
+      } else {
+        const audioUrl = data.url
+        setAudioTrack({ title: data.title, artist: data.artist, url: audioUrl, type: 'src' })
+        audioRef.current!.src = audioUrl
+        audioRef.current!.volume = audioVolume
+        audioRef.current!.play().catch(console.error)
         setAudioPlaying(true)
       }
     })
@@ -234,14 +263,22 @@ const GamePage = () => {
    * Gérer la lecture/pause de l'audio
    */
   const handleToggleAudio = () => {
-    if (!audioRef.current || !audioTrack) return
+    if (!audioTrack) return
+
 
     if (audioPlaying) {
-      audioRef.current.pause()
+      if (audioTrack.type === 'youtube') {
+        pause()
+      } else {
+        audioRef.current?.pause()
+      }
     } else {
-      audioRef.current.play().catch((err) => console.error('Erreur lors de la lecture audio:', err))
+      if (audioTrack.type === 'youtube') {
+        playVideo()
+      } else {
+        audioRef.current?.play().catch(console.error)
+      }
     }
-
     setAudioPlaying(!audioPlaying)
   }
 
@@ -249,10 +286,13 @@ const GamePage = () => {
    * Gérer le changement de volume
    */
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = Number.parseFloat(e.target.value)
+    const newVolume = parseFloat(e.target.value)
     setAudioVolume(newVolume)
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume
+
+    if (audioTrack?.type === 'youtube') {
+      setYTVolume(newVolume)
+    } else {
+      if (audioRef.current) audioRef.current.volume = newVolume
     }
   }
 
@@ -268,11 +308,10 @@ const GamePage = () => {
     }
     audioRef.current.addEventListener('ended', handleEnded)
 
-    if (audioTrack) {
+    // on ne démarre ici que le flux « src » (MP3/ogg)
+    if (audioTrack?.type === 'src' && audioTrack.url) {
       audioRef.current.src = audioTrack.url
-      if (audioPlaying) {
-        audioRef.current.play().catch((err) => console.error('Erreur lors de la lecture audio:', err))
-      }
+      if (audioPlaying) audioRef.current.play().catch(console.error)
     }
 
     return () => {
@@ -393,250 +432,258 @@ const GamePage = () => {
     )
   }
 
-  return isAuthorized && creator ? (
+  return (
     <>
-      <Box className="game-page" display="flex" flexDirection="column"
-        sx={{
-          backgroundImage: (isNight || gameFinished) ?
-            'url(/assets/images/games/background-night.png)'
-            : 'url(/assets/images/games/background2.png)',
-          backgroundSize: 'cover',
-        }}
-      >
-        {/* En-tête */}
-        <div className="relative z-10 bg-gradient-to-r from-black/80 to-blue-900/30 backdrop-blur-sm border-b border-blue-500/30 shadow-lg">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mr-3">
-                <span className="font-bold text-lg">P42</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">
-                  <span className="text-blue-300">[{GAME_TYPES[roomData.type]}]</span> {roomData.name}
-                </h1>
-                <p className="text-sm text-blue-300">
-                  {players.length}/{slots} joueurs • {isNight ? 'Phase nocturne' : 'Phase diurne'}
-                </p>
+      {isAuthorized && creator ? (
+        <>
+          <Box className="game-page" display="flex" flexDirection="column"
+            sx={{
+              backgroundImage: (isNight || gameFinished) ?
+                'url(/assets/images/games/background-night.png)'
+                : 'url(/assets/images/games/background2.png)',
+              backgroundSize: 'cover',
+            }}
+          >
+            {/* En-tête */}
+            <div className="relative z-10 bg-gradient-to-r from-black/80 to-blue-900/30 backdrop-blur-sm border-b border-blue-500/30 shadow-lg">
+              <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mr-3">
+                    <span className="font-bold text-lg">P42</span>
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold">
+                      <span className="text-blue-300">[{GAME_TYPES[roomData.type]}]</span> {roomData.name}
+                    </h1>
+                    <p className="text-sm text-blue-300">
+                      {players.length}/{slots} joueurs • {isNight ? 'Phase nocturne' : 'Phase diurne'}
+                    </p>
+                  </div>
+                </div>
+
+                {!isArchive && (
+                  <div className="flex gap-2 items-center">
+                    {audioTrack && (
+                      <div className="flex items-center gap-2 px-3 py-1 bg-black/40 border border-blue-500/30 rounded-lg">
+                        <motion.button
+                          className={`w-6 h-6 flex items-center justify-center rounded-full ${audioPlaying ? 'bg-purple-600' : 'bg-blue-600'} text-white`}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={handleToggleAudio}
+                        >
+                          {audioPlaying ? (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-3 w-3"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-3 w-3"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          )}
+                        </motion.button>
+                        <div className="flex flex-col">
+                          <span className="text-xs text-white font-medium truncate max-w-[100px]">{audioTrack?.title || '…'}</span>
+                          <span className="text-xs text-blue-300 truncate max-w-[100px]">{audioTrack?.artist || '…'}</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.01"
+                          value={audioVolume}
+                          onChange={handleVolumeChange}
+                          className="w-16 h-1 bg-blue-500/30 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
+                    )}
+                    <motion.button
+                      className="px-3 py-1 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all flex items-center gap-1"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleClearChat}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                          fillRule="evenodd"
+                          d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    Effacer
+                    </motion.button>
+                    <motion.button
+                      className="px-3 py-1 bg-red-900/40 hover:bg-red-900/60 text-red-300 hover:text-white border border-red-500/30 rounded-lg transition-all flex items-center gap-1"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleLeaveGame}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                          fillRule="evenodd"
+                          d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-4-4H3zm9 2.586L14.586 8H12V5.586zM5 5h5v2H5V5zm0 4h10v6H5V9z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    Quitter
+                    </motion.button>
+                  </div>
+                )}
               </div>
             </div>
 
-            {!isArchive && (
-              <div className="flex gap-2 items-center">
-                {audioTrack && (
-                  <div className="flex items-center gap-2 px-3 py-1 bg-black/40 border border-blue-500/30 rounded-lg">
-                    <motion.button
-                      className={`w-6 h-6 flex items-center justify-center rounded-full ${audioPlaying ? 'bg-purple-600' : 'bg-blue-600'} text-white`}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={handleToggleAudio}
-                    >
-                      {audioPlaying ? (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-3 w-3"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-3 w-3"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
-                    </motion.button>
-                    <div className="flex flex-col">
-                      <span className="text-xs text-white font-medium truncate max-w-[100px]">Titre</span>
-                      <span className="text-xs text-blue-300 truncate max-w-[100px]">Artiste</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value={audioVolume}
-                      onChange={handleVolumeChange}
-                      className="w-16 h-1 bg-blue-500/30 rounded-lg appearance-none cursor-pointer"
-                    />
-                  </div>
-                )}
-                <motion.button
-                  className="px-3 py-1 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all flex items-center gap-1"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleClearChat}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                      fillRule="evenodd"
-                      d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Effacer
-                </motion.button>
-                <motion.button
-                  className="px-3 py-1 bg-red-900/40 hover:bg-red-900/60 text-red-300 hover:text-white border border-red-500/30 rounded-lg transition-all flex items-center gap-1"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleLeaveGame}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                      fillRule="evenodd"
-                      d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-4-4H3zm9 2.586L14.586 8H12V5.586zM5 5h5v2H5V5zm0 4h10v6H5V9z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Quitter
-                </motion.button>
-              </div>
-            )}
-          </div>
-        </div>
+            {/* Contenu principal */}
+            <Box display="flex" flex={1} p={2} className="game-page-container">
+              {/* Colonne gauche : Controls */}
+              <Box
+                display="flex"
+                flexDirection="column"
+                width="25%"
+                className="left-column"
+                mr={2}
+              >
+                <Box mb={2}>
+                  <Controls
+                    gameId={gameId}
+                    roomData={roomData}
+                    fetchGameDetails={handleFetchGameDetails}
+                    isCreator={isCreator}
+                    creator={creator}
+                    canBeReady={canBeReady}
+                    canStartGame={canStartGame}
+                    player={player}
+                    players={players}
+                    gameStarted={gameStarted}
+                    gameFinished={gameFinished}
+                    isArchive={isArchive}
+                    setGameStarted={setGameStarted}
+                    slots={slots}
+                    setSlots={setSlots}
+                    setRoomData={setRoomData}
+                    isInn={isInn}
+                    viewer={viewer}
+                    setPlayer={setPlayer}
+                  />
+                </Box>
+              </Box>
 
-        {/* Contenu principal */}
-        <Box display="flex" flex={1} p={2} className="game-page-container">
-          {/* Colonne gauche : Controls */}
-          <Box
-            display="flex"
-            flexDirection="column"
-            width="25%"
-            className="left-column"
-            mr={2}
-          >
-            <Box mb={2}>
-              <Controls
-                gameId={gameId}
-                roomData={roomData}
-                fetchGameDetails={handleFetchGameDetails}
-                isCreator={isCreator}
-                creator={creator}
-                canBeReady={canBeReady}
-                canStartGame={canStartGame}
-                player={player}
-                players={players}
-                gameStarted={gameStarted}
-                gameFinished={gameFinished}
-                isArchive={isArchive}
-                setGameStarted={setGameStarted}
-                slots={slots}
-                setSlots={setSlots}
-                setRoomData={setRoomData}
-                isInn={isInn}
-                viewer={viewer}
-                setPlayer={setPlayer}
-              />
+              {/* Colonne centrale : Chat */}
+              <Box
+                display="flex"
+                flexDirection="column"
+                width="50%"
+                className="chat-column"
+                mr={2}
+                height="85vh"
+              >
+                {loading ? (
+                  <Container className="loader-container loader-container-two">
+                    <div className="spinner-wrapper">
+                      <Spinner className="custom-spinner" />
+                      <div className="loading-text">Chargement du chat...</div>
+                    </div>
+                  </Container>
+                ) : (
+                  <Chat
+                    gameId={gameId!}
+                    playerId={user?.id}
+                    player={player ?? undefined}
+                    viewer={viewer ?? undefined}
+                    players={players}
+                    user={user ?? undefined}
+                    userRole={user?.role}
+                    messages={messages}
+                    highlightedPlayers={highlightedPlayers}
+                    isNight={isNight}
+                    gameStarted={gameStarted}
+                    gameFinished={gameFinished}
+                    isArchive={isArchive}
+                    isInn={isInn}
+                  />
+                )}
+              </Box>
+
+              {/* Colonne droite : Liste des joueurs */}
+              <Box
+                display="flex"
+                flexDirection="column"
+                width="25%"
+                className="right-column"
+              >
+                <Composition roomData={roomData} />
+                <PlayersList
+                  players={players}
+                  player={player}
+                  viewers={viewers}
+                  viewer={viewer}
+                  isCreator={isCreator}
+                  creatorNickname={creator!.nickname}
+                  gameId={gameId!}
+                  socket={socket}
+                  toggleHighlightPlayer={toggleHighlightPlayer}
+                  highlightedPlayers={highlightedPlayers}
+                  gameStarted={gameStarted}
+                  gameFinished={gameFinished}
+                  alienList={alienList}
+                  sistersList={sistersList}
+                  brothersList={brothersList}
+                  coupleList={coupleList}
+                  isNight={isNight}
+                  isInn={isInn}
+                  innList={innList}
+                />
+              </Box>
             </Box>
           </Box>
 
-          {/* Colonne centrale : Chat */}
-          <Box
-            display="flex"
-            flexDirection="column"
-            width="50%"
-            className="chat-column"
-            mr={2}
-            height="85vh"
-          >
-            {loading ? (
-              <Container className="loader-container loader-container-two">
-                <div className="spinner-wrapper">
-                  <Spinner className="custom-spinner" />
-                  <div className="loading-text">Chargement du chat...</div>
+          <div className="relative z-10 bg-gradient-to-r from-black/80 to-blue-900/30 backdrop-blur-sm border-t border-blue-500/30 py-2 px-4 text-xs text-blue-300">
+            <div className="container mx-auto flex justify-between items-center">
+              <div>
+                {!isArchive ? 'Partie' : 'Archive'} #{gameId} • v{process.env.REACT_APP_GAME_VERSION}
+              </div>
+              {player && (
+                <div>
+                Connecté en tant que: <span className="text-white font-medium">{player.nickname}</span>
                 </div>
-              </Container>
-            ) : (
-              <Chat
-                gameId={gameId!}
-                playerId={user?.id}
-                player={player ?? undefined}
-                viewer={viewer ?? undefined}
-                players={players}
-                user={user ?? undefined}
-                userRole={user?.role}
-                messages={messages}
-                highlightedPlayers={highlightedPlayers}
-                isNight={isNight}
-                gameStarted={gameStarted}
-                gameFinished={gameFinished}
-                isArchive={isArchive}
-                isInn={isInn}
-              />
-            )}
-          </Box>
-
-          {/* Colonne droite : Liste des joueurs */}
-          <Box
-            display="flex"
-            flexDirection="column"
-            width="25%"
-            className="right-column"
-          >
-            <Composition roomData={roomData} />
-            <PlayersList
-              players={players}
-              player={player}
-              viewers={viewers}
-              viewer={viewer}
-              isCreator={isCreator}
-              creatorNickname={creator!.nickname}
-              gameId={gameId!}
-              socket={socket}
-              toggleHighlightPlayer={toggleHighlightPlayer}
-              highlightedPlayers={highlightedPlayers}
-              gameStarted={gameStarted}
-              gameFinished={gameFinished}
-              alienList={alienList}
-              sistersList={sistersList}
-              brothersList={brothersList}
-              coupleList={coupleList}
-              isNight={isNight}
-              isInn={isInn}
-              innList={innList}
-            />
-          </Box>
-        </Box>
-      </Box>
-
-      <div className="relative z-10 bg-gradient-to-r from-black/80 to-blue-900/30 backdrop-blur-sm border-t border-blue-500/30 py-2 px-4 text-xs text-blue-300">
-        <div className="container mx-auto flex justify-between items-center">
-          <div>
-            {!isArchive ? 'Partie' : 'Archive'} #{gameId} • v{process.env.REACT_APP_GAME_VERSION}
-          </div>
-          {player && (
-            <div>
-              Connecté en tant que: <span className="text-white font-medium">{player.nickname}</span>
+              )}
             </div>
-          )}
-        </div>
-      </div>
-    </>
-  ): (
-    <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
-      <div className="text-center">
-        <div className="relative">
-          <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-8 h-8 bg-blue-500/20 rounded-full animate-pulse"></div>
+          </div>
+        </>
+      ): (
+        <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
+          <div className="text-center">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-500/20 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+            <p className="mt-4 text-blue-300">Chargement de la partie...</p>
           </div>
         </div>
-        <p className="mt-4 text-blue-300">Chargement de la partie...</p>
-      </div>
-    </div>
+      )}
+      <div
+        id="yt-audio-player"
+        style={{ width: 0, height: 0, overflow: 'hidden', position: 'absolute' }}
+      />
+    </>
   )
 }
 
