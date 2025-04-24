@@ -25,17 +25,6 @@ export function useYouTubeAudioPlayer(
 
   useEffect(() => {
     const createPlayer = () => {
-      // s'assurer que le container existe
-      let container = document.getElementById('yt-audio-player')
-      if (!container) {
-        container = document.createElement('div')
-        container.id = 'yt-audio-player'
-        container.style.width = '0'
-        container.style.height = '0'
-        container.style.overflow = 'hidden'
-        document.body.appendChild(container)
-      }
-
       // création du player AVEC origin + host
       new window.YT.Player('yt-audio-player', {
         height: '0',
