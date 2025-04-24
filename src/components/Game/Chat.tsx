@@ -4,22 +4,35 @@ import { User } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
 import { motion } from 'framer-motion'
 import ChatMessages, { ChatMessagesHandle } from 'components/Game/ChatMessage'
+import axios from 'axios'
 
 interface ChatProps {
-  gameId: string;
-  players?: PlayerType[];
-  playerId?: string | number;
-  player?: PlayerType;
-  user?: User;
-  viewer?: Viewer;
-  userRole?: string;
-  isNight: boolean;
-  gameStarted: boolean;
-  gameFinished: boolean;
-  isArchive: boolean;
-  messages: Message[];
-  highlightedPlayers: { [nickname: string]: string };
-  isInn: boolean;
+  gameId: string
+  players?: PlayerType[]
+  playerId?: string | number
+  player?: PlayerType
+  user?: User
+  viewer?: Viewer
+  userRole?: string
+  isNight: boolean
+  gameStarted: boolean
+  gameFinished: boolean
+  isArchive: boolean
+  messages: Message[]
+  highlightedPlayers: { [nickname: string]: string }
+  isInn: boolean
+}
+
+interface GiphyResult {
+  id: string
+  url: string
+  images: {
+    fixed_height_small: {
+      url: string
+      width: string
+      height: string
+    }
+  }
 }
 
 const Chat: React.FC<ChatProps> = ({
@@ -44,6 +57,10 @@ const Chat: React.FC<ChatProps> = ({
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [giphyResults, setGiphyResults] = useState<GiphyResult[]>([])
+  const [isSearchingGifs, setIsSearchingGifs] = useState(false)
+  const [giphySearchTerm, setGiphySearchTerm] = useState('')
+  const giphyApiKey = process.env.REACT_APP_GIPHY_API_KEY || ''
 
   // Ref vers le composant ChatMessages qui gère le scroll
   const chatMessagesRef = useRef<ChatMessagesHandle>(null)
@@ -61,6 +78,30 @@ const Chat: React.FC<ChatProps> = ({
 
   const developerCommand = ['startPhase', 'endPhase', 'listCards']
 
+  const searchGiphy = useCallback(
+    async (searchTerm: string) => {
+      if (!searchTerm.trim()) {
+        setGiphyResults([])
+        return
+      }
+
+      setIsSearchingGifs(true)
+      try {
+        const response = await axios.get(
+          `https://api.giphy.com/v1/gifs/search?api_key=${giphyApiKey}&q=${encodeURIComponent(
+            searchTerm,
+          )}&limit=8&rating=g`,
+        )
+        setGiphyResults(response.data.data)
+      } catch (error) {
+        console.error('Erreur lors de la recherche Giphy:', error)
+      } finally {
+        setIsSearchingGifs(false)
+      }
+    },
+    [giphyApiKey],
+  )
+
   const handleSendMessage = () => {
     if (isArchive) return
     const trimmedMessage = newMessage.trim()
@@ -68,37 +109,19 @@ const Chat: React.FC<ChatProps> = ({
 
     try {
       if (trimmedMessage.startsWith('/')) {
-        const commandString = trimmedMessage.slice(1).trim()
-        const [command, arg, ...rest] = commandString.split(' ')
-        const text = rest.join(' ')
-
         if (userRole !== 'User') {
-          socket.emit(
-            developerCommand.includes(command)
-              ? 'developerCommand'
-              : 'moderationCommand',
-            {
-              command,
-              arg,
-              text,
-              roomId: gameId,
-              playerId,
-              currentUserRole: userRole,
-              moderator: user,
-            }
-          )
-        } else {
-          socket.emit('command',
-            {
-              command,
-              arg,
-              text,
-              roomId: gameId,
-              playerId,
-              currentUserRole: userRole,
-              user,
-            }
-          )
+          const commandString = trimmedMessage.slice(1).trim()
+          const [command, arg, ...rest] = commandString.split(' ')
+          const text = rest.join(' ')
+          socket.emit(developerCommand.includes(command) ? 'developerCommand' : 'moderationCommand', {
+            command,
+            arg,
+            text,
+            roomId: gameId,
+            playerId,
+            currentUserRole: userRole,
+            moderator: user,
+          })
         }
       } else {
         let channelToSend = player ? 0 : viewer ? 1 : null
@@ -107,20 +130,14 @@ const Chat: React.FC<ChatProps> = ({
         // Logique pour déterminer le canal de chat selon le rôle et l'état du jeu
         if (
           isNight &&
-          ([2, 9, 20, 21].includes(player?.card?.id || -1) ||
-            player?.isInfected) &&
+          ([2, 9, 20, 21].includes(player?.card?.id || -1) || player?.isInfected) &&
           gameStarted &&
           !gameFinished
         )
           channelToSend = 3
-        if (isNight && player?.card?.id === 16 && gameStarted && !gameFinished)
-          channelToSend = 4
-        if (isNight && player?.card?.id === 17 && gameStarted && !gameFinished)
-          channelToSend = 5
-        if (
-          (isNight && isInn && gameStarted && !gameFinished) ||
-          (isNight && player?.card?.id === 23)
-        )
+        if (isNight && player?.card?.id === 16 && gameStarted && !gameFinished) channelToSend = 4
+        if (isNight && player?.card?.id === 17 && gameStarted && !gameFinished) channelToSend = 5
+        if ((isNight && isInn && gameStarted && !gameFinished) || (isNight && player?.card?.id === 23))
           channelToSend = 6
 
         socket.emit('sendMessage', {
@@ -143,6 +160,22 @@ const Chat: React.FC<ChatProps> = ({
 
   const handleInputChange = (value: string) => {
     setNewMessage(value)
+
+    // Vérifier si c'est une commande /gif
+    if (value.startsWith('/gif ')) {
+      const searchTerm = value.substring(5).trim()
+      setGiphySearchTerm(searchTerm)
+
+      // Débounce pour éviter trop de requêtes
+      const debounceTimer = setTimeout(() => {
+        searchGiphy(searchTerm)
+      }, 1000)
+
+      return () => clearTimeout(debounceTimer)
+    } else {
+      setGiphyResults([])
+    }
+
     if (userRole === 'User') return
 
     const words = value.trim().split(' ')
@@ -171,11 +204,7 @@ const Chat: React.FC<ChatProps> = ({
       const searchQuery = arg.toLowerCase()
       const filteredSuggestions =
         players
-          ?.filter(
-            (p) =>
-              p.nickname.toLowerCase().includes(searchQuery) &&
-              p.id !== playerId
-          )
+          ?.filter((p) => p.nickname.toLowerCase().includes(searchQuery) && p.id !== playerId)
           .map((p) => p.nickname) || []
       setSuggestions(filteredSuggestions)
     } else {
@@ -186,6 +215,12 @@ const Chat: React.FC<ChatProps> = ({
   const handleSuggestionClick = (command: string, nickname: string) => {
     setNewMessage(`/${command} ${nickname} `)
     setSuggestions([])
+    inputRef.current?.focus()
+  }
+
+  const handleGiphySelection = (gifUrl: string) => {
+    setNewMessage(`/img ${gifUrl}`)
+    setGiphyResults([])
     inputRef.current?.focus()
   }
 
@@ -228,25 +263,20 @@ const Chat: React.FC<ChatProps> = ({
               className="inline-block w-3 h-3 rounded-full bg-green-500 align-middle mx-1"></span>{ ' ' }
             <strong>Normale</strong>
           </p>
-          <ul
-            className="list-disc list-inside text-xs text-blue-200 space-y-1">
+          <ul className="list-disc list-inside text-xs text-blue-200 space-y-1">
             <li>
-              Il est strictement <strong>interdit d'insulter</strong> un autre
-              joueur et d'avoir une attitude malsaine.
+              Il est strictement <strong>interdit d'insulter</strong> un autre joueur et d'avoir une attitude malsaine.
             </li>
             <li>
-              Le dévoilement
-              est <strong>interdit</strong> et <strong>sanctionné</strong> systématiquement.
+              Le dévoilement est <strong>interdit</strong> et <strong>sanctionné</strong> systématiquement.
             </li>
             <li>
-              Tous les joueurs <strong>doivent</strong> participer au débat. Il
-              n'est pas autorisé d'être{ ' ' }
+              Tous les joueurs <strong>doivent</strong> participer au débat. Il n'est pas autorisé d'être{' '}
               <strong>AFK</strong>.
             </li>
           </ul>
           <p className="text-xs text-blue-200 mt-2">
-            <strong>Rappel :</strong> ne divulguez <strong>jamais</strong> vos
-            informations privées sur le jeu.
+            <strong>Rappel :</strong> ne divulguez <strong>jamais</strong> vos informations privées sur le jeu.
           </p>
         </div>
         <hr />
@@ -292,9 +322,7 @@ const Chat: React.FC<ChatProps> = ({
                     setSelectedIndex((prev) => (prev + 1) % suggestions.length)
                     e.preventDefault()
                   } else if (e.key === 'ArrowUp') {
-                    setSelectedIndex(
-                      (prev) => (prev - 1 + suggestions.length) % suggestions.length
-                    )
+                    setSelectedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length)
                     e.preventDefault()
                   } else if (e.key === 'Enter') {
                     if (selectedIndex === -1) {
@@ -353,6 +381,31 @@ const Chat: React.FC<ChatProps> = ({
                   {nickname}
                 </div>
               ))}
+            </div>
+          )}
+          {giphyResults.length > 0 && (
+            <div className="absolute bottom-full left-0 w-full bg-black/90 border border-blue-500/30 rounded-t-lg p-2 z-10">
+              <div className="text-xs text-blue-300 mb-2">
+                {isSearchingGifs
+                  ? 'Recherche de GIFs...'
+                  : `GIFs pour "${giphySearchTerm}" (cliquez pour sélectionner)`}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {giphyResults.map((gif) => (
+                  <div
+                    key={gif.id}
+                    className="cursor-pointer hover:opacity-80 transition-opacity border border-blue-500/20 rounded overflow-hidden"
+                    onClick={() => handleGiphySelection(gif.images.fixed_height_small.url)}
+                  >
+                    <img
+                      src={gif.images.fixed_height_small.url || '/placeholder.svg'}
+                      alt="GIF"
+                      className="w-full h-auto object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
