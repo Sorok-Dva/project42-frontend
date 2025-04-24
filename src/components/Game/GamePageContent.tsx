@@ -57,7 +57,6 @@ const GamePage = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const handleVideoInfo = useCallback((info: { video_id: string; title: string; author: string }) => {
-    console.log('YT metadata:', info)
     setAudioTrack(prev =>
       prev && prev.type === 'youtube'
         ? { ...prev, title: info.title, artist: info.author }
@@ -65,8 +64,13 @@ const GamePage = () => {
     )
   }, [setAudioTrack])
 
+  const handlePlayerEnd = useCallback(() => {
+    setAudioPlaying(false)
+    setAudioTrack(null)
+  }, [])
+
   const { loadAndPlay, playVideo, pause, setVolume: setYTVolume } =
-    useYouTubeAudioPlayer(handleVideoInfo)
+    useYouTubeAudioPlayer(handleVideoInfo, handlePlayerEnd)
   /**
    * Toggles the highlighting of a player based on their nickname.
    * If the player is already highlighted, they will be removed from the highlighted list.

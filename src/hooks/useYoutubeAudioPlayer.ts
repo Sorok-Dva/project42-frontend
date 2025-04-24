@@ -17,7 +17,8 @@ interface YouTubePlayer {
 }
 
 export function useYouTubeAudioPlayer(
-  onVideoInfo: (info: { video_id: string; title: string; author: string }) => void
+  onVideoInfo: (info: { video_id: string; title: string; author: string }) => void,
+  onPlayerEnd?: () => void
 ) {
   const playerRef = useRef<YouTubePlayer | null>(null)
   const pendingVideoRef = useRef<string | null>(null)
@@ -59,10 +60,14 @@ export function useYouTubeAudioPlayer(
               pendingVideoRef.current = null
             }
           },
-          onStateChange: (event: any) => {
-            if (event.data === window.YT.PlayerState.PLAYING) {
-              const info = event.target.getVideoData()
+          onStateChange: (evt: any) => {
+            const state = evt.data
+            if (state === window.YT.PlayerState.PLAYING) {
+              const info = (evt.target as YouTubePlayer).getVideoData()
               onVideoInfo(info)
+            }
+            if (state === window.YT.PlayerState.ENDED) {
+              onPlayerEnd?.()
             }
           },
           onError: (err: any) => console.error('YT Player error', err),
@@ -84,7 +89,7 @@ export function useYouTubeAudioPlayer(
       playerRef.current = null
       window.onYouTubeIframeAPIReady = () => {}
     }
-  }, [onVideoInfo])
+  }, [onVideoInfo, onPlayerEnd])
 
   const loadAndPlay = (videoId: string) => {
     if (playerRef.current) {
