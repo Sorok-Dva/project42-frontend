@@ -355,7 +355,7 @@ const GamePage = () => {
         <div className="absolute inset-0 z-1">{ parallaxStars }</div>
 
         <motion.div
-          className="bg-black/60 backdrop-blur-md rounded-xl border border-blue-500/30 p-8 max-w-md w-full"
+          className="bg-black/60 backdrop-blur-md rounded-xl border border-blue-500/30 p-8 max-w-md w-full z-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
