@@ -84,8 +84,7 @@ const AppContent: React.FC = () => {
       <Routes>
         {serverError ? (
           <>
-            <Route path="/service-unavailable" element={<ServiceUnavailable />} />
-            <Route path="*" element={<Navigate to="/service-unavailable" />} />
+            <Route path="*" element={<ServiceUnavailable />} />
           </>
         ) : (
           <>
