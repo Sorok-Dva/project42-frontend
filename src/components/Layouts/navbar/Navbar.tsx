@@ -18,8 +18,8 @@ const menuData = [
   },
   {
     id: 2,
-    title: 'Jouer',
-    url: '/games',
+    title: 'Actualités',
+    url: '/news',
   },
   {
     id: 3,
