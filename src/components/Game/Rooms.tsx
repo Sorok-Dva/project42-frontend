@@ -432,7 +432,7 @@ const RoomList = () => {
           <h3 className="text-lg font-bold text-white">Types de parties</h3>
         </div>
 
-        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
             <div className="flex items-center mb-2">
               <div className="w-4 h-4 bg-blue-500 rounded-sm mr-2"></div>
