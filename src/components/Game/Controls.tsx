@@ -22,6 +22,8 @@ import CardImage from 'components/Game/CardImage'
 import Invitations from './Invitations'
 import { useSocket } from 'contexts/SocketContext'
 import { Tooltip } from 'react-tooltip'
+import { toast } from 'react-toastify'
+import { ToastDefaultOptions } from 'utils/toastOptions'
 
 interface GameControlsProps {
   gameId: string | undefined
@@ -138,7 +140,20 @@ const GameControls: React.FC<GameControlsProps> = ({
 
   const handleJoinReplayed = () => {
     if (replayGameId) {
-      window.location.href = `/game/${replayGameId}`
+      try {
+        const response = await axios.post(`/api/games/room/${roomId}/join`, {}, {
+          headers: {
+            Authorization: `Bearer ${ token }`,
+          },
+        })
+        window.location.href = `/game/${ response.data.game.id }`
+      } catch (error: any) {
+        if (error.response?.data?.error) {
+          toast.error(`Une erreur est survenue: ${error.response.data.error}`, ToastDefaultOptions)
+        } else {
+          toast.error('Erreur lors de la tentative de rejoindre la partie.', ToastDefaultOptions)
+        }
+      }
     }
   }
 
