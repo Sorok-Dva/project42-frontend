@@ -50,7 +50,16 @@ const UnifiedChat: React.FC = () => {
         audioNotif.currentTime = 0
         audioNotif.play().catch(() => {})
 
-        setPrivateMessages(prev => [...prev, message])
+        // n'ajoute au fil que si on est sur la bonne conversation
+        if (activeConversation?.id === message.conversationId) {
+          setPrivateMessages(prev => [...prev, message])
+          // et marquer lu immédiatement
+          axios.put(
+            `/api/private/${message.conversationId}/read`,
+            {},
+            { headers: { Authorization: `Bearer ${token}` } }
+          ).catch(console.error)
+        }
 
         setConversations(prev =>
           prev.map(c => {
@@ -353,10 +362,6 @@ const UnifiedChat: React.FC = () => {
     return contacts.find(c => c.nickname === other.nickname)
   }
 
-  const filteredContacts = contacts.filter((contact) =>
-    (contact.nickname as string).toLowerCase().includes(searchQuery.toLowerCase()),
-  )
-
   // Générer le contenu HTML du tooltip
   const generateTooltipContent = () => {
     const onlineContacts = contacts.filter((c) => c.status === 'online')
@@ -402,6 +407,17 @@ const UnifiedChat: React.FC = () => {
       </div>
     `
   }
+
+  const sortedConversations = [...conversations].sort((a, b) => {
+    const ta = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0
+    const tb = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0
+    return tb - ta
+  })
+
+  const displayedConversations = sortedConversations.filter(c => {
+    const other = getOtherParticipant(c)
+    return other?.nickname.toLowerCase().includes(searchQuery.toLowerCase())
+  })
 
   return (
     <div className={`
@@ -574,16 +590,11 @@ const UnifiedChat: React.FC = () => {
                   className="h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/30 scrollbar-track-black/20"
                   ref={chatContainerRef}
                 >
-                  {filteredContacts.length === 0 ? (
+                  {displayedConversations.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-gray-400">Aucun contact trouvé</div>
                   ) : (
-                    filteredContacts.map((contact) => {
-                      // Trouver la conversation correspondante
-                      const conversation = conversations.find((c) =>
-                        c.participants.some(p => p.nickname === contact.nickname) &&
-                        c.participants.some(p => p.nickname === (user?.nickname ?? ''))
-                      )
-
+                    displayedConversations.map(conversation => {
+                      const contact = getOtherParticipant(conversation)!
                       return (
                         <div
                           key={contact.nickname}
