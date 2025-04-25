@@ -62,6 +62,7 @@ interface UserContextType {
   isAdmin: boolean;
   navigateTo: (path : string) => void;
   reloadUser: (forceReload?: boolean) => void;
+  loading: boolean
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -72,6 +73,7 @@ export const UserProvider : React.FC<{ children : ReactNode }> = ({ children }) 
   const [user, setUser] = useState<User | null>(null)
   const navigate = useNavigate()
   const [stopRequest, setStopRequest] = useState(false)
+  const [loading, setLoading] = useState(true)
   const { setServerError } = useError()
   const { setToken } = useAuth()
   const callApi = useApi()
@@ -107,7 +109,7 @@ export const UserProvider : React.FC<{ children : ReactNode }> = ({ children }) 
             setServerError(error)
             setUser(null)
           }
-        })
+        }).finally(() => setLoading(false))
     }
   }, [user, stopRequest, callApi, logout, setServerError])
 
@@ -125,7 +127,7 @@ export const UserProvider : React.FC<{ children : ReactNode }> = ({ children }) 
   const isAdmin = user?.roleId === 1
 
   return (
-    <UserContext.Provider value={ { user, setUser, logout, login, isAdmin, navigateTo, reloadUser: fetchMe  } }>
+    <UserContext.Provider value={ { user, setUser, logout, login, isAdmin, navigateTo, reloadUser: fetchMe, loading  } }>
       { children }
     </UserContext.Provider>
   )

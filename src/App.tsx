@@ -10,7 +10,7 @@ import 'styles/Toastify.css'
 import 'styles/Spinner.css'
 
 import React, { useEffect } from 'react'
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 
 import { UserProvider, useUser } from 'contexts/UserContext'
 import { AuthProvider, useAuth } from 'contexts/AuthContext'
@@ -55,15 +55,22 @@ import Guilds from 'pages/GuildsList'
 import Guild from 'pages/GuildPage'
 
 import Tchat from 'components/HomePage/Tchat'
+import LoadingScreen from 'components/Layouts/LoadingScreen'
 
 const AppContent: React.FC = () => {
-  const { serverMaintenance } = useMaintenance()
+  const { serverMaintenance, loading: maintenanceLoading } = useMaintenance()
   const { serverError } = useError()
   const { token } = useAuth()
-  const { user } = useUser()
+  const { user, loading: userLoading } = useUser()
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
   const isGameRoute = location.pathname.startsWith('/game')
+
+  const isInitializing = maintenanceLoading || userLoading
+
+  if (isInitializing) {
+    return <LoadingScreen />
+  }
 
   if (serverMaintenance && !user?.isAdmin) {
     return (
