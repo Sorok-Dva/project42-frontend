@@ -48,6 +48,28 @@ const menuData = [
       },
     ],
   },
+  {
+    id: 5,
+    title: 'Admin',
+    isAdmin: true,
+    submenus: [
+      {
+        id: 1,
+        title: 'Dashboard',
+        url: '/admin',
+      },
+      {
+        id: 2,
+        title: 'Joueurs',
+        url: '/admin/users',
+      },
+      {
+        id: 3,
+        title: 'News',
+        url: '/admin/news',
+      },
+    ],
+  },
 ]
 
 type submenuType = {
@@ -120,7 +142,8 @@ const Navbar: React.FC<{
                   className="custom-nav gap-lg-7 gap-3 cursor-scale growDown2 ms-xxl-10 d-none d-lg-flex"
                   data-lenis-prevent
                 >
-                  {menuData.map(({ id, title, submenus, url }) => {
+                  {menuData.map(({ id, title, submenus, url, isAdmin }) => {
+                    if (isAdmin && !user?.isAdmin) return
                     return url ? (
                       <li key={id} className="menu-link">
                         <Link
