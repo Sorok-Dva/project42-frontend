@@ -1,58 +1,81 @@
-import React from 'react'
-import { Card, CardHeader, Col, Container, Row } from 'reactstrap'
-import UserGrowthChart from 'pages/admin/charts/UserGrowthChart'
-import ReportGrowthChart from 'pages/admin/charts/ReportGrowthChart'
+'use client'
 
-const AdminDashboard : React.FC = () => {
+import React from 'react'
+import { motion } from 'framer-motion'
+import StatsOverview from 'components/Admin/StatsOverview'
+import RecentActivity from 'components/Admin/RecentActivity'
+import QuickActions from 'components/Admin/QuickActions'
+import UserChart from 'components/Admin/Charts/Users'
+import GameActivityChart from 'components/Admin/Charts/GameActivity'
+import { useUser } from 'contexts/UserContext'
+
+const AdminDashboard: React.FC = () => {
+  const { user } = useUser()
   return (
-    <>
-      <Container className="mt-4" fluid>
-        <Row>
-          <Col className="mb-5 mb-xl-0" xl="8">
-            <Card className="bg-gradient-default shadow">
-              <CardHeader className="bg-transparent">
-                <Row>
-                  <Col className="mb-12" xl="12">
-                    <Card className="bg-gradient-default shadow">
-                      <UserGrowthChart/>
-                    </Card>
-                  </Col>
-                </Row>
-              </CardHeader>
-            </Card>
-          </Col>
-          <Col xl="4">
-            <Card className="shadow">
-              <CardHeader className="bg-transparent">
-                <Row className="align-items-center">
-                  <div className="col">
-                    <h6 className="text-uppercase text-muted ls-1 mb-1">
-                      Performance
-                    </h6>
-                    <h2 className="mb-0">Total screenshots</h2>
-                  </div>
-                </Row>
-              </CardHeader>
-            </Card>
-          </Col>
-        </Row>
-        <Row>
-          <Col className="mb-5 mt-4 mb-xl-0" xl="8">
-            <Card className="bg-gradient-default shadow">
-              <CardHeader className="bg-transparent">
-                <Row>
-                  <Col className="mb-12" xl="12">
-                    <Card className="bg-gradient-default shadow">
-                      <ReportGrowthChart/>
-                    </Card>
-                  </Col>
-                </Row>
-              </CardHeader>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </>
+    <main className="p-4 md:p-6 space-y-6">
+      {/* Welcome message */}
+      <motion.div
+        className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 p-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h2 className="text-2xl font-bold mb-2">Bienvenue {user?.nickname}</h2>
+      </motion.div>
+
+      {/* Stats overview */}
+      <StatsOverview />
+
+      {/* Charts section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <motion.div
+          className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 p-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <h3 className="text-xl font-bold mb-4">User Growth</h3>
+          <div className="h-80">
+            <UserChart />
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 p-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <h3 className="text-xl font-bold mb-4">Game Activity</h3>
+          <div className="h-80">
+            <GameActivityChart />
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Quick actions and recent activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <motion.div
+          className="lg:col-span-1 bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 p-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
+          <QuickActions />
+        </motion.div>
+
+        <motion.div
+          className="lg:col-span-2 bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 p-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
+          <RecentActivity />
+        </motion.div>
+      </div>
+    </main>
   )
 }
 

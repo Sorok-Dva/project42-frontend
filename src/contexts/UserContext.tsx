@@ -39,6 +39,7 @@ export interface User {
   signature?: string;
   discordId?: string;
   premium?: Date;
+  updatedAt?: Date;
   token: string;
   behaviorPoints?: number;
   moderatorPoints?: number;
