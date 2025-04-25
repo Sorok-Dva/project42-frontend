@@ -37,6 +37,7 @@ import UserList from 'pages/admin/users/UserList'
 import AdminUserProfile from 'pages/admin/users/UserProfile'
 import AdminDashboard from 'pages/admin/Dashboard'
 import AdminAlphaKeys from 'pages/admin/AlphaKeys'
+import AdminNews from 'pages/admin/News'
 import ResetPassword from 'pages/ResetPassword'
 import ServiceUnavailable from 'pages/ServiceUnavailable'
 import UserSettingsPage from 'pages/UserSettings'
@@ -53,6 +54,7 @@ import SplitTextAnimations from 'utils/SplitTextAnim'
 import MaintenancePage from 'pages/Maintenance'
 import Guilds from 'pages/GuildsList'
 import Guild from 'pages/GuildPage'
+import News from 'pages/News'
 
 import Tchat from 'components/HomePage/Tchat'
 import LoadingScreen from 'components/Layouts/LoadingScreen'
@@ -108,6 +110,7 @@ const AppContent: React.FC = () => {
                           <Route path="users" element={<UserList />} />
                           <Route path="users/:id" element={<AdminUserProfile />} />
                           <Route path="alpha-keys" element={<AdminAlphaKeys />} />
+                          <Route path="news" element={<AdminNews />} />
                         </Route>
                       </Route>
                     )}
@@ -126,6 +129,7 @@ const AppContent: React.FC = () => {
             <Route path="/users/validate/:token" element={<ValidateUser />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/community/leaderboard" element={<Leaderboard />} />
+            <Route path="/news" element={<News />} />
             <Route path="/game/:id" element={<GamePage />} />
             <Route path="/stations" element={<Guilds />} />
             <Route path="/station/:id" element={<Guild />} />

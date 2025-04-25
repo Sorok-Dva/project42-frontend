@@ -267,3 +267,50 @@ code {
   color: #9ca3af;
   margin-left: 0.5rem;
 }
+
+/* Quill editor custom styles for dark theme */
+.quill {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 0.5rem;
+  color: white;
+}
+
+.ql-toolbar {
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.ql-container {
+  border: none !important;
+  font-family: inherit;
+}
+
+.ql-editor {
+  min-height: 200px;
+  font-size: 1rem;
+  color: white;
+}
+
+.ql-picker-label {
+  color: #93c5fd !important;
+}
+
+.ql-stroke {
+  stroke: #93c5fd !important;
+}
+
+.ql-fill {
+  fill: #93c5fd !important;
+}
+
+.ql-picker-options {
+  background-color: #0f172a !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.ql-picker-item {
+  color: #93c5fd !important;
+}

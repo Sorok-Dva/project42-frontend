@@ -10,6 +10,8 @@ import { Friendship } from 'components/Layouts/navbar/Friends'
 import { useAuth } from 'contexts/AuthContext'
 import { Container, Spinner } from 'reactstrap'
 
+const audioNotif = new Audio('/assets/sounds/pm-notif.wav')
+
 const UnifiedChat: React.FC = () => {
   const { socket } = useSocket()
   const { user } = useUser()
@@ -33,8 +35,6 @@ const UnifiedChat: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const tooltipId = 'chat-users-tooltip'
-
-  const audioNotif = new Audio('/assets/sounds/pm-notif.wav')
 
   useEffect(() => {
     if (!hasJoined && socket && user?.guildMembership?.guild?.id) {

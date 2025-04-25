@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Container, Spinner } from 'reactstrap'
 import { useMaintenance } from 'contexts/MaintenanceContext'
+import { parallaxStars, staticStars } from 'utils/animations'
 
 export default function MaintenancePage() {
   const { maintenanceMessage } = useMaintenance()
@@ -24,62 +25,6 @@ export default function MaintenancePage() {
       </Container>
     )
   }
-
-  // Générer des étoiles statiques
-  const staticStars = Array.from({ length: 600 }).map((_, i) => {
-    const size = Math.random() * 4 + 1
-    const color = i % 20 === 0 ? '#8bdfff' : i % 15 === 0 ? '#ffcf8b' : i % 10 === 0 ? '#ff8bab' : '#ffffff'
-
-    return (
-      <div
-        key={`star-${i}`}
-        className="absolute rounded-full"
-        style={{
-          top: `${Math.random() * 100}%`,
-          left: `${Math.random() * 100}%`,
-          width: `${size}px`,
-          height: `${size}px`,
-          backgroundColor: color,
-          boxShadow: i % 8 === 0 ? `0 0 ${size + 3}px ${size}px rgba(255, 255, 255, 0.7)` : 'none',
-          opacity: Math.random() * 0.8 + 0.2,
-          animation: `twinkle ${Math.random() * 5 + 3}s infinite ${Math.random() * 5}s`,
-        }}
-      />
-    )
-  })
-
-  // Générer des étoiles avec parallaxe
-  const parallaxStars = Array.from({ length: 50 }).map((_, i) => {
-    const size = Math.random() * 3 + 2
-    const depth = Math.random() * 5 + 1
-    const color = i % 3 === 0 ? '#8bdfff' : i % 5 === 0 ? '#ffcf8b' : '#ffffff'
-
-    return (
-      <motion.div
-        key={`parallax-${i}`}
-        className="absolute rounded-full"
-        style={{
-          top: `${Math.random() * 100}%`,
-          left: `${Math.random() * 100}%`,
-          width: `${size}px`,
-          height: `${size}px`,
-          backgroundColor: color,
-          boxShadow: `0 0 ${size}px ${size / 2}px rgba(255, 255, 255, 0.5)`,
-          zIndex: 1,
-        }}
-        animate={{
-          x: [0, Math.random() * 20 - 10],
-          y: [0, Math.random() * 20 - 10],
-        }}
-        transition={{
-          duration: 20 / depth,
-          repeat: Number.POSITIVE_INFINITY,
-          repeatType: 'reverse',
-          ease: 'easeInOut',
-        }}
-      />
-    )
-  })
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black px-4 py-12 text-white">
