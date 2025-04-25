@@ -1,24 +1,24 @@
-import React, { useCallback, useEffect, useState } from 'react'
+'use client'
+
+import type React from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
-import { Button } from '@mui/material'
-import { Spinner } from 'reactstrap'
-import { Tooltip } from 'react-tooltip'
 import { useUser } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
-import { RoomCard, RoomData } from 'hooks/useGame'
+import type { RoomCard, RoomData } from 'hooks/useGame'
 import { useAuth } from 'contexts/AuthContext'
-
 
 const generateCards = (cards: RoomCard[]) => {
   return cards.map((c) => {
-    const amount = c.quantity > 1 ? (
-      <div className="amount">
-        <span>{c.quantity}</span>
-      </div>
-    ) : null
+    const amount =
+      c.quantity > 1 ? (
+        <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
+          <span>{c.quantity}</span>
+        </div>
+      ) : null
     return (
-      <div key={c.id} style={{ display: 'inline-block', position: 'relative' }}>
-        <img src={`/assets/images/miniatures/carte${c.id}_90_90.png`} alt={`Carte ${c.id}`} />
+      <div key={c.id} className="inline-block relative">
+        <img src={`/assets/images/miniatures/carte${c.id}_90_90.png`} alt={`Carte ${c.id}`} className="rounded-md" />
         {amount}
       </div>
     )
@@ -83,7 +83,7 @@ const RoomList = () => {
     if (!socket || !user) return
 
     const handlePlayerLeft = (data: { message: string }) => {
-    /* alert(data.message.includes(user.nickname))
+      /* alert(data.message.includes(user.nickname))
 
       if (data.message.includes(user.nickname)) {
         setPlayerRoomId(null)
@@ -104,7 +104,9 @@ const RoomList = () => {
       const waitingFun = data.filter((room: RoomData) => room.status === 'waiting' && [1, 3].includes(room.type))
       const inProgressFun = data.filter((room: RoomData) => room.status === 'in_progress' && [1, 3].includes(room.type))
       const waitingSerious = data.filter((room: RoomData) => room.status === 'waiting' && [0, 2].includes(room.type))
-      const inProgressSerious = data.filter((room: RoomData) => room.status === 'in_progress' && [0, 2].includes(room.type))
+      const inProgressSerious = data.filter(
+        (room: RoomData) => room.status === 'in_progress' && [0, 2].includes(room.type),
+      )
 
       setRoomsWaitingFun(waitingFun)
       setRoomsInProgressFun(inProgressFun)
@@ -132,13 +134,11 @@ const RoomList = () => {
   const handleSubmit = async () => {
     if (inGame) return
     try {
-      const response = await axios.post('/api/games/room',
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        })
+      const response = await axios.post('/api/games/room', formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
       setGameId(response.data.gameId)
       setPlayerRoomId(response.data.gameId)
       setInGame(true)
@@ -174,11 +174,15 @@ const RoomList = () => {
       return
     }
     try {
-      const response = await axios.post(`/api/games/room/${roomId}/join`, {}, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+      const response = await axios.post(
+        `/api/games/room/${roomId}/join`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
         },
-      })
+      )
       setPlayerRoomId(roomId)
       window.open(`/game/${response.data.game.id}`, '_blank')
       setInGame(true)
@@ -198,11 +202,15 @@ const RoomList = () => {
       return
     }
     try {
-      const response = await axios.post(`/api/games/room/${roomId}/spectate`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await axios.post(
+        `/api/games/room/${roomId}/spectate`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      })
+      )
       setPlayerRoomId(roomId)
       window.open(`/game/${response.data.game.id}`, '_blank')
       setInGame(true)
@@ -230,11 +238,15 @@ const RoomList = () => {
       return
     }
     try {
-      const response = await axios.post('/api/games/players/room/leave', {}, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+      const response = await axios.post(
+        '/api/games/players/room/leave',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
         },
-      })
+      )
       if (response.data.message) {
         socket.emit('leaveRoom', {
           roomId: playerRoomId,
@@ -255,262 +267,357 @@ const RoomList = () => {
     }
   }
 
-  const generateRoomLine = (game: RoomData, waitingRoom: boolean = false, featuring: boolean = true): JSX.Element => {
+  const generateRoomLine = (game: RoomData, waitingRoom = false, featuring = true): JSX.Element => {
+    // Define type colors
+    const typeColors = {
+      0: 'border-green-600 bg-green-600', // NORMAL
+      1: 'bg-blue-500', // FUN
+      2: 'bg-red-600', // SERIOUS
+      3: 'bg-purple-600', // CARNAGE
+    }
+
+    const typeColor = typeColors[game.type as keyof typeof typeColors] || 'bg-gray-500'
+
     return (
-      <div
-        className={`waiting-game type-${game.type} phase-0`}
-        data-tooltip="${tooltip}">
-        <div className="white-background"></div>
-        <aside>{ game.name }</aside>
-        <aside>{ game.creator }</aside>
-        <aside>{ game.players?.length }/{ game.maxPlayers }</aside>
-        <aside>...</aside>
-        <div className="big_options"></div>
-        { !inGame ? (
-          <div className="join-buttons">
-            <button className="button_secondary viewer" onClick={() => handleSpectateRoom(game.id)}>Observer</button>
-            { waitingRoom && (
-              <button className="button btn-primary join-nec" onClick={() => handleJoinRoom(game.id)}>Jouer</button>
+      <div className={`mb-2 backdrop-blur-sm rounded-lg border-l-4 ${typeColor} overflow-hidden`}>
+        <div className="grid grid-cols-12 items-center p-3">
+          <div className="col-span-4 font-medium text-white">{game.name}</div>
+          <div className="col-span-3 text-blue-300">{game.creator}</div>
+          <div className="col-span-2 text-center text-gray-300">
+            {game.players?.length}/{game.maxPlayers}
+          </div>
+          <div className="col-span-3 flex justify-end gap-2">
+            {!inGame ? (
+              <>
+                <button
+                  className="px-3 py-1 bg-black/60 hover:bg-black/80 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-colors text-sm"
+                  onClick={() => handleSpectateRoom(game.id)}
+                >
+                  Observer
+                </button>
+                {waitingRoom && (
+                  <button
+                    className="px-3 py-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-colors text-sm"
+                    onClick={() => handleJoinRoom(game.id)}
+                  >
+                    Jouer
+                  </button>
+                )}
+              </>
+            ) : (
+              inGame &&
+              game.id === playerRoomId && (
+                <>
+                  <button
+                    className="px-3 py-1 bg-red-900/40 hover:bg-red-900/60 text-red-300 hover:text-white border border-red-500/30 rounded-lg transition-colors text-sm"
+                    onClick={handleLeaveRoom}
+                  >
+                    Quitter
+                  </button>
+                  <button
+                    className="px-3 py-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-colors text-sm"
+                    onClick={handleJoinCurrentRoom}
+                  >
+                    Rejoindre
+                  </button>
+                </>
+              )
             )}
           </div>
-        ) : (inGame && game.id === playerRoomId) && (
-          <div className="join-buttons">
-            <button className="button_secondary viewer" onClick={handleLeaveRoom}>Quitter la partie</button>
-            <button className="button btn-primary" onClick={handleJoinCurrentRoom}>Rejoindre la partie</button>
-          </div>
-        )}
+        </div>
       </div>
     )
   }
 
   const GenerateBloc: React.FC<{
-    className: string;
-    title: string,
-    rooms: RoomData[],
-    inGame: boolean,
-    waiting: boolean,
+    className: string
+    title: string
+    rooms: RoomData[]
+    inGame: boolean
+    waiting: boolean
   }> = ({ className, title, rooms, inGame, waiting }) => {
     return (
-      <aside className={className}>
-        <header>{title}</header>
-        <article className="waiting-game title">
-          <div></div>
-          <aside>Nom</aside>
-          <aside>Créateur</aside>
-          <aside>Places</aside>
-          <aside>Options</aside>
-        </article>
-        <main>
-          { !rooms && (
-            <article className="empty">
-              <div className="spinner-wrapper">
-                <Spinner animation="border" role="status" className="custom-spinner">
-                  <span className="sr-only">Chargement en cours</span>
-                </Spinner>
-                <div className="loading-text">Chargement en cours</div>
-              </div>
-            </article>
-          )}
+      <div className="w-full lg:w-1/2 px-2">
+        <div className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+          <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+            <h3 className="text-lg font-bold text-white">{title}</h3>
+          </div>
 
-          { rooms && rooms.length === 0 ? (
-            <article className="empty">
-              <h2>Aucune partie en cours.</h2>
-              {!inGame && (
-                <Button className="creer-partie" onClick={() => setShowForm(true)}>
-                  <img src="/assets/images/hr_v1.png" width={25} height={25} alt="Icon" /> CRÉER UNE PARTIE
-                </Button>
-              )}
-            </article>
-          ) : rooms.map((game) => generateRoomLine(game, waiting)) }
-        </main>
-      </aside>
+          <div className="p-4">
+            <div className="grid grid-cols-12 items-center px-3 py-2 mb-2 bg-black/30 rounded-lg text-sm text-gray-400">
+              <div className="col-span-4">Nom</div>
+              <div className="col-span-3">Créateur</div>
+              <div className="col-span-2 text-center">Places</div>
+              <div className="col-span-3 text-right">Actions</div>
+            </div>
+
+            {!rooms ? (
+              <div className="flex flex-col items-center justify-center py-10">
+                <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+                <div className="text-blue-300">Chargement en cours</div>
+              </div>
+            ) : rooms.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <h2 className="text-xl text-gray-400 mb-4">Aucune partie en cours.</h2>
+                {!inGame && (
+                  <button
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2"
+                    onClick={() => setShowForm(true)}
+                  >
+                    <img src="/assets/images/hr_v1.png" width={25} height={25} alt="Icon" className="w-5 h-5" />
+                    CRÉER UNE PARTIE
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-1">{rooms.map((game) => generateRoomLine(game, waiting))}</div>
+            )}
+          </div>
+        </div>
+      </div>
     )
   }
 
   return (
-    <section className="room-page list-room">
+    <section className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black text-white p-4">
       {/* Section Ingame */}
       {inGame && (
-        <section className="ingame-page">
-          <h1 className="with-borders">
-            <div></div>
-            <span>Tu es déjà en jeu</span>
-            <div></div>
-          </h1>
-          <article>
-            { playerRoomId && (
+        <div className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden mb-6 p-6">
+          <h2 className="text-2xl font-bold text-center mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+            Tu es déjà en jeu
+          </h2>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
+            {playerRoomId && (
               <>
-                <Button className="btn btn-primary" onClick={handleJoinCurrentRoom}> Rejoindre la partie en cours</Button>
-                <Button className="btn btn-warning" onClick={handleLeaveRoom}>Quitter la partie</Button>
+                <button
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20"
+                  onClick={handleJoinCurrentRoom}
+                >
+                  Rejoindre la partie en cours
+                </button>
+                <button
+                  className="px-6 py-3 bg-red-900/40 hover:bg-red-900/60 text-red-300 hover:text-white border border-red-500/30 rounded-lg transition-all"
+                  onClick={handleLeaveRoom}
+                >
+                  Quitter la partie
+                </button>
               </>
             )}
-          </article>
-          <div>
-            <i className="mdi mdi-information-outline"></i>
-            <span>
+          </div>
+
+          <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 flex items-start gap-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="text-yellow-300">
               Tu dois quitter ta partie en cours pour <b>observer</b> ou <b>jouer</b> une autre partie !
             </span>
           </div>
-        </section>
+        </div>
       )}
 
-      {/* Contenu de la Room Page */}
-      {/* Bannières éventuelles */}
-      {/* <RoomBanners /> */}
-      <div className="gametypes-modal-content">
-        <article className="labels">
-          <aside>
-            <header>
-              <div style={{ backgroundColor: '#4a86e8' }}></div>
-              <strong style={{ verticalAlign: 'middle' }}>
-                Partie <span style={{ color: '#4a86e8' }}>FUN</span> <em>(bandeau Bleu)</em>
-              </strong>
-            </header>
-            <div>Des parties rapides, ambiance détente, peu de prise de tête.</div>
-          </aside>
-          <aside>
-            <header>
-              <div style={{ backgroundColor: '#38761d' }}></div>
-              <strong style={{ verticalAlign: 'middle' }}>
-                Partie <span style={{ color: '#38761d' }}>NORMALE</span> <em>(bandeau Vert)</em>
-              </strong>
-            </header>
-            <div>Des parties comme dans la vraie vie, réflexion et bluff sont de rigueur.</div>
-          </aside>
-          <aside>
-            <header>
-              <div style={{ backgroundColor: '#a08aa6' }}></div>
-              <strong style={{ verticalAlign: 'middle' }}>
-                Partie <span style={{ color: '#a08aa6' }}>CARNAGE</span> <em>(bandeau Violet)</em>
-              </strong>
-            </header>
-            <div>Très rapide, 6 rôles, peu voire aucune stratégie, beaucoup d'éliminations à chaque tour.</div>
-          </aside>
-          <aside>
-            <header>
-              <div style={{ backgroundColor: '#ef3a3a' }}></div>
-              <strong style={{ verticalAlign: 'middle' }}>
-                Partie <span style={{ color: '#ef3a3a' }}>SÉRIEUSE</span> <em>(bandeau Rouge)</em>
-              </strong>
-            </header>
-            <div>Demande beaucoup de concentration et de persuasion. Règles strictes favorisant le débat.</div>
-          </aside>
-          <aside>
-            <header>
-              <img
-                src="/assets/img/chatelain.png"
-                style={{ width: 30, height: 30, verticalAlign: 'middle' }}
-                alt="Partie Premium"
-              />
-              <strong style={{ verticalAlign: 'middle' }}>Partie Premium</strong>
-            </header>
-            <div>Plus de rôles, plus d'options, plus de tout !</div>
-          </aside>
-        </article>
+      {/* Game Types Info */}
+      <div className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+          <h3 className="text-lg font-bold text-white">Types de parties</h3>
+        </div>
+
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+            <div className="flex items-center mb-2">
+              <div className="w-4 h-4 bg-blue-500 rounded-sm mr-2"></div>
+              <h4 className="font-bold">
+                Partie <span className="text-blue-400">FUN</span>
+              </h4>
+            </div>
+            <p className="text-sm text-gray-300">Des parties rapides, ambiance détente, peu de prise de tête.</p>
+          </div>
+
+          <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+            <div className="flex items-center mb-2">
+              <div className="w-4 h-4 bg-green-600 rounded-sm mr-2"></div>
+              <h4 className="font-bold">
+                Partie <span className="text-green-500">NORMALE</span>
+              </h4>
+            </div>
+            <p className="text-sm text-gray-300">
+              Des parties comme dans la vraie vie, réflexion et bluff sont de rigueur.
+            </p>
+          </div>
+
+          <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+            <div className="flex items-center mb-2">
+              <div className="w-4 h-4 bg-purple-600 rounded-sm mr-2"></div>
+              <h4 className="font-bold">
+                Partie <span className="text-purple-400">CARNAGE</span>
+              </h4>
+            </div>
+            <p className="text-sm text-gray-300">
+              Très rapide, 6 rôles, peu voire aucune stratégie, beaucoup d'éliminations à chaque tour.
+            </p>
+          </div>
+
+          <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+            <div className="flex items-center mb-2">
+              <div className="w-4 h-4 bg-red-600 rounded-sm mr-2"></div>
+              <h4 className="font-bold">
+                Partie <span className="text-red-500">SÉRIEUSE</span>
+              </h4>
+            </div>
+            <p className="text-sm text-gray-300">
+              Demande beaucoup de concentration et de persuasion. Règles strictes favorisant le débat.
+            </p>
+          </div>
+
+          {/*<div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+            <div className="flex items-center mb-2">
+              <img src="/assets/img/chatelain.png" className="w-6 h-6 mr-2" alt="Partie Premium" />
+              <h4 className="font-bold">Partie Premium</h4>
+            </div>
+            <p className="text-sm text-gray-300">Plus de rôles, plus d'options, plus de tout !</p>
+          </div>*/}
+        </div>
       </div>
 
       {!showForm && (
         <>
-          {/*<h1 className="with-borders">*/}
-          {/*  <div></div>*/}
-          {/*  <span>*/}
-          {/*Lancement rapide{' '}*/}
-          {/*    <img*/}
-          {/*      className="infotop"*/}
-          {/*      data-tooltip-id="infotop"*/}
-          {/*      data-tooltip-content="Clique ici pour en savoir plus sur les différents types de partie"*/}
-          {/*      src="/assets/images/information.png"*/}
-          {/*      alt="Information"*/}
-          {/*    />*/}
-          {/*    <Tooltip id="infotop" />*/}
-          {/*  </span>*/}
-          {/*  <div></div>*/}
-          {/*</h1>*/}
-          {/*<article className="featured-games">*/}
-          {/*   Ici vous afficherez vos parties en vedette via generateRoomLine */}
-          {/*</article>*/}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+              Liste des parties en attente
+            </h2>
+            <div className="flex flex-wrap -mx-2">
+              <GenerateBloc
+                className="d-games"
+                title="Espace détente"
+                rooms={roomsWaitingFun}
+                inGame={inGame}
+                waiting={true}
+              />
+              <GenerateBloc
+                className="r-games"
+                title="Espace réflexion"
+                rooms={roomsWaitingSerious}
+                inGame={inGame}
+                waiting={true}
+              />
+            </div>
+          </div>
 
-          {/*<h1 className="with-borders header-levels">
-        <div></div>
-        <span>Quêtes & Niveaux</span>
-        <div></div>
-      </h1>*/}
-          {/* Composant ou contenu des quêtes */}
-
-          <h1 className="with-borders header-waiting">
-            <div></div>
-            <span>Liste des parties en attente</span>
-            <div></div>
-          </h1>
-          <article className="games-list games-waiting">
-            <GenerateBloc className="d-games" title="Espace détente" rooms={roomsWaitingFun} inGame={inGame} waiting={true} />
-            <GenerateBloc className="r-games" title="Espace réflexion" rooms={roomsWaitingSerious} inGame={inGame} waiting={true}/>
-          </article>
-
-          <h1 className="with-borders header-launched">
-            <div></div>
-            <span>Liste des parties en cours</span>
-            <div></div>
-          </h1>
-          <article className="games-list games-launched">
-            <GenerateBloc className="d-games" title="Espace détente" rooms={roomsInProgressFun} inGame={inGame} waiting={false}/>
-            <GenerateBloc className="r-games" title="Espace réflexion" rooms={roomsInProgressSerious} inGame={inGame} waiting={false} />
-          </article>
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+              Liste des parties en cours
+            </h2>
+            <div className="flex flex-wrap -mx-2">
+              <GenerateBloc
+                className="d-games"
+                title="Espace détente"
+                rooms={roomsInProgressFun}
+                inGame={inGame}
+                waiting={false}
+              />
+              <GenerateBloc
+                className="r-games"
+                title="Espace réflexion"
+                rooms={roomsInProgressSerious}
+                inGame={inGame}
+                waiting={false}
+              />
+            </div>
+          </div>
         </>
       )}
+
       {!showForm && !inGame && (
-        <>
-          <h1>Vous n'avez pas trouvé votre bonheur ?</h1>
-          <article>
-            <Button
-              data-type="1"
-              className={!inGame ? 'creer-partie' : 'creer-partie disabled'}
-              onClick={() => setShowForm(true)}
-            >
-              <img src="/assets/images/hr_v1.png" width={25} height={25} alt="Icon" /> CRÉER UNE PARTIE
-            </Button>
-          </article>
-        </>
+        <div className="text-center py-8">
+          <h2 className="text-2xl font-bold mb-6">Vous n'avez pas trouvé votre bonheur ?</h2>
+          <button
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2 mx-auto"
+            onClick={() => setShowForm(true)}
+          >
+            <img src="/assets/images/hr_v1.png" width={25} height={25} alt="Icon" className="w-5 h-5" />
+            CRÉER UNE PARTIE
+          </button>
+        </div>
       )}
-      { showForm && !inGame && (
-        <section className="creer-page">
-          <article>
-            <Button className="retour-room" onClick={() => setShowForm(false)}>
-              <a
-                className="back-btn" href="#">
-                <i className="ti ti-arrow-narrow-left fs-2xl" onClick={() => setShowForm(false)}></i></a>
-            </Button>
-            <aside className="header-bloc">Créer une partie</aside>
-            <aside className="header-advice">
-    Assurez-vous qu’aucune partie similaire à celle que vous souhaitez créer n'existe. Les doublons rendent les temps pour lancer une partie plus longs.
-            </aside>
-            <aside className="type-partie">
-              <header>1 - Choisis le type de partie</header>
-              <main>
-                <Button value="3" disabled={true}>CARNAGE</Button>
-                <Button value="1" disabled={true}>FUN</Button>
-                <Button className="active" value="0">NORMALE</Button>
-                <Button value="2" disabled={true}>SÉRIEUSE</Button>
-                {/* Afficher Animation si applicable */}
-              </main>
-              <footer>
-                <div className="infos-type" data-type="3">
-        Viens t'amuser avant tout, partie rapide et composition définie.
+
+      {showForm && !inGame && (
+        <div className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+          <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30 flex items-center">
+            <button
+              className="mr-4 p-2 hover:bg-black/40 rounded-full transition-colors"
+              onClick={() => setShowForm(false)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-blue-300"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+            <h3 className="text-xl font-bold text-white">Créer une partie</h3>
+          </div>
+
+          <div className="p-6">
+            <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-6">
+              <p className="text-yellow-300">
+                Assurez-vous qu'aucune partie similaire à celle que vous souhaitez créer n'existe. Les doublons rendent
+                les temps pour lancer une partie plus longs.
+              </p>
+            </div>
+
+            <div className="space-y-8">
+              <div>
+                <h4 className="text-lg font-medium text-blue-300 mb-4">1 - Choisis le type de partie</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                  <button
+                    className="px-4 py-2 bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
+                    disabled={true}
+                  >
+                    CARNAGE
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
+                    disabled={true}
+                  >
+                    FUN
+                  </button>
+                  <button className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-800 text-white rounded-lg shadow-lg">
+                    NORMALE
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
+                    disabled={true}
+                  >
+                    SÉRIEUSE
+                  </button>
                 </div>
-                <div className="infos-type" data-type="1">
-        Parties idéales pour discuter avec ses amis et jouer dans une ambiance détendue.
+
+                <div className="bg-black/40 rounded-lg p-4 border border-green-500/20">
+                  <p className="text-green-300">
+                    Tu y trouveras de la réflexion et une bonne ambiance. La participation au débat et l'argumentation
+                    sont requises.
+                  </p>
                 </div>
-                <div className="infos-type active" data-type="0">
-        Tu y trouveras de la réflexion et une bonne ambiance. La participation au débat et l'argumentation sont requises.
-                </div>
-                <div className="infos-type" data-type="2">
-        Règles strictes pour joueurs aimant le challenge. Concentration et participation active. Accroche-toi !
-                </div>
-              </footer>
-            </aside>
-            <aside className="nom-partie">
-              <header>2 - Donne un nom à ta partie</header>
-              <main>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-medium text-blue-300 mb-4">2 - Donne un nom à ta partie</h4>
                 <input
                   id="game-name"
                   name="name"
@@ -518,88 +625,67 @@ const RoomList = () => {
                   type="text"
                   placeholder="Nom de partie"
                   onChange={handleChange}
+                  className="w-full bg-black/60 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 />
-              </main>
-            </aside>
-            <aside className="not-box">
-              <aside></aside>
-              <aside>
-                <img src="/assets/images/carte1.png" alt="Carte 1" />
-                <h2>Paramétrage de la Partie</h2>
-              </aside>
-              <aside></aside>
-            </aside>
-            <aside className="debat-partie">
-              <aside>3 - Choisis le temps de débat</aside>
-              <aside>
-                {[2, 3, 4, 5].map((timerValue) => (
-                  <Button
-                    key={timerValue}
-                    className={`grey ${formData.timer === timerValue ? 'active' : ''}`}
-                    onClick={() => setFormData((prev) => ({ ...prev, timer: timerValue }))}
-                  >
-                    {timerValue} min
-                  </Button>
-                ))}
-              </aside>
-              <aside></aside>
-            </aside>
-            <aside className="options-partie">
-              <aside>4 - Options supplémentaires</aside>
-              <aside>
-                <Button
-                  className={`grey ${formData.whiteFlag ? 'active' : ''}`}
-                  onClick={() => setFormData((prev) => ({ ...prev, whiteFlag: !prev.whiteFlag }))}
-                >
-                  Sans points
-                </Button>
-                {/*<Button className="event-option" value="st-patrick">
-                  St-Patrick
-                </Button>
-                <Button className="event-option" value="halloween">
-                  Halloween
-                </Button>
-                <Button className="event-option" value="summer">
-                  <img src="/stuff/salle_de_jeu/partie_ete.png" alt="Ete" /> Été
-                </Button>
-                <Button className="event-option" value="cadeau">
-                  Cadeau explosif
-                </Button>
-                <Button className="event-option" value="stValentin">
-                  Couple Maudit
-                </Button>
-                <Button className="event-option" value="easter">
-                  Pâques
-                </Button>
-                <Button className="event-option" value="ultrafast">
-                  Ultra-rapide
-                </Button>
-                <Button className="event-option" value="hiddenDeadsRoles">
-                  Rôles des morts cachés
-                </Button>
-                <Button id="gm_mode" className="grey" value="reel">
-                  Meneur réel
-                </Button>*/}
-                <Button className="grey" value="anonyme" disabled={true}>
-                  Anonyme
-                </Button>
-                <Button className="grey" value="selective" disabled={true}>
-                  Sélective
-                </Button>
-                <Button
-                  className={`grey ${formData.privateGame ? 'active' : ''}`}
-                  onClick={() => setFormData((prev) => ({ ...prev, privateGame: !prev.privateGame }))}
-                >
-                  Privée
-                </Button>
-              </aside>
-              <aside></aside>
-            </aside>
+              </div>
 
-            {formData.privateGame && (
-              <aside className="password-partie">
-                <header>4b - Donne un mot de passe à ta partie</header>
-                <main>
+              <div className="flex items-center justify-center py-4">
+                <div className="h-px bg-blue-500/20 flex-grow"></div>
+                <div className="flex items-center mx-4 space-x-3">
+                  <img src="/assets/images/carte1.png" alt="Carte 1" className="w-14 h-14" />
+                  <h4 className="text-lg font-medium text-white">Paramétrage de la Partie</h4>
+                </div>
+                <div className="h-px bg-blue-500/20 flex-grow"></div>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-medium text-blue-300 mb-4">3 - Choisis le temps de débat</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[2, 3, 4, 5].map((timerValue) => (
+                    <button
+                      key={timerValue}
+                      className={`px-4 py-2 ${formData.timer === timerValue ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'} rounded-lg transition-colors`}
+                      onClick={() => setFormData((prev) => ({ ...prev, timer: timerValue }))}
+                    >
+                      {timerValue} min
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-medium text-blue-300 mb-4">4 - Options supplémentaires</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <button
+                    className={`px-4 py-2 rounded-lg transition-colors ${formData.whiteFlag ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'}`}
+                    onClick={() => setFormData((prev) => ({ ...prev, whiteFlag: !prev.whiteFlag }))}
+                  >
+                    Sans points
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
+                    disabled={true}
+                  >
+                    Anonyme
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
+                    disabled={true}
+                  >
+                    Sélective
+                  </button>
+                  <button
+                    className={`px-4 py-2 rounded-lg transition-colors ${formData.privateGame ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'}`}
+                    onClick={() => setFormData((prev) => ({ ...prev, privateGame: !prev.privateGame }))}
+                  >
+                    Privée
+                  </button>
+                </div>
+              </div>
+
+              {formData.privateGame && (
+                <div>
+                  <h4 className="text-lg font-medium text-blue-300 mb-4">4b - Donne un mot de passe à ta partie</h4>
                   <input
                     id="game-password"
                     name="password"
@@ -607,25 +693,29 @@ const RoomList = () => {
                     type="text"
                     placeholder="Mot de passe"
                     onChange={handleChange}
+                    className="w-full bg-black/60 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   />
-                </main>
-              </aside>
-            )}
+                </div>
+              )}
 
-            <aside className="nbj-partie">
-              <aside>5 - Nombre de joueurs</aside>
-              <aside>
-                <Button className="grey active" value="8">
+              <div>
+                <h4 className="text-lg font-medium text-blue-300 mb-4">5 - Nombre de joueurs</h4>
+                <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg shadow-lg">
                   de 6 j à 24 j
-                </Button>
-              </aside>
-              <aside></aside>
-            </aside>
-            <aside>
-              <Button className="creer-partie bgblue" onClick={handleSubmit}>CRÉER</Button>
-            </aside>
-          </article>
-        </section>
+                </button>
+              </div>
+
+              <div className="pt-4 text-center">
+                <button
+                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20 text-lg font-medium"
+                  onClick={handleSubmit}
+                >
+                  CRÉER
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   )
