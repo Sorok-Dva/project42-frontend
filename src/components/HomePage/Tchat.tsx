@@ -415,7 +415,11 @@ const UnifiedChat: React.FC = () => {
     return tb - ta
   })
 
-  const displayedConversations = sortedConversations.filter(c => {
+  const uniqueConversations = sortedConversations.filter((c, idx, self) =>
+    idx === self.findIndex(other => other.id === c.id)
+  )
+
+  const displayedConversations = uniqueConversations.filter(c => {
     const other = getOtherParticipant(c)
     return other?.nickname.toLowerCase().includes(searchQuery.toLowerCase())
   })
