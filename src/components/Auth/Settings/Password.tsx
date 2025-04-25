@@ -1,10 +1,6 @@
-'use client'
-
 import React, { useState } from 'react'
-import { Img as Image } from 'react-image'
 import { toast } from 'react-toastify'
 import { useUser } from 'contexts/UserContext'
-import illustrationImg from '../../../assets/images/resetPassword.png'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 
 const Password: React.FC = () => {
@@ -41,43 +37,19 @@ const Password: React.FC = () => {
 
   return (
     <>
-      <div className="row align-items-center">
-        <div className="col-lg-6">
-          <div className="industries-img left-img">
-            <Image src={illustrationImg} alt="Image" width={620} height={445} />
-          </div>
-        </div>
+      <p>
+        Vous pouvez changer votre mot de passe à tout moment.
+      </p>
+      <p>
+        Il vous suffit de cliquer sur le bouton, et un lien de réinitialisation du mot de passe
+        vous sera envoyé par e-mail. Suivez les instructions dans l'e-mail
+        pour définir un nouveau mot de passe.
+      </p>
 
-        <div className="col-lg-6">
-          <div className="industries-content">
-            <h3>Changer votre mot de passe</h3>
-            <p>
-              Vous pouvez changer votre mot de passe à tout moment.
-            </p>
-            <p>
-              Il vous suffit de cliquer sur le bouton, et un lien de réinitialisation du mot de passe
-              vous sera envoyé par e-mail. Suivez les instructions dans l'e-mail
-              pour définir un nouveau mot de passe.
-            </p>
-
-            <div className="row">
-              <div className="col-lg-6 col-sm-6">
-                <ul className="industries-item">
-                  <li>
-                    <i className="flaticon-checked"></i>
-                    Changement sécurisé
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <button className="default-btn" onClick={handlePasswordReset} disabled={btnDisabled}>
-                Changer mon mot de passe
-              </button>
-            </div>
-          </div>
-        </div>
+      <div className="text-center">
+        <button className="button_secondary" onClick={handlePasswordReset} disabled={btnDisabled} style={{ width: '90%' }}>
+          Changer mon mot de passe
+        </button>
       </div>
     </>
   )

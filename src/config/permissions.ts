@@ -3,86 +3,98 @@ export const ROLE_PERMISSIONS = {
     game: ['create', 'edit', 'dissolve', 'view', 'bypassPassword'],
     gamePowers: [
       'modo', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
-      'giveRole', 'removeRole', 'editRole', 'seeRole',
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
       'startPhase', 'endPhase', 'kill', 'revive',
-      'listCards'
+      'listCards', 'mp', '42', 'forceReload',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
-      'music', 'video', 'image', 'dice', 'text', 'timer',
-      'quiz', 'poll', 'vote', 'question', 'answer',
+      'music', 'video', 'img', 'dice', 'text', 'timer',
+      'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
-    site: ['achievement'],
+    site: [
+      'achievement', 'warn', 'ban', 'rename', 'addPoints',
+      'ip', 'ipComment', 'antecedents', 'moderationNotes', 'stalk',
+      'userRole', 'dcInfos', 'removeSignature', 'guildAdmin'
+    ],
   },
   Admin: {
     game: ['create', 'edit', 'dissolve', 'view', 'bypassPassword'],
     gamePowers: [
       'modo', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
-      'giveRole', 'removeRole', 'editRole', 'seeRole',
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
       'startPhase', 'endPhase', 'kill', 'revive',
-      'listCards'
+      'listCards', 'mp', '42', 'forceReload',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
-      'music', 'video', 'image', 'dice', 'text', 'timer',
-      'quiz', 'poll', 'vote', 'question', 'answer',
+      'music', 'video', 'img', 'dice', 'text', 'timer',
+      'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
-    site: ['achievement'],
+    site: [
+      'achievement', 'warn', 'ban', 'rename', 'addPoints',
+      'ip', 'ipComment', 'antecedents', 'moderationNotes', 'stalk',
+      'userRole', 'dcInfos', 'removeSignature', 'guildAdmin'
+    ],
   },
   Developer: {
     game: ['create', 'edit', 'dissolve', 'view', 'bypassPassword'],
     gamePowers: [
       'modo', 'messageTo', 'warn', 'kick', 'ban', 'mute', 'unmute',
-      'giveRole', 'removeRole', 'editRole', 'seeRole',
       'addTimer', 'removeTimer', 'setTimer', 'nick', 'crea',
       'setNight', 'setDay', 'stop', 'card',
       'startPhase', 'endPhase', 'kill', 'revive',
-      'listCards'
+      'listCards', 'mp', '42', 'forceReload',
     ],
     godPowers: [],
     animationPowers: [
-      'music', 'video', 'image', 'dice', 'text', 'timer',
-      'quiz', 'poll', 'vote', 'question', 'answer',
+      'music', 'video', 'img', 'dice', 'text', 'timer',
+      'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
-    site: ['achievement'],
+    site: [
+      'achievement', 'ip', 'ipComment', 'antecedents', 'moderationNotes',
+    ],
   },
   Moderator: {
     game: ['create', 'edit', 'dissolve', 'view', 'bypassPassword'],
     gamePowers: [
       'modo', 'warn', 'kick', 'ban', 'mute', 'unmute',
-      'giveRole', 'removeRole', 'editRole', 'seeRole',
-      'setTimer', 'crea', 'stop',
+      'crea', 'mp', '42',
     ],
     godPowers: [],
     animationPowers: [],
-    site: [],
+    site: [
+      'warn', 'ban', 'rename',
+      'ip', 'ipComment', 'antecedents', 'moderationNotes', 'stalk',
+      'dcInfos', 'removeSignature'
+    ],
   },
   ModeratorTest: {
     game: ['create', 'edit', 'view'],
     gamePowers: [
-      'modo', 'warn', 'kick', 'mute', 'unmute',
+      'modo', 'warn', 'kick', 'mute', 'unmute', 'mp', '42',
     ],
     godPowers: [],
     animationPowers: [],
-    site: [],
+    site: [
+      'warn', 'antecedents', 'moderationNotes', 'dcInfos'
+    ],
   },
   Animator: {
     game: ['create', 'view'],
-    gamePowers: [ 'addTimer', 'removeTimer', 'setTimer', 'message', 'messageTo' ],
-    godPowers: ['setNight', 'setDay',],
+    gamePowers: [ 'addTimer', 'removeTimer', 'setTimer', 'message', 'mp', '42' ],
+    godPowers: [ 'setNight', 'setDay' ],
     animationPowers: [
-      'music', 'video', 'image', 'dice', 'text', 'timer',
-      'quiz', 'poll', 'vote', 'question', 'answer',
+      'music', 'video', 'img', 'dice', 'text', 'timer',
+      'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
     site: [],
   },
   User: {
     game: ['create', 'view'],
-    gamePowers: [],
+    gamePowers: ['42'],
     godPowers: [],
     animationPowers: [],
     site: [],

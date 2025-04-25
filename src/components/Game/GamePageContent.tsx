@@ -1,12 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Box, Typography, Button, Paper, TextField } from '@mui/material'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Box } from '@mui/material'
 import { Container, Spinner } from 'reactstrap'
 import { useParams } from 'react-router-dom'
+import { motion } from 'framer-motion'
 
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
 import { useGameContext } from 'contexts/GameContext'
+import { useYouTubeAudioPlayer } from 'hooks/useYoutubeAudioPlayer'
 
 import {
   fetchGameDetails,
@@ -19,7 +21,7 @@ import { getRandomColor } from 'utils/getRandomColor'
 
 import 'styles/Game.scss'
 import Composition from './Composition'
-import ViewersList from 'components/Game/ViewersList'
+import { parallaxStars, staticStars } from 'utils/animations'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -42,6 +44,33 @@ const GamePage = () => {
 
   const [highlightedPlayers, setHighlightedPlayers] = useState<{ [nickname: string]: string }>({})
 
+  const [audioPlaying, setAudioPlaying] = useState<boolean>(false)
+  const [audioTrack, setAudioTrack] = useState<{
+    title: string
+    artist: string
+    url?: string
+    videoId?: string
+    // 'src' = flux MP3, 'youtube' = IFrame
+    type: 'src' | 'youtube'
+  } | null>(null)
+  const [audioVolume, setAudioVolume] = useState<number>(0.5)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  const handleVideoInfo = useCallback((info: { video_id: string; title: string; author: string }) => {
+    setAudioTrack(prev =>
+      prev && prev.type === 'youtube'
+        ? { ...prev, title: info.title, artist: info.author }
+        : prev
+    )
+  }, [setAudioTrack])
+
+  const handlePlayerEnd = useCallback(() => {
+    setAudioPlaying(false)
+    setAudioTrack(null)
+  }, [])
+
+  const { loadAndPlay, playVideo, pause, setVolume: setYTVolume } =
+    useYouTubeAudioPlayer(handleVideoInfo, handlePlayerEnd)
   /**
    * Toggles the highlighting of a player based on their nickname.
    * If the player is already highlighted, they will be removed from the highlighted list.
@@ -80,7 +109,6 @@ const GamePage = () => {
     isNight,
     gameStarted,
     gameFinished,
-    messagesEndRef,
     passwordRequired,
     isAuthorized,
     password,
@@ -90,6 +118,8 @@ const GamePage = () => {
     coupleList,
     slots,
     isArchive,
+    isInn,
+    innList,
     setIsArchive,
     setSlots,
     setPlayer,
@@ -103,7 +133,7 @@ const GamePage = () => {
     setGameFinished,
   } = useGameContext()
 
-  // temp - debug
+  // Debug - Écouter tous les événements socket
   useEffect(() => {
     if (!socket) return
 
@@ -111,19 +141,80 @@ const GamePage = () => {
       console.log(`Événement reçu : ${eventName}`, args)
     })
 
+    socket.on('bipNotReadyPlayers', () => {
+      // Afficher une notification uniquement si le joueur n'est pas prêt
+      if (player && !player.ready && player.nickname !== creator?.nickname) {
+        // Créer une notification sonore
+        const notificationSound = new Audio('/assets/sounds/sos.mp3')
+        notificationSound.play().catch((err) => console.error('Erreur lors de la lecture du son:', err))
+
+        // Afficher une alerte visuelle
+        const notificationDiv = document.createElement('div')
+        notificationDiv.className =
+          'fixed top-4 right-4 bg-gradient-to-r from-yellow-600 to-orange-600 text-white p-4 rounded-lg shadow-lg z-50 animate-bounce'
+        notificationDiv.innerHTML = `
+          <p class="font-bold">Attention !</p>
+          <p>${creator?.nickname} vous demande de vous mettre prêt !</p>
+        `
+        document.body.appendChild(notificationDiv)
+
+        // Supprimer la notification après 5 secondes
+        setTimeout(() => {
+          notificationDiv.classList.add('opacity-0', 'transition-opacity')
+          setTimeout(() => {
+            document.body.removeChild(notificationDiv)
+          }, 500)
+        }, 5000)
+      }
+    })
+
+    socket.on('music', (data) => {
+      // STOPPE toujours tout d'abord
+      pause()
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ''
+      }
+
+      if (!data.url || data.url === '') return
+
+      const ytMatch = data.url.match(
+        /(?:youtube\.com\/(?:watch\?.*?v=)|youtu\.be\/)([A-Za-z0-9_-]{11})(?=[?&]|$)/
+      )
+      const videoId = ytMatch?.[1] ?? null
+
+      if (videoId) {
+        setAudioTrack({ title: data.title, artist: data.artist, videoId, type: 'youtube' })
+        loadAndPlay(videoId)    // pourra être mis en attente
+        setAudioPlaying(true)
+      } else {
+        const audioUrl = data.url
+        setAudioTrack({ title: data.title, artist: data.artist, url: audioUrl, type: 'src' })
+        audioRef.current!.src = audioUrl
+        audioRef.current!.volume = audioVolume
+        audioRef.current!.play().catch(console.error)
+        setAudioPlaying(true)
+      }
+    })
+
+    socket.on('stopMusic', () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        setAudioPlaying(false)
+      }
+    })
+
     return () => {
       socket.offAny()
+      socket.off('bipNotReadyPlayers')
+      socket.off('music')
+      socket.off('stopMusic')
     }
-  }, [socket])
+  }, [socket, player])
 
   useEffect(() => {
     setIsCreator(player?.nickname === creator?.nickname)
   }, [creator])
-
-  function isDateMoreThan10MinutesOld(date: Date) {
-    const tenMinutesAgo = Date.now() - 600000
-    return new Date(date).getTime() < tenMinutesAgo
-  }
 
   /**
    * Requête pour recharger certains détails du jeu (ex : titre, etc.)
@@ -156,14 +247,13 @@ const GamePage = () => {
     if (!socket || !gameId) return
     if (confirm('Êtes-vous sûr de vouloir quitter la partie ?')) {
       try {
-        if (player) {
-          const response = await leaveGame(token)
-          if (response.message) {
-            socket.emit('leaveRoom', {
-              roomId: gameId,
-              player: { id: user?.id, nickname: user?.nickname },
-            })
-          }
+        const response = await leaveGame(token)
+        if (response.message) {
+          socket.emit('leaveRoom', {
+            roomId: gameId,
+            player: player ? { id: user?.id, nickname: user?.nickname } : null,
+            viewer,
+          })
         }
         localStorage.removeItem(`game_auth_${gameId}`)
         setGameError('Vous avez bien quitté la partie. Vous pouvez fermer cet onglet.')
@@ -173,259 +263,427 @@ const GamePage = () => {
     }
   }
 
+  /**
+   * Gérer la lecture/pause de l'audio
+   */
+  const handleToggleAudio = () => {
+    if (!audioTrack) return
+
+
+    if (audioPlaying) {
+      if (audioTrack.type === 'youtube') {
+        pause()
+      } else {
+        audioRef.current?.pause()
+      }
+    } else {
+      if (audioTrack.type === 'youtube') {
+        playVideo()
+      } else {
+        audioRef.current?.play().catch(console.error)
+      }
+    }
+    setAudioPlaying(!audioPlaying)
+  }
+
+  /**
+   * Gérer le changement de volume
+   */
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseFloat(e.target.value)
+    setAudioVolume(newVolume)
+
+    if (audioTrack?.type === 'youtube') {
+      setYTVolume(newVolume)
+    } else {
+      if (audioRef.current) audioRef.current.volume = newVolume
+    }
+  }
+
+  // Créer et gérer l'élément audio
+  useEffect(() => {
+    audioRef.current = new Audio()
+    audioRef.current.volume = audioVolume
+
+    // 2) Dès que la piste se termine, on enlève le player
+    const handleEnded = () => {
+      setAudioPlaying(false)
+      setAudioTrack(null)
+    }
+    audioRef.current.addEventListener('ended', handleEnded)
+
+    // on ne démarre ici que le flux « src » (MP3/ogg)
+    if (audioTrack?.type === 'src' && audioTrack.url) {
+      audioRef.current.src = audioTrack.url
+      if (audioPlaying) audioRef.current.play().catch(console.error)
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ''
+        audioRef.current.removeEventListener('ended', handleEnded)
+      }
+    }
+  }, [])
+
+  // Mettre à jour le volume lorsqu'il change
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = audioVolume
+    }
+  }, [audioVolume])
+
   if (gameError) {
+    localStorage.setItem('gameFinished', 'true')
+
+    const isLeaveMessage = gameError.includes('Vous avez bien quitté la partie.')
     return (
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        height="100vh"
-        bgcolor="#f0f0f5"
-        style={{
-          backgroundImage: 'url(/assets/images/games/background-night.png)',
-          backgroundSize: 'cover',
-        }}
-      >
-        <Paper
-          elevation={4}
-          sx={{
-            padding: '2rem',
-            borderRadius: '10px',
-            textAlign: 'center',
-            backgroundColor: '#ffffff',
-            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)'
-          }}
+      <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
+        <div className="absolute inset-0 z-0">{ staticStars }</div>
+
+        {/* Nébuleuses colorées */ }
+        <div className="absolute inset-0 z-0">
+          <div
+            className="absolute inset-0 opacity-40"
+            style={ {
+              background:
+                'radial-gradient(circle at 70% 30%, rgba(111, 66, 193, 0.6), transparent 60%), radial-gradient(circle at 30% 70%, rgba(59, 130, 246, 0.6), transparent 60%), radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.3), transparent 70%)',
+            } }
+          />
+        </div>
+
+        {/* Étoiles avec parallaxe */ }
+        <div className="absolute inset-0 z-1">{ parallaxStars }</div>
+
+        <motion.div
+          className={`z-20 bg-black/60 backdrop-blur-md rounded-xl border ${isLeaveMessage ? 'border-green-500/30' : 'border-red-500/30'} p-8 max-w-md text-center`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          <Typography variant="h5" gutterBottom>
-            ❌Erreur
-          </Typography>
-          <div className="alert alert-danger mt-2">
-            <Typography variant="body1" sx={{ marginBottom: '1rem' }}>
-              {gameError}
-            </Typography>
-          </div>
-        </Paper>
-      </Box>
+          {!isLeaveMessage && <div className="text-red-500 text-5xl mb-4">⚠️</div>}
+          <h1 className={`text-2xl font-bold mb-4 ${isLeaveMessage ? 'text-green-400' : 'text-red-400'}`}>
+            {isLeaveMessage ? 'Partie quittée' : 'Erreur'}
+          </h1>
+          <p className="text-gray-300 mb-6">{gameError}</p>
+          <button
+            onClick={() => window.close()}
+            className={`px-4 py-2 ${isLeaveMessage ? 'bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900' : 'bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900'} text-white rounded-lg transition-all`}
+          >
+            Fermer
+          </button>
+        </motion.div>
+      </div>
     )
   }
 
   if (passwordRequired && !isAuthorized) {
     return (
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        height="100vh"
-        bgcolor="#f0f0f5"
-        sx={{
-          backgroundImage: 'url(/assets/images/games/background2.png)',
-          backgroundSize: 'cover',
-        }}
-      >
-        <Paper
-          elevation={4}
-          sx={{
-            padding: '2rem',
-            borderRadius: '10px',
-            textAlign: 'center',
-            backgroundColor: '#ffffff',
-            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)'
-          }}
-        >
-          <Typography variant="h5" gutterBottom>
-            🔒 Partie protégée
-          </Typography>
-          <Typography variant="body1" sx={{ marginBottom: '1rem' }}>
-            Entrez le mot de passe pour rejoindre la partie.
-          </Typography>
-          <TextField
-            type="password"
-            label="Mot de passe"
-            variant="outlined"
-            fullWidth
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            sx={{ marginBottom: '1rem' }}
-            autoFocus
-            onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+      <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
+        <div className="absolute inset-0 z-0">{ staticStars }</div>
+
+        {/* Nébuleuses colorées */ }
+        <div className="absolute inset-0 z-0">
+          <div
+            className="absolute inset-0 opacity-40"
+            style={ {
+              background:
+                'radial-gradient(circle at 70% 30%, rgba(111, 66, 193, 0.6), transparent 60%), radial-gradient(circle at 30% 70%, rgba(59, 130, 246, 0.6), transparent 60%), radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.3), transparent 70%)',
+            } }
           />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={handlePasswordSubmit}
-          >
-            Valider
-          </Button>
-          { error && <div className="alert alert-danger mt-2">{error}</div>}
-        </Paper>
-      </Box>
+        </div>
+
+        {/* Étoiles avec parallaxe */ }
+        <div className="absolute inset-0 z-1">{ parallaxStars }</div>
+
+        <motion.div
+          className="bg-black/60 backdrop-blur-md rounded-xl border border-blue-500/30 p-8 max-w-md w-full z-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="text-blue-500 text-5xl mb-4 flex justify-center">🔒</div>
+          <h1 className="text-2xl font-bold mb-4 text-center">Partie protégée</h1>
+          <p className="text-blue-300 mb-6 text-center">Entrez le mot de passe pour rejoindre la partie.</p>
+
+          <div className="space-y-4">
+            <input
+              type="password"
+              placeholder="Mot de passe"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-black/40 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              autoFocus
+              onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+            />
+
+            <motion.button
+              className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handlePasswordSubmit}
+            >
+              Valider
+            </motion.button>
+
+            {error && (
+              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3 text-red-300 text-sm">{error}</div>
+            )}
+          </div>
+        </motion.div>
+      </div>
     )
   }
 
-  return isAuthorized && creator ? (
+  return (
     <>
-      <Box display="flex" flexDirection="column" height="100vh"
-        sx={{
-          backgroundImage: (isNight || gameFinished) ?
-            'url(/assets/images/games/background-night.png)'
-            : 'url(/assets/images/games/background2.png)',
-          backgroundSize: 'cover',
-        }}
-      >
-        {/* Header */}
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          px={2}
-          py={1}
-          bgcolor="#262626"
-        >
-          <Typography variant="h6">
-            [{GAME_TYPES[roomData.type]}] Partie : {roomData.name} ({players.length}/{slots})
-          </Typography>
-
-          {!isArchive && (
-            <Box display="flex" gap={2}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleClearChat}
-              >
-                ♻️
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleLeaveGame}
-              >
-                Quitter
-              </Button>
-            </Box>
-          )}
-        </Box>
-
-        {/* Contenu principal */}
-        <Box display="flex" flex={1} p={2} className="game-page-container">
-          {/* Colonne gauche : Controls */}
-          <Box
-            display="flex"
-            flexDirection="column"
-            width="25%"
-            className="left-column"
-            mr={2}
+      {isAuthorized && creator ? (
+        <>
+          <Box className="game-page" display="flex" flexDirection="column"
+            sx={{
+              backgroundImage: (isNight || gameFinished) ?
+                'url(/assets/images/games/background-night.png)'
+                : 'url(/assets/images/games/background2.png)',
+              backgroundSize: 'cover',
+            }}
           >
-            <Box mb={2}>
-              <Controls
-                gameId={gameId}
-                roomData={roomData}
-                fetchGameDetails={handleFetchGameDetails}
-                isCreator={isCreator}
-                canBeReady={canBeReady}
-                canStartGame={canStartGame}
-                player={player}
-                players={players}
-                gameStarted={gameStarted}
-                gameFinished={gameFinished}
-                isArchive={isArchive}
-                setGameStarted={setGameStarted}
-                slots={slots}
-                setSlots={setSlots}
-                setRoomData={setRoomData}
-              />
-            </Box>
-          </Box>
-
-          {/* Colonne centrale : Chat */}
-          <Box
-            display="flex"
-            flexDirection="column"
-            width="50%"
-            className="chat-column"
-            mr={2}
-            height="85vh"
-          >
-            {loading ? (
-              <Container className="loader-container">
-                <div className="spinner-wrapper">
-                  <Spinner className="custom-spinner" />
-                  <div className="loading-text">Chargement du chat...</div>
+            {/* En-tête */}
+            <div className="relative z-10 bg-gradient-to-r from-black/80 to-blue-900/30 backdrop-blur-sm border-b border-blue-500/30 shadow-lg">
+              <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mr-3">
+                    <span className="font-bold text-lg">P42</span>
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold">
+                      <span className="text-blue-300">[{GAME_TYPES[roomData.type]}]</span> {roomData.name}
+                    </h1>
+                    <p className="text-sm text-blue-300">
+                      {players.length}/{slots} joueurs • {isNight ? 'Phase nocturne' : 'Phase diurne'}
+                    </p>
+                  </div>
                 </div>
-              </Container>
-            ) : (
-              <Chat
-                gameId={gameId!}
-                playerId={user?.id}
-                player={player ?? undefined}
-                viewer={viewer ?? undefined}
-                players={players}
-                user={user ?? undefined}
-                userRole={user?.role}
-                messages={messages}
-                messagesEndRef={messagesEndRef}
-                highlightedPlayers={highlightedPlayers}
-                isNight={isNight}
-                gameStarted={gameStarted}
-                gameFinished={gameFinished}
-                isArchive={isArchive}
-              />
-            )}
+
+                {!isArchive && (
+                  <div className="flex gap-2 items-center">
+                    {audioTrack && (
+                      <div className="flex items-center gap-2 px-3 py-1 bg-black/40 border border-blue-500/30 rounded-lg">
+                        <motion.button
+                          className={`w-6 h-6 flex items-center justify-center rounded-full ${audioPlaying ? 'bg-purple-600' : 'bg-blue-600'} text-white`}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={handleToggleAudio}
+                        >
+                          {audioPlaying ? (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-3 w-3"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-3 w-3"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          )}
+                        </motion.button>
+                        <div className="flex flex-col">
+                          <span className="text-xs text-white font-medium truncate max-w-[100px]">{audioTrack?.title || '…'}</span>
+                          <span className="text-xs text-blue-300 truncate max-w-[100px]">{audioTrack?.artist || '…'}</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.01"
+                          value={audioVolume}
+                          onChange={handleVolumeChange}
+                          className="w-16 h-1 bg-blue-500/30 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
+                    )}
+                    <motion.button
+                      className="px-3 py-1 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all flex items-center gap-1"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleClearChat}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                          fillRule="evenodd"
+                          d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    Effacer
+                    </motion.button>
+                    <motion.button
+                      className="px-3 py-1 bg-red-900/40 hover:bg-red-900/60 text-red-300 hover:text-white border border-red-500/30 rounded-lg transition-all flex items-center gap-1"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleLeaveGame}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                          fillRule="evenodd"
+                          d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-4-4H3zm9 2.586L14.586 8H12V5.586zM5 5h5v2H5V5zm0 4h10v6H5V9z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    Quitter
+                    </motion.button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Contenu principal */}
+            <Box display="flex" flex={1} p={2} className="game-page-container">
+              {/* Colonne gauche : Controls */}
+              <Box
+                display="flex"
+                flexDirection="column"
+                width="25%"
+                className="left-column"
+                mr={2}
+              >
+                <Box mb={2}>
+                  <Controls
+                    gameId={gameId}
+                    roomData={roomData}
+                    fetchGameDetails={handleFetchGameDetails}
+                    isCreator={isCreator}
+                    creator={creator}
+                    canBeReady={canBeReady}
+                    canStartGame={canStartGame}
+                    player={player}
+                    players={players}
+                    gameStarted={gameStarted}
+                    gameFinished={gameFinished}
+                    isArchive={isArchive}
+                    setGameStarted={setGameStarted}
+                    slots={slots}
+                    setSlots={setSlots}
+                    setRoomData={setRoomData}
+                    isInn={isInn}
+                    viewer={viewer}
+                    setPlayer={setPlayer}
+                  />
+                </Box>
+              </Box>
+
+              {/* Colonne centrale : Chat */}
+              <Box
+                display="flex"
+                flexDirection="column"
+                width="50%"
+                className="chat-column"
+                mr={2}
+                height="85vh"
+              >
+                {loading ? (
+                  <Container className="loader-container loader-container-two">
+                    <div className="spinner-wrapper">
+                      <Spinner className="custom-spinner" />
+                      <div className="loading-text">Chargement du chat...</div>
+                    </div>
+                  </Container>
+                ) : (
+                  <Chat
+                    gameId={gameId!}
+                    playerId={user?.id}
+                    player={player ?? undefined}
+                    viewer={viewer ?? undefined}
+                    players={players}
+                    user={user ?? undefined}
+                    userRole={user?.role}
+                    messages={messages}
+                    highlightedPlayers={highlightedPlayers}
+                    isNight={isNight}
+                    gameStarted={gameStarted}
+                    gameFinished={gameFinished}
+                    isArchive={isArchive}
+                    isInn={isInn}
+                  />
+                )}
+              </Box>
+
+              {/* Colonne droite : Liste des joueurs */}
+              <Box
+                display="flex"
+                flexDirection="column"
+                width="25%"
+                className="right-column"
+              >
+                <Composition roomData={roomData} />
+                <PlayersList
+                  players={players}
+                  player={player}
+                  viewers={viewers}
+                  viewer={viewer}
+                  isCreator={isCreator}
+                  creatorNickname={creator!.nickname}
+                  gameId={gameId!}
+                  socket={socket}
+                  toggleHighlightPlayer={toggleHighlightPlayer}
+                  highlightedPlayers={highlightedPlayers}
+                  gameStarted={gameStarted}
+                  gameFinished={gameFinished}
+                  alienList={alienList}
+                  sistersList={sistersList}
+                  brothersList={brothersList}
+                  coupleList={coupleList}
+                  isNight={isNight}
+                  isInn={isInn}
+                  innList={innList}
+                />
+              </Box>
+            </Box>
           </Box>
 
-          {/* Colonne droite : Liste des joueurs */}
-          <Box
-            display="flex"
-            flexDirection="column"
-            width="25%"
-            className="right-column"
-          >
-            <Composition roomData={roomData} />
-            <PlayersList
-              players={players}
-              player={player}
-              viewers={viewers}
-              viewer={viewer}
-              isCreator={isCreator}
-              creatorNickname={creator!.nickname}
-              gameId={gameId!}
-              socket={socket}
-              toggleHighlightPlayer={toggleHighlightPlayer}
-              highlightedPlayers={highlightedPlayers}
-              gameStarted={gameStarted}
-              gameFinished={gameFinished}
-              alienList={alienList}
-              sistersList={sistersList}
-              brothersList={brothersList}
-              coupleList={coupleList}
-              isNight={isNight}
-            />
-          </Box>
-        </Box>
-      </Box>
-
-      <Box
-        position="fixed"
-        bottom={0}
-        left={0}
-        p={1}
-        bgcolor="#262626"
-        borderTop="1px solid #ccc"
-        width="100%"
-      >
-        <Typography variant="caption">
-          {!isArchive ? 'Partie' : 'Archive'} #{gameId} - v{process.env.REACT_APP_GAME_VERSION} || {player?.nickname}
-        </Typography>
-      </Box>
+          <div className="relative z-10 bg-gradient-to-r from-black/80 to-blue-900/30 backdrop-blur-sm border-t border-blue-500/30 py-2 px-4 text-xs text-blue-300">
+            <div className="container mx-auto flex justify-between items-center">
+              <div>
+                {!isArchive ? 'Partie' : 'Archive'} #{gameId} • v{process.env.REACT_APP_GAME_VERSION}
+              </div>
+              {player && (
+                <div>
+                Connecté en tant que: <span className="text-white font-medium">{player.nickname}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      ): (
+        <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
+          <div className="text-center">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-500/20 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+            <p className="mt-4 text-blue-300">Chargement de la partie...</p>
+          </div>
+        </div>
+      )}
     </>
-  ): (
-    <Container className="loader-container">
-      <div className="spinner-wrapper">
-        <Spinner className="custom-spinner" />
-        <div className="loading-text">Chargement de la partie...</div>
-      </div>
-    </Container>
   )
 }
 

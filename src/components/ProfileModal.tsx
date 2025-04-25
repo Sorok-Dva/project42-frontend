@@ -10,6 +10,8 @@ import RenderGameLine from 'components/Profile/RenderGameLine'
 import AchievementBadge from 'components/Profile/AchievementBadge'
 import Actions from './Profile/Actions'
 import Details from './Profile/Details'
+import Activity from 'components/Profile/Activity'
+import { Tooltip } from 'react-tooltip'
 
 interface AchievementResult { [favorite: number]:  {
     id: number
@@ -21,7 +23,9 @@ interface AchievementResult { [favorite: number]:  {
     title?: string | { [level: number]: string }
     nextLevelTo?: number
   } }
-interface User {
+
+export interface User {
+  id : number
   nickname: string;
   points: number;
   level: number;
@@ -51,6 +55,7 @@ interface User {
   guild: {
     id: number;
     name: string;
+    banner: string | null;
     tag: string;
     picture: string;
     border: string;
@@ -69,6 +74,10 @@ interface User {
       nextLevelTo?: number
     }]
   },
+  activity: {
+    state: 'ingame' | 'pregame' | 'spectator' | 'none' | string;
+    gameId?: number;
+  }
   createdAt: Date;
 }
 
@@ -80,18 +89,18 @@ interface ProfileModalProps {
 const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
   const { token } = useAuth()
   const [user, setUser] = useState<User | null>(null)
-  const [selfProfile, setSelfProfile] = useState<boolean>(false)
+  const [relation, setRelation] = useState<'me' | 'friend' | 'waiting' | 'none'>('none')
   const [error, setError] = useState<string | null>(null)
   const [role, setRole] = useState<{ name: string, color: string } | null>(null)
 
   useEffect(() => {
     const fetchuser = async () => {
       try {
-        const response = await axios.get(`/api/users/${nickname}`, {
+        const response = await axios.get(`/api/users/${nickname}`, token ? {
           headers: { Authorization: `Bearer ${token}` },
-        })
+        } : {})
         setUser(response.data.user)
-        setSelfProfile(response.data.self)
+        setRelation(response.data.relation)
         setRole(rolify(response.data.user.role.name))
       } catch (e: any) {
         if (e.response?.data.error) {
@@ -228,7 +237,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                             </div>
                           </div>
                         ))
-                      ) : selfProfile ? (
+                      ) : relation === 'me' ? (
                         <p>
                           Tu n'as pas encore indiqué quels étaient tes badges favoris.
                           Fais le vite dans l'onglet <strong>Badges et titre</strong> de ton Compte !
@@ -243,7 +252,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                     <div className="profil-info-game">
                       {/* Dernières parties */}
                       <div className="resume-last-game">
-                        {user.playedGames === 0 && selfProfile ? (
+                        {user.playedGames === 0 && relation === 'me' ? (
                           <p>
                               Tu viens seulement de débarquer dans la station Mir.
                             <br />
@@ -288,7 +297,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                         {user.guild ? (
                           <a
                             className="profile-infos-hamlet"
-                            href={`/station?tag=${user.guild.tag}`}
+                            href={`/station/${user.guild.tag}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
@@ -296,24 +305,27 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                               className={`hamlet-banner ${
                                 user.guild.border ? `hamlet-border-${user.guild.border}` : ''
                               }`}
-                              style={{ backgroundImage: `url(${user.guild.picture})` }}
+                              style={{ backgroundImage: `url(${user.guild.banner ? user.guild.banner : '/img/stations_banner.png'})` }}
                             ></div>
                             <h2>
-                              {user.guild.name} <br />
                               <small>[{user.guild.tag}]</small>
+                              {user.guild.name}
                             </h2>
                             <ul className="hamlet-details">
-                              <li data-tooltip={`Rôle de ${user.nickname} dans sa station`}>
+                              <li
+                                data-tooltip-content={`Rôle de ${user.nickname} dans sa station`}
+                                data-tooltip-id="role-tooltip"
+                              >
                                 <img src="/assets/images/icon-capitaine.png" alt="Rôle" />{' '}
                                 {user.guild.role}
-                                {user.guild.role !== 'maire' && !user.isMale ? 'e' : ''}
+                                <Tooltip id="role-tooltip"/>
                               </li>
                               <li data-tooltip="Joueurs membres de la station">
-                                <img src="/assets/images/icon-people.png" alt="Membres" /> {user.guild.membersCount}/100
+                                <img src="/assets/images/icon-people.png" alt="Membres" /> {user.guild.membersCount}/50
                               </li>
                             </ul>
                           </a>
-                        ) : selfProfile ? (
+                        ) : relation === 'me' ? (
                         // C'est mon profil et je n'ai pas de station
                           <div>
                             <p>
@@ -344,7 +356,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                       </div>
                     </div>
 
-                    <Actions data={user} relation='me' />
+                    <Actions data={user} relation={relation} />
                   </>
                 ): (
                   <div
@@ -365,121 +377,19 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
               </div>
             </div>
 
+            { user && relation !== 'me' && user.activity.state !== 'none' && (
+              <Activity user={user} relation={relation} />
+            )}
             { user && (
               <div className="profile-tabs">
-                <Details user={user} relation="me" />
+                <Details user={user} relation={relation} />
               </div>
             )}
-
-            {/*<ProfileDetails user={user} relation='me' renderAchievement={} />*/}
           </div>
         </div>
       </div>
     </div>
   )
 }
-
-/*
-<div className="modal-container" onClick={e => e.stopPropagation()}>
-  Header avec le titre et le bouton de fermeture
-  <div className="modal-header">
-    <h2>Profil de {nickname}</h2>
-    <button className="close-btn" onClick={onClose}>
-      &times;
-    </button>
-  </div>
-
-  Contenu principal
-  <div className="modal-content">
-    {error ? (
-      <div className="alert alert-danger">{error}</div>
-    ) : user ? (
-      <>
-        <div className="profile-top">
-          <div className="avatar">
-            <img src={ user.avatar } alt="avatar"/>
-          </div>
-          <div className="profile-info">
-            <b>
-              { nickname },
-              <span className="user-role"
-                    data-team={ role?.name }
-                    style={{ backgroundColor: role?.color }}>
-                      { role?.name }
-                    </span>
-            </b>
-            <div className="quote">{ user.quote }</div>
-            <div className="profile-stats">
-                    <span>
-                      <img src="/assets/images/profile/level.png" alt="Niveau" />
-                      Niveau <b>{ user.level }</b>
-                    </span>
-              <span>
-                      <img src="/assets/images/dice.png" alt="Parties" />
-                      <b>{ user.gamesPlayed }</b> parties jouées
-                    </span>
-              <span>
-                      <img src="/assets/images/star.png" alt="Points" />
-                      <b>{ user.points }</b> points
-                    </span>
-              <div className="mt-4" style={{ marginLeft: '-20vh' }}>
-                <small>Inscrit le { new Date(user.createdAt).toLocaleDateString('fr-FR', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                }) }</small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="section-middle">
-          <div className="hameau-block">
-            { selfProfile && (
-              <>
-                <p><b style={{ color: '#982726' }}>Tu n&apos;as pas de hameau.</b></p>
-                <p>Rejoins-en un dès
-                  maintenant
-                  pour faire de nouvelles rencontres !</p>
-                <button>Voir les hameaux</button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/!* Historique des dernières parties *!/ }
-        <div className="match-history">
-          { user.matchHistory.map((match, idx) => (
-            <div key={ idx } className="match-row">
-              <span>{ match.mode }</span>
-              <span>{ match.date }</span>
-              <span>{ match.result }</span>
-            </div>
-          )) }
-        </div>
-
-        {/!* Bouton masquer/fermer ou autres actions *!/ }
-        <div className="actions">
-          <button onClick={ onClose }>Masquer les détails</button>
-        </div>
-      </>
-    ): (
-      <div
-        style={ {
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '200px',
-        } }
-      >
-        <Spinner className="custom-spinner"/>
-        <div style={ { marginTop: '1rem' } }>Chargement du profil...
-        </div>
-      </div>
-    ) }
-  </div>
-</div>
-*/
 
 export default ProfileModal

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Socket } from 'socket.io-client'
 import {
   fetchGameDetails,
@@ -17,6 +17,7 @@ export interface Message {
   isMeneur: boolean
   isPerso: boolean
   isMsgSite: boolean
+  cssClass?: string | null
   createdAt: Date
 }
 
@@ -65,6 +66,7 @@ export interface RoomData {
   id: number
   creator: string
   name: string
+  status: 'waiting' | 'in_progress' | 'completed'
   type: number
   timer: number
   maxPlayers: number
@@ -72,6 +74,7 @@ export interface RoomData {
   password?: string
   phase: number
   cards: RoomCard[]
+  players?: Partial<PlayerType>[]
   createdAt: Date
   updatedAt: Date
 }
@@ -95,6 +98,7 @@ export const useGame = (
     creator: '',
     name: 'Chargement...',
     timer: 3,
+    status: 'waiting',
     type: 0,
     maxPlayers: 6,
     isPrivate: true,
@@ -110,7 +114,7 @@ export const useGame = (
   const [players, setPlayers] = useState<PlayerType[]>([])
   const [viewer, setViewer] = useState<Viewer | null>(null)
   const [viewers, setViewers] = useState<Viewer[]>([])
-  const [creator, setCreator] = useState<UserType | null>(null)
+  const [creator, setCreator] = useState<PlayerType | null>(null)
   const [isCreator, setIsCreator] = useState<boolean>(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [canBeReady, setCanBeReady] = useState(false)
@@ -128,20 +132,8 @@ export const useGame = (
   const [coupleList, setCoupleList] = useState<string[]>([])
   const [slots, setSlots] = useState<number>(roomData.maxPlayers)
   const [isArchive, setIsArchive] = useState<boolean>(false)
-
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  /**
-   * scrollToBottom is a function that scrolls the view to the bottom of a container.
-   * It ensures that the UI automatically scrolls to the most recent content,
-   * providing a smooth scrolling effect.
-   *
-   * The function utilizes a reference (messagesEndRef) to the DOM element
-   * and invokes the scrollIntoView method with the 'smooth' behavior.
-   */
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+  const [isInn, setIsInn] = useState<boolean>(false)
+  const [innList, setInnList] = useState<string[]>([])
 
   /**
    * Asynchronously handles the submission of a password for game authentication.
@@ -220,7 +212,7 @@ export const useGame = (
       setLoading(false)
 
       const allPlayersReady = playersData
-        .filter((player: PlayerType) => player.playerId !== creator?.id)
+        .filter((player: PlayerType) => player.playerId !== creator?.playerId)
         .every((player: PlayerType) => player.ready)
 
       if (allPlayersReady && playersData.length === roomData.maxPlayers) {
@@ -254,9 +246,9 @@ export const useGame = (
      * @returns {Promise<void>} A promise that resolves when the room data is successfully loaded or stops due to invalid conditions.
      */
     const loadRoomData = async () => {
-      if (!gameId || !token) return
+      if (!gameId) return
       try {
-        const data = await fetchGameDetails(gameId, token)
+        const data = await fetchGameDetails(gameId, token ?? null)
         if (data.error) {
           setGameError(data.error)
         } else {
@@ -302,7 +294,8 @@ export const useGame = (
     if (!hasJoined && isAuthorized) {
       socket.emit('joinRoom', {
         roomId: gameId,
-        player: { id: user.id, nickname: user.nickname },
+        player: !user ? null : { id: user.id, nickname: user.nickname },
+        viewer,
       })
       setHasJoined(true)
     }
@@ -312,7 +305,7 @@ export const useGame = (
       if (data.sound) {
         const audio = new Audio(`/assets/sounds/${data.sound}.mp3`)
         audio.volume = 0.5
-        audio.play()
+        audio.play().catch(() => {})
       }
       setMessages((prev) => [
         ...prev,
@@ -335,6 +328,10 @@ export const useGame = (
       if (updatedPlayers.length >= roomData.maxPlayers) setCanBeReady(true)
     })
 
+    socket.on('updateViewers', (updatedViewers: Viewer[]) => {
+      setViewers(updatedViewers)
+    })
+
     socket.on('newMessage', (message) => {
       if (message.channel === 2 && isNight) {
         socket.emit('shaman_listen', message)
@@ -342,11 +339,11 @@ export const useGame = (
       setMessages((prev) => [...prev, message])
       if (message.sound) {
         const audio = new Audio(`/assets/sounds/${message.sound}.mp3`)
-        audio.play()
+        audio.play().catch(() => {})
       }
       if (message.message.toLowerCase().includes(player?.nickname.toLowerCase())) {
         const audio = new Audio('/assets/sounds/sos.mp3')
-        audio.play()
+        audio.play().catch(() => {})
       }
     })
 
@@ -356,14 +353,14 @@ export const useGame = (
       }
     })
 
-    socket.on('playerKicked', (data: { nickname: string; sound: string }) => {
-      if (data.nickname === player?.nickname) {
+    socket.on('playerKicked', (data: { arg: string; sound: string }) => {
+      if (player?.nickname && data.arg === player.nickname) {
         setGameError('Vous avez été expulsé de la partie.')
       }
       if (data.sound) {
         const audio = new Audio(`/assets/sounds/${data.sound}.mp3`)
         audio.volume = 0.5
-        audio.play()
+        audio.play().catch(() => {})
       }
     })
 
@@ -376,7 +373,6 @@ export const useGame = (
     })
 
     socket.on('newCreator', (creatorData: PlayerType) => {
-      console.log('newCreator', creatorData)
       setCreator(creatorData)
     })
 
@@ -388,10 +384,27 @@ export const useGame = (
       setIsNight(nightStarted)
     })
 
+    socket.on('gameStarted', async () => {
+      setGameStarted(true)
+      setIsNight(true)
+      const data = await fetchGameDetails(gameId, token ?? null)
+      if (data.error) {
+        setGameError(data.error)
+      }
+      setRoomData(data.room)
+      setPlayer(data.player)
+      setViewer(data.viewer)
+      setCreator(data.creator)
+    })
+
     socket.on('gameFinished', (room: RoomData) => {
       // @todo join viewers channel
       setGameFinished(true)
       setIsNight(true)
+    })
+
+    socket.on('updateMaxPlayers', (maxPlayers: number) => {
+      setSlots(maxPlayers)
     })
 
     socket.on('updateCards', (cards: RoomCard[]) => {
@@ -414,6 +427,13 @@ export const useGame = (
       setCoupleList(list)
     })
 
+    socket.on('inn_list', (list: string[]) => {
+      if (list.includes(player?.nickname || 'Joueur introuvable')) {
+        setIsInn(true)
+        setInnList(list)
+      }
+    })
+
     socket.on('dead', () => {
       setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, alive: false } : null)
     })
@@ -424,6 +444,18 @@ export const useGame = (
 
     socket.on('dissolve', () => {
       setGameError('Le salon a été détruit par la modération.')
+    })
+
+    socket.on('forceReload', async () => {
+      // Purge du cache (Cache API)
+      if ('caches' in window) {
+        const cacheNames = await caches.keys()
+        await Promise.all(cacheNames.map(name => caches.delete(name)))
+      }
+      // Rechargement forcé avec cache-bust
+      const url = new URL(window.location.href)
+      url.searchParams.set('_', Date.now().toString())
+      window.location.replace(url.toString())
     })
 
     socket.on('error', (error: any) => {
@@ -453,22 +485,19 @@ export const useGame = (
       socket.off('enableReadyOption')
       socket.off('enableStartGame')
       socket.off('nightStarted')
+      socket.off('gameStarted')
       socket.off('gameFinished')
+      socket.off('updateMaxPlayers')
       socket.off('updateCards')
       socket.off('alienList')
       socket.off('coupleList')
+      socket.off('inn_list')
       socket.off('dead')
       socket.off('dissolve')
+      socket.off('forceReload')
       socket.off('error')
     }
   }, [socket, gameId, user, player, hasJoined, isAuthorized, isNight, roomData.maxPlayers])
-
-  /**
-   * Scroll auto en bas des messages à chaque nouveau message
-   */
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
 
   return {
     roomData,
@@ -487,7 +516,6 @@ export const useGame = (
     isNight,
     gameStarted,
     gameFinished,
-    messagesEndRef,
     passwordRequired,
     isAuthorized,
     password,
@@ -497,6 +525,8 @@ export const useGame = (
     coupleList,
     slots,
     isArchive,
+    isInn,
+    innList,
     setIsArchive,
     setSlots,
     setPlayer,

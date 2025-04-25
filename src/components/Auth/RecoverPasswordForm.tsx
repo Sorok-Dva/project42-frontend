@@ -1,20 +1,10 @@
-'use client'
-
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
-import { ThemeContext } from 'contexts/ThemeContext'
 
 const RecoverPasswordForm: React.FC = () => {
   const [email, setEmail] = useState('')
-  const themeContext = useContext(ThemeContext)
-
-  if (!themeContext) {
-    throw new Error('ThemeContext not found')
-  }
-
-  const { theme } = themeContext
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value)
@@ -55,15 +45,15 @@ const RecoverPasswordForm: React.FC = () => {
       <div className="container">
         <div className="row">
           <div className="col-12">
-            <div className={`contact-form-action ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}>
+            <div className={'contact-form-action bg-dark text-white'}>
               <div className="form-heading text-center">
-                <h3 className={`form-title${theme === 'dark' ? '-dark' : ''}`}>Réinitialiser votre mot de passe</h3>
+                <h3 className={'form-title-dark'}>Réinitialiser votre mot de passe</h3>
 
                 <p className="reset-desc">
                   Saisissez l'adresse e-mail de votre compte pour réinitialiser le mot de passe. Ensuite,
                   vous recevrez un lien par e-mail pour réinitialiser le mot de passe. Si
                   vous rencontrez des problèmes concernant la réinitialisation du mot de passe,{' '}
-                  <Link to="https://discord.gg/KwVyhHQGAf">contactez-nous sur discord.</Link>
+                  <Link to="https://discord.gg/FBsg7hKK7j">contactez-nous sur discord.</Link>
                 </p>
               </div>
 
@@ -72,7 +62,7 @@ const RecoverPasswordForm: React.FC = () => {
                   <div className="col-12">
                     <div className="form-group">
                       <input
-                        className={`form-control ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'} `}
+                        className={'form-control bg-dark text-white'}
                         type="email"
                         name="email"
                         value={email}
@@ -99,7 +89,7 @@ const RecoverPasswordForm: React.FC = () => {
 
                   <div className="col-12">
                     <button className="default-btn btn-two" type="submit">
-                      Demander une réinitialiser du mot de passe
+                      Demander une réinitialisation du mot de passe
                     </button>
                   </div>
                 </div>

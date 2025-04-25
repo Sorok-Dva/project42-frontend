@@ -1,38 +1,29 @@
 import React from 'react'
-
-interface Activity {
-  state: 'ingame' | 'pregame' | 'spectator' | 'none' | string;
-  gameId: string;
-}
-
-interface Data {
-  username: string;
-  activity?: Activity;
-}
+import { User } from 'components/ProfileModal'
 
 interface JoinGameProps {
-  data: Data;
+  user: User;
   relation: string;
 }
 
-const JoinGame: React.FC<JoinGameProps> = ({ data, relation }) => {
-  if (relation === 'me' || !data.activity || data.activity.state === 'none') {
+const JoinGame: React.FC<JoinGameProps> = ({ user, relation }) => {
+  if (relation === 'me' || !user.activity || user.activity.state === 'none') {
     return null
   }
 
-  const { state, gameId } = data.activity
+  const { state, gameId } = user.activity
 
   let content: JSX.Element | null = null
 
   if (state === 'ingame') {
     content = (
       <>
-        <p>{data.username} est actuellement en jeu.</p>
+        <p>{user.nickname} est actuellement en jeu.</p>
         <div className="join-game-button">
           <a
             className="button_secondary"
             target="_blank"
-            href={`/jeu/index.php?partie=${gameId}`}
+            href={`/game/${gameId}`}
             rel="noopener noreferrer"
           >
             Observer
@@ -43,18 +34,18 @@ const JoinGame: React.FC<JoinGameProps> = ({ data, relation }) => {
   } else if (state === 'pregame') {
     content = (
       <>
-        <p>{data.username} est sur le point de commencer une partie.</p>
+        <p>{user.nickname} est sur le point de commencer une partie.</p>
         <div className="join-game-button">
           <a
             className="button_secondary"
             target="_blank"
-            href={`/jeu/index.php?partie=${gameId}`}
+            href={`/game/${gameId}`}
             rel="noopener noreferrer"
           >
             Observer
           </a>
-          <form method="POST" action="/jeu/index.php" target="_blank">
-            <input type="hidden" name="salon" value={gameId} />
+          <form method="POST" action="/game/join" target="_blank">
+            <input type="hidden" name="room" value={gameId} />
             <button className="button_secondary" type="submit" name="player">
               Rejoindre
             </button>
@@ -65,15 +56,15 @@ const JoinGame: React.FC<JoinGameProps> = ({ data, relation }) => {
   } else if (state === 'spectator') {
     content = (
       <>
-        <p>{data.username} observe une partie.</p>
+        <p>{user.nickname} observe une partie.</p>
         <div className="join-game-button">
           <a
             className="button_secondary"
             target="_blank"
-            href={`/jeu/index.php?partie=${gameId}`}
+            href={`/game/${gameId}`}
             rel="noopener noreferrer"
           >
-            Rejoindre {data.username} en spectateur
+            Rejoindre {user.nickname} en spectateur
           </a>
         </div>
       </>

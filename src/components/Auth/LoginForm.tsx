@@ -1,15 +1,14 @@
-'use client'
-
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useUser } from 'contexts/UserContext'
 import { toast } from 'react-toastify'
 import { Button, Form, FormGroup, Input, InputGroup, InputGroupText } from 'reactstrap'
-import PageBanner from '../Common/PageBanner'
 import { ToastDefaultOptions } from 'utils/toastOptions'
-import { ThemeContext } from 'contexts/ThemeContext'
+import axios from 'axios'
 
-const LoginForm: React.FC = () => {
+const LoginForm: React.FC<{
+  toggle?: () => void
+}> = ({ toggle }: { toggle?: () => void }) => {
   const { login } = useUser()
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
@@ -17,13 +16,6 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const mainRef = useRef<HTMLDivElement>(null)
-  const themeContext = useContext(ThemeContext)
-
-  if (!themeContext) {
-    throw new Error('ThemeContext not found')
-  }
-
-  const { theme } = themeContext
 
   useEffect(() => {
     if (mainRef.current) {
@@ -39,16 +31,10 @@ const LoginForm: React.FC = () => {
     e.preventDefault()
 
     try {
-      const response = await fetch('/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      })
+      const response = await axios.post('/api/users/login', { username, password })
 
-      if (response.ok) {
-        const data = await response.json()
+      if (response.status === 200) {
+        const { data } = await response
         const token = data.token
         const payload = JSON.parse(atob(token.split('.')[1]))
         login({
@@ -62,7 +48,10 @@ const LoginForm: React.FC = () => {
           isAdmin: payload.isAdmin,
           validated: payload.validated,
           lastNicknameChange: payload.lastNicknameChange,
+          level: payload.level,
+          title: payload.title,
           token: payload.token,
+          discordId: payload.discordId,
         }, token)
 
         toast.success(`Vous êtes maintenant connecté ! Bienvenue ${payload.nickname}.`, {
@@ -76,42 +65,32 @@ const LoginForm: React.FC = () => {
         })
 
         navigate('/')
-      } else if (response.status === 400) {
-        const errorData = await response.json()
+        if (toggle) toggle()
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorData = await error?.response?.data
         if (errorData.errors && Array.isArray(errorData.errors)) {
           errorData.errors.forEach((error : { msg : string }) => {
+            setError(error.msg)
             toast.error(error.msg, ToastDefaultOptions)
           })
         } else if (errorData.error) {
-          toast.error(errorData.error, { ...ToastDefaultOptions, autoClose: 30000 })
+          setError(errorData.error)
+          toast.error(errorData.error, ToastDefaultOptions)
         }
+      } else {
+        toast.error('Une erreur est survenue.', ToastDefaultOptions)
       }
-    } catch (err) {
-      console.log(err)
-      setError('An error occurred while attempting to log you in.')
     }
   }
   return (
     <>
-      <PageBanner
-        pageTitle="Connexion"
-        homePageUrl="/"
-        homePageText="Accueil"
-        activePageText="Connexion"
-      />
-      <div className="user-area-all-style log-in-area ptb-100">
-        <div className="container">
-          <div className="row">
-            <div className="col-12">
-              <div className={`contact-form-action ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}>
-                <div className="form-heading text-center">
-                  <h3 className={`form-title${theme === 'dark' ? '-dark' : ''}`}>Se connecter</h3>
-                </div>
-
-                { error && <div className="alert alert-danger text-center">{ error }</div> }
-                <Form role="form" onSubmit={ handleSubmit }>
-                  <div className="row">
-                    {/*<div className="col-lg-4 col-md-4 col-sm-12">
+      { error &&
+        <div className="alert alert-danger text-center">{ error }</div> }
+      <Form role="form" onSubmit={ handleSubmit }>
+        <div className="row">
+          {/*<div className="col-lg-4 col-md-4 col-sm-12">
                       <a
                         href="https://www.google.com/"
                         className="default-btn mb-30"
@@ -139,98 +118,75 @@ const LoginForm: React.FC = () => {
                       >
                         <i className="bx bxl-twitter"></i> Twitter
                       </a>
-                    </div>*/}
+                    </div>*/ }
 
-                    <div className="col-12">
-                      <FormGroup className="mb-3">
-                        <InputGroup className={`input-group-alternative ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}>
-                          <InputGroupText>
-                            <i className="ni ni-email-83"/>
-                          </InputGroupText>
-                          <Input
-                            placeholder="Email ou pseudo"
-                            type="text"
-                            value={ username }
-                            onChange={ (e) => setUsername(e.target.value) }
-                            className={theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}
-                          />
-                        </InputGroup>
-                      </FormGroup>
-                    </div>
+          <div className="col-12">
+            <FormGroup className="mb-3">
+              <InputGroup
+                className={ 'input-group-alternative bg-dark text-white' }>
+                <InputGroupText>
+                  <i className="ni ni-email-83"/>
+                </InputGroupText>
+                <Input
+                  placeholder="Email ou pseudo"
+                  type="text"
+                  value={ username }
+                  onChange={ (e) => setUsername(e.target.value) }
+                  className={ 'bg-dark text-white' }
+                />
+              </InputGroup>
+            </FormGroup>
+          </div>
 
-                    <div className="col-12">
-                      <FormGroup>
-                        <InputGroup
-                          className={`input-group-alternative ${theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}>
-                          <InputGroupText>
-                            <i className="ni ni-lock-circle-open"/>
-                          </InputGroupText>
-                          <Input
-                            placeholder="Mot de passe"
-                            type={ showPassword ? 'text': 'password' }
-                            autoComplete="off"
-                            value={ password }
-                            onChange={ (e) => setPassword(e.target.value) }
-                            className={theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}
-                          />
-                          <InputGroupText>
-                            <Button
-                              color="secondary"
-                              outline
-                              onClick={ () => setShowPassword(!showPassword) }
-                              className={theme === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}
-                            >
-                              { showPassword ? 'Hide': 'Show' }
-                            </Button>
-                          </InputGroupText>
-                        </InputGroup>
-                      </FormGroup>
-                    </div>
+          <div className="col-12">
+            <FormGroup>
+              <InputGroup
+                className={ 'input-group-alternative bg-dark text-white' }>
+                <InputGroupText>
+                  <i className="ni ni-lock-circle-open"/>
+                </InputGroupText>
+                <Input
+                  placeholder="Mot de passe"
+                  type={ showPassword ? 'text': 'password' }
+                  autoComplete="off"
+                  value={ password }
+                  onChange={ (e) => setPassword(e.target.value) }
+                  className='bg-dark text-white'
+                />
+                <InputGroupText>
+                  <Button
+                    color="secondary"
+                    outline
+                    onClick={ () => setShowPassword(!showPassword) }
+                    className='bg-dark text-white'
+                  >
+                    { showPassword ? '🙈': '👁️' }
+                  </Button>
+                </InputGroupText>
+              </InputGroup>
+            </FormGroup>
+          </div>
 
-                    <div className="col-lg-6 col-sm-6 form-condition">
-                      <div className="agree-label">
-                        <div className="form-check">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            id="gridCheck"
-                            name="rememberMe"
-                          />
-                          <label
-                            className="form-check-label"
-                            htmlFor="gridCheck"
-                          >
-                            Se souvenir de moi
-                          </label>
-                        </div>
-                      </div>
-                    </div>
+          <div className="col-12">
+            <button className="default-btn btn-two text-center" type="submit">
+              Connexion
+            </button>
+          </div>
 
-                    <div className="col-lg-6 col-sm-6">
-                      <Link to="/recover-password" className="forget">
-                        Mot de passe oublié ?
-                      </Link>
-                    </div>
+          <div className="col-lg-6 col-sm-6 mt-2 right-item">
+            <Link to="/recover-password" onClick={toggle} className="forget">
+              Mot de passe oublié ?
+            </Link>
+          </div>
 
-                    <div className="col-12">
-                      <button className="default-btn btn-two" type="submit">
-                        Connexion
-                      </button>
-                    </div>
-
-                    <div className="col-12">
-                      <p className="account-desc">
-                        Pas encore membre ?
-                        <Link to="/register">S'inscrire</Link>
-                      </p>
-                    </div>
-                  </div>
-                </Form>
-              </div>
-            </div>
+          <div className="col-12 mt-4">
+            <p className="account-desc">
+              Pas encore membre ?{' '}
+              <Link to="/register" onClick={toggle}>S'inscrire</Link>
+            </p>
           </div>
         </div>
-      </div>
+      </Form>
     </>
   )
 }

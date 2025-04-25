@@ -1,4 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200;300;400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 body {
   margin: 0;
@@ -7,27 +10,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: black;
-}
-
-body.light-theme {
-  background-color: white;
-  color: white;
-}
-
-body.dark-theme {
-  background-color: #121212;
-  color: white;
-}
-
-body.dark-theme.bg-dark {
-  background-color: #121212 !important;
-  color: white !important;
-}
-
-body.light-theme.bg-light {
-  background-color: white !important;
-  color: black !important;
+  background-color: #121315 !important;
+  /*background-size: 100% !important;*/
+  /*background-attachment: fixed !important;*/
 }
 
 .bg-dark > .input-group-text {
@@ -77,4 +62,255 @@ code {
 
 .highlight-row {
   background-color: #4da1f1 !important;
+}
+
+.card-3d ul {
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+}
+.card-3d ul li {
+  display: inline-block;
+  padding: 0 5px;
+}
+.card-3d ul li a {
+  margin-top: 3vh;
+}
+.card-3d ul li a:hover {
+  animation: rubberBand 1s linear;
+}
+
+/* Animations pour les étoiles */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes orbit {
+  0% {
+    transform: rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.8));
+  }
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background-color: white;
+  pointer-events: none;
+}
+
+.orbit-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.orbit {
+  position: absolute;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 50%;
+}
+
+.planet {
+  position: absolute;
+  border-radius: 50%;
+  transform-origin: center;
+}
+
+
+.bg-discord {
+  background-color: #5865F2;
+}
+.bg-discord-dark {
+  background-color: #4752C4;
+}
+.focus\:ring-discord:focus {
+  --tw-ring-color: rgba(88, 101, 242, 0.5);
+}
+
+@keyframes gradient-scroll {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.gradient-text {
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  background-image: linear-gradient(90deg, #60a5fa, #c084fc, #60a5fa); /* boucle fluide */
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  animation: gradient-scroll 5s linear infinite;
+}
+
+.gradient-bar {
+  height: 0.25rem;
+  width: 6rem;
+  margin-bottom: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 9999px;
+  background-image: linear-gradient(90deg, #3b82f6, #9333ea, #3b82f6); /* boucle fluide */
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  animation: gradient-scroll 5s linear infinite;
+}
+
+.tooltip-content {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.tooltip-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.tooltip-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tooltip-item {
+  display: flex;
+  align-items: center;
+  padding: 0.375rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tooltip-item:last-child {
+  border-bottom: none;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.status-online {
+  background-color: #10b981;
+}
+
+.status-away {
+  background-color: #f59e0b;
+}
+
+.status-busy {
+  background-color: #ef4444;
+}
+
+.status-offline {
+  background-color: #6b7280;
+}
+
+.username {
+  flex: 1;
+  font-size: 0.875rem;
+  color: #e5e7eb;
+}
+
+.status-text {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-left: 0.5rem;
+}
+
+/* Quill editor custom styles for dark theme */
+.quill {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 0.5rem;
+  color: white;
+}
+
+.ql-toolbar {
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.ql-container {
+  border: none !important;
+  font-family: inherit;
+}
+
+.ql-editor {
+  min-height: 200px;
+  font-size: 1rem;
+  color: white;
+}
+
+.ql-picker-label {
+  color: #93c5fd !important;
+}
+
+.ql-stroke {
+  stroke: #93c5fd !important;
+}
+
+.ql-fill {
+  fill: #93c5fd !important;
+}
+
+.ql-picker-options {
+  background-color: #0f172a !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.ql-picker-item {
+  color: #93c5fd !important;
 }

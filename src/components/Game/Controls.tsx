@@ -1,7 +1,5 @@
-import React, { useMemo, useRef, useState } from 'react'
-import { Box } from '@mui/material'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHeart, faHeartCircleXmark } from '@fortawesome/free-solid-svg-icons'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import { usePermissions } from 'hooks/usePermissions'
 import {
   addBotToGame,
@@ -16,17 +14,22 @@ import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import GameTimer from './Timer'
 import PhaseAction from './PhaseAction'
-import { PlayerType, RoomData } from 'hooks/useGame'
+import { PlayerType, RoomData, Viewer } from 'hooks/useGame'
 import EditCompoModal from 'components/Game/EditComposition'
 import TransferLeadModal from 'components/Game/TransferLead'
 import axios from 'axios'
 import CardImage from 'components/Game/CardImage'
+import Invitations from './Invitations'
+import { useSocket } from 'contexts/SocketContext'
+import { Tooltip } from 'react-tooltip'
 
 interface GameControlsProps {
   gameId: string | undefined
   roomData: RoomData
+  creator: PlayerType
   player: PlayerType | null
   players: PlayerType[]
+  viewer: Viewer | null
   isCreator: boolean
   canBeReady: boolean
   canStartGame: boolean
@@ -38,6 +41,8 @@ interface GameControlsProps {
   isArchive: boolean
   setSlots: React.Dispatch<React.SetStateAction<number>>
   setRoomData: React.Dispatch<React.SetStateAction<RoomData>>
+  setPlayer: React.Dispatch<React.SetStateAction<PlayerType | null>>
+  isInn: boolean
 }
 
 /**
@@ -50,8 +55,10 @@ const GameControls: React.FC<GameControlsProps> = ({
   fetchGameDetails,
   canBeReady,
   canStartGame,
+  creator,
   player,
   players,
+  viewer,
   gameStarted,
   gameFinished,
   setGameStarted,
@@ -59,17 +66,20 @@ const GameControls: React.FC<GameControlsProps> = ({
   setSlots,
   setRoomData,
   isArchive,
+  isInn,
+  setPlayer,
 }) => {
   const { token } = useAuth()
   const { user } = useUser()
+  const { socket } = useSocket()
   const { checkPermission } = usePermissions()
   const canAddBot = checkPermission('godPowers', 'addBot')
-  const canEditGame = checkPermission('game', 'edit')
   const [timer, setTimer] = useState<number>(3)
   const [isEditCompositionOpen, setIsEditCompositionOpen] = useState(false)
   const [isTransferLeadOpen, setIsTransferLeadOpen] = useState(false)
   const [isFavoriteArchive, setIsFavoriteArchive] = useState<boolean>(false)
   const [favoriteComment, setFavoriteComment] = useState<string>('')
+  const [replayGameId, setReplayGameId] = useState<number | null>(null)
 
   const openEditComposition = () => {
     if (!isCreator || isArchive) return
@@ -97,6 +107,41 @@ const GameControls: React.FC<GameControlsProps> = ({
     }
   }
 
+  useEffect(() => {
+    if (!socket) return
+
+    const onReplayed = ({ newGameId, creator }: { newGameId: number, creator: string }) => {
+      setReplayGameId(newGameId)
+      new Audio('/assets/sounds/rewind.wav').play().catch(() => {})
+    }
+
+    socket.on('gameReplayed', onReplayed)
+    return () => { socket.off('gameReplayed', ({ newGameId }) => setReplayGameId(newGameId)) }
+  }, [socket])
+
+  const handleReplay = async () => {
+    if (!roomData.id || !gameFinished || !token) return
+    try {
+      const response = await axios.post(
+        `/api/games/room/${roomData.id}/replay`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      const newGame = response.data.game
+      setReplayGameId(newGame.id)
+      window.location.href = `/game/${newGame.id}`
+    } catch (e: any) {
+      console.error('Erreur lors du relancement :', e)
+      alert(e.response?.data?.error || 'Erreur lors du relancement de la partie')
+    }
+  }
+
+  const handleJoinReplayed = () => {
+    if (replayGameId) {
+      window.location.href = `/game/${replayGameId}`
+    }
+  }
+
   const handleAddBot = async () => {
     if (!gameId || gameStarted || gameFinished) return
     try {
@@ -110,7 +155,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleStartGame = async () => {
-    if (!gameId || gameStarted || gameFinished || !canStartGame) return
+    if (!gameId || gameStarted || gameFinished || !canStartGame || !token) return
     try {
       await startGame(gameId, token)
       fetchGameDetails()
@@ -131,11 +176,11 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleBeReady = async () => {
-    if (!gameId || !player || gameStarted || gameFinished) return
+    if (!gameId || !player || !canBeReady || gameStarted || gameFinished) return
     try {
       const response = await setPlayerReady(gameId, token)
       if (response.status === 200) {
-        player.ready = true
+        setPlayer({ ...player, ready: true })
       }
     } catch (error) {
       console.error('Erreur lors du set ready:', error)
@@ -236,6 +281,15 @@ const GameControls: React.FC<GameControlsProps> = ({
     }
   }
 
+  const handleJoinGame = async () => {
+    if (!gameId || gameStarted || gameFinished) return
+    try {
+      // @TODO
+    } catch (error) {
+      console.error('Erreur lors du join room:', error)
+    }
+  }
+
   const closeTransferLead = async () => {
     setIsTransferLeadOpen(false)
   }
@@ -258,273 +312,483 @@ const GameControls: React.FC<GameControlsProps> = ({
     return `${minutes} min ${seconds} sec`
   }
 
+  const handleBipNotReadyPlayers = () => {
+    if (!socket || !gameId || gameStarted || gameFinished || !isCreator) return
+
+    socket.emit('bipNotReadyPlayers', gameId)
+  }
+
   const cardId = player?.card?.id
-  const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} />, [cardId])
+  const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} isArchive={isArchive} />, [cardId, isArchive])
 
-  return (
-    <Box id="block_actions">
-      { !gameStarted && !gameFinished && (
-        <Box id="block_ami" className="block rounded bgblue">
-          <Box className="block_header">
-            <h3>Inviter vos amis</h3>
-          </Box>
+  // Rendu conditionnel selon l'état du jeu
+  if (player && !gameStarted && !gameFinished) {
+    return (
+      <div className="space-y-4">
+        {/* Bloc d'invitation */ }
+        <Invitations gameId={gameId} players={players} isCreator={isCreator} />
 
-          <Box className="block_content block_scrollable_wrapper scrollbar-light">
-            <Box className="block_scrollable_content">
-              <Box className="invite_show">
-                <Box className="invite_friends">Chargement...</Box>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-      )}
+        {/* Options pour les joueurs non créateurs */ }
+        { !isCreator && (
+          <motion.div
+            className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
+            initial={ { opacity: 0, y: 20 } }
+            animate={ { opacity: 1, y: 0 } }
+            transition={ { duration: 0.5, delay: 0.1 } }
+          >
+            <div
+              className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+              <h3 className="text-lg font-bold text-white">Options de la
+                partie</h3>
+            </div>
 
-      {!isCreator && !gameStarted && !gameFinished && (
-        <>
-          <Box id="block_options" className="block rounded bgblue">
-            <Box className="block_header">
-              <h3>Options de la partie</h3>
-            </Box>
-            <Box className="block_content block_scrollable_wrapper scrollbar-light">
-              <Box className="block_scrollable_content">
-                <Box className="block_content_section text-center">
-                  <Box>
-                    {player && canBeReady && !player.ready && (
-                      <Box
-                        className="button array_selectable sound-tick bglightblue animate__animated animate__bounce animate__infinite"
-                        onClick={handleBeReady}
-                      >
-                        Je suis prêt(e) !
-                      </Box>
+            <div className="p-4 text-center">
+              { player && canBeReady && !player.ready ? (
+                <motion.button
+                  className="sound-tick px-6 py-3 bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 text-white rounded-lg shadow-lg shadow-green-500/20 animate-pulse"
+                  whileHover={ { scale: 1.05 } }
+                  whileTap={ { scale: 0.95 } }
+                  onClick={ handleBeReady }
+                >
+                  Je suis prêt{ user?.isMale ? '': 'e' } !
+                </motion.button>
+              ): player && player.ready ? (
+                <div className="bg-gradient-to-r from-black/60 to-blue-900/20 rounded-lg p-4 border border-blue-500/30">
+                  <div className="flex items-center justify-center mb-3">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-green-500 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-green-400 font-medium">Tu es prêt{user?.isMale ? '' : 'e'} !</span>
+                  </div>
+
+                  {/* Progression des joueurs prêts */}
+                  <div className="mb-3">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-blue-300">Joueurs prêts</span>
+                      <span className="text-white font-medium">{(players.filter(p => p.ready).length + 1)}/{players.length}</span>
+                    </div>
+                    <div className="w-full bg-black/40 rounded-full h-2.5">
+                      <div
+                        className="bg-gradient-to-r from-green-500 to-green-700 h-2.5 rounded-full"
+                        style={{ width: `${((players.filter(p => p.ready).length + 1) / players.length) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Message d'attente */}
+                  <div className="text-center">
+                    {players.length < 6 ? (
+                      <p className="text-yellow-300">
+                        <span className="inline-block animate-pulse mr-1">⚠️</span>
+                        Il faut au moins 6 joueurs pour commencer
+                      </p>
+                    ) : (players.filter(p => !p.ready).length - 1) > 0 ? (
+                      <p className="text-blue-300">
+                        En attente de {(players.filter(p => !p.ready).length - 1)} joueur{players.filter(p => !p.ready).length - 1 > 1 ? 's' : ''}
+                      </p>
+                    ) : (
+                      <p className="text-green-400">
+                        <span className="inline-block animate-pulse mr-1">✓</span>
+                        Tous les joueurs sont prêts !
+                      </p>
                     )}
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-          <hr/>
-        </>
-      )}
-
-      {isCreator && !gameStarted && !gameFinished && (
-        <>
-          <Box id="block_crea" className="block rounded bgblue">
-            <Box className="block_header">
-              <h3>Configurer la partie</h3>
-            </Box>
-            <Box
-              className="block_content block_scrollable_wrapper scrollbar-light">
-              <Box className="block_scrollable_content">
-                <Box className="block_content_section">
-                  <Box className="game-options">
-                    <Box className="premium-options">
-                      <Box id="crea_places">
-                        <Box
-                          className="buttons_array buttons_array_small bglightblue">
-                          {/*$places == 6 || $places == count($joueurs))*/ }
-                          <Box
-                            className="button array_clickable sound-tick sound-unselect"
-                            data-tooltip="Supprimer une place"
-                            onClick={ removePlace }>–
-                          </Box>
-
-                          <Box className="button unclickable"><span
-                            className="places">{ slots }</span> places
-                          </Box>
-
-                          {/*if (($salonType < 2 && $places == 50) || ($salonType == 2 && $places == 30)):*/ }
-                          <Box
-                            className="button array_clickable sound-tick sound-select"
-                            onClick={ addPlace }>+
-                          </Box>
-                        </Box>
-                      </Box>
-                      <Box id="crea_debat">
-                        <Box
-                          className="buttons_array buttons_array_small bglightblue mt-1">
-                          {/*if (isset($debateMin) && $debate == $debateMin)*/ }
-                          <Box
-                            className="button array_clickable sound-tick sound-unselect"
-                            onClick={ removeTimer }>–
-                          </Box>
-
-                          <Box className="button unclickable">
-                            <span
-                              className="debat">{ timer }</span> min
-                            de débat
-                          </Box>
-
-                          {/*if (isset($debateMax) && $debate == $debateMax)*/ }
-                          <Box
-                            className="button array_clickable sound-tick sound-select"
-                            onClick={ addTimer }>+
-                          </Box>
-                        </Box>
-                      </Box>
-
-                      {/*<Box id="crea_params">
-                        <Box className="buttons_array bglightblue">
-                          <Box
-                            className="button array_selectable sound-tick selected'"
-                            data-action="cacheVote">
-                            <img src="/assets/images/icon-votecache.png"
-                              alt="Cacher les votes"/>
-                          </Box>
-
-                          <Box
-                            className="button array_selectable sound-tick selected"
-                            data-action="muteSpec">
-                            <img src="/assets/images/icon-mutespec.png"
-                              alt="Muter les spectateurs"/>
-                          </Box>
-                        </Box>
-                      </Box>*/}
-                    </Box>
-                  </Box>
-
-                  <Box onClick={openEditComposition}
-                    className="button sound-tick rounded bglightblue">
-                    <h3>Gérer la composition</h3>
-                  </Box>
-
-                  <Box className="button_secondary sound-tick crea_lead" onClick={handleTransferCreator}>
-                    Léguer les droits du salon
-                  </Box>
-                  <Box className="button_secondary sound-tick join_spec">
-                    <span>Rejoindre les spectateurs</span>
-                  </Box>
-
-                  { ['SuperAdmin', 'Admin', 'Developers', 'Moderator', 'ModeratorTest', 'Animator']
-                    .includes(user?.role as string) && (
-                    <Box style={{ width: '100%' }}>
-                      <Box className="flex-row gutter">
-                        { canEditGame && (
-                          <Box className="button_secondary sound-tick">
-                            Modifier le salon
-                          </Box>
-                        ) }
-                        { canAddBot && (
-                          <Box className="button_secondary sound-tick"
-                            onClick={ handleAddBot }>Ajouter un bot
-                          </Box>
-                        ) }
-                      </Box>
-                    </Box>
-                  ) }
-
-                  <Box id="crea_launch" className="block_content_section">
-                    <Box
-                      className={ `button sound-tick rounded bglightblue ${ !canStartGame ? 'disabled': 'animation-bounce' }` }
-                      onClick={ handleStartGame }
+                    <p className="text-gray-400 text-sm mt-1">En attente du lancement par le créateur</p>
+                  </div>
+                </div>
+              ): (
+                <div className="bg-gradient-to-r from-black/60 to-blue-900/20 rounded-lg p-4 border border-blue-500/30">
+                  <div className="flex items-center justify-center mb-3">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-yellow-500 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      <h3>Lancer la partie</h3>
-                    </Box>
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-        </>
-      ) }
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span className="text-yellow-400 font-medium">En attente de joueurs</span>
+                  </div>
 
-      { player && gameStarted && !gameFinished ? (
-        <>
-          <Box id="block_ia"
-            className="shadow rounded bgblue game-started">
-            <Box id="block_infos">
-              <p className="wait_for_card_reveal">
-                Vous êtes <strong>{ player.card?.name }</strong>.<br/>
-              </p>
-              <GameTimer gameStarted={ gameStarted }
-                gameFinished={ gameFinished }/>
-              <PhaseAction player={ player }
-                roomId={ Number(gameId!) }/>
-            </Box>
-          </Box>
-          {memoizedCardImage}
-        </>
-      ): <>
-        { isArchive && (() => {
-          const cardId = 1
-          const winStates: Record<number, string> = {
-            90: 'Les <b>Aliens infiltrés</b> ont gagné !',
-            91: 'Les <b>Membres de la station</b> ont gagné !',
-            92: 'Les <b>Amoureux</b> ont gagné !',
-            94: 'Le <b>Maître des Ondes</b> a gagné !',
-            95: 'Le <b>Séraphin</b> a gagné !',
-            99: 'Tout le monde est mort !',
-          }
+                  {/* Progression des joueurs */}
+                  <div className="mb-3">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-blue-300">Joueurs connectés</span>
+                      <span className="text-white font-medium">{players.length}/{ slots }</span>
+                    </div>
+                    <div className="w-full bg-black/40 rounded-full h-2.5">
+                      <div
+                        className="bg-gradient-to-r from-yellow-500 to-yellow-700 h-2.5 rounded-full"
+                        style={{ width: `${Math.min((players.length / slots) * 100, 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
 
-          const cardsIds: Record<number, number> = {
-            90: 2,
-            91: 1,
-            92: 6,
-            94: 15,
-            95: 9,
-            99: -1,
-          }
+                  {/* Message d'attente */}
+                  <div className="text-center">
+                    <p className="text-yellow-300">
+                      <span className="inline-block animate-pulse mr-1">⚠️</span>
+                      Il manque {Math.max(slots - players.length, 0)} joueur{Math.max(slots - players.length, 0) > 1 ? 's' : ''} pour commencer
+                    </p>
+                    <p className="text-gray-400 text-sm mt-1">
+                      Cliquez sur "Je suis prêt" quand suffisamment de joueurs seront connectés
+                    </p>
+                  </div>
+                </div>
+              ) }
+            </div>
+          </motion.div>
+        ) }
 
-          return (
-            <Box id="block_ia" className="shadow rounded bgblue game-started spectator">
-              <Box id="block_infos">
-                <h3>Archive de la partie {roomData.name}</h3>
-                <Box>
-                  <Box id="block_infos">
-                    <Box style={{ marginTop: '1rem', marginLeft: '2rem' }}>
-                      <h3 dangerouslySetInnerHTML={{ __html: winStates[roomData.phase] }} />
-                      <p><b>Durée de la partie</b>: {getGameDuration()}</p>
-                    </Box>
-                  </Box>
-                  <CardImage cardId={cardsIds[roomData.phase] ?? cardId} />
-                </Box>
-                <Box className="block_content_section mt-4">
-                  <Box
-                    className="button sound-tick rounded bglightblue heart"
-                    onClick={handleAddFavorite}
+        {/* Options pour le créateur */ }
+        { isCreator && (
+          <motion.div
+            className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
+            initial={ { opacity: 0, y: 20 } }
+            animate={ { opacity: 1, y: 0 } }
+            transition={ { duration: 0.5, delay: 0.2 } }
+          >
+            <div
+              className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+              <h3 className="text-lg font-bold text-white">Configurer la
+                partie</h3>
+            </div>
+
+            <div className="p-4 space-y-4">
+              {/* Nombre de places */ }
+              <div className="flex items-center justify-center space-x-2">
+                <button
+                  className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                  onClick={ removePlace }
+                  disabled={ slots <= 6 }
+                >
+                  –
+                </button>
+                <div className="px-4 py-2 bg-black/40 rounded-lg text-white">
+                  <span className="font-bold">{ slots }</span> places
+                </div>
+                <button
+                  className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                  onClick={ addPlace }
+                  disabled={ slots >= 24 }
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Temps de débat */ }
+              <div className="flex items-center justify-center space-x-2">
+                <button
+                  className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                  onClick={ removeTimer }
+                  disabled={ timer <= 2 }
+                >
+                  –
+                </button>
+                <div className="px-4 py-2 bg-black/40 rounded-lg text-white">
+                  <span className="font-bold">{ timer }</span> min de débat
+                </div>
+                <button
+                  className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                  onClick={ addTimer }
+                  disabled={ timer >= 5 }
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Boutons d'action */ }
+              <div className="space-y-2">
+                <motion.button
+                  className="sound-tick w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20"
+                  whileHover={ { scale: 1.02 } }
+                  whileTap={ { scale: 0.98 } }
+                  onClick={ openEditComposition }
+                >
+                  Gérer la composition
+                </motion.button>
+
+                <motion.button
+                  className="sound-tick w-full px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all"
+                  whileHover={ { scale: 1.02 } }
+                  whileTap={ { scale: 0.98 } }
+                  onClick={ handleTransferCreator }
+                >
+                  Léguer les droits du salon
+                </motion.button>
+
+                { user?.role && canAddBot && (
+                  <motion.button
+                    className="sound-tick w-full px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all"
+                    whileHover={ { scale: 1.02 } }
+                    whileTap={ { scale: 0.98 } }
+                    onClick={ handleAddBot }
                   >
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      { !isFavoriteArchive ? (
-                        <>
-                          <FontAwesomeIcon icon={faHeart} style={{ color: 'pink', fontSize: '1.5em' }} />
-                          Ajouter à mes favoris
-                        </>
-                      ): (
-                        <>
-                          <FontAwesomeIcon icon={faHeartCircleXmark} style={{ color: 'pink', fontSize: '1.5em' }} />
-                          Retirer de mes favoris
-                        </>
-                      )}
-                    </h3>
-                  </Box>
-                  { isFavoriteArchive && (
-                    <Box
-                      className="button sound-tick rounded bglightblue heart"
-                    >
-                      <textarea
-                        value={favoriteComment}
-                        onChange={(e) => setFavoriteComment(e.target.value)}
-                        placeholder="Un commentaire sur cette partie ? 😊"
-                        className="border rounded p-2 w-full"
-                        cols={40}
-                        rows={4}
-                      />
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-            </Box>
-          )
-        })()}
-      </> }
+                    Ajouter un bot
+                  </motion.button>
+                ) }
 
-      {isEditCompositionOpen && (
-        <EditCompoModal roomId={roomData.id} onClose={closeEditComposition} />
-      )}
-      {isTransferLeadOpen && (
-        <TransferLeadModal roomId={roomData.id} players={players} creator={roomData.creator} onClose={closeTransferLead} />
-      )}
-    </Box>
-  )
+                {/* Bouton pour bipper les joueurs non prêts - visible uniquement quand le salon est plein */}
+                {players.length === slots && players.filter(p => p.nickname !== creator.nickname).some(p => !p.ready) && (
+                  <motion.button
+                    className="sound-tick w-full px-4 py-2 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white rounded-lg transition-all shadow-lg shadow-orange-500/20 animate-pulse"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleBipNotReadyPlayers}
+                  >
+                    Bipper les joueurs non prêts ({players.filter(p => !p.ready).length - 1})
+                  </motion.button>
+                )}
+
+                {isEditCompositionOpen && (
+                  <EditCompoModal roomId={roomData.id} onClose={closeEditComposition} />
+                )}
+                {isTransferLeadOpen && (
+                  <TransferLeadModal roomId={roomData.id} players={players} creator={roomData.creator} onClose={closeTransferLead} />
+                )}
+              </div>
+
+              {/* Bouton de lancement */ }
+              <motion.button
+                className={ `sound-tick w-full px-6 py-3 bg-gradient-to-r ${
+                  canStartGame
+                    ? 'from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 animate-pulse'
+                    : 'from-gray-600 to-gray-800 opacity-70 cursor-not-allowed'
+                } text-white rounded-lg shadow-lg shadow-green-500/20 transition-all` }
+                whileHover={ canStartGame ? { scale: 1.05 }: {} }
+                whileTap={ canStartGame ? { scale: 0.95 }: {} }
+                onClick={ handleStartGame }
+                disabled={ !canStartGame }
+              >
+                <span className="text-lg font-bold">Lancer la partie</span>
+              </motion.button>
+            </div>
+          </motion.div>
+        ) }
+      </div>
+    )
+  }
+
+  // Partie en cours
+  if (player && gameStarted && !gameFinished) {
+    return (
+      <div className="space-y-4">
+        <motion.div
+          className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
+          initial={ { opacity: 0, y: 20 } }
+          animate={ { opacity: 1, y: 0 } }
+          transition={ { duration: 0.5 } }
+        >
+          <div
+            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+            <h3 className="text-lg font-bold text-white">Informations</h3>
+          </div>
+
+          <div className="p-4">
+            <div className="bg-black/40 rounded-lg p-3 mb-4">
+              <p className="text-center text-blue-200 mb-2">
+                Vous êtes <span className="strong font-bold">{player.card?.name}</span>
+              </p>
+
+              {/* Carte du joueur */}
+              <div className="flex justify-center mb-4 relative h-32">{memoizedCardImage}</div>
+            </div>
+
+            {/* Timer */ }
+            <GameTimer gameId={gameId || ''} gameStarted={ gameStarted }
+              gameFinished={ gameFinished }/>
+
+            {/* Actions de phase */ }
+            <PhaseAction player={ player } roomId={ Number(gameId!) }
+              isInn={ isInn }/>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  if ((!player || viewer) && !gameFinished) {
+    return (
+      <div className="space-y-4">
+        <motion.div
+          className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
+          initial={ { opacity: 0, y: 20 } }
+          animate={ { opacity: 1, y: 0 } }
+          transition={ { duration: 0.5 } }
+        >
+          <div
+            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+            <h3 className="text-lg font-bold text-white">Informations</h3>
+          </div>
+
+          <div className="p-4">
+            <div className="bg-black/40 rounded-lg p-3 mb-4">
+              <p className="text-center text-blue-200 mb-2">
+                Vous êtes <span className="strong font-bold">spectateur</span>
+              </p>
+            </div>
+
+            {viewer && !gameStarted && !gameFinished && (
+              <motion.button
+                className={`sound-tick w-full px-4 py-2 transition-all rounded-lg ${
+                  players.length >= slots
+                    ? 'bg-red-900/20 text-red-300 border border-red-500/30 opacity-70 cursor-not-allowed'
+                    : 'bg-blue-600/40 hover:bg-blue-600/60 text-blue-300 hover:text-white border border-blue-500/30'
+                }`}
+                whileHover={players.length >= slots ? {} : { scale: 1.02 }}
+                whileTap={players.length >= slots ? {} : { scale: 0.98 }}
+                onClick={handleJoinGame}
+                disabled={players.length >= slots}
+                data-tooltip-id="join_game"
+                data-tooltip-content={players.length >= slots ? 'Vous ne pouvez pas rejoindre, la partie est pleine.' : 'Rejoindre le salon de jeu'}
+              >
+                Rejoindre la partie
+                <Tooltip id="join_game" />
+              </motion.button>
+            )}
+
+            {/* Timer */ }
+            { gameStarted &&  (
+              <GameTimer gameId={gameId || ''} gameStarted={ gameStarted } gameFinished={ gameFinished }/>
+            )}
+
+            {!viewer && !gameFinished && (
+              <motion.button
+                className="sound-tick w-full px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all"
+                whileHover={ { scale: 1.02 } }
+                whileTap={ { scale: 0.98 } }
+              >
+                S'inscrire !
+              </motion.button>
+            )}
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // Partie terminée (archive)
+  if (isArchive || gameFinished) {
+    const cardId = 1
+    const winStates: Record<number, string> = {
+      90: 'Les <b>Aliens infiltrés</b> ont gagné !',
+      91: 'Les <b>Membres de la station</b> ont gagné !',
+      92: 'Les <b>Amoureux</b> ont gagné !',
+      94: 'Le <b>Maître des Ondes</b> a gagné !',
+      95: 'Le <b>Séraphin</b> a gagné !',
+      99: 'Tout le monde est mort !',
+    }
+
+    const cardsIds: Record<number, number> = {
+      90: 2,
+      91: 1,
+      92: 6,
+      94: 15,
+      95: 9,
+      99: -1,
+    }
+
+    return (
+      <div className="space-y-4">
+        <motion.div
+          className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
+          initial={ { opacity: 0, y: 20 } }
+          animate={ { opacity: 1, y: 0 } }
+          transition={ { duration: 0.5 } }
+        >
+          <div
+            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+            <h3 className="text-lg font-bold text-white">Archive de la
+              partie { roomData.name.replace('Partie de', ' de') }</h3>
+          </div>
+
+          <div className="p-4">
+            <CardImage cardId={cardsIds[roomData.phase] ?? cardId} isArchive={true}/>
+            <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 mb-4">
+              <div className="flex-1">
+                <h3
+                  className="text-xl font-bold mb-2 text-white"
+                  dangerouslySetInnerHTML={ { __html: winStates[roomData.phase] || 'Partie terminée' } }
+                />
+                <p className="text-blue-300">
+                  <span
+                    className="font-bold">Durée de la partie:</span> { getGameDuration() }
+                </p>
+              </div>
+            </div>
+
+            {/* Boutons d'action */ }
+            <div className="space-y-3">
+              <motion.button
+                className={ `w-full px-4 py-2 flex items-center justify-center gap-2 sound-tick ${
+                  !isFavoriteArchive
+                    ? 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700'
+                    : 'bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900'
+                } text-white rounded-lg transition-all shadow-lg` }
+                whileHover={ { scale: 1.02 } }
+                whileTap={ { scale: 0.98 } }
+                onClick={ handleAddFavorite }
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5"
+                  viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    fillRule="evenodd"
+                    d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                { !isFavoriteArchive ? 'Ajouter à mes favoris': 'Retirer de mes favoris' }
+              </motion.button>
+
+              { isFavoriteArchive && (
+                <div className="bg-black/40 rounded-lg p-3">
+                  <textarea
+                    value={ favoriteComment }
+                    onChange={ (e) => setFavoriteComment(e.target.value) }
+                    placeholder="Un commentaire sur cette partie ? 😊"
+                    className="w-full bg-black/40 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    rows={ 4 }
+                  />
+                </div>
+              ) }
+
+              {/* Replay controls for creator */}
+              {isCreator && !replayGameId && (
+                <motion.button
+                  className="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleReplay}
+                >
+                  Relancer la partie
+                </motion.button>
+              )}
+
+              {replayGameId && (
+                <motion.button
+                  className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow-lg"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleJoinReplayed}
+                >
+                  Rejoindre la nouvelle partie
+                </motion.button>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  return null
 }
 
 export default GameControls
+

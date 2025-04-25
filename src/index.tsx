@@ -18,7 +18,6 @@ import ScrollToTopHook from 'hooks/scrollToTop'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
 import * as Sentry from '@sentry/react'
-import { ThemeProvider } from 'contexts/ThemeContext'
 
 if (process.env.REACT_APP_SENTRY_DSN) Sentry.init({
   dsn: process.env.REACT_APP_SENTRY_DSN,
@@ -49,17 +48,15 @@ const root = ReactDOM.createRoot(
 )
 
 root.render(
-  <ThemeProvider>
-    <Sentry.ErrorBoundary>
-      <React.StrictMode>
-        <Router>
-          <ScrollToTopHook />
-          <App/>
-          <AosAnimation />
-        </Router>
-      </React.StrictMode>
-    </Sentry.ErrorBoundary>
-  </ThemeProvider>
+  <Sentry.ErrorBoundary>
+    <React.StrictMode>
+      <Router>
+        <ScrollToTopHook />
+        <App/>
+        <AosAnimation />
+      </Router>
+    </React.StrictMode>
+  </Sentry.ErrorBoundary>
 )
 
 // If you want to start measuring performance in your app, pass a function

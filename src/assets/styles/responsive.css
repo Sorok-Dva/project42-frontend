@@ -1181,7 +1181,7 @@
     text-align: unset;
   }
   .main-banner-area-two {
-    padding-top: 200px;
+    padding-top: 10vh;
   }
   .main-banner-area-two .banner-text {
     top: 0;
@@ -1623,9 +1623,6 @@
   }
   .main-banner-area.main-banner-area-one .banner-img img:nth-child(4) {
     right: 170px;
-  }
-  .main-banner-area-two {
-    height: 100vh;
   }
   .main-banner-area-two .banner-text {
     top: 110px;

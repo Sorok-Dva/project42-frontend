@@ -3,6 +3,10 @@ USER PROFILE MODAL
 */
 
 .profile {
+  strong {
+    color: #e6c585;
+  }
+
   .profile-infos {
     display: flex;
     align-items: center;
@@ -26,14 +30,17 @@ USER PROFILE MODAL
       background-color: #0e1735;
       width: 500px;
       height: auto;
-      margin: -1.5vh 0 0;
+      margin: -1.5vh auto 2vh;
     }
 
     .profile-avatar {
-      width: 35%;
       border: 0;
       border-radius: 50%;
       margin-top: 5%;
+      width: 165px;
+      height: 165px;
+      object-fit: cover;
+      object-position: center;
     }
 
     .profile-infos-character {
@@ -72,8 +79,8 @@ USER PROFILE MODAL
         display: flex;
         justify-content: space-around;
         padding: 10px;
-        font-size: 1.2em;
         list-style-type: none;
+        margin-top: 1vh;
 
         li {
           padding: 5px;
@@ -390,14 +397,6 @@ USER PROFILE MODAL
 
               }
 
-              .bullet-game {
-                width: 5px;
-                height: 5px;
-                border-radius: 150px;
-                filter: none;
-                margin: 0 2px;
-              }
-
               strong {
                 margin: 0;
                 color: #fff;
@@ -667,15 +666,6 @@ USER PROFILE MODAL
 
         }
 
-        .bullet-game {
-          width: 5px;
-          height: 5px;
-          border-radius: 100px;
-          filter: none;
-          margin: 0 2px;
-          flex-grow: 0;
-        }
-
         strong {
           text-transform: capitalize;
           margin: 0 0 0 4px;
@@ -689,13 +679,12 @@ USER PROFILE MODAL
         span.game-date {
           position: relative;
           left: 0;
-          margin: 0;
           font-style: italic;
           flex-grow: 1;
           align-content: baseline;
           text-align: start;
-          margin-left: 3vh;
-          margin-right: 1vh;
+          margin: 0 1vh 0 3vh;
+          font-size: inherit !important;
         }
 
         .label-win {
@@ -760,7 +749,7 @@ USER PROFILE MODAL
   }
 
   .join-game {
-    margin: 15vh 0 15px 0;
+    margin: 0 0 5vh 0;
     padding: 10px;
     background-color: #2a3662;
     border-radius: 15px;
@@ -862,6 +851,27 @@ USER PROFILE MODAL
         }
       }
     }
+
+    .moderation-buttons {
+      width: 25vh;
+      margin: -5.8vh 0 0 0;
+      z-index: 2;
+      position: relative;
+
+      a {
+        border-radius: 5px;
+        font-size: 12px;
+        background-color: #5e1717;
+        transition: background-color .2s ease;
+        margin: 0 2px;
+        padding: 5px 10px;
+        text-transform: uppercase;
+
+        &:hover {
+          background-color: #982626;
+        }
+      }
+    }
   }
 
   .signature {
@@ -869,6 +879,28 @@ USER PROFILE MODAL
     font-style: italic;
     font-size: 14px;
     word-wrap: break-word;
+  }
+}
+
+.moderation-panel > .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.moderation-buttons {
+  margin: 0;
+  a {
+    border-radius: 5px;
+    font-size: 12px;
+    background-color: #5e1717;
+    transition: background-color .2s ease;
+    margin: 0 2px;
+    padding: 5px 10px;
+    text-transform: uppercase;
+
+    &:hover {
+      background-color: #982626 !important;
+    }
   }
 }
 

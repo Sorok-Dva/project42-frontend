@@ -1,0 +1,1030 @@
+.account-achievements {
+
+  .profil-achievements {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    min-height: 240px;
+    align-items: stretch;
+    position: relative;
+  }
+
+  .achievements-presentation {
+    position: relative;
+    color: #fff;
+    margin: 10px 0;
+    overflow: hidden;
+    width: 45%;
+    min-width: 455px;
+    max-height: 280px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    &>.titre-compte {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      background-color: #1d2752;
+      width: 100%;
+      position: relative;
+      top: 0;
+      height: 45px;
+      left: 0;
+
+      h3 {
+        color: #fff;
+        margin: 1vh;
+      }
+    }
+
+    p {
+      margin: 2vh;
+    }
+
+    #liste-achievements-fav {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    #achievements-list .achievement_badge {
+      position: absolute;
+
+      &:nth-child(1) {
+        top: 0;
+        left: 0;
+      }
+
+      &:nth-child(2) {
+        top: 0;
+        left: 50px;
+      }
+
+      &:nth-child(3) {
+        top: 50px;
+        left: 0;
+      }
+
+      &:nth-child(4) {
+        top: 50px;
+        left: 50px;
+      }
+    }
+
+    .set-achievements {
+      position: relative;
+      background-color: #1d2752;
+      width: 90%;
+      margin: 2vh 5%;
+      transition: background-color .2s ease;
+
+      &:hover {
+        background-color: #253459;
+      }
+    }
+
+    .delete-title {
+      position: relative;
+      background-color: #1d2752;
+      width: 90%;
+      margin: 2vh 5%;
+      transition: background-color .2s ease;
+
+      &:hover {
+        background-color: #253459;
+      }
+    }
+  }
+
+  .explication-achievements {
+    padding: 2vh;
+    text-align: center;
+    background-color: #1d2752;
+    color: #fff;
+    border-radius: 10px;
+    margin-bottom: 2vh;
+  }
+
+  h2 {
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  h3 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .achievement_badge {
+    margin-right: 10px;
+  }
+
+  .achievement-socket {
+    display: inline-block;
+    position: relative;
+    height: 58px;
+
+    &.active>.achievement_badge {
+      border-color: #ad7b5b;
+    }
+
+    &.active .fleche-fav {
+      img {
+        height: 17px;
+      }
+
+      width: 24px;
+      height: 23px;
+      z-index: 600;
+      position: absolute;
+      bottom: -1.5px;
+    ;
+      left: 17px;
+    }
+
+    .achievement-delete {
+      position: absolute;
+      bottom: 0px;
+      right: 6px;
+      width: 20px;
+      height: 20px;
+      background: #800000;
+      border-radius: 50%;
+      text-shadow: 0 2px 2px rgba(0, 0, 0, .2);
+      box-shadow: 0 5px 5px rgba(0, 0, 0, .2), inset 0 2px 2px rgba(0, 0, 0, .2);
+      font-weight: 500;
+      text-align: center;
+      vertical-align: middle;
+      color: #fff;
+      cursor: pointer;
+      font-family: 'montserrat';
+      padding: 2px 1px 1px 2px;
+    }
+  }
+
+  #popupachievements {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    background-color: #172247;
+    border: 2px solid #e3be70;
+    box-shadow: 0 5px 5px rgba(0, 0, 0, .2), inset 0 2px 2px rgba(0, 0, 0, .2);
+    border-radius: 15px;
+    padding: 25px;
+    width: 540px;
+    position: absolute;
+    z-index: 5;
+    top: 160px;
+    left: 35px;
+    margin: 0;
+
+    & .close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      font-size: 14px;
+      line-height: 20px;
+      text-align: center;
+      cursor: pointer;
+      -ms-user-select: none;
+      user-select: none;
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      color: #fff;
+      opacity: .5;
+      -webkit-filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .5));
+      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .5));
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    // Fin Temp by Vava
+
+    & .achievement_badge {
+      cursor: pointer;
+    }
+
+    & .achievement_badge[data-use="1"] {
+      cursor: default;
+      -webkit-filter: brightness(70%) grayscale(1);
+      filter: brightness(70%) grayscale(1);
+    }
+  }
+
+  .set-title {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+
+// --- PARAMETRES ---
+.box-setting {
+  padding: 1em;
+  margin: 5px;
+  box-shadow: 0 5px 5px rgba(0, 0, 0, .15);
+  text-shadow: 0 2px 2px rgba(0, 0, 0, .2);
+  color: #fff;
+  border-radius: 5px;
+
+  a {
+    margin: 2vh;
+  }
+}
+
+.account-settings {
+  .box-setting {
+    background-color: #1b253e;
+  }
+}
+
+.account-profil {
+  .box-setting {
+    background-color: #1b253e;
+  }
+}
+
+.account-settings>div,
+.account-profil>div {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  text-align: center;
+
+  .box-setting {
+    width: 32%;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+
+    h3 {
+      flex: none;
+      background-color: rgba(255, 255, 255, .12);
+      padding: 10px 0;
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin: 10px;
+      text-align: left;
+      flex: 1;
+
+      input,
+      select {
+        width: 100%;
+        margin-top: 5px;
+      }
+
+      input[type="text"],
+      input[type="password"],
+      input[type="email"] {
+        padding: 5px;
+        font-size: 12px;
+        border: 1px solid #fff;
+        background: #fff;
+        border-radius: 3px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, .15);
+
+        transition: all .15s ease-in-out;
+
+        &:focus {
+          border-color: #263C64;
+          box-shadow: 2px 2px 10px rgba(38, 60, 100, .5);
+        }
+      }
+
+      select {
+        display: block;
+        font-size: 16px;
+      }
+    }
+
+    button {
+      flex: none;
+      margin: 10px;
+    }
+
+    p {
+      padding: 5px 10px;
+    }
+  }
+}
+
+.delete-account-modal {
+  &>div {
+    display: flex;
+    flex-flow: column nowrap;
+
+    &>h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    &>.delete-account-confirm {
+      margin-top: 10px;
+    }
+  }
+}
+
+
+// Premium
+.account-premium {
+  header {
+    position: relative;
+
+    padding: 25px;
+    padding-left: 115px;
+    margin: 10px 282px;
+
+    color: #fff;
+    font-size: 1.2em;
+    text-shadow: 0 2px 2px rgba(0, 0, 0, .2);
+
+    img {
+      position: absolute;
+      top: 10px;
+      left: 11px;
+      width: 82px;
+    }
+  }
+
+  &>p {
+    margin: 10px 0;
+    font-size: 1.1em;
+  }
+}
+
+.give-premium {
+  padding: 20px;
+  margin: 30px 300px;
+  margin-bottom: 50px;
+  color: #fff;
+
+  * {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  strong {
+    display: inline;
+  }
+}
+
+.gain-premium {
+  display: flex;
+  margin-top: 5px;
+
+  &>div {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    color: #fff;
+    margin: 5px;
+    padding: 10px;
+
+    * {
+      flex: 1;
+    }
+
+    form {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+
+
+#compte_histo_premium {
+
+  >h3 {
+    margin-top: 30px;
+    text-align: center;
+  }
+
+  >div.center {
+    margin: 20px 40px 30px;
+  }
+
+  .histo-table {
+    border-collapse: collapse;
+    margin: auto 15px;
+    border-radius: 5px 5px 0 0;
+    border: 0;
+    border-bottom: 2px solid rgba(255, 255, 255, .15);
+
+    tbody {
+      display: table !important;
+    }
+
+    td {
+      text-align: center;
+      padding: 8px;
+    }
+
+    tr:nth-child(odd) td {
+      background-color: rgba(255, 255, 255, .1);
+    }
+
+    tr.histo-th>td {
+      font-weight: bold;
+      background-color: rgba(255, 255, 255, .15);
+    }
+  }
+}
+
+// --- ANTECEDENTS ---
+.account-antecedents h3 {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.antecedent {
+  text-align: left;
+  padding: 15px;
+  margin: 10px 0;
+
+  h4 {
+    font-size: 1.2em;
+  }
+}
+
+.account-antecedents {
+  .antecedents-pc {
+    // points de comportement
+    padding: 15px;
+    font-size: 1.4em;
+    text-align: center;
+  }
+
+  p {
+    line-height: 1.5;
+  }
+}
+
+// --- MICRO ---
+.account-micro p {
+  margin-bottom: 15px;
+}
+
+.account-micro-tabs {
+  position: relative;
+  bottom: -2px;
+  z-index: 2;
+
+  display: flex;
+  padding: 0 20px;
+
+  list-style-type: none;
+  text-align: center;
+
+  li {
+    flex: 1;
+    padding: 10px 0;
+    background-color: #eee;
+
+    border-radius: 10px 10px 0 0;
+    border: 2px solid #eee;
+
+    font-family: Montserrat, sans-serif;
+    letter-spacing: .15em;
+    font-weight: bold;
+    text-transform: uppercase;
+
+    cursor: pointer;
+    transition: .15s ease-in-out background-color;
+
+    &:hover {
+      background-color: #fcfcfc;
+    }
+
+    &.selected {
+      background-color: #fafafa;
+      border-bottom: 0;
+    }
+
+    &:first-child {
+      border-top-right-radius: 0;
+      border-right: 0;
+    }
+
+    &:last-child {
+      border-top-left-radius: 0;
+    }
+  }
+}
+
+.account-micro-tabs-content>section {
+  padding: 20px;
+  background-color: #fafafa;
+  border-radius: 10px;
+  border: 2px solid #eee;
+}
+
+.account-mumble {
+  padding-top: 20px;
+
+  h3 {
+    text-align: center;
+    margin-bottom: 1em;
+  }
+
+  .mumble-infos {
+    display: block;
+    padding: 40px;
+    padding-left: 30px;
+    border-radius: 5px;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 40px;
+    margin-right: 3px;
+    margin-left: 301px;
+
+    & p {
+      margin-bottom: 20px;
+      font-size: 17px;
+    }
+
+    & img {
+      float: right;
+      margin-right: -50px;
+      margin-top: -26px;
+    }
+
+    &>div {
+      margin-left: -10px;
+      display: inline-block;
+    }
+  }
+
+  // Images
+  .mumble-tree {
+    float: left;
+    width: 259px;
+    height: 414px;
+    margin-right: 23px;
+    margin-top: 3px;
+  }
+}
+
+// MICRO - Page de configuration
+.account-vconf {
+  h3 {
+    text-align: center;
+    margin-bottom: 1em;
+    margin-top: 1.5em;
+  }
+
+  #micro_conf {
+    display: block;
+    margin: 0 auto;
+    width: 225px;
+    height: 52px;
+    background-color: #263c64;
+    background-blend-mode: luminosity;
+    background-repeat: repeat;
+    background-position: top left;
+    color: #fff;
+    text-transform: uppercase;
+    text-shadow: 0 2px 2px rgba(0, 0, 0, .2);
+    border-radius: 5px;
+    margin-bottom: 30px;
+    margin-top: 35px;
+    cursor: pointer;
+    border: none;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::-moz-focus-inner {
+      outline: none;
+      border: 0;
+    }
+
+    #fin-bouton {
+      width: 100%;
+      padding-right: 0;
+    }
+
+    .img_button {
+      float: left;
+      margin: 10px 15px 10px 15px;
+    }
+
+    p {
+      font-weight: bold;
+      float: right;
+      padding-right: 15px;
+      width: 170px;
+      font-size: 1.1em;
+      margin: 16px 0;
+    }
+  }
+
+  #micro_conf_info {
+    padding-bottom: 2em;
+    display: flex;
+    height: auto;
+
+
+    .micro-fonction {
+      float: left;
+      display: block;
+      width: 50px;
+      height: 64px;
+      margin-right: 15px;
+      margin-bottom: 3em;
+    }
+
+    .text-micro {
+      float: right;
+      width: 90%;
+
+      p {
+        .error_micro {
+          color: #800000;
+        }
+
+        strong {
+          color: #000;
+        }
+      }
+    }
+
+    hr {
+      background: none;
+      height: auto;
+      opacity: 1;
+      border: #b4b4b4 0.5px solid;
+      display: block;
+      margin: 13px 0;
+      position: relative;
+
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+  }
+}
+
+
+#gestion-profil {
+  .box-setting {
+    overflow: hidden;
+    width: 25%;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left;
+
+    &:first-child {
+      flex-grow: 1;
+      width: 100%;
+    }
+
+    &:first-child {
+      background-color: #263c64;
+
+      h3 {
+        background-color: #324f83;
+      }
+
+      #premium-give {
+        background-color: #910d0c;
+
+        &:hover:not(.disabled) {
+          background-color: #ae1e1d;
+        }
+      }
+    }
+
+    &:nth-child(3),
+    &:nth-child(5) {
+      p {
+        display: block;
+        margin: auto 2vh;
+
+      }
+    }
+
+    h3 {
+      background-color: #1d2752;
+      text-align: center;
+    }
+
+    .statut-premium {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: center;
+
+      &>div {
+        margin: 10px;
+        text-align: left;
+
+        p {
+          padding: 0;
+        }
+      }
+    }
+
+    #premium-img {
+      float: left;
+      height: auto;
+      width: 45px;
+    }
+
+    .bouton-premium {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      flex-wrap: nowrap;
+      margin: 0 5px 1vh 5px;
+
+      a,
+      button {
+        margin: 5px 5px 0 5px;
+        background-color: #3e5b90;
+        max-height: 46px;
+
+        &:hover {
+          background-color: #44649d;
+        }
+      }
+
+      #premium-historique {
+        background-color: #263c64 !important;
+        transition: background-color .2s ease;
+
+        &:hover {
+          background-color: #324c7b !important;
+        }
+      }
+    }
+
+    &>a {
+      margin-bottom: 1vh;
+      width: 84%
+    }
+
+    &>p {
+      padding: 0;
+      margin: 0 2vh;
+    }
+
+    &>label {
+      margin: 1vh 2vh;
+    }
+
+    &>textarea {
+      height: 50px;
+      margin: 1vh 2vh 0.5vh 2vh;
+      padding: 1vh;
+    }
+
+    &>button {
+      margin: 0 auto 1vh auto;
+      width: 92%;
+    }
+
+    a,
+    button {
+      background-color: #1d2752;
+
+      &:hover {
+        background-color: #253459;
+      }
+    }
+  }
+}
+
+
+/* Pop up Compte*/
+
+
+
+.donner-premium,
+.allonge-premium {
+  margin: 0 auto;
+
+  h3 {
+    text-align: center;
+    margin-bottom: 2vh;
+  }
+}
+
+.donner-premium {
+  &>form {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+
+    div {
+      display: flex;
+      flex-wrap: nowrap;
+      flex-direction: row;
+      justify-content: space-between;
+
+      input,
+      select {
+        width: 48%;
+        padding: 1vh;
+      }
+    }
+
+    button {
+      margin-top: 2vh;
+      background-color: #3e5b90;
+
+      &:hover {
+        background-color: #44649d !important;
+      }
+    }
+
+    p>strong {
+      color: #ae1e1d;
+    }
+  }
+}
+
+.allonge-premium {
+  .possibilites {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    #separateur {
+      width: 2px;
+
+      hr {
+        width: 2px;
+        height: 70%;
+        background: #3e5b90;
+        opacity: 1;
+        margin: 0;
+        top: 23%;
+        position: absolute;
+
+        &::after {
+          display: none;
+        }
+      }
+    }
+
+    div {
+      width: 45%;
+
+      &>p {
+        margin-bottom: 0.5vh !important;
+        margin-top: 1.5vh;
+        font-size: 13px !important;
+
+        &>strong {
+          color: #ffffff;
+          font-size: 16px;
+        }
+      }
+
+      button {
+        background-color: #3e5b90;
+        width: 100%;
+
+        &:hover {
+          background-color: #44649d;
+        }
+      }
+    }
+
+
+  }
+
+  input,
+  select {
+    width: 48%;
+    padding: 1vh;
+  }
+
+  button {
+    margin-top: 2vh;
+    background-color: #3e5b90;
+  }
+}
+
+
+/* Discord */
+
+$burple: #5865F2;
+
+.discord-not-connected {
+  position: relative;
+  background: #F5F5F5;
+
+  h3 {
+    position: absolute;
+    top: 0;
+  }
+
+  .discord-art-header {
+    height: 300px;
+    background-color: #C5D1E7;
+    //background-image: url(/static/img/discordNewHeader.png);
+    background-size: cover;
+    background-position: center;
+  }
+
+  p {
+    width: 634px;
+    margin: 0 auto;
+    margin-bottom: 20px;
+    color: #3f3f3f;
+    font-size: 18px;
+  }
+}
+
+.discord-not-connected,
+.discord-account {
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .2);
+  border-radius: 5px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.discord-not-connected h3,
+.discord-account h3 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 37px;
+  margin-bottom: 5px;
+
+  color: #fff;
+  background-color: rgba(0, 0, 0, .2);
+}
+
+.discord-not-connected-content {
+  padding: 40px;
+}
+
+.discord-connected {
+  display: flex;
+  align-items: center;
+}
+
+.discord-account {
+  width: (100% / 3);
+  background-color: $burple;
+  padding-bottom: 20px;
+
+  img {
+    display: block;
+    width: 100px;
+    height: 100px;
+    background-color: #23272A;
+    margin: 10px auto;
+    margin-top: 20px;
+    border-radius: 50%;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, .15);
+  }
+
+  span {
+    // Username + discriminator
+    display: block;
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: rgba(255, 255, 255, .7);
+    text-shadow: 0 2px 2px rgba(0, 0, 0, .2);
+
+    strong {
+      color: #fff;
+    }
+  }
+}
+
+.discord-permissions {
+  flex: 1;
+  padding: 10px 60px;
+}
+
+.discord-modal footer {
+  text-align: center;
+  margin-top: -20px;
+  margin-bottom: -10px;
+}
