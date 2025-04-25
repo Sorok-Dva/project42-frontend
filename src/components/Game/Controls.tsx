@@ -141,7 +141,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const handleJoinReplayed = async () => {
     if (replayGameId) {
       try {
-        const response = await axios.post(`/api/games/room/${roomData.id}/join`, {}, {
+        const response = await axios.post(`/api/games/room/${replayGameId}/join`, {}, {
           headers: {
             Authorization: `Bearer ${ token }`,
           },
