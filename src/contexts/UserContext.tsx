@@ -83,6 +83,7 @@ export const UserProvider : React.FC<{ children : ReactNode }> = ({ children }) 
   }
 
   const logout = useCallback(() => {
+    setLoading(true)
     setUser(null)
     localStorage.removeItem('token')
     navigateTo('/')
@@ -115,9 +116,11 @@ export const UserProvider : React.FC<{ children : ReactNode }> = ({ children }) 
 
   useEffect(() => {
     fetchMe(false)
+    setLoading(false)
   }, [fetchMe])
 
   const login = (user: User, token: string, returnTomHome = true) => {
+    setLoading(false)
     setUser(user)
     setToken(token)
     localStorage.setItem('token', token)
