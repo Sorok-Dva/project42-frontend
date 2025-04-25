@@ -93,6 +93,7 @@ const UnifiedChat: React.FC = () => {
       })
 
       socket.on('guildMessage', (message: GuildMessage) => {
+        if (message.nickname === user?.nickname) return
         audioNotif.currentTime = 0
         audioNotif.play().catch(() => {})
         setGuildMessages((prev) => [...prev, message])
