@@ -1,38 +1,40 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { useAuth } from 'contexts/AuthContext'
 
-// Mock data for user growth
-const generateUserData = () => {
-  const months = ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aout', 'Sept', 'Oct', 'Nov', 'Dec']
-  const currentMonth = new Date().getMonth()
-
-  return months.map((month, index) => {
-    // Generate some realistic looking data with an upward trend
-    const baseValue = 500 + index * 100
-    const randomFactor = Math.random() * 200 - 100
-    const newUsers = Math.max(50, Math.floor((baseValue + randomFactor) / 10))
-
-    return {
-      name: month,
-      'Total Users': baseValue + randomFactor,
-      'New Users': newUsers,
-      active: index === currentMonth, // Highlight current month
-    }
-  })
+interface UserData {
+  name: string
+  'Total Users': number
+  'New Users': number
 }
 
 const UserChart: React.FC = () => {
-  const [data, setData] = useState<any[]>([])
-  const [mounted, setMounted] = useState(false)
+  const { token } = useAuth()
+  const [data, setData] = useState<UserData[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setData(generateUserData())
-    setMounted(true)
+    const fetchData = async () => {
+      try {
+        const { data: result } = await axios.get<UserData[]>('/api/admin/stats/user-growth', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        })
+        setData(result)
+      } catch (error) {
+        console.error('Failed to fetch user growth:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
   }, [])
 
-  if (!mounted) return <div className="flex items-center justify-center h-full">Loading chart...</div>
+  if (loading) return <div className="flex items-center justify-center h-full">Chargement chart...</div>
 
   return (
     <ResponsiveContainer width="100%" height="100%">

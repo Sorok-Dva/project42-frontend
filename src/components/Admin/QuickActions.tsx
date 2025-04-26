@@ -2,42 +2,56 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { UserPlus, Newspaper, MessageSquare, Shield, Settings, Database } from 'lucide-react'
+import {
+  Construction,
+  Newspaper,
+  MessageSquare,
+  Shield,
+  Settings,
+  Gamepad2,
+  UserRoundMinusIcon,
+} from 'lucide-react'
 
 const QuickActions: React.FC = () => {
   const actions = [
     {
-      title: 'Add User',
-      icon: <UserPlus size={20} />,
-      color: 'from-green-600 to-green-400',
-      href: '/admin/users/create',
+      title: 'Maintenance',
+      icon: <Construction size={20} />,
+      color: 'from-orange-600 to-red-400',
+      href: '#',
     },
     {
-      title: 'New Article',
+      title: 'Création de partie',
+      icon: <Gamepad2 size={20} />,
+      color: 'from-orange-400 to-red-200',
+      href: '/admin/news/create',
+    },
+    {
+      title: 'Ban un joueur',
+      icon: <UserRoundMinusIcon size={20} />,
+      color: 'from-red-600 to-red-400',
+      href: '/admin/users/ban',
+    },
+    {
+      title: 'Ajouter une news',
       icon: <Newspaper size={20} />,
       color: 'from-blue-600 to-blue-400',
       href: '/admin/news/create',
     },
     {
-      title: 'Create Room',
-      icon: <Database size={20} />,
-      color: 'from-purple-600 to-purple-400',
-      href: '/admin/rooms/create',
-    },
-    {
-      title: 'Announcements',
+      title: 'Annonces',
       icon: <MessageSquare size={20} />,
       color: 'from-yellow-600 to-yellow-400',
       href: '/admin/announcements',
     },
     {
-      title: 'Moderation',
+      title: 'Modération',
       icon: <Shield size={20} />,
       color: 'from-red-600 to-red-400',
       href: '/admin/moderation',
     },
     {
-      title: 'Settings',
+      title: 'Paramètres',
       icon: <Settings size={20} />,
       color: 'from-gray-600 to-gray-400',
       href: '/admin/settings',

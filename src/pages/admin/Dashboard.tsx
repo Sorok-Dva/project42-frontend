@@ -34,7 +34,7 @@ const AdminDashboard: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <h3 className="text-xl font-bold mb-4">User Growth</h3>
+          <h3 className="text-xl font-bold mb-4">Croissance utilisateur</h3>
           <div className="h-80">
             <UserChart />
           </div>
@@ -46,7 +46,7 @@ const AdminDashboard: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <h3 className="text-xl font-bold mb-4">Game Activity</h3>
+          <h3 className="text-xl font-bold mb-4">Parties</h3>
           <div className="h-80">
             <GameActivityChart />
           </div>
@@ -61,7 +61,7 @@ const AdminDashboard: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
+          <h3 className="text-xl font-bold mb-4">Actions rapide</h3>
           <QuickActions />
         </motion.div>
 
@@ -71,7 +71,7 @@ const AdminDashboard: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
         >
-          <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
+          <h3 className="text-xl font-bold mb-4">Activité</h3>
           <RecentActivity />
         </motion.div>
       </div>

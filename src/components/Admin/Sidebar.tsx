@@ -14,6 +14,7 @@ import {
   BarChart3,
   ChevronDown,
   LogOut,
+  Key,
 } from 'lucide-react'
 
 interface AdminSidebarProps {
@@ -44,10 +45,13 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
       href: '/admin/users',
       subItems: [
         { title: 'Liste', href: '/admin/users' },
-        { title: 'Équipe', href: '/admin/users/moderators' },
-        { title: 'Joueurs Bannis', href: '/admin/users/banned' },
         { title: 'Joueurs sous Surveillance', href: '/admin/users/stalklist' },
       ],
+    },
+    {
+      title: 'Clé Alpha',
+      icon: <Key size={20} />,
+      href: '/admin/alpha-keys',
     },
     {
       title: 'News',

@@ -28,6 +28,8 @@ export const GAME_TYPES: Record<number, string> = {
   1: 'Fun',
   2: 'Sérieuse',
   3: 'Carnage',
+  4: 'Spéciale',
+  5: 'Test',
 }
 
 /**

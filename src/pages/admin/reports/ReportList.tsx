@@ -218,7 +218,7 @@ const ReportsList: React.FC = () => {
                 >
                   { [10, 30, 50, 100, 500].map((size) => (
                     <option key={ size } value={ size }>
-                      { size } lignes par page
+                      { size }
                     </option>
                   )) }
                 </select>
