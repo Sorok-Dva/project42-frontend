@@ -1,4 +1,4 @@
-export const rolify = (role: string) => {
+export const rolify = (role: string, isMale = true) => {
   switch (role) {
   case 'SuperAdmin':
     return {
@@ -32,8 +32,8 @@ export const rolify = (role: string) => {
     }
   case 'User':
     return {
-      name: 'Joueur',
-      color: '#0f87dc',
+      name: isMale ? 'Joueur' : 'Joueuse',
+      color: isMale ? '#2baaf7' : '#e15fc3',
     }
   default:
     return null
