@@ -410,6 +410,18 @@ const UsersPage: React.FC = () => {
                   </th>
                   <th
                     className="p-4 text-left cursor-pointer hover:text-blue-300"
+                    onClick={ () => handleSort('id') }
+                  >
+                    <div className="flex items-center">
+                      <span>ID</span>
+                      { sortField === 'id' && (
+                        <span
+                          className="ml-1">{ sortDirection === 'asc' ? '↑': '↓' }</span>
+                      ) }
+                    </div>
+                  </th>
+                  <th
+                    className="p-4 text-left cursor-pointer hover:text-blue-300"
                     onClick={ () => handleSort('nickname') }
                   >
                     <div className="flex items-center">
@@ -455,7 +467,18 @@ const UsersPage: React.FC = () => {
                   </th>
                   <th className="p-4 text-left">IP d'inscription</th>
                   <th className="p-4 text-left">Dernière IP</th>
-                  <th className="p-4 text-left">Date d'inscription</th>
+                  <th
+                    className="p-4 text-left cursor-pointer hover:text-blue-300"
+                    onClick={ () => handleSort('updatedAt') }
+                  >
+                    <div className="flex items-center">
+                      <span>Date d'inscription</span>
+                      { sortField === 'createdAt' && (
+                        <span
+                          className="ml-1">{ sortDirection === 'asc' ? '↑': '↓' }</span>
+                      ) }
+                    </div>
+                  </th>
                   <th className="p-4 text-left">Actions</th>
                 </tr>
               </thead>
@@ -492,6 +515,7 @@ const UsersPage: React.FC = () => {
                           onChange={ () => handleSelectUser(String(user.id)) }
                         />
                       </td>
+                      <td className="p-4">#{ user.id }</td>
                       <td className="p-4">
                         <div className="flex items-center">
                           <div
