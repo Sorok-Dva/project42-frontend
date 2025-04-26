@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react'
+'use client'
+
+import type React from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import clsx from 'clsx'
 import { useAuth } from 'contexts/AuthContext'
 import useDropdown from 'hooks/useDropdown'
 import Button from 'components/Layouts/Button'
-import { Button as Btn } from '@mui/material'
 import { Input } from 'reactstrap'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
-import Friendship from 'components/Friendship'
+import FriendshipComponent from 'components/Friendship'
 
 export interface Friendship {
   id: number
@@ -55,8 +57,8 @@ const Friends: React.FC = () => {
         },
       })
       setFriendships(response.data)
-      setAcceptedFriends(response.data.filter(f => f.friendshipStatus === 'accepted'))
-      setOnlineFriends(response.data.filter(f => f.isOnline && f.friendshipStatus === 'accepted'))
+      setAcceptedFriends(response.data.filter((f) => f.friendshipStatus === 'accepted'))
+      setOnlineFriends(response.data.filter((f) => f.isOnline && f.friendshipStatus === 'accepted'))
     } catch (error) {
       console.error('Erreur lors du chargement des amitiés', error)
     }
@@ -126,84 +128,97 @@ const Friends: React.FC = () => {
   }
 
   return (
-    <div ref={ref} className="position-relative flex-shrink-0">
-      <Button onClick={toggleOpen} classes="ntf-btn fs-2xl" badgeCount={onlineFriends.length} type='friends'>
-        <i className="ti ti-users"></i>
+    <div ref={ref} className="relative flex-shrink-0">
+      <Button
+        onClick={toggleOpen}
+        classes="relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-800/70 hover:bg-slate-700/70 border border-slate-700/50 transition-all duration-300"
+        badgeCount={onlineFriends.length}
+        type="friends"
+      >
+        <i className="ti ti-users text-xl text-slate-200"></i>
       </Button>
-      <div className={clsx('notification-area p-4', { open: open })} data-lenis-prevent>
-        <h3>Mes amis ({onlineFriends.length} / {acceptedFriends.length})</h3>
-        <hr />
-        <div className="notification-card d-grid gap-4" data-tilt>
-          {friendships.length === 0 && <h5>Vous n'avez pas encore d'amis.</h5>}
 
-          {friendships.map((friendship) => (
-            <Friendship friendship={friendship} friendships={friendships} setFriendships={setFriendships} key={friendship.id}/>
-          ))}
+      <div
+        className={clsx(
+          'absolute right-0 top-full mt-2 w-80 bg-slate-900/90 backdrop-blur-md rounded-lg border border-slate-700/50 shadow-xl shadow-indigo-900/20 z-50 transform transition-all duration-300 origin-top-right',
+          open ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none',
+        )}
+        data-lenis-prevent
+      >
+        <div className="p-4">
+          <h3 className="text-lg font-medium text-slate-100 flex items-center gap-2 mb-3">
+            <i className="ti ti-users text-indigo-400"></i>
+            Mes amis
+            <span className="text-sm font-normal text-slate-400">
+              ({onlineFriends.length} / {acceptedFriends.length})
+            </span>
+          </h3>
 
-          {showAddFriendInput ? (
-            <div>
-              <div style={{ position: 'relative' }}>
-                <Input
-                  type="text"
-                  placeholder="Saisissez un pseudo"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                />
-                <button
-                  onClick={cancelAddFriend}
-                  style={{
-                    position: 'absolute',
-                    right: 8,
-                    top: 8,
-                    background: 'transparent',
-                    border: 'none',
-                    fontSize: '1rem',
-                    color: '#999',
-                    cursor: 'pointer',
-                  }}
-                >
-                  ✕
-                </button>
+          <div className="border-t border-slate-700/50 mb-3"></div>
+
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
+            {friendships.length === 0 && (
+              <div className="text-center py-4 text-slate-400">
+                <i className="ti ti-mood-empty text-3xl mb-2 block"></i>
+                Vous n'avez pas encore d'amis.
               </div>
-              {searchResults.length > 0 ? (
-                <ul
-                  style={{
-                    listStyleType: 'none',
-                    padding: '8px',
-                    margin: '8px 0 0 0',
-                    backgroundColor: '#000',
-                    borderRadius: '4px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                  }}
-                >
-                  {searchResults.map((user) => (
-                    <li
-                      key={user.id}
-                      style={{
-                        cursor: 'pointer',
-                        padding: '8px',
-                        borderBottom: '1px solid #444',
-                        color: '#fff',
-                      }}
-                      onClick={() => handleAddFriend(user.id)}
-                    >
-                      {user.nickname}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                searchQuery.trim() !== '' && (
-                  <p style={{ color: '#fff', padding: '8px', backgroundColor: '#000', borderRadius: '4px', marginTop: '8px' }}>
-                    Aucune correspondance
-                  </p>
-                )
-              )}
-            </div>
-          ) : (
-            <Btn onClick={showAddFriend}>Ajouter un ami</Btn>
-          )}
+            )}
+
+            {friendships.map((friendship) => (
+              <FriendshipComponent
+                friendship={friendship}
+                friendships={friendships}
+                setFriendships={setFriendships}
+                key={friendship.id}
+              />
+            ))}
+          </div>
+
+          <div className="mt-4 border-t border-slate-700/50 pt-3">
+            {showAddFriendInput ? (
+              <div className="space-y-2">
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="Saisissez un pseudo"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    className="w-full bg-slate-800/70 border border-slate-700/50 rounded-md text-slate-200 py-2 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  />
+                  <button
+                    onClick={cancelAddFriend}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                  >
+                    <i className="ti ti-x"></i>
+                  </button>
+                </div>
+
+                {searchResults.length > 0 ? (
+                  <ul className="bg-slate-800/90 border border-slate-700/50 rounded-md max-h-48 overflow-y-auto">
+                    {searchResults.map((user) => (
+                      <li
+                        key={user.id}
+                        className="px-3 py-2 hover:bg-slate-700/50 cursor-pointer text-slate-300 hover:text-slate-100 transition-colors border-b border-slate-700/30 last:border-0"
+                        onClick={() => handleAddFriend(user.id)}
+                      >
+                        {user.nickname}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  searchQuery.trim() !== '' && <p className="text-slate-400 text-sm py-2">Aucune correspondance</p>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={showAddFriend}
+                className="w-full py-2 px-4 bg-indigo-600/70 hover:bg-indigo-500/70 text-slate-100 rounded-md transition-colors flex items-center justify-center gap-2"
+              >
+                <i className="ti ti-user-plus"></i>
+                Ajouter un ami
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

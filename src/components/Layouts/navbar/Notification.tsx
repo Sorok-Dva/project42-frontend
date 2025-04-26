@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react'
+'use client'
+
+import type React from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import clsx from 'clsx'
 import useDropdown from 'hooks/useDropdown'
 import Button from '../Button'
-import { Link } from 'react-router-dom'
 import { useAuth } from 'contexts/AuthContext'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye, faTrash } from '@fortawesome/free-solid-svg-icons'
 
 interface NotificationItem {
   id: number
@@ -43,7 +43,7 @@ const Notifications: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       setNotifications(response.data)
-      const unreadCount = response.data.filter(n => !n.isRead).length
+      const unreadCount = response.data.filter((n) => !n.isRead).length
       setNotificationCount(unreadCount)
     } catch (error) {
       console.error('Erreur lors de la récupération des notifications', error)
@@ -63,12 +63,8 @@ const Notifications: React.FC = () => {
   // Marquer une notification comme lue
   const markAsRead = async (id: number) => {
     try {
-      await axios.put(
-        `/api/notifications/${id}/read`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } },
-      )
-      setNotifications(notifications.map(n => (n.id === id ? { ...n, isRead: true } : n)))
+      await axios.put(`/api/notifications/${id}/read`, {}, { headers: { Authorization: `Bearer ${token}` } })
+      setNotifications(notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n)))
       toast.info('Notification lue.', ToastDefaultOptions)
       setNotificationCount(notificationCount - 1)
     } catch (error) {
@@ -83,7 +79,7 @@ const Notifications: React.FC = () => {
       await axios.delete(`/api/notifications/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      setNotifications(notifications.filter(n => n.id !== id))
+      setNotifications(notifications.filter((n) => n.id !== id))
       toast.info('Notification supprimée.', ToastDefaultOptions)
     } catch (error) {
       console.error('Erreur lors de la suppression de la notification', error)
@@ -125,109 +121,152 @@ const Notifications: React.FC = () => {
     return (
       <div>
         <div dangerouslySetInnerHTML={{ __html: invitationData.text }} />
-        <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
-          {!notification.isRead && invitationData.actions.map((btn, idx) => (
-            <button
-              key={idx}
-              onClick={() =>
-                handleGameInvitationAction(notification.id, btn.action, invitationData!.invitation.invitationLink)
-              }
-              className={`btn ${
-                btn.action === 'join'
-                  ? 'btn-primary'
-                  : btn.action === 'observer'
-                    ? 'btn-info'
-                    : 'btn-danger'
-              }`}
-            >
-              {btn.label}
-            </button>
-          ))}
+        <div className="flex gap-2 mt-3">
+          {!notification.isRead &&
+            invitationData.actions.map((btn, idx) => (
+              <button
+                key={idx}
+                onClick={() =>
+                  handleGameInvitationAction(notification.id, btn.action, invitationData!.invitation.invitationLink)
+                }
+                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                  btn.action === 'join'
+                    ? 'bg-indigo-600/70 hover:bg-indigo-500/70 text-white'
+                    : btn.action === 'observer'
+                      ? 'bg-cyan-600/70 hover:bg-cyan-500/70 text-white'
+                      : 'bg-red-600/70 hover:bg-red-500/70 text-white'
+                }`}
+              >
+                {btn.label}
+              </button>
+            ))}
         </div>
       </div>
     )
   }
 
   return (
-    <div ref={ref} className="position-relative flex-shrink-0">
-      <Button onClick={toggleOpen} classes="ntf-btn fs-2xl" badgeCount={notifications.filter(n => !n.isRead).length}>
-        <i className="ti ti-bell-filled"></i>
+    <div ref={ref} className="relative flex-shrink-0">
+      <Button
+        onClick={toggleOpen}
+        classes="relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-800/70 hover:bg-slate-700/70 border border-slate-700/50 transition-all duration-300"
+        badgeCount={notifications.filter((n) => !n.isRead).length}
+      >
+        <i className="ti ti-bell-filled text-xl text-slate-200"></i>
       </Button>
-      <div className={clsx('notification-area p-4', { open: open })} data-lenis-prevent>
-        <h3>Notifications ({notifications.filter(n => !n.isRead).length})</h3>
-        <hr />
-        {loading ? (
-          <p>Chargement...</p>
-        ) : notifications.length === 0 ? (
-          <p>Aucune notification.</p>
-        ) : (
-          <div className="notification-card d-grid gap-4" data-tilt>
-            {notifications.map(notification => (
-              <React.Fragment key={notification.id}>
-                {notification.type === 'game_invitation' ? (
-                  <div
-                    className="card-item d-flex align-items-center gap-4"
-                    style={{ borderColor: notification.isRead ? 'green' : 'yellow' }}
-                  >
-                    <div className="card-info">
-                      <b className="card-title d-block" dangerouslySetInnerHTML={{ __html: notification.title }} />
-                      <br />
-                      <span className="card-text d-block" style={{ fontSize: '0.9rem' }}>
-                        {renderGameInvitation(notification)}
-                      </span>
-                      <small>
-                        <i>{new Date(notification.createdAt).toLocaleString()}</i>
-                      </small>
-                      <div style={{ marginTop: '5px' }}>
-                        {!notification.isRead && (
-                          <button className="btn btn-success me-2" onClick={() => markAsRead(notification.id)}>
-                            <FontAwesomeIcon icon={faEye} />
-                          </button>
-                        )}
-                        <button className="btn btn-danger" onClick={() => deleteNotification(notification.id)}>
-                          <FontAwesomeIcon icon={faTrash} />
-                        </button>
+
+      <div
+        className={clsx(
+          'absolute right-0 top-full mt-2 w-96 max-w-[90vw] bg-slate-900/90 backdrop-blur-md rounded-lg border border-slate-700/50 shadow-xl shadow-indigo-900/20 z-50 transform transition-all duration-300 origin-top-right',
+          open ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none',
+        )}
+        data-lenis-prevent
+      >
+        <div className="p-4">
+          <h3 className="text-lg font-medium text-slate-100 flex items-center gap-2 mb-3">
+            <i className="ti ti-bell text-indigo-400"></i>
+            Notifications
+            <span className="text-sm font-normal text-slate-400">
+              ({notifications.filter((n) => !n.isRead).length})
+            </span>
+          </h3>
+
+          <div className="border-t border-slate-700/50 mb-3"></div>
+
+          <div className="max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                <span className="ml-2 text-slate-400">Chargement...</span>
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="text-center py-8 text-slate-400">
+                <i className="ti ti-bell-off text-3xl mb-2 block"></i>
+                Aucune notification.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {notifications.map((notification) => (
+                  <div key={notification.id} className="group">
+                    {notification.type === 'game_invitation' ? (
+                      <div
+                        className={`rounded-lg p-3 border transition-all ${
+                          notification.isRead
+                            ? 'bg-slate-800/30 border-green-700/30'
+                            : 'bg-slate-800/50 border-yellow-500/30 shadow-lg shadow-yellow-900/10'
+                        }`}
+                      >
+                        <div>
+                          <h4
+                            className="font-medium text-slate-200 mb-1"
+                            dangerouslySetInnerHTML={{ __html: notification.title }}
+                          />
+                          <div className="text-slate-300 text-sm">{renderGameInvitation(notification)}</div>
+                          <div className="mt-2 text-xs text-slate-500">
+                            {new Date(notification.createdAt).toLocaleString()}
+                          </div>
+                          <div className="mt-2 flex gap-2">
+                            {!notification.isRead && (
+                              <button
+                                className="p-1.5 rounded-md bg-green-600/20 text-green-400 hover:bg-green-600/30 transition-colors"
+                                onClick={() => markAsRead(notification.id)}
+                              >
+                                <i className="ti ti-eye text-sm"></i>
+                              </button>
+                            )}
+                            <button
+                              className="p-1.5 rounded-md bg-red-600/20 text-red-400 hover:bg-red-600/30 transition-colors"
+                              onClick={() => deleteNotification(notification.id)}
+                            >
+                              <i className="ti ti-trash text-sm"></i>
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ) : (
-                  <Link to="#" key={notification.id}>
-                    <div
-                      className="card-item d-flex align-items-center gap-4"
-                      style={{ borderColor: notification.isRead ? 'green' : 'yellow' }}
-                    >
-                      <div className="card-info">
-                        <b
-                          className="card-title d-block tcn-1"
+                    ) : (
+                      <div
+                        className={`rounded-lg p-3 border transition-all ${
+                          notification.isRead
+                            ? 'bg-slate-800/30 border-green-700/30'
+                            : 'bg-slate-800/50 border-yellow-500/30 shadow-lg shadow-yellow-900/10'
+                        }`}
+                      >
+                        <h4
+                          className="font-medium text-slate-200 mb-1"
                           dangerouslySetInnerHTML={{ __html: notification.title }}
                         />
-                        <br />
-                        <span
-                          className="card-text d-block tcn-1 fs-sm"
+                        <div
+                          className="text-slate-300 text-sm"
                           dangerouslySetInnerHTML={{ __html: notification.message }}
                         />
-                        <small>
-                          <i>{new Date(notification.createdAt).toLocaleString()}</i>
-                        </small>
-                        <div>
+                        <div className="mt-2 text-xs text-slate-500">
+                          {new Date(notification.createdAt).toLocaleString()}
+                        </div>
+                        <div className="mt-2 flex gap-2">
                           {!notification.isRead && (
-                            <button className="btn btn-success me-2" onClick={() => markAsRead(notification.id)}>
-                              <FontAwesomeIcon icon={faEye} />
+                            <button
+                              className="p-1.5 rounded-md bg-green-600/20 text-green-400 hover:bg-green-600/30 transition-colors"
+                              onClick={() => markAsRead(notification.id)}
+                            >
+                              <i className="ti ti-eye text-sm"></i>
                             </button>
                           )}
-                          <button className="btn btn-danger" onClick={() => deleteNotification(notification.id)}>
-                            <FontAwesomeIcon icon={faTrash} />
+                          <button
+                            className="p-1.5 rounded-md bg-red-600/20 text-red-400 hover:bg-red-600/30 transition-colors"
+                            onClick={() => deleteNotification(notification.id)}
+                          >
+                            <i className="ti ti-trash text-sm"></i>
                           </button>
                         </div>
                       </div>
-                    </div>
-                  </Link>
-                )}
-                <hr />
-              </React.Fragment>
-            ))}
+                    )}
+                    <div className="border-t border-slate-800/50 my-3"></div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   )
