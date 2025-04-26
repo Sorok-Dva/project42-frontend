@@ -528,7 +528,7 @@ const UsersPage: React.FC = () => {
                               className="object-cover"
                             />
                           </div>
-                          <span>{ user.nickname }</span>
+                          <span data-profile={user.nickname}>{ user.nickname }</span>
                         </div>
                       </td>
                       <td className="p-4">{ user.email }</td>
