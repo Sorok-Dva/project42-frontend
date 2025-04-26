@@ -30,6 +30,11 @@ export const rolify = (role: string) => {
       name: 'Animateur',
       color: '#c8c80e',
     }
+  case 'User':
+    return {
+      name: 'Joueur',
+      color: '#0f87dc',
+    }
   default:
     return null
   }
