@@ -39,6 +39,8 @@ export interface User {
   signature?: string;
   discordId?: string;
   premium?: Date;
+  updatedAt?: Date;
+  createdAt?: Date;
   token: string;
   behaviorPoints?: number;
   moderatorPoints?: number;
@@ -52,6 +54,8 @@ export interface User {
       banner: string;
     }
   },
+  registerIp?: string;
+  lastLoginIp?: string;
 }
 
 interface UserContextType {

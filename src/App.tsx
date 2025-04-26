@@ -84,10 +84,10 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      {!isGameRoute && (
+      {!isGameRoute && !isAdminRoute && (
         <>
           <Navbar isTransparent={true} />
-          { user?.guildMembership && <Tchat />}
+          <Tchat />
         </>
       )}
       <Routes>
@@ -106,7 +106,7 @@ const AppContent: React.FC = () => {
                     { user.isAdmin && (
                       <Route element={<AdminRoute />}>
                         <Route path="/admin" element={<AdminLayout />}>
-                          <Route path="home" element={<AdminDashboard />} />
+                          <Route path="/admin" element={<AdminDashboard />} />
                           <Route path="users" element={<UserList />} />
                           <Route path="users/:id" element={<AdminUserProfile />} />
                           <Route path="alpha-keys" element={<AdminAlphaKeys />} />
