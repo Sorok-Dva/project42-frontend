@@ -21,6 +21,7 @@ import {
 import { Img as Image } from 'react-image'
 import { User, useUser } from 'contexts/UserContext'
 import { useAuth } from 'contexts/AuthContext'
+import { rolify } from 'utils/rolify'
 
 // Rôles et leurs couleurs
 const roleColors = {
@@ -446,11 +447,11 @@ const UsersPage: React.FC = () => {
                   )}
                   <th
                     className="p-4 text-left cursor-pointer hover:text-blue-300"
-                    onClick={ () => handleSort('role') }
+                    onClick={ () => handleSort('roleId') }
                   >
                     <div className="flex items-center">
                       <span>Rôle</span>
-                      { sortField === 'role' && <span
+                      { sortField === 'roleId' && <span
                         className="ml-1">{ sortDirection === 'asc' ? '↑': '↓' }</span> }
                     </div>
                   </th>
@@ -540,7 +541,7 @@ const UsersPage: React.FC = () => {
                         <span
                           className={ `px-2 py-1 rounded-full text-xs ${ roleColors[user.role as keyof typeof roleColors] || 'bg-gray-600 text-white' }` }
                         >
-                          { user.role }
+                          { rolify(user.role) }
                         </span>
                       </td>
                       <td className="p-4">
