@@ -574,7 +574,7 @@ const UsersPage: React.FC = () => {
                       </td>
                       <td className="p-4">{ user.registerIp }</td>
                       <td className="p-4">{ user.lastLoginIp }</td>
-                      <td className="p-4">{ new Date(user.updatedAt || 'now').toLocaleString('fr-FR') }</td>
+                      <td className="p-4">{ new Date(user.createdAt || 'now').toLocaleString('fr-FR') }</td>
                       <td className="p-4">
                         <div className="relative">
                           <button
