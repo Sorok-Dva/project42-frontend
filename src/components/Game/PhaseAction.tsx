@@ -43,6 +43,8 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     id : number
   } | null>(null)
   const [showForm, setShowForm] = useState<boolean>(true)
+  const [deathElixirUsed, setDeathElixirUsed] = useState<boolean>(false)
+  const [lifeElixirUsed, setLifeElixirUsed] = useState<boolean>(false)
   const [hint, setHint] = useState<string | null>(null)
 
   useEffect(() => {
@@ -60,6 +62,8 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
         (data.action.card === 6 && !player.alive)
       ) {
         setActionRequest(data)
+        setDeathElixirUsed(data.deathElixirUsed !== null && data.deathElixirUsed !== undefined)
+        setLifeElixirUsed(data.lifeElixirUsed !== null && data.lifeElixirUsed !== undefined)
       }
     })
 
@@ -205,8 +209,10 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
       actionRequest={actionRequest as any}
       alienVictim={alienVictim}
       setAlienVictim={setAlienVictim}
-      deathElixirUsed={actionRequest.deathElixirUsed}
-      lifeElixirUsed={actionRequest.lifeElixirUsed}
+      deathElixirUsed={deathElixirUsed}
+      lifeElixirUsed={lifeElixirUsed}
+      setDeathElixirUsed={setDeathElixirUsed}
+      setLifeElixirUsed={setLifeElixirUsed}
     />
   }
 

@@ -19,8 +19,10 @@ interface PhaseActionCard5Props {
   actionRequest: PhaseActionRequestCard5;
   alienVictim: { id: number; nickname: string } | null;
   setAlienVictim: React.Dispatch<React.SetStateAction<{ id: number; nickname: string } | null>>;
-  deathElixirUsed: string | null | undefined
-  lifeElixirUsed: string | null | undefined
+  deathElixirUsed: boolean
+  lifeElixirUsed: boolean
+  setDeathElixirUsed: React.Dispatch<React.SetStateAction<boolean>>;
+  setLifeElixirUsed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
@@ -31,11 +33,14 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
   setAlienVictim,
   deathElixirUsed,
   lifeElixirUsed,
+  setDeathElixirUsed,
+  setLifeElixirUsed,
 }) => {
   const { socket } = useSocket()
   const { user } = useUser()
   const [selectedDeathTarget, setSelectedDeathTarget] = useState<number | ''>('')
 
+  console.log(deathElixirUsed, lifeElixirUsed)
   const handleDeathChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedDeathTarget(Number(event.target.value))
   }
@@ -49,6 +54,7 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
       targets: [selectedDeathTarget],
       type: 'death'
     })
+    setDeathElixirUsed(true)
   }
 
   const handleLifeSubmit = () => {
@@ -61,6 +67,7 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
       type: 'life'
     })
     setAlienVictim(null)
+    setLifeElixirUsed(true)
   }
 
   return (
