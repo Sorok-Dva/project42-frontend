@@ -190,9 +190,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
 
         {/* Logout button */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-blue-500/30">
-          <button className="flex items-center w-full p-3 rounded-lg text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-colors">
+          <button onClick={() => { window.location.href = '/' }} className="flex items-center w-full p-3 rounded-lg text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-colors">
             <LogOut size={20} className="mr-3" />
-            <span>Logout</span>
+            <span>Retour sur Project 42</span>
           </button>
         </div>
       </motion.div>
