@@ -288,13 +288,13 @@ export const useGame = (
    * Gère les listeners socket
    */
   useEffect(() => {
-    if (!socket || !gameId || !user) return
+    if (!socket || !gameId) return
 
     // 1) Rejoint la room si pas déjà fait
     if (!hasJoined && isAuthorized) {
       socket.emit('joinRoom', {
         roomId: gameId,
-        player: !user ? null : { id: user.id, nickname: user.nickname },
+        player: player,
         viewer,
       })
       setHasJoined(true)
@@ -497,7 +497,7 @@ export const useGame = (
       socket.off('forceReload')
       socket.off('error')
     }
-  }, [socket, gameId, user, player, hasJoined, isAuthorized, isNight, roomData.maxPlayers])
+  }, [socket, gameId, user, player, viewer, hasJoined, isAuthorized, isNight, roomData.maxPlayers])
 
   return {
     roomData,

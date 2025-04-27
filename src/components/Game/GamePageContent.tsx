@@ -249,6 +249,11 @@ const GamePage = () => {
     if (!socket || !gameId) return
     if (confirm('Êtes-vous sûr de vouloir quitter la partie ?')) {
       try {
+        if (viewer && !viewer.user) {
+          window.location.href = '/'
+          return
+        }
+
         const response = await leaveGame(token)
         if (response.message) {
           socket.emit('leaveRoom', {

@@ -654,7 +654,7 @@ const GameControls: React.FC<GameControlsProps> = ({
               </p>
             </div>
 
-            {viewer && !gameStarted && !gameFinished && (
+            {viewer?.user && !gameStarted && !gameFinished && (
               <motion.button
                 className={`sound-tick w-full px-4 py-2 transition-all rounded-lg ${
                   players.length >= slots
@@ -678,14 +678,26 @@ const GameControls: React.FC<GameControlsProps> = ({
               <GameTimer gameId={gameId || ''} gameStarted={ gameStarted } gameFinished={ gameFinished }/>
             )}
 
-            {!viewer && !gameFinished && (
-              <motion.button
-                className="sound-tick w-full px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all"
-                whileHover={ { scale: 1.02 } }
-                whileTap={ { scale: 0.98 } }
+            {!viewer?.user && !gameFinished && (
+              <motion.div
+                className="w-full p-4 bg-black/60 backdrop-blur-sm border border-blue-500/30 rounded-lg shadow-lg shadow-blue-500/10 flex flex-col items-center gap-3"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
               >
-                S'inscrire !
-              </motion.button>
+                <img src="/assets/images/carte0.png" alt="Logo du jeu" className="h-16 w-auto object-contain mb-1" />
+                <p className="text-sm text-blue-200 italic text-center">
+                  Rejoins la communauté pour lancer tes propres parties et découvrir un univers de jeu passionnant où
+                  stratégie et persuasion seront tes meilleurs atouts !
+                </p>
+                <motion.button
+                  className="sound-tick w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-lg transition-all shadow-md shadow-blue-500/20"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  Créer mon compte
+                </motion.button>
+              </motion.div>
             )}
           </div>
         </motion.div>
