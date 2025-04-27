@@ -142,14 +142,14 @@ const GameControls: React.FC<GameControlsProps> = ({
     if (replayGameId) {
       try {
         if (player) {
-          const response = await axios.post(`/api/games/room/${replayGameId}/join`, {}, {
+          await axios.post(`/api/games/room/${replayGameId}/join`, {}, {
             headers: {
-              Authorization: `Bearer ${ token }`,
+              Authorization: `Bearer ${token}`,
             },
           })
         }
 
-        window.location.href = `/game/${ response.data.game.id }`
+        window.location.href = `/game/${replayGameId}`
       } catch (error: any) {
         if (error.response?.data?.error) {
           toast.error(`Une erreur est survenue: ${error.response.data.error}`, ToastDefaultOptions)
