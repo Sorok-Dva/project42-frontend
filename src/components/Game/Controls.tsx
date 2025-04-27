@@ -84,7 +84,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const [replayGameId, setReplayGameId] = useState<number | null>(null)
 
   const openEditComposition = () => {
-    if (!isCreator || isArchive) return
+    if (!isCreator || isArchive || roomData.type === 3) return
     setIsEditCompositionOpen(true)
   }
   const closeEditComposition = async () => {
@@ -205,7 +205,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
   const removePlace = () => {
-    if (!gameId || gameStarted || gameFinished || slots <= 6) return
+    if (!gameId || gameStarted || gameFinished || slots <= 6 || roomData.type === 3) return
 
     setSlots(prevSlots => prevSlots - 1)
 
@@ -228,7 +228,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const addPlace = () => {
-    if (!gameId || gameStarted || gameFinished || slots >= 24) return
+    if (!gameId || gameStarted || gameFinished || slots >= 24 || roomData.type === 3) return
 
     setSlots(prevSlots => prevSlots + 1)
 
@@ -248,7 +248,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const removeTimer = () => {
-    if (!gameId || !isCreator || gameStarted || gameFinished || timer <= 2) return
+    if (!gameId || !isCreator || gameStarted || gameFinished || timer <= 2 || roomData.type === 3) return
 
     setTimer(prevTimer => prevTimer - 1)
 
@@ -268,7 +268,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const addTimer = () => {
-    if (!gameId || !isCreator || gameStarted || gameFinished || timer >= 5) return
+    if (!gameId || !isCreator || gameStarted || gameFinished || timer >= 5 || roomData.type === 3) return
 
     setTimer(prevTimer => prevTimer + 1)
 
