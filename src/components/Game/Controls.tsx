@@ -76,7 +76,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const { socket } = useSocket()
   const { checkPermission } = usePermissions()
   const canAddBot = checkPermission('godPowers', 'addBot')
-  const [timer, setTimer] = useState<number>(3)
+  const [timer, setTimer] = useState<number>(roomData.timer)
   const [isEditCompositionOpen, setIsEditCompositionOpen] = useState(false)
   const [isTransferLeadOpen, setIsTransferLeadOpen] = useState(false)
   const [isFavoriteArchive, setIsFavoriteArchive] = useState<boolean>(false)
@@ -483,57 +483,68 @@ const GameControls: React.FC<GameControlsProps> = ({
             <div className="p-4 space-y-4">
               {/* Nombre de places */ }
               <div className="flex items-center justify-center space-x-2">
-                <button
-                  className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
-                  onClick={ removePlace }
-                  disabled={ slots <= 6 }
-                >
-                  –
-                </button>
+                { roomData.type !== 3 && (
+                  <button
+                    className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                    onClick={ removePlace }
+                    disabled={ slots <= 6 }
+                  >
+                    –
+                  </button>
+                )}
                 <div className="px-4 py-2 bg-black/40 rounded-lg text-white">
                   <span className="font-bold">{ slots }</span> places
                 </div>
-                <button
-                  className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
-                  onClick={ addPlace }
-                  disabled={ slots >= 24 }
-                >
-                  +
-                </button>
+                { roomData.type !== 3 && (
+                  <button
+                    className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                    onClick={ addPlace }
+                    disabled={ slots >= 24 }
+                  >
+                    +
+                  </button>
+                )}
               </div>
 
               {/* Temps de débat */ }
               <div className="flex items-center justify-center space-x-2">
-                <button
-                  className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
-                  onClick={ removeTimer }
-                  disabled={ timer <= 2 }
-                >
-                  –
-                </button>
+                { roomData.type !== 3 && (
+                  <button
+                    className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                    onClick={ removeTimer }
+                    disabled={ timer <= 2 }
+                  >
+                    –
+                  </button>
+                )}
                 <div className="px-4 py-2 bg-black/40 rounded-lg text-white">
                   <span className="font-bold">{ timer }</span> min de débat
                 </div>
-                <button
-                  className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
-                  onClick={ addTimer }
-                  disabled={ timer >= 5 }
-                >
-                  +
-                </button>
+                { roomData.type !== 3 && (
+                  <button
+                    className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                    onClick={ addTimer }
+                    disabled={ timer >= 5 }
+                  >
+                    +
+                  </button>
+                )}
               </div>
 
               {/* Boutons d'action */ }
               <div className="space-y-2">
                 <motion.button
-                  className="sound-tick w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20"
+                  className={`w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20 ${roomData.type === 3 ? 'disabled cursor-not-allowed' : 'sound-ticket'}`}
                   whileHover={ { scale: 1.02 } }
                   whileTap={ { scale: 0.98 } }
                   onClick={ openEditComposition }
+                  disabled={ roomData.type === 3 }
+                  data-tooltip-content={ roomData.type === 3 ? 'Vous ne pouvez pas modifier la composition dans une partie carnage.' : 'Modifier la composition de jeu' }
+                  data-tooltip-id="compo-edit"
                 >
                   Gérer la composition
                 </motion.button>
-
+                <Tooltip id="compo-edit" />
                 <motion.button
                   className="sound-tick w-full px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all"
                   whileHover={ { scale: 1.02 } }
@@ -624,9 +635,19 @@ const GameControls: React.FC<GameControlsProps> = ({
             <GameTimer gameId={gameId || ''} gameStarted={ gameStarted }
               gameFinished={ gameFinished }/>
 
-            {/* Actions de phase */ }
-            <PhaseAction player={ player } roomId={ Number(gameId!) }
-              isInn={ isInn }/>
+            { gameStarted && !player?.alive ? (
+              <div className="bg-black/40 rounded-lg p-3 mb-4">
+                <p className="text-center text-blue-200 mb-2">
+                  Vous êtes <span className="strong font-bold">mort.</span>
+                </p>
+
+                { player.card?.id === 6 && (
+                  <PhaseAction player={ player } roomId={ Number(gameId!) } gameType={roomData.type} isInn={ isInn }/>
+                )}
+              </div>
+            ) : (
+              <PhaseAction player={ player } roomId={ Number(gameId!) } gameType={roomData.type} isInn={ isInn }/>
+            )}
           </div>
         </motion.div>
       </div>

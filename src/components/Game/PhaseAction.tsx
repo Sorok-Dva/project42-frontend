@@ -22,6 +22,7 @@ interface PhaseActionRequest {
 interface PhaseActionProps {
   player: PlayerType
   roomId: number
+  gameType: number
   isInn: boolean
 }
 
@@ -29,6 +30,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   player,
   roomId,
   isInn,
+  gameType,
 }) => {
   const { socket } = useSocket()
   const { user } = useUser()
@@ -199,6 +201,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   if (actionRequest && actionRequest.action.card === 5) {
     return <PhaseActionCard5
       roomId={roomId}
+      gameType={gameType}
       actionRequest={actionRequest as any}
       alienVictim={alienVictim}
       setAlienVictim={setAlienVictim}

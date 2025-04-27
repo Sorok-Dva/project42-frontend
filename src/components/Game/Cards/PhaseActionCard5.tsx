@@ -15,6 +15,7 @@ interface PhaseActionRequestCard5 {
 
 interface PhaseActionCard5Props {
   roomId: number;
+  gameType: number;
   actionRequest: PhaseActionRequestCard5;
   alienVictim: { id: number; nickname: string } | null;
   setAlienVictim: React.Dispatch<React.SetStateAction<{ id: number; nickname: string } | null>>;
@@ -24,6 +25,7 @@ interface PhaseActionCard5Props {
 
 const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
   roomId,
+  gameType,
   actionRequest,
   alienVictim,
   setAlienVictim,
@@ -50,7 +52,7 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
   }
 
   const handleLifeSubmit = () => {
-    if (!socket || lifeElixirUsed) return
+    if (!socket || lifeElixirUsed || gameType === 3) return
     socket.emit('phaseActionResponse', {
       roomId,
       playerId: user!.id,
@@ -103,7 +105,7 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
       )}
 
       {/* Section elixir de Vie */}
-      {alienVictim && (
+      {alienVictim && gameType !== 3 && (
         <div className="mt-6">
           <h4 className="text-base font-medium text-blue-300 mb-2">Elixir de Vie :</h4>
           <button
@@ -115,7 +117,7 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
         </div>
       )}
 
-      {deathElixirUsed && lifeElixirUsed && (
+      {(deathElixirUsed && lifeElixirUsed) || (gameType === 3 && deathElixirUsed) && (
         <div className="mt-6 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
           <p className="text-blue-300">Vous avez utilisé tous vos élixirs.</p>
         </div>
