@@ -1,7 +1,6 @@
 'use client'
 
-import type React from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useUser } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
@@ -45,9 +44,14 @@ const RoomList = () => {
     password: '',
     timer: 3,
     whiteFlag: false,
+    type: 3,
   })
 
   const channel = new BroadcastChannel('site-channel')
+
+  useEffect(() => {
+    setFormData((prev) => ({...prev, timer: formData.type === 3 ? 2 : formData.timer}))
+  }, [formData.type])
 
   useEffect(() => {
     fetchRooms()
@@ -583,37 +587,71 @@ const RoomList = () => {
 
             <div className="space-y-8">
               <div>
-                <h4 className="text-lg font-medium text-blue-300 mb-4">1 - Choisis le type de partie</h4>
+                <h4 className="text-lg font-medium text-blue-300 mb-4">1 - Choisis le type de partie - {formData.type}</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                   <button
-                    className="px-4 py-2 bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
-                    disabled={true}
+                    className={ `px-4 py-2
+                    ${formData.type !== 3 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700 ': 'bg-gradient-to-r  from-purple-600 to-purple-900  text-white rounded-lg shadow-lg'}` }
+                    onClick={() => setFormData((prev) => ({ ...prev, type: 3, timer: 2 }))}
                   >
                     CARNAGE
                   </button>
                   <button
-                    className="px-4 py-2 bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
+                    className={ `px-4 py-2
+                    ${formData.type !== 1 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700 ': 'bg-gradient-to-r from-blue-400 to-blue-600  text-white rounded-lg shadow-lg'} cursor-not-allowed` }
+                    onClick={() => setFormData((prev) => ({ ...prev, type: 1 }))}
                     disabled={true}
                   >
                     FUN
                   </button>
-                  <button className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-800 text-white rounded-lg shadow-lg">
+                  <button
+                    className={ `px-4 py-2
+                    ${formData.type !== 0 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700 ': 'bg-gradient-to-r from-green-600 to-green-800  text-white rounded-lg shadow-lg'} cursor-not-allowed` }
+                    onClick={() => setFormData((prev) => ({ ...prev, type: 0 }))}>
                     NORMALE
                   </button>
                   <button
-                    className="px-4 py-2 bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
+                    className={ `px-4 py-2
+                    ${formData.type !== 2 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700': 'bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg shadow-lg'} cursor-not-allowed` }
+                    onClick={() => setFormData((prev) => ({ ...prev, type: 2 }))}
                     disabled={true}
                   >
                     SÉRIEUSE
                   </button>
                 </div>
 
-                <div className="bg-black/40 rounded-lg p-4 border border-green-500/20">
-                  <p className="text-green-300">
-                    Tu y trouveras de la réflexion et une bonne ambiance. La participation au débat et l'argumentation
-                    sont requises.
-                  </p>
-                </div>
+                { formData.type === 3 && (
+                  <div className="bg-black/40 rounded-lg p-4 border border-purple-500/20">
+                    <p className="text-purple-300">
+                      Viens t'amuser avant tout, partie rapide et composition définie.
+                    </p>
+                  </div>
+                )}
+
+                { formData.type === 1 && (
+                  <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+                    <p className="text-blue-300">
+                      Parties idéales pour discuter avec ses amis et jouer dans une ambiance détendue.
+                    </p>
+                  </div>
+                )}
+
+                { formData.type === 0 && (
+                  <div className="bg-black/40 rounded-lg p-4 border border-green-500/20">
+                    <p className="text-green-300">
+                      Tu y trouveras de la réflexion et une bonne ambiance. La participation au débat et l'argumentation
+                      sont requises.
+                    </p>
+                  </div>
+                )}
+
+                { formData.type === 2 && (
+                  <div className="bg-black/40 rounded-lg p-4 border border-red-500/20">
+                    <p className="text-red-300">
+                      Règles strictes pour joueurs aimant le challenge. Concentration et participation active. Accroche-toi !
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -644,8 +682,9 @@ const RoomList = () => {
                   {[2, 3, 4, 5].map((timerValue) => (
                     <button
                       key={timerValue}
-                      className={`px-4 py-2 ${formData.timer === timerValue ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'} rounded-lg transition-colors`}
+                      className={`px-4 py-2 ${(formData.timer === timerValue || formData.type === 3 && timerValue === 2) ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'} rounded-lg transition-colors ${formData.type === 3 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                       onClick={() => setFormData((prev) => ({ ...prev, timer: timerValue }))}
+                      disabled={formData.type === 3}
                     >
                       {timerValue} min
                     </button>
@@ -701,7 +740,7 @@ const RoomList = () => {
               <div>
                 <h4 className="text-lg font-medium text-blue-300 mb-4">5 - Nombre de joueurs</h4>
                 <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg shadow-lg">
-                  de 6 j à 24 j
+                  { formData.type === 3 ? '6 joueurs' : 'de 6 j à 24 j' }
                 </button>
               </div>
 
