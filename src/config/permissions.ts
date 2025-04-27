@@ -48,7 +48,7 @@ export const ROLE_PERMISSIONS = {
       'startPhase', 'endPhase', 'kill', 'revive',
       'listCards', 'mp', '42', 'forceReload',
     ],
-    godPowers: [],
+    godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
       'music', 'video', 'img', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
