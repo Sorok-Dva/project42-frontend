@@ -297,9 +297,14 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleJoinGame = async () => {
-    if (!gameId || gameStarted || gameFinished) return
+    if (!gameId || gameStarted || gameFinished || players.length >= roomData.maxPlayers || !viewer) return
     try {
-      // @TODO
+      const response = await axios.post(`/api/games/room/${gameId}/join`, {}, {
+        headers: {
+          Authorization: `Bearer ${ token }`,
+        },
+      })
+      window.location.href = `/game/${ response.data.game.id }`
     } catch (error) {
       console.error('Erreur lors du join room:', error)
     }
