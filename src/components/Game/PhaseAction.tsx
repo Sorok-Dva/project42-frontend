@@ -2,21 +2,21 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useSocket } from 'contexts/SocketContext'
 import { useUser } from 'contexts/UserContext'
-import { PlayerType } from 'hooks/useGame'
+import type { PlayerType } from 'hooks/useGame'
 import PhaseActionCard5 from 'components/Game/Cards/PhaseActionCard5'
 import PhaseActionCard20 from 'components/Game/Cards/PhaseActionCard20'
 
 interface PhaseActionRequest {
-  phase: number;
+  phase: number
   action: {
-    card: number;
-    targetCount: number;
-    message: string;
-    channel?: string;
-  };
-  eligibleTargets: { id: number; nickname: string }[];
-  deathElixirUsed?: string | null;
-  lifeElixirUsed?: string | null;
+    card: number
+    targetCount: number
+    message: string
+    channel?: string
+  }
+  eligibleTargets: { id: number; nickname: string }[]
+  deathElixirUsed?: string | null
+  lifeElixirUsed?: string | null
 }
 
 interface PhaseActionProps {
@@ -26,12 +26,7 @@ interface PhaseActionProps {
   isInn: boolean
 }
 
-const PhaseAction: React.FC<PhaseActionProps> = ({
-  player,
-  roomId,
-  isInn,
-  gameType,
-}) => {
+const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameType }) => {
   const { socket } = useSocket()
   const { user } = useUser()
   const [actionRequest, setActionRequest] = useState<PhaseActionRequest | null>(null)
@@ -39,13 +34,27 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   const [selectedNickname, setSelectedNickname] = useState<string | null>(null)
   const [selectedNicknames, setSelectedNicknames] = useState<string[]>([])
   const [alienVictim, setAlienVictim] = useState<{
-    nickname : string;
-    id : number
+    nickname: string
+    id: number
   } | null>(null)
   const [showForm, setShowForm] = useState<boolean>(true)
   const [deathElixirUsed, setDeathElixirUsed] = useState<boolean>(false)
   const [lifeElixirUsed, setLifeElixirUsed] = useState<boolean>(false)
   const [hint, setHint] = useState<string | null>(null)
+  const [selectHeight, setSelectHeight] = useState(0)
+
+  useEffect(() => {
+    if (actionRequest && actionRequest.eligibleTargets.length > 0 && actionRequest.action.targetCount === 1) {
+      const firstTargetId = actionRequest.eligibleTargets[0].id
+      setSelectedTargets([firstTargetId])
+
+      // Mettre à jour également le nickname sélectionné
+      const selectedTarget = actionRequest.eligibleTargets.find((target) => target.id === firstTargetId)
+      if (selectedTarget) {
+        setSelectedNickname(selectedTarget.nickname)
+      }
+    }
+  }, [actionRequest])
 
   useEffect(() => {
     if (!socket || !user || !player || !roomId) return
@@ -98,18 +107,14 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     // Construction de la chaîne des nicknames à partir des ids.
     setSelectedNicknames(
       selectedIds.map((id) => {
-        const selectedTarget = actionRequest?.eligibleTargets.find(
-          (target) => target.id === id,
-        )
+        const selectedTarget = actionRequest?.eligibleTargets.find((target) => target.id === id)
         return selectedTarget ? selectedTarget.nickname : ''
-      })
+      }),
     )
 
     // Pour la sélection unique, on peut mettre à jour selectedNickname si besoin
     if (selectedIds.length === 1) {
-      const selectedTarget = actionRequest?.eligibleTargets.find(
-        (target) => target.id === selectedIds[0],
-      )
+      const selectedTarget = actionRequest?.eligibleTargets.find((target) => target.id === selectedIds[0])
       if (selectedTarget) {
         setSelectedNickname(selectedTarget.nickname)
       }
@@ -121,15 +126,12 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     const select = e.currentTarget
     const option = e.target as HTMLOptionElement
     const value = Number(option.value)
-    if ((selectedTargets.length + 1 > targetCount) && !selectedTargets.includes(value)) {
+    if (selectedTargets.length + 1 > targetCount && !selectedTargets.includes(value)) {
       alert(`Vous ne pouvez pas sélectionner plus de ${targetCount} joueurs`)
       return
     }
     // Modification de la sélection
-    setSelectedTargets((prev) =>
-      prev.includes(value) ? prev.filter((id) => id !== value) : [...prev, value]
-    )
-
+    setSelectedTargets((prev) => (prev.includes(value) ? prev.filter((id) => id !== value) : [...prev, value]))
   }
 
   const handleSubmit = () => {
@@ -184,14 +186,14 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     // Afficher des indications pour certaines cartes
     if (actionRequest.action.card === 22 && selectedNickname) {
       setHint(
-        `Vous avez sélectionné <strong>${ selectedNickname }</strong>. Vous pouvez maintenant lui envoyer un message via le tchat.`,
+        `Vous avez sélectionné <strong>${selectedNickname}</strong>. Vous pouvez maintenant lui envoyer un message via le tchat.`,
       )
       setShowForm(false)
     }
 
     if (actionRequest.action.card === 23 && selectedNicknames.length > 0) {
       setHint(
-        `Vous avez invité <strong>${ selectedNicknames.join(', ') }</strong>. Vous pouvez maintenant discuter entre vous via le tchat.`,
+        `Vous avez invité <strong>${selectedNicknames.join(', ')}</strong>. Vous pouvez maintenant discuter entre vous via le tchat.`,
       )
       setShowForm(false)
     }
@@ -200,29 +202,47 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     // setSelectedNickname(null)
   }
 
+  useEffect(() => {
+    const handleResize = () => {
+      // La hauteur sera gérée par la propriété size et le style maxHeight
+      // Pas besoin de calculer une hauteur spécifique
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [actionRequest])
+
   if (!actionRequest) return null
 
   if (actionRequest && actionRequest.action.card === 5) {
-    return <PhaseActionCard5
-      roomId={roomId}
-      gameType={gameType}
-      actionRequest={actionRequest as any}
-      alienVictim={alienVictim}
-      setAlienVictim={setAlienVictim}
-      deathElixirUsed={deathElixirUsed}
-      lifeElixirUsed={lifeElixirUsed}
-      setDeathElixirUsed={setDeathElixirUsed}
-      setLifeElixirUsed={setLifeElixirUsed}
-    />
+    return (
+      <PhaseActionCard5
+        roomId={roomId}
+        gameType={gameType}
+        actionRequest={actionRequest as any}
+        alienVictim={alienVictim}
+        setAlienVictim={setAlienVictim}
+        deathElixirUsed={deathElixirUsed}
+        lifeElixirUsed={lifeElixirUsed}
+        setDeathElixirUsed={setDeathElixirUsed}
+        setLifeElixirUsed={setLifeElixirUsed}
+      />
+    )
   }
 
   if (actionRequest && actionRequest.action.card === 20) {
-    return <PhaseActionCard20
-      roomId={roomId}
-      actionRequest={actionRequest as any}
-      alienVictim={alienVictim}
-      setAlienVictim={setAlienVictim}
-    />
+    return (
+      <PhaseActionCard20
+        roomId={roomId}
+        actionRequest={actionRequest as any}
+        alienVictim={alienVictim}
+        setAlienVictim={setAlienVictim}
+      />
+    )
   }
 
   // Gestion spéciale pour certaines cartes
@@ -230,27 +250,23 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
     return (
       <motion.div
         className="bg-black/40 backdrop-blur-sm rounded-lg border border-blue-500/30 p-4 mt-4"
-        initial={ { opacity: 0, y: 10 } }
-        animate={ { opacity: 1, y: 0 } }
-        transition={ { duration: 0.3 } }
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
       >
-        <h3
-          className="text-lg font-bold text-white mb-2">{ actionRequest.action.message }</h3>
+        <h3 className="text-lg font-bold text-white mb-2">{actionRequest.action.message}</h3>
 
-        { alienVictim ? (
-          <div
-            className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 mb-3">
+        {alienVictim ? (
+          <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 mb-3">
             <p className="text-green-300">
-              Vous avez choisi
-              d'éliminer <strong>{ alienVictim.nickname }</strong>.
+              Vous avez choisi d'éliminer <strong>{alienVictim.nickname}</strong>.
             </p>
           </div>
-        ): (
-          <div
-            className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
+        ) : (
+          <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
             <p className="text-blue-300">En attente de votre décision...</p>
           </div>
-        ) }
+        )}
       </motion.div>
     )
   }
@@ -258,79 +274,77 @@ const PhaseAction: React.FC<PhaseActionProps> = ({
   return (
     <motion.div
       className="bg-black/40 backdrop-blur-sm rounded-lg border border-blue-500/30 p-4 mt-4"
-      initial={ { opacity: 0, y: 10 } }
-      animate={ { opacity: 1, y: 0 } }
-      transition={ { duration: 0.3 } }
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
     >
-      <h3
-        className="text-lg font-bold text-white mb-2">{ actionRequest.action.message }</h3>
+      <h3 className="text-lg font-bold text-white mb-2">{actionRequest.action.message}</h3>
 
-      { hint && (
-        <div
-          className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 mb-3">
-          <p className="text-blue-300"
-            dangerouslySetInnerHTML={ { __html: hint } }/>
+      {hint && (
+        <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 mb-3">
+          <p className="text-blue-300" dangerouslySetInnerHTML={{ __html: hint }} />
         </div>
-      ) }
+      )}
 
-      { isInn && (
-        <div
-          className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3 mb-3">
+      {isInn && (
+        <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3 mb-3">
           <p className="text-yellow-300">
-            Vous avez été invité par l'aubergiste de la station ! Vous pouvez
-            maintenant discuter entre vous.
+            Vous avez été invité par l'aubergiste de la station ! Vous pouvez maintenant discuter entre vous.
           </p>
         </div>
-      ) }
+      )}
 
-      { showForm && actionRequest.action.targetCount > 0 && (
+      {showForm && actionRequest.action.targetCount > 0 && (
         <div className="space-y-4">
           <div className="relative">
             <select
-              multiple={ actionRequest.action.targetCount > 1 }
-              value={ selectedTargets.map(String) }
-              onChange={ handleSelectionChange }
-              { ...(actionRequest.action.targetCount > 1
+              multiple={actionRequest.action.targetCount > 1}
+              value={selectedTargets.map(String)}
+              onChange={handleSelectionChange}
+              {...(actionRequest.action.targetCount > 1
                 ? { onMouseDown: (e: any) => handleMouseDown(e, actionRequest.action.targetCount) }
-                : {}) }
+                : {})}
               className="w-full bg-black/60 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-              size={ Math.min(actionRequest.eligibleTargets.length, 5) }
+              size={Math.min(actionRequest.eligibleTargets.length, Math.max(5, Math.floor(window.innerHeight * 0.05)))}
+              style={{
+                height: 'auto',
+                maxHeight: 'min(40vh, 300px)',
+                overflow: 'auto'
+              }}
             >
-              { actionRequest.eligibleTargets.map((target) => (
-                <option key={ target.id } value={ target.id }
-                  className="p-2 hover:bg-blue-900/30">
-                  { target.nickname }
+              {actionRequest.eligibleTargets.map((target) => (
+                <option key={target.id} value={target.id} className="p-2 hover:bg-blue-900/30">
+                  {target.nickname}
                 </option>
-              )) }
+              ))}
             </select>
 
-            { actionRequest.action.targetCount > 1 && (
+            {actionRequest.action.targetCount > 1 && (
               <div className="text-xs text-blue-300 mt-1">
-                { actionRequest.action.card === 7
+                {actionRequest.action.card === 7
                   ? 'Sélectionnez exactement 2 joueurs'
                   : actionRequest.action.card === 15
                     ? 'Sélectionnez jusqu\'à 2 joueurs'
                     : actionRequest.action.card === 23
                       ? 'Sélectionnez jusqu\'à 3 joueurs'
-                      : `Sélectionnez jusqu'à ${ actionRequest.action.targetCount } joueurs` }
+                      : `Sélectionnez jusqu'à ${actionRequest.action.targetCount} joueurs`}
               </div>
-            ) }
+            )}
           </div>
 
           <motion.button
             className="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20"
-            whileHover={ { scale: 1.02 } }
-            whileTap={ { scale: 0.98 } }
-            onClick={ handleSubmit }
-            disabled={ selectedTargets.length === 0 }
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleSubmit}
+            disabled={selectedTargets.length === 0}
           >
             Valider
           </motion.button>
         </div>
-      ) }
+      )}
     </motion.div>
   )
 }
 
 export default PhaseAction
-
