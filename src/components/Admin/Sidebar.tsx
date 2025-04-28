@@ -15,6 +15,7 @@ import {
   ChevronDown,
   LogOut,
   Key,
+  Gamepad2,
 } from 'lucide-react'
 
 interface AdminSidebarProps {
@@ -76,6 +77,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
       title: 'Statistics',
       icon: <BarChart3 size={20} />,
       href: '/admin/statistics',
+    },
+    {
+      title: 'Cartes',
+      icon: <Gamepad2 size={20} />,
+      href: '/admin/cards',
     },
     {
       title: 'Modération',

@@ -38,6 +38,7 @@ import AdminUserProfile from 'pages/admin/users/UserProfile'
 import AdminDashboard from 'pages/admin/Dashboard'
 import AdminAlphaKeys from 'pages/admin/AlphaKeys'
 import AdminNews from 'pages/admin/News'
+import AdminCards from 'pages/admin/cards/List'
 import ResetPassword from 'pages/ResetPassword'
 import ServiceUnavailable from 'pages/ServiceUnavailable'
 import UserSettingsPage from 'pages/UserSettings'
@@ -111,6 +112,7 @@ const AppContent: React.FC = () => {
                           <Route path="users/:id" element={<AdminUserProfile />} />
                           <Route path="alpha-keys" element={<AdminAlphaKeys />} />
                           <Route path="news" element={<AdminNews />} />
+                          <Route path="cards" element={<AdminCards />} />
                         </Route>
                       </Route>
                     )}
