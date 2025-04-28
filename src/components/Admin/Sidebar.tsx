@@ -16,6 +16,7 @@ import {
   LogOut,
   Key,
   Gamepad2,
+  ChartArea,
 } from 'lucide-react'
 
 interface AdminSidebarProps {
@@ -92,6 +93,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
       title: 'Paramètres',
       icon: <Settings size={20} />,
       href: '/admin/settings',
+    },
+    {
+      title: 'Grafana',
+      icon: <ChartArea size={20} />,
+      href: process.env.REACT_APP_GRAFANA_DASHBOARD || '/admin',
     },
   ]
 
