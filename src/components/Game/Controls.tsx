@@ -221,7 +221,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleAddFavorite = async () => {
-    if (!gameId || gameStarted || !gameFinished || !isArchive) return
+    if (!gameId || !gameFinished) return
     try {
       await addFavoriteGame(gameId, isFavoriteArchive ? 'delete' : 'add', favoriteComment, token)
       if (isFavoriteArchive) {
