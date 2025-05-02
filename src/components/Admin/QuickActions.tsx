@@ -10,9 +10,25 @@ import {
   Settings,
   Gamepad2,
   UserRoundMinusIcon,
+  ClockFading,
 } from 'lucide-react'
+import { useAuth } from 'contexts/AuthContext'
+import axios from 'axios'
+import { ToastDefaultOptions } from 'utils/toastOptions'
+import { toast } from 'react-toastify'
 
 const QuickActions: React.FC = () => {
+  const { token } = useAuth()
+  const executeCronjobs = async () => {
+    if (!token) return
+    try {
+      await axios.post('/api/server/cronjobs', {}, { headers: { Authorization: `Bearer ${token}` } })
+      toast.success('Cronjob en cours d\'exécution.', ToastDefaultOptions)
+    } catch (e) {
+      toast.error('Une erreur est survenue lors de l\'exécution des cronjobs.', ToastDefaultOptions)
+    }
+  }
+
   const actions = [
     {
       title: 'Maintenance',
@@ -49,6 +65,13 @@ const QuickActions: React.FC = () => {
       icon: <Shield size={20} />,
       color: 'from-red-600 to-red-400',
       href: '/admin/moderation',
+    },
+    {
+      title: 'Executer Cronjobs',
+      icon: <ClockFading size={20} />,
+      color: 'from-green-600 to-green-100',
+      href: '#',
+      onclick: () => executeCronjobs()
     },
     {
       title: 'Paramètres',
