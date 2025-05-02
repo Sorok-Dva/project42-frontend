@@ -1,11 +1,17 @@
-import React from 'react'
-import { Socket } from 'socket.io-client'
+'use client'
+
+import type React from 'react'
+import { useState, useEffect } from 'react'
+import type { Socket } from 'socket.io-client'
 import ViewersList from 'components/Game/ViewersList'
-import { Viewer } from 'hooks/useGame'
+import type { Viewer } from 'hooks/useGame'
 import { Tooltip } from 'react-tooltip'
 import { faUserAstronaut } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faHeart } from '@fortawesome/free-solid-svg-icons/faHeart'
+import { motion, AnimatePresence } from 'framer-motion'
+import axios from 'axios'
+import { createPortal } from 'react-dom'
 
 interface Player {
   nickname: string
@@ -44,6 +50,28 @@ interface PlayersListProps {
   innList: string[]
 }
 
+interface SuspiciousCard {
+  playerNickname: string
+  cardId: number
+}
+
+export interface GameCard {
+  id: number
+  name: string
+}
+
+export interface RoomCard {
+  id: number
+  roomId: number
+  cardId: number
+  quantity: number
+}
+
+export interface CardsResponse {
+  gameCards: Record<number, GameCard>
+  roomCards: Record<number, RoomCard>
+}
+
 const PlayersList: React.FC<PlayersListProps> = ({
   players,
   player,
@@ -65,6 +93,49 @@ const PlayersList: React.FC<PlayersListProps> = ({
   isInn,
   innList,
 }) => {
+  const [availableCards, setAvailableCards] = useState<{ id: number, name: string }[]>([])
+  const [suspiciousCards, setSuspiciousCards] = useState<SuspiciousCard[]>([])
+  const [showCardSelector, setShowCardSelector] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
+
+  // Récupérer les suspicious cards depuis le localStorage au chargement
+  useEffect(() => {
+    if (gameId && player) {
+      const retrieveRoomsCards = async () => {
+        const { data } = await axios.get<CardsResponse>(`/api/games/room/${gameId}/cards`)
+        const { gameCards, roomCards } = data
+
+        const available = Object.values(roomCards)
+          .filter(rc => rc.quantity > 0)
+          .map(rc => ({
+            id: rc.cardId,
+            name: gameCards[rc.cardId].name
+          }))
+
+        setAvailableCards(available)
+      }
+
+      const saved = localStorage.getItem(`suspiciousCards_${gameId}`)
+      if (saved) {
+        setSuspiciousCards(JSON.parse(saved))
+      }
+
+      retrieveRoomsCards()
+    }
+  }, [gameId, player])
+
+  // Sauvegarder les suspicious cards dans le localStorage
+  useEffect(() => {
+    if (gameId && player && suspiciousCards.length > 0) {
+      localStorage.setItem(`suspiciousCards_${gameId}`, JSON.stringify(suspiciousCards))
+    }
+  }, [suspiciousCards, gameId, player])
+
   const handleKickPlayer = (nickname: string) => {
     if (!isCreator || !socket || gameStarted) return
     try {
@@ -98,6 +169,31 @@ const PlayersList: React.FC<PlayersListProps> = ({
     return 0
   })
 
+  // Gérer le clic sur une carte suspecte
+  const handleSuspiciousCardClick = (nickname: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (gameFinished || !player) return
+
+    setShowCardSelector((prev) => (prev === nickname ? null : nickname))
+  }
+
+  // Assigner une carte suspecte à un joueur
+  const assignSuspiciousCard = (playerNickname: string, cardId: number) => {
+    setSuspiciousCards((prev) => {
+      // Filtrer les cartes existantes pour ce joueur
+      const filtered = prev.filter((card) => card.playerNickname !== playerNickname)
+      // Ajouter la nouvelle carte
+      return [...filtered, { playerNickname, cardId }]
+    })
+    setShowCardSelector(null)
+  }
+
+  // Obtenir l'ID de la carte suspecte pour un joueur
+  const getSuspiciousCardId = (nickname: string): number => {
+    const card = suspiciousCards.find((card) => card.playerNickname === nickname)
+    return card ? card.cardId : 0
+  }
+
   return (
     <div className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden">
       <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
@@ -119,6 +215,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
             const isHighlighted = highlightedPlayers[_player.nickname]
             const mostVotes = voteCounts[_player.nickname] === maxVotes() && maxVotes() > 0
             const isCurrentPlayer = _player.nickname === player?.nickname
+            const suspiciousCardId = getSuspiciousCardId(_player.nickname)
 
             return (
               <div
@@ -127,18 +224,86 @@ const PlayersList: React.FC<PlayersListProps> = ({
                 style={{ backgroundColor: isHighlighted || '' }}
               >
                 {/* Indicateurs de rôle et statut */}
-                <div className="flex items-center space-x-1 absolute top-1/2 transform -translate-y-1/2">
+                <div className="flex items-center absolute top-1/2 transform -translate-y-1/2">
                   {/* Carte révélée pour les morts ou fin de partie */}
                   {((gameStarted && !_player.alive) || gameFinished) && _player.cardId && (
                     <div
-                      className="w-6 h-6 rounded-full overflow-hidden border border-gray-700 group-hover:scale-150 transition-transform"
+                      className="w-7 h-7 overflow-hidden border border-gray-700 group-hover:scale-150 transition-transform"
                       title={`Carte: ${_player.cardId}`}
                     >
                       <img
                         src={`/assets/images/carte${_player.cardId}.png`}
                         alt="Carte"
-                        className="w-full h-full"
+                        className="w-full h-full object-cover"
                       />
+                    </div>
+                  )}
+
+                  {/* Carte suspecte pour les joueurs vivants pendant la partie */}
+                  {player && gameStarted && !gameFinished && _player.alive && _player.nickname !== player.nickname && (
+                    <div className="relative">
+                      <img
+                        className="w-7 h-7 border border-yellow-500/50 cursor-pointer hover:border-yellow-500 transition-all suspicious_card"
+                        src={`/assets/images/carte${suspiciousCardId}.png`}
+                        alt="Suspicious Card"
+                        onClick={(e) => handleSuspiciousCardClick(_player.nickname, e)}
+                        data-tooltip-content={
+                          suspiciousCardId > 0
+                            ? `Vous suspectez que ${_player.nickname} est ${availableCards.find((c) => c.id === suspiciousCardId)?.name || 'Inconnu'}`
+                            : 'Cliquez pour marquer ce joueur avec un rôle suspecté'
+                        }
+                        data-tooltip-id={`suspicious_${_player.nickname}`}
+                      />
+                      <Tooltip id={`suspicious_${_player.nickname}`} />
+
+                      {/* Sélecteur de cartes - Rendu directement dans le DOM */}
+                      {showCardSelector === _player.nickname && mounted && (
+                        createPortal(<div className="fixed inset-0 bg-transparent z-[9999]" onClick={() => setShowCardSelector(null)}>
+                          <div
+                            className="absolute bg-black/95 border-2 border-yellow-500/70 rounded-lg p-3 w-72 shadow-xl"
+                            style={{
+                              top: '50%',
+                              left: '85%',
+                              transform: 'translate(-50%, -85%)',
+                              maxHeight: '80vh',
+                              overflow: 'auto',
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="text-sm text-yellow-400 mb-2 font-semibold">
+                              Rôle suspecté pour {_player.nickname}:
+                            </div>
+                            <div className="grid grid-cols-5 gap-2 max-h-60 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-yellow-500/30 scrollbar-track-black/20">
+                              {availableCards.length > 0 ? (
+                                availableCards.map((card) => (
+                                  <div
+                                    key={card.id}
+                                    className="cursor-pointer bg-black/60 hover:bg-yellow-900/40 rounded-md p-1 transition-colors flex flex-col items-center border border-yellow-500/30 hover:border-yellow-500/70"
+                                    onClick={() => assignSuspiciousCard(_player.nickname, card.id)}
+                                    data-tooltip-content={card.name}
+                                    data-tooltip-id={`card_${card.id}_${_player.nickname}`}
+                                  >
+                                    <img
+                                      src={`/assets/images/carte${card.id}.png`}
+                                      alt={card.name}
+                                      className="w-10 h-10 object-cover rounded-md"
+                                    />
+                                    <Tooltip id={`card_${card.id}_${_player.nickname}`} />
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="col-span-5 text-center text-gray-400 py-4">Chargement des cartes...</div>
+                              )}
+                            </div>
+                            <div
+                              className="mt-3 text-center py-2 text-xs text-gray-400 cursor-pointer hover:text-gray-300 bg-black/40 hover:bg-black/60 rounded-md border border-yellow-500/30"
+                              onClick={() => assignSuspiciousCard(_player.nickname, 0)}
+                            >
+                              Réinitialiser
+                            </div>
+                          </div>
+                        </div>, document.body)
+                      )}
                     </div>
                   )}
 
@@ -154,9 +319,15 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
                 {/* Nom du joueur */}
                 <div
-                  className={`flex-1 ml-6 ${!_player.alive ? 'text-red-300 line-through' : isCurrentPlayer ? 'text-blue-300 font-bold' : 'text-white'}`}
+                  className={`flex-1 ${!_player.alive ? 'text-red-300 line-through' : isCurrentPlayer ? 'text-blue-300 font-bold' : 'text-white'}
+                  ${player && gameStarted && !gameFinished && _player.alive && _player.nickname !== player.nickname ? ' ml-9' : ' ml-6'}
+                  ${player && gameStarted && !gameFinished && _player.alive && _player.nickname !== player.nickname && !isNight ? ' ml-16' : ''}
+                  ${((gameStarted && !_player.alive) || gameFinished) && _player.cardId ? ' ml-9' : ''}
+                  `}
                 >
-                  <span className="player sound-tick" data-profile={ _player.nickname }>{_player.nickname}</span>
+                  <span className="player sound-tick" data-profile={_player.nickname}>
+                    {_player.nickname}
+                  </span>
 
                   {/* Badges de statut */}
                   <div className="inline-flex gap-1 ml-1">
@@ -187,32 +358,43 @@ const PlayersList: React.FC<PlayersListProps> = ({
                     )}
                     {(coupleList.includes(_player.nickname) || _player.inLove) && (
                       <>
-                        <span className="inline-block px-1 text-red-300"
+                        <span
+                          className="inline-block px-1 text-red-300"
                           data-tooltip-content={_player.inLove ? 'Ce joueur était en couple.' : 'Vous êtes en couple !'}
-                          data-tooltip-id="lover"><FontAwesomeIcon icon={faHeart}/></span>
+                          data-tooltip-id="lover"
+                        >
+                          <FontAwesomeIcon icon={faHeart} />
+                        </span>
                         <Tooltip id="lover" />
                       </>
                     )}
                     {_player.isCharmed && (
                       <>
-                        <div className="badge-jdf"
-                          data-tooltip-content={_player.nickname !== player?.nickname ? 'Ce joueur est charmé.' : 'Vous êtes charmé !'}
-                          data-tooltip-id="charmed"></div>
+                        <div
+                          className="badge-jdf"
+                          data-tooltip-content={
+                            _player.nickname !== player?.nickname ? 'Ce joueur est charmé.' : 'Vous êtes charmé !'
+                          }
+                          data-tooltip-id="charmed"
+                        ></div>
                         <Tooltip id="charmed" />
                       </>
                     )}
                     {_player.isInfected && (
                       <>
-                        <div className="inline-block px-1"
+                        <div
+                          className="inline-block px-1"
                           data-tooltip-content="Ce joueur a été infecté."
-                          data-tooltip-id={`${_player.nickname}_infected`}>
-                          <span className="inline-block px-1 text-xs bg-orange-900/60 text-orange-300 rounded">Infecté</span>
+                          data-tooltip-id={`${_player.nickname}_infected`}
+                        >
+                          <span className="inline-block px-1 text-xs bg-orange-900/60 text-orange-300 rounded">
+                            Infecté
+                          </span>
                         </div>
                         <Tooltip id={`${_player.nickname}_infected`} />
-
                       </>
                     )}
-                    {(innList.includes(_player.nickname) && isNight) && (
+                    {innList.includes(_player.nickname) && isNight && (
                       <span className="inline-block px-1 text-xs bg-yellow-900/60 text-yellow-300 rounded">
                         Auberge
                       </span>
@@ -220,13 +402,13 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   </div>
 
                   {/* Indication de vote */}
-                  {(!isNight && _player.target && !gameFinished) && (
+                  {!isNight && _player.target && !gameFinished && (
                     <span className="text-sm text-gray-400">→ {_player.target}</span>
                   )}
                 </div>
 
                 {/* Actions sur le joueur */}
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center">
                   {/* Indicateur "prêt" */}
                   {!gameStarted && !gameFinished && _player.ready && (
                     <div className="text-green-400" title="Ce joueur est prêt">
@@ -293,4 +475,3 @@ const PlayersList: React.FC<PlayersListProps> = ({
 }
 
 export default PlayersList
-
