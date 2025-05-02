@@ -153,6 +153,16 @@ const GameControls: React.FC<GameControlsProps> = ({
         { headers: { Authorization: `Bearer ${token}` } },
       )
       const newGame = response.data.game
+
+      await axios.post(
+        `/api/games/room/${newGame.id}/join`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
       setReplayGameId(newGame.id)
       window.location.href = `/game/${newGame.id}`
     } catch (e: any) {
