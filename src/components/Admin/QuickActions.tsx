@@ -71,7 +71,7 @@ const QuickActions: React.FC = () => {
       icon: <ClockFading size={20} />,
       color: 'from-green-600 to-green-100',
       href: '#',
-      onclick: () => executeCronjobs
+      onclick: () => executeCronjobs()
     },
     {
       title: 'Paramètres',
