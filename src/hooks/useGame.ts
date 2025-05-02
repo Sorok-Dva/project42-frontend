@@ -207,7 +207,7 @@ export const useGame = (
     if (!gameId || !authorized) return
     try {
       const [playersData, viewersData, chatData] = await Promise.all([
-        fetchPlayers(gameId),
+        fetchPlayers(gameId, token),
         fetchViewers(gameId),
         fetchChatMessages(gameId, token),
       ])

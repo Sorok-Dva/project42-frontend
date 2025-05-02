@@ -16,8 +16,12 @@ export const fetchGameDetails = async (gameId: string, token?: string | null) =>
 /**
  * Récupère la liste des joueurs
  */
-export const fetchPlayers = async (gameId: string) => {
-  const response = await axios.get(`/api/games/room/${gameId}/players`)
+export const fetchPlayers = async (gameId: string, token: string | null) => {
+  const response = await axios.get(`/api/games/room/${gameId}/players`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
   return response.data
 }
 
