@@ -9,12 +9,13 @@ import { Tooltip } from 'react-tooltip'
 import { faUserAstronaut } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faHeart } from '@fortawesome/free-solid-svg-icons/faHeart'
-import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 import { createPortal } from 'react-dom'
+import { useUser } from 'contexts/UserContext'
 
 interface Player {
   nickname: string
+  realNickname: string
   ready: boolean
   alive: boolean
   cardId?: number
@@ -93,6 +94,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   isInn,
   innList,
 }) => {
+  const { user } = useUser()
   const [availableCards, setAvailableCards] = useState<{ id: number, name: string }[]>([])
   const [suspiciousCards, setSuspiciousCards] = useState<SuspiciousCard[]>([])
   const [showCardSelector, setShowCardSelector] = useState<string | null>(null)
@@ -324,7 +326,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   ${((gameStarted && !_player.alive) || gameFinished) && _player.cardId ? ' ml-9' : ''}
                   `}
                 >
-                  <span className="player sound-tick" data-profile={_player.nickname}>
+                  <span className="player sound-tick" data-profile={user?.isAdmin ? _player.realNickname : _player.nickname}>
                     {_player.nickname}
                   </span>
 
