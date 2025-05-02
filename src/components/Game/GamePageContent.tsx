@@ -627,6 +627,7 @@ const GamePage = () => {
                     gameFinished={gameFinished}
                     isArchive={isArchive}
                     isInn={isInn}
+                    gameType={roomData.type}
                   />
                 )}
               </Box>

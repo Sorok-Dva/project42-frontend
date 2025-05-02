@@ -4,6 +4,7 @@ import { User } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
 import { motion } from 'framer-motion'
 import ChatMessages, { ChatMessagesHandle } from 'components/Game/ChatMessage'
+import GameRule from 'components/Game/Rules'
 import axios from 'axios'
 
 interface ChatProps {
@@ -21,6 +22,7 @@ interface ChatProps {
   messages: Message[]
   highlightedPlayers: { [nickname: string]: string }
   isInn: boolean
+  gameType: number
 }
 
 interface GiphyResult {
@@ -50,6 +52,7 @@ const Chat: React.FC<ChatProps> = ({
   gameFinished,
   isArchive,
   isInn,
+  gameType,
 }) => {
   const { socket } = useSocket()
   const [newMessage, setNewMessage] = useState('')
@@ -254,31 +257,8 @@ const Chat: React.FC<ChatProps> = ({
       {/* Zone de messages */}
       <div className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/30 scrollbar-track-black/20">
         {/* Règles du jeu */ }
-        <div
-          className="mb-4 p-3 bg-black/40 rounded-lg border border-blue-500/20">
-          <p className="text-blue-200 text-sm mb-2">
-            <span className="font-bold text-white">Rappel :</span> vous êtes
-            sur une partie{ ' ' }
-            <span
-              className="inline-block w-3 h-3 rounded-full bg-green-500 align-middle mx-1"></span>{ ' ' }
-            <strong>Normale</strong>
-          </p>
-          <ul className="list-disc list-inside text-xs text-blue-200 space-y-1">
-            <li>
-              Il est strictement <strong>interdit d'insulter</strong> un autre joueur et d'avoir une attitude malsaine.
-            </li>
-            <li>
-              Le dévoilement est <strong>interdit</strong> et <strong>sanctionné</strong> systématiquement.
-            </li>
-            <li>
-              Tous les joueurs <strong>doivent</strong> participer au débat. Il n'est pas autorisé d'être{' '}
-              <strong>AFK</strong>.
-            </li>
-          </ul>
-          <p className="text-xs text-blue-200 mt-2">
-            <strong>Rappel :</strong> ne divulguez <strong>jamais</strong> vos informations privées sur le jeu.
-          </p>
-        </div>
+
+        <GameRule gameType={gameType} />
         <hr />
 
         {/* Messages */ }
