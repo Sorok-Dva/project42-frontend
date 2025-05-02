@@ -22,6 +22,7 @@ import { getRandomColor } from 'utils/getRandomColor'
 import 'styles/Game.scss'
 import Composition from './Composition'
 import { parallaxStars, staticStars } from 'utils/animations'
+import { PlayerType } from 'hooks/useGame'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -255,10 +256,11 @@ const GamePage = () => {
         }
 
         const response = await leaveGame(token)
+        console.log('leave response', response)
         if (response.message) {
           socket.emit('leaveRoom', {
             roomId: gameId,
-            player: player ? { id: user?.id, nickname: user?.nickname } : null,
+            player: player ? { id: user?.id, nickname: response?.nickname, realNickname: response?.realNickname } : null,
             viewer,
           })
         }

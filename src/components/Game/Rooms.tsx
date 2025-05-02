@@ -6,6 +6,7 @@ import { useUser } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
 import type { RoomCard, RoomData } from 'hooks/useGame'
 import { useAuth } from 'contexts/AuthContext'
+import { leaveGame } from 'services/gameService'
 
 const generateCards = (cards: RoomCard[]) => {
   return cards.map((c) => {
@@ -137,18 +138,27 @@ const RoomList = () => {
   }
 
   const handleSubmit = async () => {
-    if (inGame) return
+    if (inGame || !token ) return
     try {
       const response = await axios.post('/api/games/room', formData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      setGameId(response.data.gameId)
-      setPlayerRoomId(response.data.gameId)
+      setGameId(response.data.game.id)
+      setPlayerRoomId(response.data.game.id)
       setInGame(true)
       setShowForm(false)
       fetchRooms()
+      await axios.post(
+        `/api/games/room/${response.data.game.id}/join`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
       window.open(`/game/${response.data.game.id}`, '_blank')
     } catch (error: any) {
       if (error.response?.data?.error) {
@@ -243,19 +253,11 @@ const RoomList = () => {
       return
     }
     try {
-      const response = await axios.post(
-        '/api/games/players/room/leave',
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        },
-      )
+      const response = await leaveGame(token)
       if (response.data.message) {
         socket.emit('leaveRoom', {
           roomId: playerRoomId,
-          player: { id: user?.id, nickname: user?.nickname },
+          player: user ? { id: user?.id, nickname: response?.nickname, realNickname: response?.realNickname } : null,
         })
         setPlayerRoomId(null)
         setInGame(false)
@@ -705,7 +707,7 @@ const RoomList = () => {
                     Sans points
                   </button>
                   <button
-                    className="px-4 py-2 bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
+                    className={`px-4 py-2 rounded-lg transition-colors ${formData.anonymousGame ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'}`}
                     onClick={() => setFormData((prev) => ({ ...prev, anonymousGame: !prev.anonymousGame }))}
                   >
                     Anonyme

@@ -2,8 +2,10 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { Box, Button, TextField, Checkbox, FormControlLabel, Typography, Paper } from '@mui/material'
 import { useUser } from 'contexts/UserContext'
+import { useAuth } from 'contexts/AuthContext'
 
 const CreateGame = () => {
+  const { token } = useAuth()
   const { user } = useUser()
   const [inGame, setInGame] = useState(false)
   const [showForm, setShowForm] = useState(false)
@@ -28,17 +30,27 @@ const CreateGame = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (!token) return
 
     try {
       const response = await axios.post('/api/games/room',
         formData,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${token}`,
           },
         })
       setGameId(response.data.gameId)
       setInGame(true)
+      await axios.post(
+        `/api/games/room/${gameId}/join`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
       window.open(`/game/${response.data.game.id}`, '_blank')
     } catch (error: any) {
       if (error.response?.data?.error) {
