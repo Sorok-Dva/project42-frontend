@@ -320,8 +320,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                 {/* Nom du joueur */}
                 <div
                   className={`flex-1 ${!_player.alive ? 'text-red-300 line-through' : isCurrentPlayer ? 'text-blue-300 font-bold' : 'text-white'}
-                  ${player && gameStarted && !gameFinished && _player.alive && _player.nickname !== player.nickname ? ' ml-9' : ' ml-6'}
-                  ${player && gameStarted && !gameFinished && _player.alive && _player.nickname !== player.nickname && !isNight ? ' ml-16' : ''}
+                  ${player && gameStarted && !gameFinished && _player.alive && _player.nickname !== player.nickname && !isNight ? ' ml-16' : player && gameStarted && !gameFinished && _player.alive && _player.nickname !== player.nickname ? ' ml-9' : ' ml-6'}
                   ${((gameStarted && !_player.alive) || gameFinished) && _player.cardId ? ' ml-9' : ''}
                   `}
                 >
