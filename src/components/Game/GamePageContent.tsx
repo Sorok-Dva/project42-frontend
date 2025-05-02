@@ -445,6 +445,13 @@ const GamePage = () => {
     )
   }
 
+  const options = []
+  if (roomData.anonymousGame) {
+    options.push('Anonyme')
+  }
+  if (roomData.whiteFlag) {
+    options.push('Sans Points')
+  }
   return (
     <>
       {isAuthorized && creator ? (
@@ -469,7 +476,7 @@ const GamePage = () => {
                       <span className="text-blue-300">[{GAME_TYPES[roomData.type]}]</span> {roomData.name}
                     </h1>
                     <p className="text-sm text-blue-300">
-                      {players.length}/{slots} joueurs • {isNight ? 'Phase nocturne' : 'Phase diurne'}
+                      {players.length}/{slots} joueurs • Options: {options.length > 0 ? options.join(',') : 'Aucune'} • {isNight ? 'Phase nocturne' : 'Phase diurne'}
                     </p>
                   </div>
                 </div>

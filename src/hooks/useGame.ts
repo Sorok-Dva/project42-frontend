@@ -73,6 +73,8 @@ export interface RoomData {
   isPrivate: boolean
   password?: string
   phase: number
+  whiteFlag: boolean
+  anonymousGame: boolean
   cards: RoomCard[]
   players?: Partial<PlayerType>[]
   createdAt: Date
@@ -104,6 +106,8 @@ export const useGame = (
     isPrivate: true,
     cards: [],
     phase: 0,
+    whiteFlag: false,
+    anonymousGame: false,
     createdAt: new Date(),
     updatedAt: new Date(),
   })
