@@ -71,7 +71,7 @@ const QuickActions: React.FC = () => {
       icon: <ClockFading size={20} />,
       color: 'from-green-600 to-green-100',
       href: '#',
-      onclick: () => executeCronjobs()
+      onclick: () => executeCronjobs
     },
     {
       title: 'Paramètres',
@@ -87,6 +87,7 @@ const QuickActions: React.FC = () => {
         <motion.a
           key={action.title}
           href={action.href}
+          onClick={action.onclick}
           className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-lg border border-blue-500/30 p-4 flex flex-col items-center justify-center hover:border-blue-400/50 transition-all"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
