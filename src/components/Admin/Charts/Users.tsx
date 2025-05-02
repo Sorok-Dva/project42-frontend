@@ -11,8 +11,8 @@ type TimeRange = 'day' | 'week' | 'month' | 'year'
 
 interface UserData {
   name: string
-  'Total Users': number
-  'New Users': number
+  'Utilisateurs total': number
+  'Nouveaux utilisateurs': number
 }
 
 const UserChart: React.FC = () => {
