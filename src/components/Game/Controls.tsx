@@ -1,4 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+'use client'
+
+import type React from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { usePermissions } from 'hooks/usePermissions'
 import {
@@ -14,7 +17,7 @@ import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import GameTimer from './Timer'
 import PhaseAction from './PhaseAction'
-import { PlayerType, RoomData, Viewer } from 'hooks/useGame'
+import type { PlayerType, RoomData, Viewer } from 'hooks/useGame'
 import EditCompoModal from 'components/Game/EditComposition'
 import TransferLeadModal from 'components/Game/TransferLead'
 import axios from 'axios'
@@ -82,6 +85,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const [isFavoriteArchive, setIsFavoriteArchive] = useState<boolean>(false)
   const [favoriteComment, setFavoriteComment] = useState<string>('')
   const [replayGameId, setReplayGameId] = useState<number | null>(null)
+  const [isSavingComment, setIsSavingComment] = useState<boolean>(false)
 
   const openEditComposition = () => {
     if (!isCreator || isArchive || roomData.type === 3) return
@@ -110,15 +114,34 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   useEffect(() => {
+    if (!socket || !token) return
+
+    const getFavorite = async () => {
+      const response = await axios.post(`/api/games/favorite/${gameId}/get`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (response.data.favorite) {
+        setIsFavoriteArchive(true)
+        setFavoriteComment(response.data.favorite.comment)
+      }
+    }
+
+    getFavorite()
+  }, [])
+
+  useEffect(() => {
     if (!socket) return
 
-    const onReplayed = ({ newGameId, creator }: { newGameId: number, creator: string }) => {
+    const onReplayed = ({ newGameId, creator }: { newGameId: number; creator: string }) => {
       setReplayGameId(newGameId)
       new Audio('/assets/sounds/rewind.wav').play().catch(() => {})
     }
 
     socket.on('gameReplayed', onReplayed)
-    return () => { socket.off('gameReplayed', ({ newGameId }) => setReplayGameId(newGameId)) }
+    return () => {
+      socket.off('gameReplayed', ({ newGameId }) => setReplayGameId(newGameId))
+    }
   }, [socket])
 
   const handleReplay = async () => {
@@ -127,7 +150,7 @@ const GameControls: React.FC<GameControlsProps> = ({
       const response = await axios.post(
         `/api/games/room/${roomData.id}/replay`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       )
       const newGame = response.data.game
       setReplayGameId(newGame.id)
@@ -142,11 +165,15 @@ const GameControls: React.FC<GameControlsProps> = ({
     if (replayGameId) {
       try {
         if (player) {
-          await axios.post(`/api/games/room/${replayGameId}/join`, {}, {
-            headers: {
-              Authorization: `Bearer ${token}`,
+          await axios.post(
+            `/api/games/room/${replayGameId}/join`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
             },
-          })
+          )
         }
 
         window.location.href = `/game/${replayGameId}`
@@ -186,7 +213,12 @@ const GameControls: React.FC<GameControlsProps> = ({
   const handleAddFavorite = async () => {
     if (!gameId || gameStarted || !gameFinished || !isArchive) return
     try {
-      addFavoriteGame(gameId, token)
+      await addFavoriteGame(gameId, isFavoriteArchive ? 'delete' : 'add', favoriteComment, token)
+      if (isFavoriteArchive) {
+        toast.info('Partie retirée des favoris.', ToastDefaultOptions)
+      } else {
+        toast.success('Partie enregistrée !', ToastDefaultOptions)
+      }
       setIsFavoriteArchive(!isFavoriteArchive)
     } catch (error) {
       alert(error)
@@ -210,7 +242,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const removePlace = () => {
     if (!gameId || gameStarted || gameFinished || slots <= 6 || roomData.type === 3) return
 
-    setSlots(prevSlots => prevSlots - 1)
+    setSlots((prevSlots) => prevSlots - 1)
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
@@ -218,11 +250,11 @@ const GameControls: React.FC<GameControlsProps> = ({
       try {
         const response = await updateMaxPlayers(slots - 1, gameId, token)
         if (response.status !== 200) {
-          setSlots(prevSlots => prevSlots + 1)
+          setSlots((prevSlots) => prevSlots + 1)
         }
       } catch (error) {
         console.error('Erreur lors du set updateMaxPlayers:', error)
-        setSlots(prevSlots => prevSlots + 1)
+        setSlots((prevSlots) => prevSlots + 1)
         if (axios.isAxiosError(error)) {
           alert(error.response?.data.error)
         }
@@ -233,7 +265,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const addPlace = () => {
     if (!gameId || gameStarted || gameFinished || slots >= 24 || roomData.type === 3) return
 
-    setSlots(prevSlots => prevSlots + 1)
+    setSlots((prevSlots) => prevSlots + 1)
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
@@ -241,11 +273,11 @@ const GameControls: React.FC<GameControlsProps> = ({
       try {
         const response = await updateMaxPlayers(slots + 1, gameId, token)
         if (response.status !== 200) {
-          setSlots(prevSlots => prevSlots - 1)
+          setSlots((prevSlots) => prevSlots - 1)
         }
       } catch (error) {
         console.error('Erreur lors du set updateMaxPlayers:', error)
-        setSlots(prevSlots => prevSlots - 1)
+        setSlots((prevSlots) => prevSlots - 1)
       }
     }, 750)
   }
@@ -253,7 +285,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const removeTimer = () => {
     if (!gameId || !isCreator || gameStarted || gameFinished || timer <= 2 || roomData.type === 3) return
 
-    setTimer(prevTimer => prevTimer - 1)
+    setTimer((prevTimer) => prevTimer - 1)
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
@@ -261,11 +293,11 @@ const GameControls: React.FC<GameControlsProps> = ({
       try {
         const response = await updateRoomTimer(timer - 1, gameId, token)
         if (response.status !== 200) {
-          setTimer(prevTimer => prevTimer + 1)
+          setTimer((prevTimer) => prevTimer + 1)
         }
       } catch (error) {
         console.error('Erreur lors du removeTimer:', error)
-        setTimer(prevTimer => prevTimer + 1)
+        setTimer((prevTimer) => prevTimer + 1)
       }
     }, 750)
   }
@@ -273,7 +305,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const addTimer = () => {
     if (!gameId || !isCreator || gameStarted || gameFinished || timer >= 5 || roomData.type === 3) return
 
-    setTimer(prevTimer => prevTimer + 1)
+    setTimer((prevTimer) => prevTimer + 1)
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
@@ -281,11 +313,11 @@ const GameControls: React.FC<GameControlsProps> = ({
       try {
         const response = await updateRoomTimer(timer + 1, gameId, token)
         if (response.status !== 200) {
-          setTimer(prevTimer => prevTimer - 1)
+          setTimer((prevTimer) => prevTimer - 1)
         }
       } catch (error) {
         console.error('Erreur lors du set addTimer:', error)
-        setTimer(prevTimer => prevTimer - 1)
+        setTimer((prevTimer) => prevTimer - 1)
       }
     }, 750)
   }
@@ -302,12 +334,16 @@ const GameControls: React.FC<GameControlsProps> = ({
   const handleJoinGame = async () => {
     if (!gameId || gameStarted || gameFinished || players.length >= roomData.maxPlayers || !viewer) return
     try {
-      const response = await axios.post(`/api/games/room/${gameId}/join`, {}, {
-        headers: {
-          Authorization: `Bearer ${ token }`,
+      const response = await axios.post(
+        `/api/games/room/${gameId}/join`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      })
-      window.location.href = `/game/${ response.data.game.id }`
+      )
+      window.location.href = `/game/${response.data.game.id}`
     } catch (error) {
       console.error('Erreur lors du join room:', error)
     }
@@ -344,38 +380,60 @@ const GameControls: React.FC<GameControlsProps> = ({
   const cardId = player?.card?.id
   const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} isArchive={isArchive} />, [cardId, isArchive])
 
+  // Enregistrer automatiquement le commentaire après 3 secondes d'inactivité
+  useEffect(() => {
+    if (!isFavoriteArchive) return
+
+    const timer = setTimeout(() => {
+      if (favoriteComment && favoriteComment.trim() !== '') {
+        setIsSavingComment(true)
+        addFavoriteGame(gameId!, 'add', favoriteComment, token)
+          .then(() => {
+            toast.success('Commentaire enregistré', ToastDefaultOptions)
+          })
+          .catch((error) => {
+            console.error('Erreur lors de l\'enregistrement du commentaire:', error)
+            toast.error('Erreur lors de l\'enregistrement du commentaire', ToastDefaultOptions)
+          })
+          .finally(() => {
+            setIsSavingComment(false)
+          })
+      }
+    }, 1500)
+
+    return () => clearTimeout(timer)
+  }, [favoriteComment, isFavoriteArchive, gameId, token])
+
   // Rendu conditionnel selon l'état du jeu
   if (player && !gameStarted && !gameFinished) {
     return (
       <div className="space-y-4">
-        {/* Bloc d'invitation */ }
+        {/* Bloc d'invitation */}
         <Invitations gameId={gameId} players={players} isCreator={isCreator} />
 
-        {/* Options pour les joueurs non créateurs */ }
-        { !isCreator && (
+        {/* Options pour les joueurs non créateurs */}
+        {!isCreator && (
           <motion.div
             className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
-            initial={ { opacity: 0, y: 20 } }
-            animate={ { opacity: 1, y: 0 } }
-            transition={ { duration: 0.5, delay: 0.1 } }
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <div
-              className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
-              <h3 className="text-lg font-bold text-white">Options de la
-                partie</h3>
+            <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+              <h3 className="text-lg font-bold text-white">Options de la partie</h3>
             </div>
 
             <div className="p-4 text-center">
-              { player && canBeReady && !player.ready ? (
+              {player && canBeReady && !player.ready ? (
                 <motion.button
                   className="sound-tick px-6 py-3 bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 text-white rounded-lg shadow-lg shadow-green-500/20 animate-pulse"
-                  whileHover={ { scale: 1.05 } }
-                  whileTap={ { scale: 0.95 } }
-                  onClick={ handleBeReady }
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleBeReady}
                 >
-                  Je suis prêt{ user?.isMale ? '': 'e' } !
+                  Je suis prêt{user?.isMale ? '' : 'e'} !
                 </motion.button>
-              ): player && player.ready ? (
+              ) : player && player.ready ? (
                 <div className="bg-gradient-to-r from-black/60 to-blue-900/20 rounded-lg p-4 border border-blue-500/30">
                   <div className="flex items-center justify-center mb-3">
                     <svg
@@ -394,12 +452,14 @@ const GameControls: React.FC<GameControlsProps> = ({
                   <div className="mb-3">
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-blue-300">Joueurs prêts</span>
-                      <span className="text-white font-medium">{(players.filter(p => p.ready).length + 1)}/{players.length}</span>
+                      <span className="text-white font-medium">
+                        {players.filter((p) => p.ready).length + 1}/{players.length}
+                      </span>
                     </div>
                     <div className="w-full bg-black/40 rounded-full h-2.5">
                       <div
                         className="bg-gradient-to-r from-green-500 to-green-700 h-2.5 rounded-full"
-                        style={{ width: `${((players.filter(p => p.ready).length + 1) / players.length) * 100}%` }}
+                        style={{ width: `${((players.filter((p) => p.ready).length + 1) / players.length) * 100}%` }}
                       ></div>
                     </div>
                   </div>
@@ -411,9 +471,10 @@ const GameControls: React.FC<GameControlsProps> = ({
                         <span className="inline-block animate-pulse mr-1">⚠️</span>
                         Il faut au moins 6 joueurs pour commencer
                       </p>
-                    ) : (players.filter(p => !p.ready).length - 1) > 0 ? (
+                    ) : players.filter((p) => !p.ready).length - 1 > 0 ? (
                       <p className="text-blue-300">
-                        En attente de {(players.filter(p => !p.ready).length - 1)} joueur{players.filter(p => !p.ready).length - 1 > 1 ? 's' : ''}
+                        En attente de {players.filter((p) => !p.ready).length - 1} joueur
+                        {players.filter((p) => !p.ready).length - 1 > 1 ? 's' : ''}
                       </p>
                     ) : (
                       <p className="text-green-400">
@@ -424,7 +485,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                     <p className="text-gray-400 text-sm mt-1">En attente du lancement par le créateur</p>
                   </div>
                 </div>
-              ): (
+              ) : (
                 <div className="bg-gradient-to-r from-black/60 to-blue-900/20 rounded-lg p-4 border border-blue-500/30">
                   <div className="flex items-center justify-center mb-3">
                     <svg
@@ -434,7 +495,12 @@ const GameControls: React.FC<GameControlsProps> = ({
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      />
                     </svg>
                     <span className="text-yellow-400 font-medium">En attente de joueurs</span>
                   </div>
@@ -443,7 +509,9 @@ const GameControls: React.FC<GameControlsProps> = ({
                   <div className="mb-3">
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-blue-300">Joueurs connectés</span>
-                      <span className="text-white font-medium">{players.length}/{ slots }</span>
+                      <span className="text-white font-medium">
+                        {players.length}/{slots}
+                      </span>
                     </div>
                     <div className="w-full bg-black/40 rounded-full h-2.5">
                       <div
@@ -457,92 +525,95 @@ const GameControls: React.FC<GameControlsProps> = ({
                   <div className="text-center">
                     <p className="text-yellow-300">
                       <span className="inline-block animate-pulse mr-1">⚠️</span>
-                      Il manque {Math.max(slots - players.length, 0)} joueur{Math.max(slots - players.length, 0) > 1 ? 's' : ''} pour commencer
+                      Il manque {Math.max(slots - players.length, 0)} joueur
+                      {Math.max(slots - players.length, 0) > 1 ? 's' : ''} pour commencer
                     </p>
                     <p className="text-gray-400 text-sm mt-1">
                       Cliquez sur "Je suis prêt" quand suffisamment de joueurs seront connectés
                     </p>
                   </div>
                 </div>
-              ) }
+              )}
             </div>
           </motion.div>
-        ) }
+        )}
 
-        {/* Options pour le créateur */ }
-        { isCreator && (
+        {/* Options pour le créateur */}
+        {isCreator && (
           <motion.div
             className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
-            initial={ { opacity: 0, y: 20 } }
-            animate={ { opacity: 1, y: 0 } }
-            transition={ { duration: 0.5, delay: 0.2 } }
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <div
-              className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
-              <h3 className="text-lg font-bold text-white">Configurer la
-                partie</h3>
+            <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+              <h3 className="text-lg font-bold text-white">Configurer la partie</h3>
             </div>
 
             <div className="p-4 space-y-4">
-              {/* Nombre de places */ }
+              {/* Nombre de places */}
               <div className="flex items-center justify-center space-x-2">
-                { roomData.type !== 3 && (
+                {roomData.type !== 3 && (
                   <button
                     className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
-                    onClick={ removePlace }
-                    disabled={ slots <= 6 }
+                    onClick={removePlace}
+                    disabled={slots <= 6}
                   >
                     –
                   </button>
                 )}
                 <div className="px-4 py-2 bg-black/40 rounded-lg text-white">
-                  <span className="font-bold">{ slots }</span> places
+                  <span className="font-bold">{slots}</span> places
                 </div>
-                { roomData.type !== 3 && (
+                {roomData.type !== 3 && (
                   <button
                     className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
-                    onClick={ addPlace }
-                    disabled={ slots >= 24 }
+                    onClick={addPlace}
+                    disabled={slots >= 24}
                   >
                     +
                   </button>
                 )}
               </div>
 
-              {/* Temps de débat */ }
+              {/* Temps de débat */}
               <div className="flex items-center justify-center space-x-2">
-                { roomData.type !== 3 && (
+                {roomData.type !== 3 && (
                   <button
                     className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
-                    onClick={ removeTimer }
-                    disabled={ timer <= 2 }
+                    onClick={removeTimer}
+                    disabled={timer <= 2}
                   >
                     –
                   </button>
                 )}
                 <div className="px-4 py-2 bg-black/40 rounded-lg text-white">
-                  <span className="font-bold">{ timer }</span> min de débat
+                  <span className="font-bold">{timer}</span> min de débat
                 </div>
-                { roomData.type !== 3 && (
+                {roomData.type !== 3 && (
                   <button
                     className="sound-tick w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
-                    onClick={ addTimer }
-                    disabled={ timer >= 5 }
+                    onClick={addTimer}
+                    disabled={timer >= 5}
                   >
                     +
                   </button>
                 )}
               </div>
 
-              {/* Boutons d'action */ }
+              {/* Boutons d'action */}
               <div className="space-y-2">
                 <motion.button
                   className={`w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20 ${roomData.type === 3 ? 'disabled cursor-not-allowed' : 'sound-ticket'}`}
-                  whileHover={ { scale: 1.02 } }
-                  whileTap={ { scale: 0.98 } }
-                  onClick={ openEditComposition }
-                  disabled={ roomData.type === 3 }
-                  data-tooltip-content={ roomData.type === 3 ? 'Vous ne pouvez pas modifier la composition dans une partie carnage.' : 'Modifier la composition de jeu' }
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={openEditComposition}
+                  disabled={roomData.type === 3}
+                  data-tooltip-content={
+                    roomData.type === 3
+                      ? 'Vous ne pouvez pas modifier la composition dans une partie carnage.'
+                      : 'Modifier la composition de jeu'
+                  }
                   data-tooltip-id="compo-edit"
                 >
                   Gérer la composition
@@ -550,61 +621,65 @@ const GameControls: React.FC<GameControlsProps> = ({
                 <Tooltip id="compo-edit" />
                 <motion.button
                   className="sound-tick w-full px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all"
-                  whileHover={ { scale: 1.02 } }
-                  whileTap={ { scale: 0.98 } }
-                  onClick={ handleTransferCreator }
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleTransferCreator}
                 >
                   Léguer les droits du salon
                 </motion.button>
 
-                { user?.role && canAddBot && (
+                {user?.role && canAddBot && (
                   <motion.button
                     className="sound-tick w-full px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all"
-                    whileHover={ { scale: 1.02 } }
-                    whileTap={ { scale: 0.98 } }
-                    onClick={ handleAddBot }
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleAddBot}
                   >
                     Ajouter un bot
                   </motion.button>
-                ) }
+                )}
 
                 {/* Bouton pour bipper les joueurs non prêts - visible uniquement quand le salon est plein */}
-                {players.length === slots && players.filter(p => p.nickname !== creator.nickname).some(p => !p.ready) && (
+                {players.length === slots &&
+                  players.filter((p) => p.nickname !== creator.nickname).some((p) => !p.ready) && (
                   <motion.button
                     className="sound-tick w-full px-4 py-2 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white rounded-lg transition-all shadow-lg shadow-orange-500/20 animate-pulse"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleBipNotReadyPlayers}
                   >
-                    Bipper les joueurs non prêts ({players.filter(p => !p.ready).length - 1})
+                      Bipper les joueurs non prêts ({players.filter((p) => !p.ready).length - 1})
                   </motion.button>
                 )}
 
-                {isEditCompositionOpen && (
-                  <EditCompoModal roomId={roomData.id} onClose={closeEditComposition} />
-                )}
+                {isEditCompositionOpen && <EditCompoModal roomId={roomData.id} onClose={closeEditComposition} />}
                 {isTransferLeadOpen && (
-                  <TransferLeadModal roomId={roomData.id} players={players} creator={roomData.creator} onClose={closeTransferLead} />
+                  <TransferLeadModal
+                    roomId={roomData.id}
+                    players={players}
+                    creator={roomData.creator}
+                    onClose={closeTransferLead}
+                  />
                 )}
               </div>
 
-              {/* Bouton de lancement */ }
+              {/* Bouton de lancement */}
               <motion.button
-                className={ `sound-tick w-full px-6 py-3 bg-gradient-to-r ${
+                className={`sound-tick w-full px-6 py-3 bg-gradient-to-r ${
                   canStartGame
                     ? 'from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 animate-pulse'
                     : 'from-gray-600 to-gray-800 opacity-70 cursor-not-allowed'
-                } text-white rounded-lg shadow-lg shadow-green-500/20 transition-all` }
-                whileHover={ canStartGame ? { scale: 1.05 }: {} }
-                whileTap={ canStartGame ? { scale: 0.95 }: {} }
-                onClick={ handleStartGame }
-                disabled={ !canStartGame }
+                } text-white rounded-lg shadow-lg shadow-green-500/20 transition-all`}
+                whileHover={canStartGame ? { scale: 1.05 } : {}}
+                whileTap={canStartGame ? { scale: 0.95 } : {}}
+                onClick={handleStartGame}
+                disabled={!canStartGame}
               >
                 <span className="text-lg font-bold">Lancer la partie</span>
               </motion.button>
             </div>
           </motion.div>
-        ) }
+        )}
       </div>
     )
   }
@@ -615,12 +690,11 @@ const GameControls: React.FC<GameControlsProps> = ({
       <div className="space-y-4">
         <motion.div
           className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
-          initial={ { opacity: 0, y: 20 } }
-          animate={ { opacity: 1, y: 0 } }
-          transition={ { duration: 0.5 } }
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          <div
-            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+          <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
             <h3 className="text-lg font-bold text-white">Informations</h3>
           </div>
 
@@ -634,22 +708,21 @@ const GameControls: React.FC<GameControlsProps> = ({
               <div className="flex justify-center mb-4 relative h-32">{memoizedCardImage}</div>
             </div>
 
-            {/* Timer */ }
-            <GameTimer gameId={gameId || ''} gameStarted={ gameStarted }
-              gameFinished={ gameFinished }/>
+            {/* Timer */}
+            <GameTimer gameId={gameId || ''} gameStarted={gameStarted} gameFinished={gameFinished} />
 
-            { gameStarted && !player?.alive ? (
+            {gameStarted && !player?.alive ? (
               <div className="bg-black/40 rounded-lg p-3 mb-4">
                 <p className="text-center text-blue-200 mb-2">
                   Vous êtes <span className="strong font-bold">mort.</span>
                 </p>
 
-                { player.card?.id === 6 && (
-                  <PhaseAction player={ player } roomId={ Number(gameId!) } gameType={roomData.type} isInn={ isInn }/>
+                {player.card?.id === 6 && (
+                  <PhaseAction player={player} roomId={Number(gameId!)} gameType={roomData.type} isInn={isInn} />
                 )}
               </div>
             ) : (
-              <PhaseAction player={ player } roomId={ Number(gameId!) } gameType={roomData.type} isInn={ isInn }/>
+              <PhaseAction player={player} roomId={Number(gameId!)} gameType={roomData.type} isInn={isInn} />
             )}
           </div>
         </motion.div>
@@ -662,12 +735,11 @@ const GameControls: React.FC<GameControlsProps> = ({
       <div className="space-y-4">
         <motion.div
           className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
-          initial={ { opacity: 0, y: 20 } }
-          animate={ { opacity: 1, y: 0 } }
-          transition={ { duration: 0.5 } }
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          <div
-            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+          <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
             <h3 className="text-lg font-bold text-white">Informations</h3>
           </div>
 
@@ -690,17 +762,19 @@ const GameControls: React.FC<GameControlsProps> = ({
                 onClick={handleJoinGame}
                 disabled={players.length >= slots}
                 data-tooltip-id="join_game"
-                data-tooltip-content={players.length >= slots ? 'Vous ne pouvez pas rejoindre, la partie est pleine.' : 'Rejoindre le salon de jeu'}
+                data-tooltip-content={
+                  players.length >= slots
+                    ? 'Vous ne pouvez pas rejoindre, la partie est pleine.'
+                    : 'Rejoindre le salon de jeu'
+                }
               >
                 Rejoindre la partie
                 <Tooltip id="join_game" />
               </motion.button>
             )}
 
-            {/* Timer */ }
-            { gameStarted &&  (
-              <GameTimer gameId={gameId || ''} gameStarted={ gameStarted } gameFinished={ gameFinished }/>
-            )}
+            {/* Timer */}
+            {gameStarted && <GameTimer gameId={gameId || ''} gameStarted={gameStarted} gameFinished={gameFinished} />}
 
             {!viewer?.user && !gameFinished && (
               <motion.div
@@ -754,65 +828,91 @@ const GameControls: React.FC<GameControlsProps> = ({
       <div className="space-y-4">
         <motion.div
           className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"
-          initial={ { opacity: 0, y: 20 } }
-          animate={ { opacity: 1, y: 0 } }
-          transition={ { duration: 0.5 } }
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          <div
-            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
-            <h3 className="text-lg font-bold text-white">Archive de la
-              partie { roomData.name.replace('Partie de', ' de') }</h3>
+          <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+            <h3 className="text-lg font-bold text-white">
+              Archive de la partie {roomData.name.replace('Partie de', ' de')}
+            </h3>
           </div>
 
           <div className="p-4">
-            <CardImage cardId={cardsIds[roomData.phase] ?? cardId} isArchive={true}/>
+            <CardImage cardId={cardsIds[roomData.phase] ?? cardId} isArchive={true} />
             <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 mb-4">
               <div className="flex-1">
                 <h3
                   className="text-xl font-bold mb-2 text-white"
-                  dangerouslySetInnerHTML={ { __html: winStates[roomData.phase] || 'Partie terminée' } }
+                  dangerouslySetInnerHTML={{ __html: winStates[roomData.phase] || 'Partie terminée' }}
                 />
                 <p className="text-blue-300">
-                  <span
-                    className="font-bold">Durée de la partie:</span> { getGameDuration() }
+                  <span className="font-bold">Durée de la partie:</span> {getGameDuration()}
                 </p>
               </div>
             </div>
 
-            {/* Boutons d'action */ }
+            {/* Boutons d'action */}
             <div className="space-y-3">
               <motion.button
-                className={ `w-full px-4 py-2 flex items-center justify-center gap-2 sound-tick ${
+                className={`w-full px-4 py-2 flex items-center justify-center gap-2 sound-tick ${
                   !isFavoriteArchive
                     ? 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700'
                     : 'bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900'
-                } text-white rounded-lg transition-all shadow-lg` }
-                whileHover={ { scale: 1.02 } }
-                whileTap={ { scale: 0.98 } }
-                onClick={ handleAddFavorite }
+                } text-white rounded-lg transition-all shadow-lg`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleAddFavorite}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5"
-                  viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path
                     fillRule="evenodd"
                     d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
                     clipRule="evenodd"
                   />
                 </svg>
-                { !isFavoriteArchive ? 'Ajouter à mes favoris': 'Retirer de mes favoris' }
+                {!isFavoriteArchive ? 'Ajouter à mes favoris' : 'Retirer de mes favoris'}
               </motion.button>
 
-              { isFavoriteArchive && (
-                <div className="bg-black/40 rounded-lg p-3">
+              {isFavoriteArchive && (
+                <div className="bg-black/40 rounded-lg p-3 relative">
                   <textarea
-                    value={ favoriteComment }
-                    onChange={ (e) => setFavoriteComment(e.target.value) }
+                    value={favoriteComment}
+                    onChange={(e) => setFavoriteComment(e.target.value)}
                     placeholder="Un commentaire sur cette partie ? 😊"
                     className="w-full bg-black/40 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                    rows={ 4 }
+                    rows={4}
                   />
+                  {isSavingComment && (
+                    <div className="absolute top-2 right-2 text-xs text-blue-300 flex items-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-300"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Enregistrement...
+                    </div>
+                  )}
+                  <div className="text-xs text-gray-400 mt-1">
+                    Le commentaire sera enregistré automatiquement 1 seconde après avoir arrêté de taper.
+                  </div>
                 </div>
-              ) }
+              )}
 
               {/* Replay controls for creator */}
               {isCreator && !replayGameId && (
@@ -847,4 +947,3 @@ const GameControls: React.FC<GameControlsProps> = ({
 }
 
 export default GameControls
-

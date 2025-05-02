@@ -154,10 +154,10 @@ export const leaveGame = async (token: string | null) => {
 /**
  * Ajoute la partie dans les favoris
  */
-export const addFavoriteGame = async (gameId: string, token: string | null) => {
+export const addFavoriteGame = async (gameId: string, action: 'add' | 'delete', comment: string, token: string | null) => {
   const response = await axios.post(
-    `/api/admin/games/favorite/${gameId}`,
-    {},
+    `/api/games/favorite/${gameId}/${action}`,
+    { comment },
     {
       headers: { Authorization: `Bearer ${token}` },
     }
