@@ -44,6 +44,7 @@ const RoomList = () => {
     password: '',
     timer: 3,
     whiteFlag: false,
+    anonymousGame: false,
     type: 3,
   })
 
@@ -705,7 +706,7 @@ const RoomList = () => {
                   </button>
                   <button
                     className="px-4 py-2 bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
-                    disabled={true}
+                    onClick={() => setFormData((prev) => ({ ...prev, anonymousGame: !prev.anonymousGame }))}
                   >
                     Anonyme
                   </button>
