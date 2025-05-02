@@ -17,6 +17,7 @@ interface PhaseActionRequest {
   eligibleTargets: { id: number; nickname: string }[]
   deathElixirUsed?: string | null
   lifeElixirUsed?: string | null
+  alive?: boolean
 }
 
 interface PhaseActionProps {
@@ -68,7 +69,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
         data.action.card === player?.card?.id ||
         data.action.card === -1 ||
         (data.action.card === 2 && ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected)) ||
-        (data.action.card === 6 && !player.alive)
+        (data.action.card === 6 && (!data.alive || !player.alive))
       ) {
         setActionRequest(data)
         setDeathElixirUsed(data.deathElixirUsed !== null && data.deathElixirUsed !== undefined)
