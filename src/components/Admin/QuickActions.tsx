@@ -84,10 +84,9 @@ const QuickActions: React.FC = () => {
   return (
     <div className="grid grid-cols-2 gap-3">
       {actions.map((action, index) => (
-        <motion.a
+        <motion.button
           key={action.title}
-          href={action.href}
-          onClick={action.onclick}
+          onClick={action.onclick ? action.onclick : ()  => window.location.href = action.href}
           className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-lg border border-blue-500/30 p-4 flex flex-col items-center justify-center hover:border-blue-400/50 transition-all"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -97,7 +96,7 @@ const QuickActions: React.FC = () => {
         >
           <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} text-white mb-2`}>{action.icon}</div>
           <span className="text-sm">{action.title}</span>
-        </motion.a>
+        </motion.button>
       ))}
     </div>
   )
