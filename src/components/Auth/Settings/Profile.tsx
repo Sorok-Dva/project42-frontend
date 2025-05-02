@@ -20,7 +20,6 @@ const Profile : React.FC<{
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
 
   const premiumDate = user.premium ? new Date(user.premium) : null
-  console.log(user, premiumDate ? premiumDate.getTime() : null)
 
   const isPremium = premiumDate ? new Date().getTime() < premiumDate.getTime() : false
   const premiumExpiration = premiumDate

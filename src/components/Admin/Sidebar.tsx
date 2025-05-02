@@ -101,8 +101,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
     },
   ]
 
-  console.log(navItems)
-
   const toggleExpand = (title: string) => {
     setExpandedItems((prev) => ({
       ...prev,

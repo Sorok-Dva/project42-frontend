@@ -40,7 +40,6 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
   const { user } = useUser()
   const [selectedDeathTarget, setSelectedDeathTarget] = useState<number | ''>('')
 
-  console.log(deathElixirUsed, lifeElixirUsed)
   const handleDeathChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedDeathTarget(Number(event.target.value))
   }

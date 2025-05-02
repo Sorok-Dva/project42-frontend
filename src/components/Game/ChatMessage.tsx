@@ -15,6 +15,24 @@ function stripHTML(input: string) {
   return tempDiv.textContent || tempDiv.innerText || ''
 }
 
+function stripHTMLKeepImages(input: string): string {
+  const tempDiv = document.createElement('div')
+  tempDiv.innerHTML = input
+
+  const allElements = Array.from(tempDiv.querySelectorAll<HTMLElement>('*'))
+  allElements.forEach(el => {
+    if (el.tagName.toLowerCase() !== 'img') {
+      const parent = el.parentNode!
+      while (el.firstChild) {
+        parent.insertBefore(el.firstChild, el)
+      }
+      parent.removeChild(el)
+    }
+  })
+
+  return tempDiv.innerHTML
+}
+
 interface ChatMessagesProps {
   messages: Message[]
   highlightedPlayers: { [nickname: string]: string }
@@ -179,7 +197,7 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
           ) {
             cleanNickname = '(Alien)'
           }
-          const escapedMessage = stripHTML(msg.message)
+          const escapedMessage = stripHTMLKeepImages(msg.message)
           const highlightColor = cleanNickname
             ? highlightedPlayers[cleanNickname] || 'transparent'
             : 'transparent'
