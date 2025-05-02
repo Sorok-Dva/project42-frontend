@@ -7,6 +7,7 @@ export const ROLE_PERMISSIONS = {
       'setNight', 'setDay', 'stop', 'card',
       'startPhase', 'endPhase', 'kill', 'revive',
       'listCards', 'mp', '42', 'forceReload',
+      'player',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
@@ -27,6 +28,7 @@ export const ROLE_PERMISSIONS = {
       'setNight', 'setDay', 'stop', 'card',
       'startPhase', 'endPhase', 'kill', 'revive',
       'listCards', 'mp', '42', 'forceReload',
+      'player',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
@@ -47,6 +49,7 @@ export const ROLE_PERMISSIONS = {
       'setNight', 'setDay', 'stop', 'card',
       'startPhase', 'endPhase', 'kill', 'revive',
       'listCards', 'mp', '42', 'forceReload',
+      'player',
     ],
     godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [
@@ -61,7 +64,7 @@ export const ROLE_PERMISSIONS = {
     game: ['create', 'edit', 'dissolve', 'view', 'bypassPassword'],
     gamePowers: [
       'modo', 'warn', 'kick', 'ban', 'mute', 'unmute',
-      'crea', 'mp', '42',
+      'crea', 'mp', '42', 'player',
     ],
     godPowers: [],
     animationPowers: [],
@@ -74,7 +77,7 @@ export const ROLE_PERMISSIONS = {
   ModeratorTest: {
     game: ['create', 'edit', 'view'],
     gamePowers: [
-      'modo', 'warn', 'kick', 'mute', 'unmute', 'mp', '42',
+      'modo', 'warn', 'kick', 'mute', 'unmute', 'mp', '42', 'player',
     ],
     godPowers: [],
     animationPowers: [],
@@ -87,7 +90,7 @@ export const ROLE_PERMISSIONS = {
     gamePowers: [ 'addTimer', 'removeTimer', 'setTimer', 'message', 'mp', '42' ],
     godPowers: [ 'setNight', 'setDay' ],
     animationPowers: [
-      'music', 'video', 'img', 'dice', 'text', 'timer',
+      'music', 'video', 'image', 'dice', 'text', 'timer',
       'quiz', 'poll', 'vote', 'question', 'answer', 'bonusPoints'
     ],
     site: [],
