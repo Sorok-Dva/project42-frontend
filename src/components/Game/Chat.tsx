@@ -64,6 +64,8 @@ const Chat: React.FC<ChatProps> = ({
   const [isSearchingGifs, setIsSearchingGifs] = useState(false)
   const [giphySearchTerm, setGiphySearchTerm] = useState('')
   const giphyApiKey = process.env.REACT_APP_GIPHY_API_KEY || ''
+  const [mentionSuggestions, setMentionSuggestions] = useState<string[]>([])
+  const [mentionIndex, setMentionIndex] = useState(-1)
 
   // Ref vers le composant ChatMessages qui gère le scroll
   const chatMessagesRef = useRef<ChatMessagesHandle>(null)
@@ -161,6 +163,37 @@ const Chat: React.FC<ChatProps> = ({
     }
   }
 
+  const handleMentionSuggestions = (value: string) => {
+    // Vérifier si on est en train de taper une mention
+    const lastAtSymbolIndex = value.lastIndexOf('@')
+    if (lastAtSymbolIndex === -1) {
+      setMentionSuggestions([])
+      return
+    }
+
+    // Extraire le texte après le dernier @ jusqu'au curseur
+    const mentionText = value
+      .slice(lastAtSymbolIndex + 1)
+      .split(' ')[0]
+      .toLowerCase()
+
+    // Si on vient juste de taper @ sans texte après, montrer tous les joueurs
+    if (mentionText === '') {
+      const allPlayerNames = players?.map((p) => p.nickname) || []
+      setMentionSuggestions(allPlayerNames)
+      setMentionIndex(-1)
+      return
+    }
+
+    // Filtrer les joueurs dont le pseudo commence par le texte tapé
+    const filteredPlayers =
+      players?.filter((p) => p.nickname.toLowerCase().includes(mentionText)).map((p) => p.nickname) || []
+
+    setMentionSuggestions(filteredPlayers)
+    setMentionIndex(-1)
+  }
+
+
   const handleInputChange = (value: string) => {
     setNewMessage(value)
 
@@ -178,6 +211,9 @@ const Chat: React.FC<ChatProps> = ({
     } else {
       setGiphyResults([])
     }
+
+    // Gérer les suggestions de mentions (@pseudo)
+    handleMentionSuggestions(value)
 
     if (userRole === 'User') return
 
@@ -219,6 +255,26 @@ const Chat: React.FC<ChatProps> = ({
   const handleSuggestionClick = (command: string, nickname: string) => {
     setNewMessage(`/${command} ${nickname} `)
     setSuggestions([])
+    inputRef.current?.focus()
+  }
+
+  const handleMentionSelection = (nickname: string) => {
+    // Trouver la position du dernier @ pour remplacer le texte
+    const lastAtIndex = newMessage.lastIndexOf('@')
+    if (lastAtIndex === -1) return
+
+    // Extraire le texte après le @ jusqu'au prochain espace ou fin de chaîne
+    const textAfterAt = newMessage.slice(lastAtIndex + 1)
+    const nextSpaceIndex = textAfterAt.indexOf(' ')
+
+    // Calculer où se termine le texte à remplacer
+    const endIndex = nextSpaceIndex === -1 ? newMessage.length : lastAtIndex + 1 + nextSpaceIndex
+
+    // Construire le nouveau message avec la mention
+    const newMessageText = newMessage.substring(0, lastAtIndex) + `@${nickname}` + newMessage.substring(endIndex)
+
+    setNewMessage(newMessageText)
+    setMentionSuggestions([])
     inputRef.current?.focus()
   }
 
@@ -298,7 +354,24 @@ const Chat: React.FC<ChatProps> = ({
               ref={inputRef}
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={(e) => {
-                if (suggestions.length > 0) {
+                if (mentionSuggestions.length > 0) {
+                  if (e.key === 'ArrowDown') {
+                    setMentionIndex((prev) => (prev + 1) % mentionSuggestions.length)
+                    e.preventDefault()
+                  } else if (e.key === 'ArrowUp') {
+                    setMentionIndex((prev) => (prev - 1 + mentionSuggestions.length) % mentionSuggestions.length)
+                    e.preventDefault()
+                  } else if (e.key === 'Enter' || e.key === 'Tab') {
+                    if (mentionIndex >= 0) {
+                      handleMentionSelection(mentionSuggestions[mentionIndex])
+                    } else if (mentionSuggestions.length > 0) {
+                      handleMentionSelection(mentionSuggestions[0])
+                    }
+                    e.preventDefault()
+                  } else if (e.key === 'Escape') {
+                    setMentionSuggestions([])
+                  }
+                } else if (suggestions.length > 0) {
                   if (e.key === 'ArrowDown') {
                     setSelectedIndex((prev) => (prev + 1) % suggestions.length)
                     e.preventDefault()
@@ -358,6 +431,23 @@ const Chat: React.FC<ChatProps> = ({
                       : 'hover:bg-blue-900/30'
                   }`}
                   onClick={() => handleSuggestionClick(currentCommand, nickname)}
+                >
+                  {nickname}
+                </div>
+              ))}
+            </div>
+          )}
+          {/* Suggestions de mentions */}
+          {mentionSuggestions.length > 0 && (
+            <div className="sound-tick absolute bottom-full left-0 w-full bg-black/80 border border-blue-500/30 rounded-t-lg max-h-40 overflow-y-auto z-10">
+              <div className="text-xs text-blue-300 px-4 py-1 border-b border-blue-500/20">Mentions</div>
+              {mentionSuggestions.map((nickname, index) => (
+                <div
+                  key={index}
+                  className={`px-4 py-2 cursor-pointer ${
+                    mentionIndex === index ? 'bg-blue-900/50' : 'hover:bg-blue-900/30'
+                  }`}
+                  onClick={() => handleMentionSelection(nickname)}
                 >
                   {nickname}
                 </div>
