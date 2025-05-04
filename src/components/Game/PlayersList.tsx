@@ -326,7 +326,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   ${((gameStarted && !_player.alive) || gameFinished) && _player.cardId ? ' ml-9' : ''}
                   `}
                 >
-                  <span className="player sound-tick" data-profile={user?.isAdmin ? _player.realNickname : _player.nickname}>
+                  <span className="player sound-tick" data-profile={user?.isAdmin ? _player.realNickname || _player.nickname : _player.nickname}>
                     {_player.nickname}
                   </span>
 
