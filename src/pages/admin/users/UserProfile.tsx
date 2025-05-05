@@ -66,8 +66,14 @@ import {
 } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from 'components/UI/Chart'
 import { toast } from 'react-toastify'
+import { BadgesData } from 'components/Auth/Settings/Badges'
 
-// Données fictives pour la démo
+type NicknameChanges = [{
+  oldNickname: string,
+  newNickname: string,
+  createdAt: Date,
+}]
+
 interface User {
   id: string,
   email: string,
@@ -102,6 +108,9 @@ interface User {
     },
     role: string,
   },
+  achievements: BadgesData,
+  stats: { type: 0 | 1 | 2 | 3 | 4 | 5 | 'all', playedGames: number, wins: number}[]
+  nicknameChanges: NicknameChanges
 }
 
 const mockAchievements = [
@@ -287,11 +296,12 @@ export default function UserDetailsPage() {
   const { token } = useAuth()
   const [user, setUser] = useState<User | null>(null)
   const [roles, setRoles] = useState<Role[]>([])
+  const [gameStats, setGameStats] = useState<{ type: number | string, wins: number, playedGames: number }>({ type: 'all', playedGames: 0, wins: 0 })
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
   const [isAddPointsModalOpen, setAddPointsModalOpen] = useState(false)
   const [pointsToAdd, setPointsToAdd] = useState<number>(0)
   const [reason, setReason] = useState<string>('Event')
-  const [nicknameChanges, setNicknameChanges] = useState<[]>([])
+  const [nicknameChanges, setNicknameChanges] = useState<NicknameChanges>()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -313,10 +323,13 @@ export default function UserDetailsPage() {
             Authorization: `Bearer ${ token }`,
           },
         })
-        const data = await response.json()
+        const data = await response.json() as User
         setUser(data)
         setNicknameChanges(data.nicknameChanges)
         setLoading(false)
+        setGameStats(data.stats.filter(stat => {
+          return stat.type === 'all'
+        })[0])
       } catch (err) {
         console.error('Failed to fetch user', err)
       }
@@ -803,7 +816,7 @@ export default function UserDetailsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">172</div>
+                <div className="text-2xl font-bold">{ gameStats.playedGames }</div>
                 <p className="text-xs text-muted-foreground">+15% ce mois-ci</p>
               </CardContent>
             </Card>
@@ -815,8 +828,8 @@ export default function UserDetailsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">112</div>
-                <p className="text-xs text-muted-foreground">Taux: 65%</p>
+                <div className="text-2xl font-bold">{ gameStats.wins }</div>
+                <p className="text-xs text-muted-foreground">Taux: { ((gameStats.wins / gameStats.playedGames) * 100).toFixed(0) }%</p>
               </CardContent>
             </Card>
             <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
@@ -839,8 +852,8 @@ export default function UserDetailsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">28/50</div>
-                <p className="text-xs text-muted-foreground">56% complétés</p>
+                <div className="text-2xl font-bold">{ user.achievements.possessed.length }/401</div>
+                <p className="text-xs text-muted-foreground">{ ((user.achievements.possessed.length / 401) * 100).toFixed(0) }% complétés</p>
               </CardContent>
             </Card>
           </div>

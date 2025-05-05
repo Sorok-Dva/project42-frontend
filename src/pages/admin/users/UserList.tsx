@@ -1,1347 +1,769 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import {
-  Award,
+  Search,
+  Filter,
+  UserPlus,
+  MoreHorizontal,
+  ChevronLeft,
+  ChevronRight,
   Ban,
-  Calendar,
+  UserCheck,
+  Trash2,
+  Download,
+  AlertTriangle,
   Check,
-  Edit,
+  ChevronDown,
   Eye,
-  GamepadIcon as GameController,
-  ListChecks,
-  LogIn,
-  MessageSquare,
-  MicOffIcon as Mute,
-  Save,
-  Shield,
-  Trophy,
-  Users,
-  X,
 } from 'lucide-react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from 'components/UI/Tabs'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'components/UI/Card'
-import { Badge } from 'components/UI/Badge'
-import { Avatar, AvatarFallback, AvatarImage } from 'components/UI/Avatar'
-import { Progress } from 'components/UI/Progress'
-import { Button } from 'components/UI/Button'
-import { Separator } from 'components/UI/Separator'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'components/UI/Table'
-import { Input } from 'components/UI/Input'
-import { Textarea } from 'components/UI/Textarea'
-import { RadioGroup, RadioGroupItem } from 'components/UI/RadioGroup'
-import { Label } from 'components/UI/Label'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from 'components/UI/Dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from 'components/UI/DropdownMenu'
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts'
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from 'components/UI/Chart'
+import { Img as Image } from 'react-image'
+import { User, useUser } from 'contexts/UserContext'
+import { useAuth } from 'contexts/AuthContext'
 
-// Données fictives pour la démo
-const mockUser = {
-  id: 1,
-  email: 'player@example.com',
-  nickname: 'SpaceCommander',
-  avatar: '/placeholder.svg?height=128&width=128',
-  isMale: true,
-  role: { id: 3, name: 'Modérateur', color: '#4CAF50' },
-  points: 12450,
-  level: 42,
-  title: 'Explorateur Galactique',
-  signature: 'Vers l\'infini et au-delà!',
-  premium: new Date('2023-12-31'),
-  validated: true,
-  registerIp: '192.168.1.1',
-  lastLoginIp: '192.168.1.2',
-  behaviorPoints: 950,
-  moderatorPoints: 320,
-  discordId: 'discord123456',
-  lastNicknameChange: new Date('2023-06-15'),
-  createdAt: new Date('2022-01-15'),
-  online: true,
-  gameStatus: 'in_game', // 'online', 'offline', 'in_pregame', 'in_game', 'spectating'
-  currentGameId: 456,
-  guildMembership: {
-    guild: {
-      id: 5,
-      name: 'Guardians of the Galaxy',
-      tag: 'GOTG',
-      points: 45000,
-      leader: 1,
-    },
-    role: 'captain',
-  },
+// Rôles et leurs couleurs
+const roleColors = {
+  SuperAdmin: 'bg-red-500 text-white',
+  Admin: 'bg-red-700 text-white',
+  Developer: 'bg-blue-600 text-white',
+  Moderator: 'bg-green-700 text-white',
+  ModeratorTest: 'bg-green-500 text-white',
+  Animator: 'bg-orange-400 text-white',
+  User: 'bg-gray-600 text-white',
+  Banned: 'bg-red-600 text-white',
 }
 
-const mockAchievements = [
-  {
-    id: 1,
-    name: 'Premier Pas',
-    description: 'Jouer sa première partie',
-    level: 1,
-    maxLevel: 3,
-    progress: 100,
-    icon: '🚀',
-    date: '2022-01-16',
-  },
-  {
-    id: 2,
-    name: 'Bavard',
-    description: 'Envoyer des messages',
-    level: 3,
-    maxLevel: 5,
-    progress: 60,
-    icon: '💬',
-    date: '2022-02-20',
-  },
-  {
-    id: 3,
-    name: 'Stratège',
-    description: 'Gagner des parties',
-    level: 2,
-    maxLevel: 5,
-    progress: 40,
-    icon: '🏆',
-    date: '2022-03-10',
-  },
-  {
-    id: 4,
-    name: 'Explorateur',
-    description: 'Découvrir différents modes de jeu',
-    level: 4,
-    maxLevel: 4,
-    progress: 100,
-    icon: '🔭',
-    date: '2022-05-22',
-  },
-  {
-    id: 5,
-    name: 'Fidèle',
-    description: 'Se connecter plusieurs jours de suite',
-    level: 2,
-    maxLevel: 3,
-    progress: 66,
-    icon: '📅',
-    date: '2022-04-05',
-  },
-]
-
-const mockNicknameChanges = [
-  { id: 1, oldNickname: 'SpaceCadet', newNickname: 'SpaceExplorer', date: '2022-03-15' },
-  { id: 2, oldNickname: 'SpaceExplorer', newNickname: 'GalacticHero', date: '2022-09-22' },
-  { id: 3, oldNickname: 'GalacticHero', newNickname: 'SpaceCommander', date: '2023-06-15' },
-]
-
-const mockBans = [
-  {
-    id: 1,
-    reason: 'Langage inapproprié',
-    moderator: 'AdminSupreme',
-    expiration: '2022-05-15',
-    date: '2022-05-01',
-    playerComment: 'Je ne recommencerai pas',
-    teamComment: 'Premier avertissement',
-  },
-  {
-    id: 2,
-    reason: 'Triche',
-    moderator: 'ModeratorX',
-    expiration: '2022-08-30',
-    date: '2022-08-15',
-    playerComment: 'Ce n\'était pas intentionnel',
-    teamComment: 'Récidive, ban plus long',
-  },
-]
-
-const mockRooms = [
-  {
-    id: 1,
-    name: 'Bataille Spatiale',
-    type: 'Compétitif',
-    status: 'completed',
-    result: 'Victoire',
-    date: '2023-01-05',
-    players: 8,
-    points: 120,
-  },
-  {
-    id: 2,
-    name: 'Mission Alpha',
-    type: 'Casual',
-    status: 'completed',
-    result: 'Défaite',
-    date: '2023-01-12',
-    players: 6,
-    points: 45,
-  },
-  {
-    id: 3,
-    name: 'Exploration Nébuleuse',
-    type: 'Compétitif',
-    status: 'completed',
-    result: 'Victoire',
-    date: '2023-01-20',
-    players: 10,
-    points: 150,
-  },
-  {
-    id: 4,
-    name: 'Défense Stellaire',
-    type: 'Tournoi',
-    status: 'completed',
-    result: 'Top 3',
-    date: '2023-02-05',
-    players: 16,
-    points: 200,
-  },
-  {
-    id: 5,
-    name: 'Conquête Galactique',
-    type: 'Compétitif',
-    status: 'in_progress',
-    result: 'En cours',
-    date: '2023-02-15',
-    players: 8,
-    points: 0,
-  },
-]
-
-const mockMessages = [
-  { id: 1, roomId: 1, channel: 'Global', message: 'Bonjour à tous!', date: '2023-01-05 14:30' },
-  { id: 2, roomId: 1, channel: 'Équipe', message: 'On se positionne à gauche', date: '2023-01-05 14:35' },
-  { id: 3, roomId: 2, channel: 'Global', message: 'Bonne chance!', date: '2023-01-12 19:22' },
-  { id: 4, roomId: 3, channel: 'Privé', message: 'On peut s\'allier?', date: '2023-01-20 20:15' },
-  { id: 5, roomId: 4, channel: 'Global', message: 'Bien joué tout le monde', date: '2023-02-05 21:45' },
-]
-
-// Données pour les graphiques
-const gameActivityData = [
-  { name: 'Jan', parties: 5, messages: 45 },
-  { name: 'Fév', parties: 8, messages: 62 },
-  { name: 'Mar', parties: 12, messages: 78 },
-  { name: 'Avr', parties: 7, messages: 51 },
-  { name: 'Mai', parties: 15, messages: 85 },
-  { name: 'Juin', parties: 10, messages: 70 },
-  { name: 'Juil', parties: 18, messages: 92 },
-  { name: 'Août', parties: 14, messages: 88 },
-  { name: 'Sep', parties: 20, messages: 110 },
-  { name: 'Oct', parties: 16, messages: 95 },
-  { name: 'Nov', parties: 22, messages: 120 },
-  { name: 'Déc', parties: 25, messages: 135 },
-]
-
-const gameResultsData = [
-  { name: 'Victoires', value: 65, color: '#4CAF50' },
-  { name: 'Défaites', value: 25, color: '#F44336' },
-  { name: 'Égalités', value: 10, color: '#2196F3' },
-]
-
-const messageTypeData = [
-  { name: 'Global', value: 45, color: '#9C27B0' },
-  { name: 'Équipe', value: 30, color: '#3F51B5' },
-  { name: 'Privé', value: 15, color: '#FF9800' },
-  { name: 'Système', value: 10, color: '#607D8B' },
-]
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
-
 const UsersPage: React.FC = () => {
-  const params = useParams()
-  const userId = params.id
-  const [user, setUser] = useState(mockUser)
+  const { token } = useAuth()
+  const { user } = useUser()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(25)
+  const [showRowsDropdown, setShowRowsDropdown] = useState(false)
+  const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [editedUser, setEditedUser] = useState(mockUser)
-  const [showModActions, setShowModActions] = useState(false)
-  const [showBanDialog, setShowBanDialog] = useState(false)
-  const [showMuteDialog, setShowMuteDialog] = useState(false)
-  const [banReason, setBanReason] = useState('')
-  const [banDuration, setBanDuration] = useState(24)
-  const [banComment, setBanComment] = useState('')
-  const [muteReason, setMuteReason] = useState('')
-  const [muteDuration, setMuteDuration] = useState(1)
+  const [sortField, setSortField] = useState<keyof User>('updatedAt')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false)
+  const [filters, setFilters] = useState({
+    role: '',
+    status: '',
+  })
+  const [actionDropdown, setActionDropdown] = useState<string | null>(null)
 
-  const handleSaveProfile = async () => {
-    try {
-      // Dans une implémentation réelle, vous feriez un appel API ici
-      // await fetch(`/api/admin/users/${userId}`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(editedUser)
-      // })
-
-      setUser(editedUser)
-      setIsEditing(false)
-
-      // Afficher un toast ou une notification de succès
-      console.log('Profil mis à jour avec succès')
-    } catch (err) {
-      setError('Erreur lors de la mise à jour du profil')
-    }
-  }
-
-  const handleBanUser = async () => {
-    try {
-      // Simuler un appel d'API pour bannir l'utilisateur
-      console.log(`Utilisateur banni pour ${banDuration}h: ${banReason}`)
-      // Reset form
-      setBanReason('')
-      setBanDuration(24)
-      setBanComment('')
-      setShowBanDialog(false)
-    } catch (err) {
-      setError('Erreur lors du bannissement de l\'utilisateur')
-    }
-  }
-
-  const handleMuteUser = async () => {
-    try {
-      // Simuler un appel d'API pour mute l'utilisateur
-      console.log(`Utilisateur mute pour ${muteDuration}h: ${muteReason}`)
-      // Reset form
-      setMuteReason('')
-      setMuteDuration(1)
-      setShowMuteDialog(false)
-    } catch (err) {
-      setError('Erreur lors du mute de l\'utilisateur')
-    }
-  }
-
-  const handleValidateAccount = async () => {
-    try {
-      // Simuler un appel d'API pour valider le compte
-      setEditedUser((prev) => ({ ...prev, validated: true }))
-      setUser((prev) => ({ ...prev, validated: true }))
-      console.log('Compte validé avec succès')
-    } catch (err) {
-      setError('Erreur lors de la validation du compte')
-    }
-  }
-
-  const handleAddToStalklist = async () => {
-    try {
-      // Simuler un appel d'API pour ajouter à la stalklist
-      console.log('Utilisateur ajouté à la stalklist')
-    } catch (err) {
-      setError('Erreur lors de l\'ajout à la stalklist')
-    }
-  }
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-    case 'online':
-      return 'En ligne'
-    case 'offline':
-      return 'Hors ligne'
-    case 'in_pregame':
-      return 'En pré-partie'
-    case 'in_game':
-      return 'En partie'
-    case 'spectating':
-      return 'Spectateur'
-    default:
-      return 'Inconnu'
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-    case 'online':
-      return 'bg-green-500'
-    case 'offline':
-      return 'bg-gray-500'
-    case 'in_pregame':
-      return 'bg-yellow-500'
-    case 'in_game':
-      return 'bg-blue-500'
-    case 'spectating':
-      return 'bg-purple-500'
-    default:
-      return 'bg-gray-500'
-    }
-  }
-
+  // Simuler un appel API pour récupérer les utilisateurs
   useEffect(() => {
-    // Simuler le chargement des données
-    const fetchUserData = async () => {
+    const fetchUsers = async () => {
       try {
-        // Dans une implémentation réelle, vous feriez un appel API ici
-        // const response = await fetch(`/api/admin/users/${userId}`)
-        // const data = await response.json()
-        // setUser(data)
-
-        // Simulation de chargement
-        setTimeout(() => {
-          setUser(mockUser)
-          setEditedUser(mockUser)
-          setLoading(false)
-        }, 1000)
+        const response = await fetch('/api/admin/users', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        const data = await response.json()
+        setUsers(data)
+        setLoading(false)
       } catch (err) {
-        setError('Erreur lors du chargement des données utilisateur')
+        console.error('Failed to fetch users', err)
+        setUsers([])
         setLoading(false)
       }
     }
 
-    fetchUserData()
-  }, [userId])
+    fetchUsers()
+  }, [])
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-16 h-16 border-4 border-t-blue-500 border-b-blue-700 rounded-full animate-spin"></div>
-          <p className="text-xl font-semibold text-gray-700">Chargement des données utilisateur...</p>
-        </div>
-      </div>
-    )
+  // Filtrer les utilisateurs en fonction de la recherche et des filtres
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      user.nickname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user?.registerIp?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user?.lastLoginIp?.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesRoleFilter = filters.role === '' || user.role === filters.role
+    const matchesStatusFilter =
+      filters.status === '' ||
+      (filters.status === 'validated' && user.validated) ||
+      (filters.status === 'not-validated' && !user.validated) ||
+      (filters.status === 'banned' && user.role === 'Banned')
+
+    return matchesSearch && matchesRoleFilter && matchesStatusFilter
+  })
+
+  // Trier les utilisateurs
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if ((a[sortField] ?? '') < (b[sortField] ?? '')) return sortDirection === 'asc' ? -1: 1
+    if ((a[sortField] ?? '') > (b[sortField] ?? '')) return sortDirection === 'asc' ? 1: -1
+    return 0
+  })
+
+  // Pagination
+  const indexOfLastUser = currentPage * rowsPerPage
+  const indexOfFirstUser = indexOfLastUser - rowsPerPage
+  const currentUsers = sortedUsers.slice(indexOfFirstUser, indexOfLastUser)
+  const totalPages = Math.ceil(sortedUsers.length / rowsPerPage)
+
+  // Gérer la sélection des utilisateurs
+  const handleSelectAll = () => {
+    if (selectedUsers.length === currentUsers.length) {
+      setSelectedUsers([])
+    } else {
+      setSelectedUsers(currentUsers.map((user) => user.id.toString()))
+    }
   }
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong className="font-bold">Erreur!</strong>
-          <span className="block sm:inline"> {error}</span>
-        </div>
-      </div>
-    )
+  const handleSelectUser = (userId : string) => {
+    if (selectedUsers.includes(userId)) {
+      setSelectedUsers(selectedUsers.filter((id) => id !== userId))
+    } else {
+      setSelectedUsers([...selectedUsers, userId])
+    }
   }
 
-  const isPremium = user.premium && new Date(user.premium) > new Date()
-  const daysSinceRegistration = Math.floor(
-    (new Date().getTime() - new Date(user.createdAt).getTime()) / (1000 * 3600 * 24),
-  )
-
-  const formatDate = (date: string | Date) => {
-    return new Date(date).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
+  // Gérer le tri
+  const handleSort = (field : keyof User) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc': 'asc')
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
   }
+
+  // Exporter en CSV
+  const exportToCSV = () => {
+    if (!user || !user.isAdmin) return
+    const headers = ['ID', 'Pseudo', 'Email', 'Rôle', 'Statut', 'Dernière Connexion', 'IP d\'inscription', 'Dernière IP', 'Date d\'inscription']
+
+    const csvData = filteredUsers.map((user) => [
+      user.id,
+      user.nickname,
+      user.email,
+      user.role,
+      user.validated ? 'Validé': user.role === 'Banned' ? 'Banni': 'Non validé',
+      new Date(user.updatedAt || 'now').toLocaleString('fr-FR'),
+      user.registerIp,
+      user.lastLoginIp,
+      new Date(user.createdAt || 'now').toLocaleString('fr-FR'),
+    ])
+
+    const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', url)
+    link.setAttribute('download', `utilisateurs_${ new Date().toISOString().split('T')[0] }.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  // Actions sur les utilisateurs
+  const handleWarnUser = async (userId : string) => {
+    try {
+      // Appel API pour avertir l'utilisateur
+      const response = await fetch(`/api/admin/users/${ userId }/warn`, {
+        method: 'POST',
+      })
+      if (!response.ok) throw new Error('Erreur lors de l\'avertissement')
+      // Mettre à jour l'interface utilisateur si nécessaire
+      setActionDropdown(null)
+    } catch (error) {
+      console.error('Erreur:', error)
+    }
+  }
+
+  const handleBanUser = async (userId : string) => {
+    try {
+      // Appel API pour bannir l'utilisateur
+      const response = await fetch(`/api/admin/users/${ userId }/ban`, {
+        method: 'POST',
+      })
+      if (!response.ok) throw new Error('Erreur lors du bannissement')
+
+      // Mettre à jour l'état local
+      setUsers(users.map((user) => (user.id.toString() === userId ? {
+        ...user,
+        banned: true,
+      }: user)))
+      setActionDropdown(null)
+    } catch (error) {
+      console.error('Erreur:', error)
+    }
+  }
+
+  const handleValidateUser = async (userId : string) => {
+    try {
+      // Appel API pour valider le compte
+      const response = await fetch(`/api/admin/users/${ userId }/validate`, {
+        method: 'POST',
+      })
+      if (!response.ok) throw new Error('Erreur lors de la validation')
+
+      // Mettre à jour l'état local
+      setUsers(users.map((user) => (user.id.toString() === userId ? {
+        ...user,
+        validated: true,
+      }: user)))
+      setActionDropdown(null)
+    } catch (error) {
+      console.error('Erreur:', error)
+    }
+  }
+
+  // Pagination function
+  const paginate = (pageNumber : number) => setCurrentPage(pageNumber)
 
   return (
-    <div className="container mx-auto py-6 space-y-8">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" onClick={() => window.history.back()}>
-            Retour
-          </Button>
-          <h1 className="text-3xl font-bold">Détails de l'utilisateur</h1>
-        </div>
-        <div className="flex space-x-2">
-          {isEditing ? (
-            <>
-              <Button onClick={handleSaveProfile} className="flex items-center gap-2">
-                <Save size={16} />
-                Sauvegarder
-              </Button>
-              <Button variant="outline" onClick={() => setIsEditing(false)} className="flex items-center gap-2">
-                <X size={16} />
-                Annuler
-              </Button>
-            </>
-          ) : (
-            <Button variant="outline" onClick={() => setIsEditing(true)} className="flex items-center gap-2">
-              <Edit size={16} />
-              Modifier
-            </Button>
-          )}
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="default" className="flex items-center gap-2">
-                <Shield size={16} />
-                Actions Modérateur
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuLabel>Actions de modération</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {!user.validated && (
-                <DropdownMenuItem className="flex items-center gap-2" onClick={handleValidateAccount}>
-                  <Check size={16} />
-                  <span>Valider le compte</span>
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem className="flex items-center gap-2 text-red-500" onClick={() => setShowBanDialog(true)}>
-                <Ban size={16} />
-                <span>Bannir l'utilisateur</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="flex items-center gap-2 text-yellow-500"
-                onClick={() => setShowMuteDialog(true)}
-              >
-                <Mute size={16} />
-                <span>Mute l'utilisateur</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center gap-2" onClick={handleAddToStalklist}>
-                <ListChecks size={16} />
-                <span>Ajouter à la stalklist</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+    <div className="flex-1 overflow-y-auto">
+      {/* Barre supérieure */ }
+      <div
+        className="bg-gradient-to-r from-black/80 to-blue-900/30 backdrop-blur-sm border-b border-blue-500/30 shadow-lg p-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center">
+            <h1
+              className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+              Gestion des Utilisateurs
+            </h1>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Carte de profil */}
-        <Card className="md:col-span-1 backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-2xl">Profil</CardTitle>
-            <CardDescription>Informations de base</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="relative">
-                <Avatar className="w-32 h-32 border-4 border-primary">
-                  <AvatarImage src={user.avatar || '/placeholder.svg'} alt={user.nickname} />
-                  <AvatarFallback>{user.nickname.substring(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                {/* Indicateur de statut */}
-                <div
-                  className={`absolute bottom-2 right-2 w-5 h-5 ${getStatusColor(user.gameStatus)} rounded-full border-2 border-white`}
-                ></div>
+      {/* Contenu des utilisateurs */ }
+      <div className="p-4 md:p-6 min-h-screen">
+        <motion.div
+          initial={ { opacity: 0, y: 20 } }
+          animate={ { opacity: 1, y: 0 } }
+          transition={ { duration: 0.5 } }
+          className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-visible shadow-lg"
+        >
+          {/* En-tête du tableau */ }
+          <div className="p-6 border-b border-blue-500/30">
+            <div
+              className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-center">
+                <h2 className="text-xl font-bold">Liste des
+                  Utilisateurs</h2>
+                <span
+                  className="ml-2 px-2 py-1 bg-blue-900/40 text-blue-300 text-xs rounded-full">
+                  { filteredUsers.length } utilisateurs
+                </span>
               </div>
-              <div className="text-center">
-                {isEditing ? (
-                  <Input
-                    value={editedUser.nickname}
-                    onChange={(e) => setEditedUser({ ...editedUser, nickname: e.target.value })}
-                    className="font-bold text-center mb-2"
+              <div className="flex flex-wrap gap-2">
+                <div className="relative">
+                  <Search
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={ 16 }/>
+                  <input
+                    type="text"
+                    placeholder="Rechercher..."
+                    value={ searchQuery }
+                    onChange={ (e) => setSearchQuery(e.target.value) }
+                    className="w-full md:w-64 bg-black/40 border border-blue-500/30 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   />
-                ) : (
-                  <h2 className="text-2xl font-bold">{user.nickname}</h2>
-                )}
-
-                {isEditing ? (
-                  <Input
-                    value={editedUser.title}
-                    onChange={(e) => setEditedUser({ ...editedUser, title: e.target.value })}
-                    className="text-center text-muted-foreground mb-2"
-                    placeholder="Titre"
-                  />
-                ) : (
-                  <p className="text-muted-foreground">{user.title}</p>
-                )}
-
-                <div className="flex justify-center mt-2 space-x-2">
-                  <Badge variant="outline" className="bg-primary/20">
-                    Niveau {user.level}
-                  </Badge>
-                  {isPremium && <Badge className="bg-amber-500">Premium</Badge>}
-                  {user.validated && <Badge className="bg-green-600">Vérifié</Badge>}
                 </div>
-              </div>
-            </div>
 
-            <Separator />
-
-            {/* Statut en jeu */}
-            <div className="bg-gray-800/50 backdrop-blur-sm p-4 rounded-lg">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className={`w-3 h-3 ${getStatusColor(user.gameStatus)} rounded-full`}></div>
-                <span className="font-medium">{getStatusText(user.gameStatus)}</span>
-              </div>
-              {user.gameStatus !== 'offline' && user.gameStatus !== 'online' && (
-                <div className="mt-2">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {user.gameStatus === 'in_pregame'
-                      ? 'En attente dans la partie'
-                      : user.gameStatus === 'in_game'
-                        ? 'En partie active'
-                        : 'Spectateur de la partie'}
-                  </p>
-                  <Button size="sm" className="w-full" variant="outline">
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Rejoindre la partie
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                {isEditing ? (
-                  <Input
-                    value={editedUser.email}
-                    onChange={(e) => setEditedUser({ ...editedUser, email: e.target.value })}
-                  />
-                ) : (
-                  <p className="font-medium">{user.email}</p>
-                )}
-              </div>
-
-              <div>
-                <p className="text-sm text-muted-foreground">Sexe</p>
-                {isEditing ? (
-                  <RadioGroup
-                    defaultValue={editedUser.isMale ? 'male' : 'female'}
-                    onValueChange={(value) => setEditedUser({ ...editedUser, isMale: value === 'male' })}
+                <div className="relative">
+                  <button
+                    onClick={ () => setShowFilterDropdown(!showFilterDropdown) }
+                    className="px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all flex items-center gap-2"
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="male" id="male" />
-                      <Label htmlFor="male">Homme</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="female" id="female" />
-                      <Label htmlFor="female">Femme</Label>
-                    </div>
-                  </RadioGroup>
-                ) : (
-                  <p className="font-medium">{user.isMale ? 'Homme' : 'Femme'}</p>
-                )}
-              </div>
+                    <Filter size={ 16 }/>
+                    <span>Filtres</span>
+                    <ChevronDown size={ 16 }/>
+                  </button>
 
-              <div>
-                <p className="text-sm text-muted-foreground">Discord</p>
-                <p className="font-medium">{user.discordId || 'Non lié'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Rôle</p>
-                <Badge style={{ backgroundColor: user.role.color }}>{user.role.name}</Badge>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Membre depuis</p>
-                <p className="font-medium">
-                  {formatDate(user.createdAt)} ({daysSinceRegistration} jours)
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Dernière connexion</p>
-                <p className="font-medium">Aujourd'hui, 15:42</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Signature</p>
-                {isEditing ? (
-                  <Textarea
-                    value={editedUser.signature}
-                    onChange={(e) => setEditedUser({ ...editedUser, signature: e.target.value })}
-                    placeholder="Signature"
-                    className="min-h-[60px]"
-                  />
-                ) : (
-                  <p className="italic text-sm">{user.signature}</p>
-                )}
+                  { showFilterDropdown && (
+                    <div
+                      className="absolute right-0 mt-2 w-64 bg-black/90 border border-blue-500/30 rounded-lg shadow-lg z-50 p-4">
+                      <div className="mb-4">
+                        <label
+                          className="block text-blue-300 text-sm mb-2">Rôle</label>
+                        <select
+                          value={ filters.role }
+                          onChange={ (e) => setFilters({
+                            ...filters,
+                            role: e.target.value,
+                          }) }
+                          className="w-full bg-black/60 border border-blue-500/30 rounded-lg px-3 py-2 text-white"
+                        >
+                          <option value="">Tous les rôles</option>
+                          <option value="SuperAdmin">SuperAdmin</option>
+                          <option value="Admin">Administrateur</option>
+                          <option value="Developer">Développeur</option>
+                          <option value="Moderator">Modérateur</option>
+                          <option value="ModeratorTest">Modérateur Test</option>
+                          <option value="Animator">Animateur</option>
+                          <option value="User">Utilisateur</option>
+                          <option value="Banned">Banni</option>
+                        </select>
+                      </div>
+                      <div className="mb-4">
+                        <label
+                          className="block text-blue-300 text-sm mb-2">Statut</label>
+                        <select
+                          value={ filters.status }
+                          onChange={ (e) => setFilters({
+                            ...filters,
+                            status: e.target.value,
+                          }) }
+                          className="w-full bg-black/60 border border-blue-500/30 rounded-lg px-3 py-2 text-white"
+                        >
+                          <option value="">Tous les statuts</option>
+                          <option value="validated">Validé</option>
+                          <option value="not-validated">Non validé</option>
+                          <option value="banned">Banni</option>
+                        </select>
+                      </div>
+                      <div className="flex justify-between">
+                        <button
+                          onClick={ () => setFilters({
+                            role: '',
+                            status: '',
+                          }) }
+                          className="px-3 py-1 text-blue-300 hover:text-white"
+                        >
+                          Réinitialiser
+                        </button>
+                        <button
+                          onClick={ () => setShowFilterDropdown(false) }
+                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                        >
+                          Appliquer
+                        </button>
+                      </div>
+                    </div>
+                  ) }
+                </div>
+
+                <button
+                  onClick={ exportToCSV }
+                  className="px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all flex items-center gap-2"
+                >
+                  <Download size={ 16 }/>
+                  <span>Exporter CSV</span>
+                </button>
+
+                <button
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all flex items-center gap-2">
+                  <UserPlus size={ 16 }/>
+                  <span>Ajouter</span>
+                </button>
               </div>
             </div>
-
-            <Separator />
-
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between mb-1">
-                  <p className="text-sm font-medium">Points</p>
-                  <p className="text-sm font-medium">{user.points}</p>
-                </div>
-                <Progress value={(user.points % 1000) / 10} className="h-2" />
-              </div>
-              <div>
-                <div className="flex justify-between mb-1">
-                  <p className="text-sm font-medium">Comportement</p>
-                  <p className="text-sm font-medium">{user.behaviorPoints}/1000</p>
-                </div>
-                <Progress value={user.behaviorPoints / 10} className="h-2" />
-              </div>
-              {user.role.id <= 3 && (
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <p className="text-sm font-medium">Points modération</p>
-                    <p className="text-sm font-medium">{user.moderatorPoints}/1000</p>
-                  </div>
-                  <Progress value={user.moderatorPoints / 10} className="h-2" />
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Contenu principal avec onglets */}
-        <div className="md:col-span-2 space-y-6">
-          {/* Statistiques rapides */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-              <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-sm font-medium flex items-center">
-                  <GameController className="mr-2 h-4 w-4" />
-                  Parties jouées
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">172</div>
-                <p className="text-xs text-muted-foreground">+15% ce mois-ci</p>
-              </CardContent>
-            </Card>
-            <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-              <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-sm font-medium flex items-center">
-                  <Trophy className="mr-2 h-4 w-4" />
-                  Victoires
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">112</div>
-                <p className="text-xs text-muted-foreground">Taux: 65%</p>
-              </CardContent>
-            </Card>
-            <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-              <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-sm font-medium flex items-center">
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Messages
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">1,254</div>
-                <p className="text-xs text-muted-foreground">~7.3 par partie</p>
-              </CardContent>
-            </Card>
-            <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-              <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-sm font-medium flex items-center">
-                  <Award className="mr-2 h-4 w-4" />
-                  Succès
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">28/50</div>
-                <p className="text-xs text-muted-foreground">56% complétés</p>
-              </CardContent>
-            </Card>
           </div>
 
-          {/* Onglets d'information */}
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid grid-cols-7 mb-4">
-              <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-              <TabsTrigger value="achievements">Succès</TabsTrigger>
-              <TabsTrigger value="guild">Guilde</TabsTrigger>
-              <TabsTrigger value="games">Parties</TabsTrigger>
-              <TabsTrigger value="messages">Messages</TabsTrigger>
-              <TabsTrigger value="nicknames">Pseudos</TabsTrigger>
-              <TabsTrigger value="sanctions">Sanctions</TabsTrigger>
-            </TabsList>
-
-            {/* Vue d'ensemble */}
-            <TabsContent value="overview" className="space-y-4">
-              <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-                <CardHeader>
-                  <CardTitle>Activité mensuelle</CardTitle>
-                  <CardDescription>Parties jouées et messages envoyés</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ChartContainer
-                      config={{
-                        parties: {
-                          label: 'Parties',
-                          color: 'hsl(var(--chart-1))',
-                        },
-                        messages: {
-                          label: 'Messages',
-                          color: 'hsl(var(--chart-2))',
-                        },
-                      }}
-                      className="h-full"
-                    >
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={gameActivityData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                          <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" />
-                          <YAxis stroke="rgba(255,255,255,0.5)" />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Legend />
-                          <Line
-                            type="monotone"
-                            dataKey="parties"
-                            stroke="var(--color-parties)"
-                            strokeWidth={2}
-                            dot={{ r: 4 }}
-                            activeDot={{ r: 6 }}
-                          />
-                          <Line
-                            type="monotone"
-                            dataKey="messages"
-                            stroke="var(--color-messages)"
-                            strokeWidth={2}
-                            dot={{ r: 4 }}
-                            activeDot={{ r: 6 }}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-                  <CardHeader>
-                    <CardTitle>Résultats des parties</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[250px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={gameResultsData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="value"
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                          >
-                            {gameResultsData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip formatter={(value) => [`${value} parties`, '']} />
-                          <Legend />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-                  <CardHeader>
-                    <CardTitle>Types de messages</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[250px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={messageTypeData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="value"
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                          >
-                            {messageTypeData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip formatter={(value) => [`${value}%`, '']} />
-                          <Legend />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
+          {/* Actions en masse */ }
+          { selectedUsers.length > 0 && (
+            <div
+              className="bg-blue-900/30 p-4 flex items-center justify-between">
+              <div className="flex items-center">
+                <span
+                  className="text-blue-300 mr-4">{ selectedUsers.length } utilisateurs sélectionnés</span>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    className="px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-all flex items-center gap-1">
+                    <AlertTriangle size={ 16 }/>
+                    <span>Avertir</span>
+                  </button>
+                  <button
+                    className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all flex items-center gap-1">
+                    <UserCheck size={ 16 }/>
+                    <span>Valider</span>
+                  </button>
+                  <button
+                    className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all flex items-center gap-1">
+                    <Ban size={ 16 }/>
+                    <span>Bannir</span>
+                  </button>
+                  <button
+                    className="px-3 py-1 bg-red-800 hover:bg-red-900 text-white rounded-lg transition-all flex items-center gap-1">
+                    <Trash2 size={ 16 }/>
+                    <span>Supprimer</span>
+                  </button>
+                </div>
               </div>
-            </TabsContent>
+              <button className="text-blue-300 hover:text-white"
+                onClick={ () => setSelectedUsers([]) }>
+                Annuler
+              </button>
+            </div>
+          ) }
 
-            {/* Succès */}
-            <TabsContent value="achievements">
-              <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-                <CardHeader>
-                  <CardTitle>Succès débloqués</CardTitle>
-                  <CardDescription>5 succès sur 50 complétés</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {mockAchievements.map((achievement) => (
+          {/* Tableau */ }
+          <div>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-black/40 border-b border-blue-500/30">
+                  <th className="p-4 text-left">
+                    <input
+                      type="checkbox"
+                      className="rounded bg-black/60 border-blue-500/50 text-blue-600 focus:ring-blue-500/50"
+                      checked={ selectedUsers.length === currentUsers.length && currentUsers.length > 0 }
+                      onChange={ handleSelectAll }
+                    />
+                  </th>
+                  <th
+                    className="p-4 text-left cursor-pointer hover:text-blue-300"
+                    onClick={ () => handleSort('id') }
+                  >
+                    <div className="flex items-center">
+                      <span>ID</span>
+                      { sortField === 'id' && (
+                        <span
+                          className="ml-1">{ sortDirection === 'asc' ? '↑': '↓' }</span>
+                      ) }
+                    </div>
+                  </th>
+                  <th
+                    className="p-4 text-left cursor-pointer hover:text-blue-300"
+                    onClick={ () => handleSort('nickname') }
+                  >
+                    <div className="flex items-center">
+                      <span>Utilisateur</span>
+                      { sortField === 'nickname' && (
+                        <span
+                          className="ml-1">{ sortDirection === 'asc' ? '↑': '↓' }</span>
+                      ) }
+                    </div>
+                  </th>
+                  <th
+                    className="p-4 text-left cursor-pointer hover:text-blue-300"
+                    onClick={ () => handleSort('email') }
+                  >
+                    <div className="flex items-center">
+                      <span>Email</span>
+                      { sortField === 'email' && <span
+                        className="ml-1">{ sortDirection === 'asc' ? '↑': '↓' }</span> }
+                    </div>
+                  </th>
+                  <th
+                    className="p-4 text-left cursor-pointer hover:text-blue-300"
+                    onClick={ () => handleSort('role') }
+                  >
+                    <div className="flex items-center">
+                      <span>Rôle</span>
+                      { sortField === 'role' && <span
+                        className="ml-1">{ sortDirection === 'asc' ? '↑': '↓' }</span> }
+                    </div>
+                  </th>
+                  <th className="p-4 text-left">Statut</th>
+                  <th
+                    className="p-4 text-left cursor-pointer hover:text-blue-300"
+                    onClick={ () => handleSort('updatedAt') }
+                  >
+                    <div className="flex items-center">
+                      <span>Dernière Connexion</span>
+                      { sortField === 'updatedAt' && (
+                        <span
+                          className="ml-1">{ sortDirection === 'asc' ? '↑': '↓' }</span>
+                      ) }
+                    </div>
+                  </th>
+                  <th className="p-4 text-left">IP d'inscription</th>
+                  <th className="p-4 text-left">Dernière IP</th>
+                  <th
+                    className="p-4 text-left cursor-pointer hover:text-blue-300"
+                    onClick={ () => handleSort('updatedAt') }
+                  >
+                    <div className="flex items-center">
+                      <span>Date d'inscription</span>
+                      { sortField === 'createdAt' && (
+                        <span
+                          className="ml-1">{ sortDirection === 'asc' ? '↑': '↓' }</span>
+                      ) }
+                    </div>
+                  </th>
+                  <th className="p-4 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                { loading ? (
+                  <tr>
+                    <td colSpan={ 9 } className="p-4 text-center">
                       <div
-                        key={achievement.id}
-                        className="border border-gray-800 rounded-lg p-4 backdrop-blur-sm bg-gray-900/50"
-                      >
-                        <div className="flex items-start">
-                          <div className="flex-shrink-0 mr-4 text-3xl">{achievement.icon}</div>
-                          <div className="flex-grow">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="font-semibold">{achievement.name}</h3>
-                                <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                              </div>
-                              <Badge variant={achievement.progress === 100 ? 'default' : 'outline'}>
-                                Niveau {achievement.level}/{achievement.maxLevel}
-                              </Badge>
-                            </div>
-                            <div className="mt-2">
-                              <div className="flex justify-between text-xs mb-1">
-                                <span>Progression</span>
-                                <span>{achievement.progress}%</span>
-                              </div>
-                              <Progress value={achievement.progress} className="h-2" />
-                            </div>
-                            <div className="mt-2 text-xs text-muted-foreground">Débloqué le {achievement.date}</div>
+                        className="flex justify-center items-center space-x-2">
+                        <div
+                          className="w-4 h-4 rounded-full bg-blue-500 animate-pulse"></div>
+                        <div
+                          className="w-4 h-4 rounded-full bg-purple-500 animate-pulse animation-delay-200"></div>
+                        <div
+                          className="w-4 h-4 rounded-full bg-pink-500 animate-pulse animation-delay-400"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ): currentUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={ 9 } className="p-4 text-center">
+                    Aucun utilisateur trouvé
+                    </td>
+                  </tr>
+                ): (
+                  currentUsers.map((user) => (
+                    <tr key={ user.id }
+                      className="border-b border-blue-500/10 hover:bg-blue-900/10">
+                      <td className="p-4">
+                        <input
+                          type="checkbox"
+                          className="rounded bg-black/60 border-blue-500/50 text-blue-600 focus:ring-blue-500/50"
+                          checked={ selectedUsers.includes(String(user.id)) }
+                          onChange={ () => handleSelectUser(String(user.id)) }
+                        />
+                      </td>
+                      <td className="p-4">#{ user.id }</td>
+                      <td className="p-4">
+                        <div className="flex items-center">
+                          <div
+                            className="w-8 h-8 rounded-full overflow-hidden mr-3">
+                            <Image
+                              src={ user.avatar || '/placeholder.svg?height=32&width=32' }
+                              alt={ user.nickname }
+                              width={ 32 }
+                              height={ 32 }
+                              className="object-cover"
+                            />
                           </div>
+                          <span data-profile={user.nickname} className="cursor-pointer">{ user.nickname }</span>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Guilde */}
-            <TabsContent value="guild">
-              {user.guildMembership ? (
-                <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <CardTitle>Membre de guilde</CardTitle>
-                        <CardDescription>Informations sur l'appartenance à une guilde</CardDescription>
-                      </div>
-                      <Badge className="bg-blue-600">
-                        {user.guildMembership.role === 'captain'
-                          ? 'Capitaine'
-                          : user.guildMembership.role === 'lieutenant'
-                            ? 'Lieutenant'
-                            : user.guildMembership.role === 'ensign'
-                              ? 'Enseigne'
-                              : user.guildMembership.role === 'cadet'
-                                ? 'Cadet'
-                                : 'Membre'}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-gray-700 rounded-lg flex items-center justify-center text-2xl">
-                        {user.guildMembership.guild.tag}
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold">{user.guildMembership.guild.name}</h3>
-                        <p className="text-sm text-muted-foreground">Tag: [{user.guildMembership.guild.tag}]</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-gray-800/50 backdrop-blur-sm p-4 rounded-lg">
-                        <div className="flex items-center space-x-2">
-                          <Trophy className="h-5 w-5 text-yellow-500" />
-                          <span className="text-sm font-medium">Points de guilde</span>
+                      </td>
+                      <td className="p-4">{ user.email }</td>
+                      <td className="p-4">
+                        <span
+                          className={ `px-2 py-1 rounded-full text-xs ${ roleColors[user.role as keyof typeof roleColors] || 'bg-gray-600 text-white' }` }
+                        >
+                          { user.role }
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center">
+                          { user.role === 'Banned' ? (
+                            <>
+                              <div
+                                className="w-2 h-2 rounded-full bg-red-500 mr-2"></div>
+                              <span>Banni</span>
+                            </>
+                          ): user.validated ? (
+                            <>
+                              <div
+                                className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                              <span>Validé</span>
+                            </>
+                          ): (
+                            <>
+                              <div
+                                className="w-2 h-2 rounded-full bg-yellow-500 mr-2"></div>
+                              <span>Non validé</span>
+                            </>
+                          ) }
                         </div>
-                        <p className="text-2xl font-bold mt-2">{user.guildMembership.guild.points}</p>
-                      </div>
-
-                      <div className="bg-gray-800/50 backdrop-blur-sm p-4 rounded-lg">
-                        <div className="flex items-center space-x-2">
-                          <Users className="h-5 w-5 text-blue-500" />
-                          <span className="text-sm font-medium">Position</span>
-                        </div>
-                        <p className="text-2xl font-bold mt-2">
-                          {user.guildMembership.role === 'captain'
-                            ? 'Capitaine'
-                            : user.guildMembership.role === 'lieutenant'
-                              ? 'Lieutenant'
-                              : user.guildMembership.role === 'ensign'
-                                ? 'Enseigne'
-                                : 'Membre'}
-                        </p>
-                      </div>
-
-                      <div className="bg-gray-800/50 backdrop-blur-sm p-4 rounded-lg">
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="h-5 w-5 text-green-500" />
-                          <span className="text-sm font-medium">Date d'adhésion</span>
-                        </div>
-                        <p className="text-2xl font-bold mt-2">15/03/2022</p>
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    <div>
-                      <h3 className="font-semibold mb-2">Contribution aux points</h3>
-                      <div className="h-[200px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart
-                            data={[
-                              { name: 'Jan', points: 150 },
-                              { name: 'Fév', points: 220 },
-                              { name: 'Mar', points: 180 },
-                              { name: 'Avr', points: 240 },
-                              { name: 'Mai', points: 280 },
-                              { name: 'Juin', points: 320 },
-                            ]}
-                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      </td>
+                      <td className="p-4">
+                        { new Date(user.updatedAt || 'now').toLocaleString('fr-FR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        }) }
+                      </td>
+                      <td className="p-4">{ user.registerIp }</td>
+                      <td className="p-4">{ user.lastLoginIp }</td>
+                      <td className="p-4">{ new Date(user.createdAt || 'now').toLocaleString('fr-FR') }</td>
+                      <td className="p-4">
+                        <div className="relative">
+                          <button
+                            onClick={ () => setActionDropdown(actionDropdown === String(user.id) ? null : String(user.id)) }
+                            className="text-blue-400 hover:text-blue-300 transition-colors"
                           >
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                            <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" />
-                            <YAxis stroke="rgba(255,255,255,0.5)" />
-                            <Tooltip />
-                            <Bar dataKey="points" fill="#3B82F6" />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-                  <CardHeader>
-                    <CardTitle>Aucune guilde</CardTitle>
-                    <CardDescription>L'utilisateur n'appartient à aucune guilde</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col items-center justify-center py-8">
-                      <Users className="h-16 w-16 text-gray-500 mb-4" />
-                      <p className="text-muted-foreground text-center">
-                        Cet utilisateur n'est actuellement membre d'aucune guilde.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
+                            <MoreHorizontal size={ 18 }/>
+                          </button>
 
-            {/* Parties */}
-            <TabsContent value="games">
-              <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-                <CardHeader>
-                  <CardTitle>Historique des parties</CardTitle>
-                  <CardDescription>Dernières parties jouées</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Nom</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Joueurs</TableHead>
-                        <TableHead>Résultat</TableHead>
-                        <TableHead>Points</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mockRooms.map((room) => (
-                        <TableRow key={room.id}>
-                          <TableCell className="font-medium">{room.id}</TableCell>
-                          <TableCell>{room.name}</TableCell>
-                          <TableCell>{room.type}</TableCell>
-                          <TableCell>{room.date}</TableCell>
-                          <TableCell>{room.players}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={
-                                room.result === 'Victoire'
-                                  ? 'bg-green-500/20 text-green-500'
-                                  : room.result === 'Défaite'
-                                    ? 'bg-red-500/20 text-red-500'
-                                    : room.result === 'En cours'
-                                      ? 'bg-blue-500/20 text-blue-500'
-                                      : 'bg-yellow-500/20 text-yellow-500'
-                              }
-                            >
-                              {room.result}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{room.points}</TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="icon">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Messages */}
-            <TabsContent value="messages">
-              <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-                <CardHeader>
-                  <CardTitle>Historique des messages</CardTitle>
-                  <CardDescription>Derniers messages envoyés</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Salle</TableHead>
-                        <TableHead>Canal</TableHead>
-                        <TableHead>Message</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mockMessages.map((message) => (
-                        <TableRow key={message.id}>
-                          <TableCell className="font-medium">{message.id}</TableCell>
-                          <TableCell>{message.roomId}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={
-                                message.channel === 'Global'
-                                  ? 'bg-purple-500/20 text-purple-500'
-                                  : message.channel === 'Équipe'
-                                    ? 'bg-blue-500/20 text-blue-500'
-                                    : message.channel === 'Privé'
-                                      ? 'bg-orange-500/20 text-orange-500'
-                                      : 'bg-gray-500/20 text-gray-500'
-                              }
-                            >
-                              {message.channel}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="max-w-[200px] truncate">{message.message}</TableCell>
-                          <TableCell>{message.date}</TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="icon">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Pseudos */}
-            <TabsContent value="nicknames">
-              <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-                <CardHeader>
-                  <CardTitle>Historique des pseudonymes</CardTitle>
-                  <CardDescription>Changements de pseudonyme</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Ancien pseudonyme</TableHead>
-                        <TableHead>Nouveau pseudonyme</TableHead>
-                        <TableHead>Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mockNicknameChanges.map((change) => (
-                        <TableRow key={change.id}>
-                          <TableCell className="font-medium">{change.id}</TableCell>
-                          <TableCell>{change.oldNickname}</TableCell>
-                          <TableCell>{change.newNickname}</TableCell>
-                          <TableCell>{change.date}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Sanctions */}
-            <TabsContent value="sanctions">
-              <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
-                <CardHeader>
-                  <CardTitle>Historique des sanctions</CardTitle>
-                  <CardDescription>Bannissements et avertissements</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Raison</TableHead>
-                        <TableHead>Modérateur</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Expiration</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mockBans.map((ban) => (
-                        <TableRow key={ban.id}>
-                          <TableCell className="font-medium">{ban.id}</TableCell>
-                          <TableCell>
-                            <Badge variant="destructive">Bannissement</Badge>
-                          </TableCell>
-                          <TableCell>{ban.reason}</TableCell>
-                          <TableCell>{ban.moderator}</TableCell>
-                          <TableCell>{ban.date}</TableCell>
-                          <TableCell>{ban.expiration}</TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="icon">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-
-                  <div className="mt-6 space-y-4">
-                    <h3 className="font-semibold">Détails de la sanction</h3>
-                    {mockBans.length > 0 && (
-                      <div className="border border-gray-800 rounded-lg p-4 backdrop-blur-sm bg-gray-900/50">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">Commentaire du joueur</h4>
-                            <p className="mt-1">{mockBans[0].playerComment}</p>
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">Commentaire de l'équipe</h4>
-                            <p className="mt-1">{mockBans[0].teamComment}</p>
-                          </div>
+                          { actionDropdown === String(user.id) && (
+                            <div
+                              className="absolute right-0 mt-2 w-48 bg-black/90 border border-blue-500/30 rounded-lg shadow-lg z-50">
+                              <ul>
+                                <li>
+                                  <a
+                                    href={ `/admin/users/${ user.id }` }
+                                    className="w-full text-left px-4 py-2 hover:bg-blue-900/30 flex items-center gap-2"
+                                  >
+                                    <Eye size={ 16 }
+                                      className="text-green-500"/>
+                                    <span>Voir l'utilisateur en détails</span>
+                                  </a>
+                                </li>
+                                <li>
+                                  <button
+                                    className="w-full text-left px-4 py-2 hover:bg-blue-900/30 flex items-center gap-2"
+                                  >
+                                    <AlertTriangle size={ 16 }
+                                      className="text-yellow-500"/>
+                                    <span>Avertir</span>
+                                  </button>
+                                </li>
+                                { !user.validated && (
+                                  <li>
+                                    <button
+                                      onClick={ () => handleValidateUser(String(user.id)) }
+                                      className="w-full text-left px-4 py-2 hover:bg-blue-900/30 flex items-center gap-2"
+                                    >
+                                      <Check size={ 16 }
+                                        className="text-green-500"/>
+                                      <span>Valider le compte</span>
+                                    </button>
+                                  </li>
+                                ) }
+                                { user.role !== 'Banned' ? (
+                                  <li>
+                                    <button
+                                      onClick={ () => handleBanUser(String(user.id)) }
+                                      className="w-full text-left px-4 py-2 hover:bg-blue-900/30 flex items-center gap-2"
+                                    >
+                                      <Ban size={ 16 }
+                                        className="text-red-500"/>
+                                      <span>Bannir</span>
+                                    </button>
+                                  </li>
+                                ) : (
+                                  <li>
+                                    <button
+                                      // onClick={ () => handleUnbanUser(String(user.id)) }
+                                      className="w-full text-left px-4 py-2 hover:bg-blue-900/30 flex items-center gap-2"
+                                    >
+                                      <Ban size={ 16 }
+                                        className="text-green-500"/>
+                                      <span>Débannir</span>
+                                    </button>
+                                  </li>
+                                ) }
+                                <li>
+                                  <button
+                                    className="w-full text-left px-4 py-2 hover:bg-blue-900/30 flex items-center gap-2">
+                                    <Trash2 size={ 16 }
+                                      className="text-red-500"/>
+                                    <span>Supprimer</span>
+                                  </button>
+                                </li>
+                              </ul>
+                            </div>
+                          ) }
                         </div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-          {/* Modale de bannissement */}
-          <Dialog open={showBanDialog} onOpenChange={setShowBanDialog}>
-            <DialogTrigger asChild>
-              <span style={{ display: 'none' }} />
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white border-gray-800">
-              <DialogHeader>
-                <DialogTitle>Bannir {user.nickname}</DialogTitle>
-                <DialogDescription className="text-gray-400">
-                  Définissez les détails du bannissement pour cet utilisateur.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="banReason" className="text-right">
-                    Raison
-                  </Label>
-                  <Input
-                    id="banReason"
-                    value={banReason}
-                    onChange={(e) => setBanReason(e.target.value)}
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="banDuration" className="text-right">
-                    Durée (heures)
-                  </Label>
-                  <Input
-                    id="banDuration"
-                    type="number"
-                    value={banDuration}
-                    onChange={(e) => setBanDuration(Number.parseInt(e.target.value))}
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="banComment" className="text-right">
-                    Commentaire
-                  </Label>
-                  <Textarea
-                    id="banComment"
-                    value={banComment}
-                    onChange={(e) => setBanComment(e.target.value)}
-                    className="col-span-3"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="secondary" onClick={() => setShowBanDialog(false)}>
-                  Annuler
-                </Button>
-                <Button type="button" variant="destructive" onClick={handleBanUser}>
-                  Bannir
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                      </td>
+                    </tr>
+                  ))
+                ) }
+              </tbody>
+            </table>
+          </div>
 
-          {/* Modale de mute */}
-          <Dialog open={showMuteDialog} onOpenChange={setShowMuteDialog}>
-            <DialogTrigger asChild>
-              <span style={{ display: 'none' }} />
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white border-gray-800">
-              <DialogHeader>
-                <DialogTitle>Mute {user.nickname}</DialogTitle>
-                <DialogDescription className="text-gray-400">
-                  Définissez les détails du mute pour cet utilisateur.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="muteReason" className="text-right">
-                    Raison
-                  </Label>
-                  <Input
-                    id="muteReason"
-                    value={muteReason}
-                    onChange={(e) => setMuteReason(e.target.value)}
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="muteDuration" className="text-right">
-                    Durée (heures)
-                  </Label>
-                  <Input
-                    id="muteDuration"
-                    type="number"
-                    value={muteDuration}
-                    onChange={(e) => setMuteDuration(Number.parseInt(e.target.value))}
-                    className="col-span-3"
-                  />
-                </div>
+          {/* Pagination */ }
+          <div
+            className="p-4 flex flex-col sm:flex-row items-center justify-between border-t border-blue-500/30">
+            <div className="text-sm text-blue-300 mb-4 sm:mb-0">
+              Affichage de <span
+                className="font-medium">{ indexOfFirstUser + 1 }</span> à{ ' ' }
+              <span
+                className="font-medium">{ Math.min(indexOfLastUser, filteredUsers.length) }</span> sur{ ' ' }
+              <span
+                className="font-medium">{ filteredUsers.length }</span> utilisateurs
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <div className="relative mr-4">
+                <button
+                  onClick={ () => setShowRowsDropdown(!showRowsDropdown) }
+                  className="px-3 py-1 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all flex items-center gap-1"
+                >
+                  { rowsPerPage } par page <ChevronDown size={ 14 }/>
+                </button>
+
+                { showRowsDropdown && (
+                  <div
+                    className="absolute right-0 mt-1 w-32 bg-black/90 border border-blue-500/30 rounded-lg shadow-lg z-50">
+                    { [10, 25, 50, 100].map((num) => (
+                      <button
+                        key={ num }
+                        onClick={ () => {
+                          setRowsPerPage(num)
+                          setShowRowsDropdown(false)
+                          setCurrentPage(1)
+                        } }
+                        className={ `block w-full text-left px-4 py-2 hover:bg-blue-900/30 ${
+                          rowsPerPage === num ? 'text-blue-400': 'text-white'
+                        }` }
+                      >
+                        { num } par page
+                      </button>
+                    )) }
+                  </div>
+                ) }
               </div>
-              <DialogFooter>
-                <Button type="button" variant="secondary" onClick={() => setShowMuteDialog(false)}>
-                  Annuler
-                </Button>
-                <Button type="button" variant="destructive" onClick={handleMuteUser}>
-                  Mute
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+
+              <button
+                className="p-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={ () => paginate(currentPage - 1) }
+                disabled={ currentPage === 1 }
+              >
+                <ChevronLeft size={ 18 }/>
+              </button>
+
+              { Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
+                let pageNumber : number
+
+                if (totalPages <= 5) {
+                  pageNumber = index + 1
+                } else if (currentPage <= 3) {
+                  pageNumber = index + 1
+                } else if (currentPage >= totalPages - 2) {
+                  pageNumber = totalPages - 4 + index
+                } else {
+                  pageNumber = currentPage - 2 + index
+                }
+
+                return (
+                  <button
+                    key={ pageNumber }
+                    onClick={ () => paginate(pageNumber) }
+                    className={ `px-3 py-1 rounded-lg transition-all ${
+                      currentPage === pageNumber
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30'
+                    }` }
+                  >
+                    { pageNumber }
+                  </button>
+                )
+              }) }
+
+              { totalPages > 5 && currentPage < totalPages - 2 && (
+                <>
+                  <span className="text-blue-300">...</span>
+                  <button
+                    onClick={ () => paginate(totalPages) }
+                    className="px-3 py-1 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all"
+                  >
+                    { totalPages }
+                  </button>
+                </>
+              ) }
+
+              <button
+                className="p-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={ () => paginate(currentPage + 1) }
+                disabled={ currentPage === totalPages }
+              >
+                <ChevronRight size={ 18 }/>
+              </button>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   )
