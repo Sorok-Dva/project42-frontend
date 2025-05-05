@@ -7,12 +7,19 @@ import {
   Award,
   Ban,
   Calendar,
+  Check,
   Edit,
   Eye,
   GamepadIcon as GameController,
+  ListChecks,
+  LogIn,
   MessageSquare,
+  MicOffIcon as Mute,
+  Save,
+  Shield,
   Trophy,
   Users,
+  X,
 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'components/UI/Tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'components/UI/Card'
@@ -22,6 +29,26 @@ import { Progress } from 'components/UI/Progress'
 import { Button } from 'components/UI/Button'
 import { Separator } from 'components/UI/Separator'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'components/UI/Table'
+import { Input } from 'components/UI/Input'
+import { Textarea } from 'components/UI/Textarea'
+import { RadioGroup, RadioGroupItem } from 'components/UI/RadioGroup'
+import { Label } from 'components/UI/Label'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from 'components/UI/Dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from 'components/UI/DropdownMenu'
 import {
   LineChart,
   Line,
@@ -41,35 +68,39 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from 'components/UI
 import { toast } from 'react-toastify'
 
 // Données fictives pour la démo
-const mockUser = {
-  id: 1,
-  email: 'player@example.com',
-  nickname: 'SpaceCommander',
-  avatar: '/placeholder.svg?height=128&width=128',
-  isMale: true,
-  role: { id: 3, name: 'Modérateur', color: '#4CAF50' },
-  points: 12450,
-  level: 42,
-  title: 'Explorateur Galactique',
-  signature: 'Vers l\'infini et au-delà!',
-  premium: new Date('2023-12-31'),
-  validated: true,
-  registerIp: '192.168.1.1',
-  lastLoginIp: '192.168.1.2',
-  behaviorPoints: 950,
-  moderatorPoints: 320,
-  discordId: 'discord123456',
-  lastNicknameChange: new Date('2023-06-15'),
-  createdAt: new Date('2022-01-15'),
+interface User {
+  id: string,
+  email: string,
+  nickname: string,
+  avatar: string,
+  isMale: boolean,
+  roleId: number,
+  role: { id: number, name: string },
+  points: number,
+  level: number,
+  title: string,
+  signature: string,
+  premium: Date,
+  validated: boolean,
+  registerIp: string,
+  lastLoginIp: string,
+  behaviorPoints: number,
+  moderatorPoints: number,
+  discordId: string,
+  lastNicknameChange: Date,
+  createdAt: Date,
+  online: boolean,
+  gameStatus: string, // 'online', 'offline', 'in_pregame', 'in_game', 'spectating'
+  currentGameId: number,
   guildMembership: {
     guild: {
-      id: 5,
-      name: 'Guardians of the Galaxy',
-      tag: 'GOTG',
-      points: 45000,
-      leader: 1,
+      id: number,
+      name: string,
+      tag: string,
+      points: number,
+      leader: boolean,
     },
-    role: 'captain',
+    role: string,
   },
 }
 
@@ -245,37 +276,254 @@ const messageTypeData = [
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
 
-const UserDetailsPage: React.FC = () => {
-  const params = useParams()
-  const userId = params.id
-  const [user, setUser] = useState(mockUser)
+interface Role {
+  id : number;
+  name : string;
+}
+
+export default function UserDetailsPage() {
+  const { id } = useParams<{ id : string }>()
+  const navigate = useNavigate()
+  const { token } = useAuth()
+  const [user, setUser] = useState<User | null>(null)
+  const [roles, setRoles] = useState<Role[]>([])
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [isAddPointsModalOpen, setAddPointsModalOpen] = useState(false)
+  const [pointsToAdd, setPointsToAdd] = useState<number>(0)
+  const [reason, setReason] = useState<string>('Event')
+  const [nicknameChanges, setNicknameChanges] = useState<[]>([])
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isEditing, setIsEditing] = useState(false)
+  const [showModActions, setShowModActions] = useState(false)
+  const [showBanDialog, setShowBanDialog] = useState(false)
+  const [showMuteDialog, setShowMuteDialog] = useState(false)
+  const [banReason, setBanReason] = useState('')
+  const [banDuration, setBanDuration] = useState(24)
+  const [banComment, setBanComment] = useState('')
+  const [muteReason, setMuteReason] = useState('')
+  const [muteDuration, setMuteDuration] = useState(1)
 
   useEffect(() => {
-    // Simuler le chargement des données
-    const fetchUserData = async () => {
+    const fetchUser = async () => {
       try {
-        // Dans une implémentation réelle, vous feriez un appel API ici
-        // const response = await fetch(`/api/admin/users/${userId}`)
-        // const data = await response.json()
-        // setUser(data)
-
-        // Simulation de chargement
-        setTimeout(() => {
-          setUser(mockUser)
-          setLoading(false)
-        }, 1000)
-      } catch (err) {
-        setError('Erreur lors du chargement des données utilisateur')
+        const response = await fetch(`/api/admin/users/${ id }`, {
+          headers: {
+            Authorization: `Bearer ${ token }`,
+          },
+        })
+        const data = await response.json()
+        setUser(data)
+        setNicknameChanges(data.nicknameChanges)
         setLoading(false)
+      } catch (err) {
+        console.error('Failed to fetch user', err)
       }
     }
 
-    fetchUserData()
-  }, [userId])
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch('/api/admin/roles', {
+          headers: {
+            Authorization: `Bearer ${ token }`,
+          },
+        })
+        const data = await response.json()
+        setRoles(data)
+      } catch (err) {
+        console.error('Failed to fetch roles', err)
+      }
+    }
 
-  if (loading) {
+    fetchUser()
+    fetchRoles()
+  }, [id, token])
+
+  const handleDelete = async () => {
+    try {
+      await fetch(`/api/admin/users/${ id }`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${ token }`,
+        },
+      })
+      navigate('/admin/users')
+    } catch (err) {
+      console.error('Failed to delete user', err)
+    }
+  }
+
+  const handleUpdate = async (e : React.FormEvent) => {
+    e.preventDefault()
+    try {
+      if (!user) return
+      console.log(user)
+      await fetch(`/api/admin/users/${ id }`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${ token }`,
+        },
+        body: JSON.stringify(user),
+      })
+      toast.info('User updated successfully')
+    } catch (err) {
+      console.error('Failed to update user', err)
+    }
+  }
+
+  const handleChange = (e : React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setUser((prevUser) => {
+      if (prevUser) {
+        return { ...prevUser, [name]: value }
+      }
+      return prevUser
+    })
+  }
+
+  const handleRoleChange = (e : React.ChangeEvent<HTMLInputElement>) => {
+    const roleId = Number(e.target.value)
+    const selectedRole = roles.find((role) => role.id === roleId)
+    if (selectedRole && user) {
+      setUser((prevUser) => ({
+        ...prevUser!,
+        role: selectedRole,
+        roleId,
+      }))
+    }
+  }
+
+  const handleAddPoints = async () => {
+    if (!user) return
+    try {
+      const response = await fetch(`/api/admin/users/${id}/add-points`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          points: pointsToAdd,
+          reason,
+        }),
+      })
+      const data = await response.json()
+      setUser((prevUser) => ({
+        ...prevUser!,
+        points: data.points,
+      }))
+      setAddPointsModalOpen(false)
+      toast.info('Points added successfully')
+    } catch (err) {
+      console.error('Failed to add points', err)
+    }
+  }
+
+  const handleSaveProfile = async () => {
+    try {
+      // Dans une implémentation réelle, vous feriez un appel API ici
+      // await fetch(`/api/admin/users/${userId}`, {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(editedUser)
+      // })
+
+      setIsEditing(false)
+
+      // Afficher un toast ou une notification de succès
+      console.log('Profil mis à jour avec succès')
+    } catch (err) {
+      setError('Erreur lors de la mise à jour du profil')
+    }
+  }
+
+  const handleBanUser = async () => {
+    try {
+      // Simuler un appel d'API pour bannir l'utilisateur
+      console.log(`Utilisateur banni pour ${banDuration}h: ${banReason}`)
+      // Reset form
+      setBanReason('')
+      setBanDuration(24)
+      setBanComment('')
+      setShowBanDialog(false)
+    } catch (err) {
+      setError('Erreur lors du bannissement de l\'utilisateur')
+    }
+  }
+
+  const handleMuteUser = async () => {
+    try {
+      // Simuler un appel d'API pour mute l'utilisateur
+      console.log(`Utilisateur mute pour ${muteDuration}h: ${muteReason}`)
+      // Reset form
+      setMuteReason('')
+      setMuteDuration(1)
+      setShowMuteDialog(false)
+    } catch (err) {
+      setError('Erreur lors du mute de l\'utilisateur')
+    }
+  }
+
+  const handleValidateAccount = async () => {
+    if (!user) return
+    try {
+      // Simuler un appel d'API pour valider le compte
+      setUser((prev) => {
+        if (!prev) return null
+        return { ...prev, validated: true }
+      })
+      console.log('Compte validé avec succès')
+    } catch (err) {
+      setError('Erreur lors de la validation du compte')
+    }
+  }
+
+  const handleAddToStalklist = async () => {
+    try {
+      // Simuler un appel d'API pour ajouter à la stalklist
+      console.log('Utilisateur ajouté à la stalklist')
+    } catch (err) {
+      setError('Erreur lors de l\'ajout à la stalklist')
+    }
+  }
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+    case 'online':
+      return 'En ligne'
+    case 'offline':
+      return 'Hors ligne'
+    case 'in_pregame':
+      return 'En pré-partie'
+    case 'in_game':
+      return 'En partie'
+    case 'spectating':
+      return 'Spectateur'
+    default:
+      return 'Inconnu'
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+    case 'online':
+      return 'bg-green-500'
+    case 'offline':
+      return 'bg-gray-500'
+    case 'in_pregame':
+      return 'bg-yellow-500'
+    case 'in_game':
+      return 'bg-blue-500'
+    case 'spectating':
+      return 'bg-purple-500'
+    default:
+      return 'bg-gray-500'
+    }
+  }
+
+  if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center space-y-4">
@@ -322,14 +570,54 @@ const UserDetailsPage: React.FC = () => {
           <h1 className="text-3xl font-bold">Détails de l'utilisateur</h1>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" className="flex items-center gap-2">
-            <Edit size={16} />
-            Modifier
-          </Button>
-          <Button variant="destructive" className="flex items-center gap-2">
-            <Ban size={16} />
-            Bannir
-          </Button>
+          {isEditing ? (
+            <>
+              <Button onClick={handleSaveProfile} className="flex items-center gap-2">
+                <Save size={16} />
+                Sauvegarder
+              </Button>
+              <Button variant="outline" onClick={() => setIsEditing(false)} className="flex items-center gap-2">
+                <X size={16} />
+                Annuler
+              </Button>
+            </>
+          ) : (
+            <Button variant="outline" onClick={() => setIsEditing(true)} className="flex items-center gap-2">
+              <Edit size={16} />
+              Modifier
+            </Button>
+          )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="default" className="flex items-center gap-2">
+                <Shield size={16} />
+                Actions Modérateur
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Actions de modération</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {!user.validated && (
+                <DropdownMenuItem className="flex items-center gap-2" onClick={handleValidateAccount}>
+                  <Check size={16} />
+                  <span>Valider le compte</span>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem className="flex items-center gap-2 text-red-500" onClick={() => setShowBanDialog(true)}>
+                <Ban size={16} />
+                <span>Bannir l'utilisateur</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center gap-2 text-yellow-500" onClick={() => setShowMuteDialog(true)}>
+                <Mute size={16} />
+                <span>Mute l'utilisateur</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center gap-2" onClick={handleAddToStalklist}>
+                <ListChecks size={16} />
+                <span>Ajouter à la stalklist</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -342,37 +630,124 @@ const UserDetailsPage: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex flex-col items-center space-y-4">
-              <Avatar className="w-32 h-32 border-4 border-primary">
-                <AvatarImage src={user.avatar || '/placeholder.svg'} alt={user.nickname} />
-                <AvatarFallback>{user.nickname.substring(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="w-32 h-32 border-4 border-primary">
+                  <AvatarImage src={user.avatar || '/placeholder.svg'} alt={user.nickname} />
+                  <AvatarFallback>{user.nickname.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                {/* Indicateur de statut */}
+                <div
+                  className={`absolute bottom-2 right-2 w-5 h-5 ${getStatusColor(user.gameStatus)} rounded-full border-2 border-white`}
+                ></div>
+              </div>
               <div className="text-center">
-                <h2 className="text-2xl font-bold">{user.nickname}</h2>
-                <p className="text-muted-foreground">{user.title}</p>
+                {isEditing ? (
+                  <Input
+                    value={user.nickname}
+                    onChange={(e) => setUser({ ...user, nickname: e.target.value })}
+                    className="font-bold text-center mb-2"
+                  />
+                ) : (
+                  <h2 className="text-2xl font-bold">{user.nickname}</h2>
+                )}
+
+                {isEditing ? (
+                  <Input
+                    value={user.title}
+                    onChange={(e) => setUser({ ...user, title: e.target.value })}
+                    className="text-center text-muted-foreground mb-2"
+                    placeholder="Titre"
+                  />
+                ) : (
+                  <p className="text-muted-foreground">{user.title}</p>
+                )}
                 <div className="flex justify-center mt-2 space-x-2">
                   <Badge variant="outline" className="bg-primary/20">
                     Niveau {user.level}
                   </Badge>
+                  <Badge>{user.role.name}</Badge>
                   {isPremium && <Badge className="bg-amber-500">Premium</Badge>}
                   {user.validated && <Badge className="bg-green-600">Vérifié</Badge>}
                 </div>
               </div>
             </div>
 
+            <div>
+              <p className="text-sm text-muted-foreground">Signature</p>
+              {isEditing ? (
+                <Textarea
+                  value={user.signature}
+                  onChange={(e) => setUser({ ...user, signature: e.target.value })}
+                  placeholder="Signature"
+                  className="min-h-[60px]"
+                />
+              ) : (
+                <p className="italic text-sm">{user.signature}</p>
+              )}
+            </div>
+
             <Separator />
+
+            {/* Statut en jeu */}
+            <div className="bg-gray-800/50 backdrop-blur-sm p-4 rounded-lg">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className={`w-3 h-3 ${getStatusColor(user.gameStatus)} rounded-full`}></div>
+                <span className="font-medium">{getStatusText(user.gameStatus)}</span>
+              </div>
+              {user.gameStatus !== 'offline' && user.gameStatus !== 'online' && (
+                <div className="mt-2">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {user.gameStatus === 'in_pregame'
+                      ? 'En attente dans la partie'
+                      : user.gameStatus === 'in_game'
+                        ? 'En partie active'
+                        : 'Spectateur de la partie'}
+                  </p>
+                  <Button size="sm" className="w-full" variant="outline">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Rejoindre la partie
+                  </Button>
+                </div>
+              )}
+            </div>
 
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium">{user.email}</p>
+                {isEditing ? (
+                  <Input
+                    value={user.email}
+                    onChange={(e) => setUser({ ...user, email: e.target.value })}
+                  />
+                ) : (
+                  <p className="font-medium">{user.email}</p>
+                )}
               </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground">Sexe</p>
+                {isEditing ? (
+                  <RadioGroup
+                    defaultValue={user.isMale ? 'male' : 'female'}
+                    onValueChange={(value) => setUser({ ...user, isMale: value === 'male' })}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="male" id="male" />
+                      <Label htmlFor="male">Homme</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="female" id="female" />
+                      <Label htmlFor="female">Femme</Label>
+                    </div>
+                  </RadioGroup>
+                ) : (
+                  <p className="font-medium">{user.isMale ? 'Homme' : 'Femme'}</p>
+                )}
+              </div>
+
               <div>
                 <p className="text-sm text-muted-foreground">Discord</p>
                 <p className="font-medium">{user.discordId || 'Non lié'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Rôle</p>
-                <Badge style={{ backgroundColor: user.role.color }}>{user.role.name}</Badge>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Membre depuis</p>
@@ -383,10 +758,6 @@ const UserDetailsPage: React.FC = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Dernière connexion</p>
                 <p className="font-medium">Aujourd'hui, 15:42</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Signature</p>
-                <p className="italic text-sm">{user.signature}</p>
               </div>
             </div>
 
@@ -966,10 +1337,108 @@ const UserDetailsPage: React.FC = () => {
               </Card>
             </TabsContent>
           </Tabs>
+          {/* Modale de bannissement */}
+          <Dialog open={showBanDialog} onOpenChange={setShowBanDialog}>
+            <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white border-gray-800">
+              <DialogHeader>
+                <DialogTitle>Bannir {user.nickname}</DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Définissez les détails du bannissement pour cet utilisateur.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="banReason" className="text-right">
+                    Raison
+                  </Label>
+                  <Input
+                    id="banReason"
+                    value={banReason}
+                    onChange={(e) => setBanReason(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="banDuration" className="text-right">
+                    Durée (heures)
+                  </Label>
+                  <Input
+                    id="banDuration"
+                    type="number"
+                    value={banDuration}
+                    onChange={(e) => setBanDuration(Number.parseInt(e.target.value))}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="banComment" className="text-right">
+                    Commentaire
+                  </Label>
+                  <Textarea
+                    id="banComment"
+                    value={banComment}
+                    onChange={(e) => setBanComment(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="secondary" onClick={() => setShowBanDialog(false)}>
+                  Annuler
+                </Button>
+                <Button type="button" variant="destructive" onClick={handleBanUser}>
+                  Bannir
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Modale de mute */}
+          <Dialog open={showMuteDialog} onOpenChange={setShowMuteDialog}>
+            <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white border-gray-800">
+              <DialogHeader>
+                <DialogTitle>Mute {user.nickname}</DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Définissez les détails du mute pour cet utilisateur.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="muteReason" className="text-right">
+                    Raison
+                  </Label>
+                  <Input
+                    id="muteReason"
+                    value={muteReason}
+                    onChange={(e) => setMuteReason(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="muteDuration" className="text-right">
+                    Durée (heures)
+                  </Label>
+                  <Input
+                    id="muteDuration"
+                    type="number"
+                    value={muteDuration}
+                    onChange={(e) => setMuteDuration(Number.parseInt(e.target.value))}
+                    className="col-span-3"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="secondary" onClick={() => setShowMuteDialog(false)}>
+                  Annuler
+                </Button>
+                <Button type="button" variant="destructive" onClick={handleMuteUser}>
+                  Mute
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </div>
   )
 }
-
-export default UserDetailsPage
