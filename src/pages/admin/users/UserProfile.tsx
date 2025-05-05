@@ -270,12 +270,6 @@ const gameActivityData = [
   { name: 'Déc', parties: 25, messages: 135 },
 ]
 
-const gameResultsData = [
-  { name: 'Victoires', value: 65, color: '#4CAF50' },
-  { name: 'Défaites', value: 25, color: '#F44336' },
-  { name: 'Égalités', value: 10, color: '#2196F3' },
-]
-
 const messageTypeData = [
   { name: 'Global', value: 45, color: '#9C27B0' },
   { name: 'Équipe', value: 30, color: '#3F51B5' },
@@ -302,6 +296,13 @@ export default function UserDetailsPage() {
   const [pointsToAdd, setPointsToAdd] = useState<number>(0)
   const [reason, setReason] = useState<string>('Event')
   const [nicknameChanges, setNicknameChanges] = useState<NicknameChanges>()
+  const [gameResultsData, setGameResultsData] = useState<[
+    { name: 'Victoires', value: number, color: '#4CAF50' },
+    { name: 'Défaites', value: number, color: '#F44336' },
+  ]>([
+    { name: 'Victoires', value: 0, color: '#4CAF50' },
+    { name: 'Défaites', value: 0, color: '#F44336' },
+  ])
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -324,12 +325,17 @@ export default function UserDetailsPage() {
           },
         })
         const data = await response.json() as User
+        const gameStatsData = data.stats.filter(stat => {
+          return stat.type === 'all'
+        })[0]
         setUser(data)
         setNicknameChanges(data.nicknameChanges)
         setLoading(false)
-        setGameStats(data.stats.filter(stat => {
-          return stat.type === 'all'
-        })[0])
+        setGameStats(gameStatsData)
+        setGameResultsData([
+          { name: 'Victoires', value: Number(((gameStatsData.wins / gameStatsData.playedGames) * 100).toFixed(0)), color: '#4CAF50' },
+          { name: 'Défaites', value: Number((((gameStatsData.playedGames - gameStatsData.wins) / gameStatsData.playedGames) * 100).toFixed(0)), color: '#F44336' },
+        ])
       } catch (err) {
         console.error('Failed to fetch user', err)
       }
@@ -945,7 +951,7 @@ export default function UserDetailsPage() {
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(value) => [`${value} parties`, '']} />
+                          <Tooltip formatter={(value) => [`${value}%`, '']} />
                           <Legend />
                         </PieChart>
                       </ResponsiveContainer>
