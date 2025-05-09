@@ -7,6 +7,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { Card, CardFormData } from 'types/card'
 import { X, Upload, Loader2 } from 'lucide-react'
 import { Img as Image } from 'react-image'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { ToastDefaultOptions } from 'utils/toastOptions'
+import { useAuth } from 'contexts/AuthContext'
 
 interface CardFormProps {
   card?: Card
@@ -16,10 +20,11 @@ interface CardFormProps {
 }
 
 const CardForm: React.FC<CardFormProps> = ({ card, isOpen, onClose, onSubmit }) => {
+  const { token } = useAuth()
   const [formData, setFormData] = useState<CardFormData>({
     name: '',
     description: '',
-    imageUrl: '/placeholder.svg?height=200&width=150',
+    imageUrl: `/assets/images/carte${card?.id}.png`,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
@@ -63,12 +68,21 @@ const CardForm: React.FC<CardFormProps> = ({ card, isOpen, onClose, onSubmit }) 
     setIsSubmitting(true)
 
     try {
-      // Simuler un délai de traitement
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await axios.post('/api/admin/cards', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      })
+
+      if (response.status === 200) {
+        toast.info(`La carte ${formData.name} a été mise à jour.`, ToastDefaultOptions)
+      } else {
+        toast.error(`Une erreur s'est produite lors de la mise à jour de la carte ${formData.name}.`, ToastDefaultOptions)
+      }
       onSubmit(formData, card?.id)
       onClose()
     } catch (error) {
-      console.error('Error submitting form:', error)
+      toast.error(`Une erreur s'est produite lors de la mise à jour de la carte ${formData.name}.`, ToastDefaultOptions)
     } finally {
       setIsSubmitting(false)
     }
@@ -133,8 +147,8 @@ const CardForm: React.FC<CardFormProps> = ({ card, isOpen, onClose, onSubmit }) 
               </label>
               <div className="flex items-start gap-4">
                 <div className="relative w-32 h-32 border border-dashed border-gray-600 rounded-md overflow-hidden">
-                  {previewImage ? (
-                    <Image src={previewImage || '/placeholder.svg'} alt="Aperçu" className="object-cover" />
+                  {previewImage || formData.imageUrl ? (
+                    <Image src={previewImage || formData.imageUrl || '/placeholder.svg'} alt="Aperçu" className="object-cover" />
                   ) : (
                     <div className="flex items-center justify-center h-full bg-gray-800">
                       <span className="text-gray-500 text-sm">Aucune image</span>

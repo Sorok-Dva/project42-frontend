@@ -27,7 +27,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete })=> {
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex-shrink-0 relative w-16 h-16 md:w-20 md:h-20 rounded-md overflow-hidden border border-blue-500/50">
-          <Image src={card.imageUrl || '/placeholder.svg'} alt={card.name} className="object-cover" />
+          <Image src={card ? `/assets/images/carte${card.id}.png` :  '/placeholder.svg'} alt={card.name} className="object-cover" />
         </div>
 
         <div className="flex-grow">
@@ -79,9 +79,9 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete })=> {
             <div>
               <h4 className="text-sm font-medium text-blue-400 mb-1">Informations</h4>
               <p className="text-xs text-gray-400">
-                Créé le: {card.createdAt.toLocaleDateString()}
+                Créé le: {new Date(card.createdAt).toLocaleDateString()}
                 <br />
-                Mis à jour le: {card.updatedAt.toLocaleDateString()}
+                Mis à jour le: {card.updatedAt ? new Date(card.updatedAt).toLocaleDateString() : 'Jamais'}
               </p>
             </div>
           </div>

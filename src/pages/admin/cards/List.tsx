@@ -6,6 +6,7 @@ import { Plus, Search, Filter, Loader2 } from 'lucide-react'
 import CardItem from 'components/Admin/Cards/Item'
 import CardForm from 'components/Admin/Cards/Form'
 import type { Card, CardFormData } from 'types/card'
+import axios from 'axios'
 
 const mockCards: Card[] = [
   {
@@ -59,15 +60,14 @@ const AdminCardsPage: React.FC = () => {
   const [currentCard, setCurrentCard] = useState<Card | undefined>(undefined)
 
   useEffect(() => {
-    // Simuler le chargement des données
-    const loadData = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      setCards(mockCards)
-      setFilteredCards(mockCards)
+    const loadCards = async () => {
+      const response = await axios.get('/api/cards')
+      setCards(response.data)
+      setFilteredCards(response.data)
       setIsLoading(false)
     }
 
-    loadData()
+    loadCards()
   }, [])
 
   useEffect(() => {
