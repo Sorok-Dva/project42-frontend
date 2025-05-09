@@ -34,8 +34,7 @@ const GameRules: React.FC<GameRulesProps> = ({ gameType }) => {
       // Carnage
       'Il est strictement <strong>interdit d\'insulter</strong> un autre joueur et d\'avoir une attitude malsaine. Toute forme d\'<strong>anti-jeu</strong> sera sanctionnée.',
       'La sorcière <strong>doit utiliser</strong> sa potion de mort la première nuit.',
-      'Le cupidon <strong>doit se sélectionner</strong> dans le couple.',
-      'Le chasseur <strong>doit tirer</strong>.',
+      'Le tireur d\'élite <strong>doit tirer</strong>.',
       'Les parties sont <strong>très courtes et <strong>intenses</strong>.',
       'Les phases sont <strong>accélérées</strong>, soyez réactifs.',
       'Le dévoilement de votre rôle est autorisé, mais vous êtes <strong>fortement incité</strong> à garder votre carte secrète.'
@@ -96,7 +95,7 @@ const GameRules: React.FC<GameRulesProps> = ({ gameType }) => {
       <ul className="list-disc list-inside text-xs text-blue-200 space-y-1">
         {currentRules.map((rule, index) => (
           <li key={index}>
-            <span dangerouslySetInnerHTML={{ __html: rule }} />
+            <span className="text-sm" dangerouslySetInnerHTML={{ __html: rule }} />
           </li>
         ))}
       </ul>
