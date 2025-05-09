@@ -49,7 +49,7 @@ export interface User {
     meanClaps: number;
   }];
   stats: [{
-    id: number;
+    type: number | 'all';
     playedGames: number;
   }],
   guild: {
@@ -267,12 +267,12 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                         ) : (
                           <>
                             <div className="games-bar">
-                              {user.stats.map((stat: { id: number, playedGames: number }) => {
+                              {user.stats.filter(s => s.type !== 'all').map((stat: { type: number | 'all', playedGames: number }) => {
                                 const flexValue = Math.round((stat.playedGames / user.playedGames) * 100)
                                 return (
                                   <div
-                                    key={stat.id}
-                                    className={`games-bar-section type-${stat.id}`}
+                                    key={stat.type}
+                                    className={`games-bar-section type-${stat.type}`}
                                     style={{ flex: flexValue }}
                                   ></div>
                                 )
