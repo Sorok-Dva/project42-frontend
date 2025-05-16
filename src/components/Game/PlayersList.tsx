@@ -25,6 +25,7 @@ interface Player {
   isBrother: boolean
   isCharmed: boolean
   isInfected: boolean
+  customVote?: number
   id?: string | number
 }
 
@@ -404,7 +405,12 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
                   {/* Indication de vote */}
                   {!isNight && _player.target && !gameFinished && (
-                    <span className="text-sm text-gray-400">→ {_player.target}</span>
+                    <span className="text-sm text-gray-400">
+                      { _player.customVote ? (
+                        <img src={`/assets/images/custom/votes/${_player.customVote}.png`} className="w-20" alt=""/>
+                      ) : ('→')}
+                      {_player.target}
+                    </span>
                   )}
                 </div>
 
