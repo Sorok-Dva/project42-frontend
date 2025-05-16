@@ -101,7 +101,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
         } : {})
         setUser(response.data.user)
         setRelation(response.data.relation)
-        setRole(rolify(response.data.user.role.name))
+        setRole(rolify(response.data.user.role.name, response.data.user.isMale))
       } catch (e: any) {
         if (e.response?.data.error) {
           setError(e.response.data.error)

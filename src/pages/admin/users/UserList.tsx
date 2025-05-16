@@ -541,7 +541,7 @@ const UsersPage: React.FC = () => {
                         <span
                           className={ `px-2 py-1 rounded-full text-xs ${ roleColors[user.role as keyof typeof roleColors] || 'bg-gray-600 text-white' }` }
                         >
-                          { rolify(user.role) }
+                          { rolify(user.role, user.isMale)?.name }
                         </span>
                       </td>
                       <td className="p-4">
