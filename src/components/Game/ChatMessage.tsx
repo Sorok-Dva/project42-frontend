@@ -8,6 +8,7 @@ import React, {
 } from 'react'
 import { Box, Typography } from '@mui/material'
 import { Message, PlayerType, Viewer } from 'hooks/useGame'
+import { emotes } from 'components/Game/Chat'
 
 function stripHTML(input: string) {
   const tempDiv = document.createElement('div')
@@ -47,6 +48,25 @@ interface ChatMessagesProps {
 
 export interface ChatMessagesHandle {
   scrollToBottom: () => void
+}
+
+function replaceEmotesWithImages(message: string): string {
+  let processedMessage = message
+
+  const escapeRegExp = (string: string) => {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  }
+
+  emotes.forEach((emote) => {
+    const escapedCode = escapeRegExp(emote.code)
+    const regex = new RegExp(escapedCode, 'g')
+    processedMessage = processedMessage.replace(
+      regex,
+      `<img src="${emote.path}" alt="${emote.name}" title="${emote.name}" class="inline-block align-middle" style="height: 18px; vertical-align: middle;" />`,
+    )
+  })
+
+  return processedMessage
 }
 
 const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
@@ -205,11 +225,11 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
             cleanNickname !== 'Système' && cleanNickname !== 'Modération'
           let processedMessage = ''
           if (cleanNickname === 'Modération' || cleanNickname === 'Système') {
-            processedMessage = msg.message
+            processedMessage = replaceEmotesWithImages(msg.message)
           } else if (cleanNickname && shouldHighlight && player) {
-            processedMessage = highlightMention(escapedMessage, player.nickname)
+            processedMessage = replaceEmotesWithImages(highlightMention(escapedMessage, player.nickname))
           } else {
-            processedMessage = escapedMessage
+            processedMessage = replaceEmotesWithImages(escapedMessage)
           }
           const uniqueKey = `${msg.playerId}-${msg.createdAt}-${index}`
           return (

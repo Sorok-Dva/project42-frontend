@@ -37,6 +37,69 @@ interface GiphyResult {
   }
 }
 
+interface Emote {
+  code: string
+  path: string
+  name: string
+}
+
+const emojis = [
+  '😀',
+  '😂',
+  '😍',
+  '🤔',
+  '😎',
+  '👍',
+  '👎',
+  '🔥',
+  '❤️',
+  '💯',
+  '🚀',
+  '✨',
+  '👽',
+  '🤖',
+  '🏆',
+  '⚔️',
+  '🛡️',
+  '🧪',
+  '💣',
+  '⚡',
+  '🌌',
+  '🌠',
+]
+
+export const emotes: Emote[] = [
+  { code: ':\'(', path: '/assets/images/emotes/6.png', name: 'Triste' },
+  { code: ':v', path: '/assets/images/emotes/7.png', name: ':v' },
+  { code: ':angel', path: '/assets/images/emotes/angel.png', name: 'Ange' },
+  { code: ':aw', path: '/assets/images/emotes/aw.png', name: 'Awesome' },
+  { code: ':biche', path: '/assets/images/emotes/biche.png', name: 'Biche' },
+  { code: ':bucher', path: '/assets/images/emotes/bucher.png', name: 'Bucher' },
+  { code: '<3', path: '/assets/images/emotes/c.png', name: 'Coeur' },
+  { code: ':keur', path: '/assets/images/emotes/keur.png', name: 'Keur' },
+  { code: ':cookie', path: '/assets/images/emotes/cookie.gif', name: 'Cookie' },
+  { code: ':cool', path: '/assets/images/emotes/cool.png', name: 'Cool' },
+  { code: ':duck', path: '/assets/images/emotes/duck.png', name: 'Canard' },
+  { code: ':eye', path: '/assets/images/emotes/eye.png', name: 'Oeil' },
+  { code: ':hamster', path: '/assets/images/emotes/hamster.png', name: 'Hamster' },
+  { code: ':hamsterjedi', path: '/assets/images/emotes/hamsterjedi.png', name: 'Hamster Jedi' },
+  { code: ':mousse', path: '/assets/images/emotes/mousse.png', name: 'Mousse' },
+  { code: ':mouton', path: '/assets/images/emotes/mouton.png', name: 'mouton' },
+  { code: ':ninja', path: '/assets/images/emotes/ninja.png', name: 'Ninja' },
+  { code: ':noel', path: '/assets/images/emotes/noel.gif', name: 'Noel' },
+  { code: ':penguin', path: '/assets/images/emotes/penguin.gif', name: 'Penguin' },
+  { code: ':phoque', path: '/assets/images/emotes/phoque.png', name: 'Phoque' },
+  { code: ':porte', path: '/assets/images/emotes/porte.png', name: 'Porte' },
+  { code: ':rip', path: '/assets/images/emotes/rip.png', name: 'RIP' },
+  { code: ':alien', path: '/assets/images/emotes/alien.png', name: 'Alien' },
+  { code: ':inno', path: '/assets/images/emotes/membre_equipage.png', name: 'Membre d\'équipage' },
+  { code: ':coordinateur', path: '/assets/images/emotes/coordinateur.png', name: 'Coordinateur' },
+  { code: ':analyste', path: '/assets/images/emotes/analyste.png', name: 'Analyste' },
+  { code: ':medecin', path: '/assets/images/emotes/medecin.png', name: 'Medecin' },
+  { code: ':bi', path: '/assets/images/emotes/bi.png', name: 'Bio-ingénieure' },
+  { code: ':te', path: '/assets/images/emotes/te.png', name: 'Tireur d\'élite' },
+]
+
 const Chat: React.FC<ChatProps> = ({
   gameId,
   players,
@@ -82,33 +145,15 @@ const Chat: React.FC<ChatProps> = ({
     chatMessagesRef.current?.scrollToBottom()
   }, [])
 
-  const emojis = [
-    '😀',
-    '😂',
-    '😍',
-    '🤔',
-    '😎',
-    '👍',
-    '👎',
-    '🔥',
-    '❤️',
-    '💯',
-    '🚀',
-    '✨',
-    '👽',
-    '🤖',
-    '🏆',
-    '⚔️',
-    '🛡️',
-    '🧪',
-    '💣',
-    '⚡',
-    '🌌',
-    '🌠',
-  ]
-
   const handleEmojiSelect = (emoji: string) => {
     setNewMessage((prev) => prev + emoji)
+    setShowEmojiPicker(false)
+    inputRef.current?.focus()
+  }
+
+  // Ajouter cette fonction après handleEmojiSelect
+  const handleEmoteSelect = (emoteCode: string) => {
+    setNewMessage((prev) => prev + ' ' + emoteCode + ' ')
     setShowEmojiPicker(false)
     inputRef.current?.focus()
   }
@@ -522,18 +567,43 @@ const Chat: React.FC<ChatProps> = ({
 
           {/* Sélecteur d'emoji */}
           {showEmojiPicker && (
-            <div className="absolute bottom-full right-0 w-64 bg-black/90 border border-blue-500/30 rounded-lg p-2 z-20">
-              <div className="text-xs text-blue-300 mb-2 pb-1 border-b border-blue-500/20">Emojis</div>
-              <div className="grid grid-cols-5 gap-2">
-                {emojis.map((emoji, index) => (
-                  <button
-                    key={index}
-                    className="text-xl hover:bg-blue-900/30 rounded p-1 transition-colors"
-                    onClick={() => handleEmojiSelect(emoji)}
-                  >
-                    {emoji}
-                  </button>
-                ))}
+            <div className="absolute bottom-full right-0 w-80 bg-black/90 border border-blue-500/30 rounded-lg p-2 z-20 max-h-80 overflow-y-auto">
+              {/* Section Emotes */}
+              <div>
+                <div className="text-xs text-blue-300 mb-2 pb-1 border-b border-blue-500/20">Emotes</div>
+                <div className="grid grid-cols-4 gap-2">
+                  {emotes.map((emote, index) => (
+                    <button
+                      key={index}
+                      className="hover:bg-blue-900/30 rounded p-1 transition-colors flex flex-col items-center"
+                      onClick={() => handleEmoteSelect(emote.code)}
+                      title={`${emote.name} ${emote.code}`}
+                    >
+                      <img
+                        src={emote.path || '/placeholder.svg'}
+                        alt={emote.name}
+                        className="w-5 h-5 object-contain"
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                {/* Section Emojis */}
+                <div className="mb-4">
+                  <div className="text-xs text-blue-300 mb-2 pb-1 border-b border-blue-500/20">Emojis</div>
+                  <div className="grid grid-cols-5 gap-2">
+                    {emojis.map((emoji, index) => (
+                      <button
+                        key={index}
+                        className="text-xl hover:bg-blue-900/30 rounded p-1 transition-colors"
+                        onClick={() => handleEmojiSelect(emoji)}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
               </div>
             </div>
           )}
