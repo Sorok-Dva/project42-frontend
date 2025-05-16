@@ -65,6 +65,11 @@ const menuData = [
       },
       {
         id: 3,
+        title: 'Clés Alpha',
+        url: '/admin/alpha-keys',
+      },
+      {
+        id: 4,
         title: 'News',
         url: '/admin/news',
       },
@@ -84,6 +89,11 @@ const menuData = [
         id: 2,
         title: 'Joueurs',
         url: '/moderator/users',
+      },
+      {
+        id: 3,
+        title: 'Clés Alpha',
+        url: '/moderator/alpha-keys',
       },
     ],
   },
