@@ -62,7 +62,7 @@ function replaceEmotesWithImages(message: string): string {
     const regex = new RegExp(escapedCode, 'g')
     processedMessage = processedMessage.replace(
       regex,
-      `<img src="${emote.path}" alt="${emote.name}" title="${emote.name}" class="inline-block align-middle" style="height: 18px; vertical-align: middle;" />`,
+      `<img src="${emote.path}" alt="${emote.name}" title="${emote.name}" class="inline-block align-middle" style="height: ${emote.h}px; vertical-align: middle;" />`,
     )
   })
 
