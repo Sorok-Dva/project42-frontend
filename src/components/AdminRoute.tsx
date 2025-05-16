@@ -5,7 +5,7 @@ import React from 'react'
 import { Container, Spinner } from 'reactstrap'
 
 const AdminRoute : React.FC = () => {
-  const { user, isAdmin } = useUser()
+  const { user } = useUser()
 
   if (user === null) {
     return <Container className="loader-container">
@@ -18,7 +18,7 @@ const AdminRoute : React.FC = () => {
     </Container>
   }
 
-  if (!isAdmin) {
+  if (user.role === 'User' || user.role === 'Banned') {
     return <Navigate to="/" replace/>
   }
 

@@ -37,7 +37,6 @@ const roleColors = {
 const UsersPage: React.FC = () => {
   const { token } = useAuth()
   const { user } = useUser()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
@@ -80,7 +79,7 @@ const UsersPage: React.FC = () => {
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.nickname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user?.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user?.registerIp?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user?.lastLoginIp?.toLowerCase().includes(searchQuery.toLowerCase())
 
@@ -142,7 +141,7 @@ const UsersPage: React.FC = () => {
     const csvData = filteredUsers.map((user) => [
       user.id,
       user.nickname,
-      user.email,
+      user.email || 'Anonymisé',
       user.role,
       user.validated ? 'Validé': user.role === 'Banned' ? 'Banni': 'Non validé',
       new Date(user.updatedAt || 'now').toLocaleString('fr-FR'),
@@ -433,16 +432,18 @@ const UsersPage: React.FC = () => {
                       ) }
                     </div>
                   </th>
-                  <th
-                    className="p-4 text-left cursor-pointer hover:text-blue-300"
-                    onClick={ () => handleSort('email') }
-                  >
-                    <div className="flex items-center">
-                      <span>Email</span>
-                      { sortField === 'email' && <span
-                        className="ml-1">{ sortDirection === 'asc' ? '↑': '↓' }</span> }
-                    </div>
-                  </th>
+                  { ['SuperAdmin', 'Admin'].includes(user?.role || '') && (
+                    <th
+                      className="p-4 text-left cursor-pointer hover:text-blue-300"
+                      onClick={ () => handleSort('email') }
+                    >
+                      <div className="flex items-center">
+                        <span>Email</span>
+                        { sortField === 'email' && <span
+                          className="ml-1">{ sortDirection === 'asc' ? '↑': '↓' }</span> }
+                      </div>
+                    </th>
+                  )}
                   <th
                     className="p-4 text-left cursor-pointer hover:text-blue-300"
                     onClick={ () => handleSort('role') }
@@ -532,7 +533,9 @@ const UsersPage: React.FC = () => {
                           <span data-profile={user.nickname} className="cursor-pointer">{ user.nickname }</span>
                         </div>
                       </td>
-                      <td className="p-4">{ user.email }</td>
+                      { ['SuperAdmin', 'Admin'].includes(user?.role || '') && (
+                        <td className="p-4">{ user.email }</td>
+                      )}
                       <td className="p-4">
                         <span
                           className={ `px-2 py-1 rounded-full text-xs ${ roleColors[user.role as keyof typeof roleColors] || 'bg-gray-600 text-white' }` }
@@ -591,7 +594,7 @@ const UsersPage: React.FC = () => {
                               <ul>
                                 <li>
                                   <a
-                                    href={ `/admin/users/${ user.id }` }
+                                    href={ `/${['SuperAdmin', 'Admin'].includes(user?.role || '') ? 'admin' : 'moderator'}/users/${ user.id }` }
                                     className="w-full text-left px-4 py-2 hover:bg-blue-900/30 flex items-center gap-2"
                                   >
                                     <Eye size={ 16 }
@@ -643,14 +646,15 @@ const UsersPage: React.FC = () => {
                                     </button>
                                   </li>
                                 ) }
-                                <li>
-                                  <button
-                                    className="w-full text-left px-4 py-2 hover:bg-blue-900/30 flex items-center gap-2">
-                                    <Trash2 size={ 16 }
-                                      className="text-red-500"/>
-                                    <span>Supprimer</span>
-                                  </button>
-                                </li>
+                                {['SuperAdmin', 'Admin'].includes(user?.role || '') && (
+                                  <li>
+                                    <button
+                                      className="w-full text-left px-4 py-2 hover:bg-blue-900/30 flex items-center gap-2">
+                                      <Trash2 size={ 16 } className="text-red-500"/>
+                                      <span>Supprimer</span>
+                                    </button>
+                                  </li>
+                                )}
                               </ul>
                             </div>
                           ) }

@@ -70,6 +70,23 @@ const menuData = [
       },
     ],
   },
+  {
+    id: 6,
+    title: 'Modération',
+    isMod: true,
+    submenus: [
+      {
+        id: 1,
+        title: 'Dashboard',
+        url: '/moderator',
+      },
+      {
+        id: 2,
+        title: 'Joueurs',
+        url: '/moderator/users',
+      },
+    ],
+  },
 ]
 
 type submenuType = {
@@ -142,8 +159,9 @@ const Navbar: React.FC<{
                   className="custom-nav gap-lg-7 gap-3 cursor-scale growDown2 ms-xxl-10 d-none d-lg-flex"
                   data-lenis-prevent
                 >
-                  {menuData.map(({ id, title, submenus, url, isAdmin }) => {
+                  {menuData.map(({ id, title, submenus, url, isAdmin, isMod }) => {
                     if (isAdmin && !user?.isAdmin) return
+                    if (isMod &&(user?.role !== 'Moderator' && user?.role !== 'ModeratorTest')) return
                     return url ? (
                       <li key={id} className="menu-link">
                         <Link

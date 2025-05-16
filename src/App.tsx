@@ -66,7 +66,7 @@ const AppContent: React.FC = () => {
   const { token } = useAuth()
   const { user, loading: userLoading } = useUser()
   const location = useLocation()
-  const isAdminRoute = location.pathname.startsWith('/admin')
+  const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/moderator')
   const isGameRoute = location.pathname.startsWith('/game')
 
   const isInitializing = maintenanceLoading || userLoading
@@ -113,6 +113,17 @@ const AppContent: React.FC = () => {
                           <Route path="alpha-keys" element={<AdminAlphaKeys />} />
                           <Route path="news" element={<AdminNews />} />
                           <Route path="cards" element={<AdminCards />} />
+                          <Route path="rooms" element={<AdminRooms />} />
+                        </Route>
+                      </Route>
+                    )}
+                    { user.role === 'Moderator' && (
+                      <Route element={<AdminRoute />}>
+                        <Route path="/moderator" element={<AdminLayout />}>
+                          <Route path="/moderator" element={<AdminDashboard />} />
+                          <Route path="users" element={<UserList />} />
+                          <Route path="users/:id" element={<AdminUserProfile />} />
+                          <Route path="alpha-keys" element={<AdminAlphaKeys />} />
                           <Route path="rooms" element={<AdminRooms />} />
                         </Route>
                       </Route>

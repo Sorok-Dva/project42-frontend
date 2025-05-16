@@ -12,7 +12,7 @@ const AdminLayout : React.FC = (props) => {
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const isDesktop = true
 
-    if (!user || !user.isAdmin) {
+    if (!user || user.role === 'User' || user.role === 'Banned') {
       window.location.href = '/'
       return
     }
