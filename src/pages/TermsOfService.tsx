@@ -8,11 +8,11 @@ const TermsCondition: React.FC = () => {
           <div className="row justify-content-center">
             <div className="col-lg-10">
               <div className="terms-condition-wrapper p-lg-15 p-md-10 p-sm-8 p-4 bgn-4 rounded">
-                <h2 className="tcn-1 mb-10 text-center cursor-scale growUp title-anim">
+                <h2 className="tcn-1 mb-10 text-center cursor-scale growUp title-animate">
                   Conditions Générales d’Utilisation de Project 42
                 </h2>
                 <div className="d-grid gap-3 mb-8">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     1. Introduction
                   </h5>
                   <p className="tcn-6 content-anim">
@@ -20,7 +20,7 @@ const TermsCondition: React.FC = () => {
                   </p>
                 </div>
                 <div className="d-grid gap-3 mb-8">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     2. Objet et Champ d’Application
                   </h5>
                   <p className="tcn-6 content-anim">
@@ -28,7 +28,7 @@ const TermsCondition: React.FC = () => {
                   </p>
                 </div>
                 <div className="d-grid gap-3 mb-8">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     3. Définitions
                   </h5>
                   <ol className="d-grid gap-3 tcn-6">
@@ -40,7 +40,7 @@ const TermsCondition: React.FC = () => {
                   </ol>
                 </div>
                 <div className="d-grid gap-3 mb-8">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     4. Accès au Jeu et Inscription
                   </h5>
                   <p className="tcn-6 content-anim">
@@ -48,7 +48,7 @@ const TermsCondition: React.FC = () => {
                   </p>
                 </div>
                 <div className="d-grid gap-3 mb-8">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     5. Compte Utilisateur et Responsabilités
                   </h5>
                   <p className="tcn-6 content-anim">
@@ -56,7 +56,7 @@ const TermsCondition: React.FC = () => {
                   </p>
                 </div>
                 <div className="d-grid gap-3 mb-8">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     6. Propriété Intellectuelle
                   </h5>
                   <p className="tcn-6 content-anim">
@@ -64,7 +64,7 @@ const TermsCondition: React.FC = () => {
                   </p>
                 </div>
                 <div className="d-grid gap-3 mb-8">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     7. Protection des Données Personnelles et Conformité au RGPD
                   </h5>
                   <p className="tcn-6 content-anim">
@@ -75,7 +75,7 @@ const TermsCondition: React.FC = () => {
                   </p>
                 </div>
                 <div className="d-grid gap-3 mb-8">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     8. Charte de Bonne Conduite
                   </h5>
                   <p className="tcn-6 content-anim">
@@ -103,7 +103,7 @@ const TermsCondition: React.FC = () => {
                   </ol>
                 </div>
                 <div className="d-grid gap-3 mb-8">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     9. Responsabilités de l’Éditeur
                   </h5>
                   <p className="tcn-6 content-anim">
@@ -111,7 +111,7 @@ const TermsCondition: React.FC = () => {
                   </p>
                 </div>
                 <div className="d-grid gap-3 mb-8">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     10. Modification des CGU
                   </h5>
                   <p className="tcn-6 content-anim">
@@ -119,7 +119,7 @@ const TermsCondition: React.FC = () => {
                   </p>
                 </div>
                 <div className="d-grid gap-3 mb-8">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     11. Limitation de Responsabilité
                   </h5>
                   <p className="tcn-6 content-anim">
@@ -127,7 +127,7 @@ const TermsCondition: React.FC = () => {
                   </p>
                 </div>
                 <div className="d-grid gap-3 mb-8">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     12. Loi Applicable et Juridiction
                   </h5>
                   <p className="tcn-6 content-anim">
@@ -135,7 +135,7 @@ const TermsCondition: React.FC = () => {
                   </p>
                 </div>
                 <div className="d-grid gap-3">
-                  <h5 className="tcn-1 cursor-scale growDown title-anim">
+                  <h5 className="tcn-1 cursor-scale growDown title-animate">
                     13. Dispositions Diverses
                   </h5>
                   <p className="tcn-6 content-anim">
@@ -144,7 +144,7 @@ const TermsCondition: React.FC = () => {
                 </div>
 
                 <div className="d-grid gap-3" style={{ marginTop: '5vh' }}>
-                  <b className="tcn-6 content-anim title-anim">
+                  <b className="tcn-6 content-anim title-animate">
                     Dernière modification : le 22/03/2025 à 01:26
                   </b>
                 </div>
