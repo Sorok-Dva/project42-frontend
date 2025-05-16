@@ -36,7 +36,7 @@ const roleColors = {
 
 const UsersPage: React.FC = () => {
   const { token } = useAuth()
-  const { user } = useUser()
+  const { user: _user } = useUser()
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
@@ -135,7 +135,7 @@ const UsersPage: React.FC = () => {
 
   // Exporter en CSV
   const exportToCSV = () => {
-    if (!user || !user.isAdmin) return
+    if (!_user || !_user.isAdmin) return
     const headers = ['ID', 'Pseudo', 'Email', 'Rôle', 'Statut', 'Dernière Connexion', 'IP d\'inscription', 'Dernière IP', 'Date d\'inscription']
 
     const csvData = filteredUsers.map((user) => [
@@ -432,7 +432,7 @@ const UsersPage: React.FC = () => {
                       ) }
                     </div>
                   </th>
-                  { ['SuperAdmin', 'Admin'].includes(user?.role || '') && (
+                  { ['SuperAdmin', 'Admin'].includes(_user?.role || '') && (
                     <th
                       className="p-4 text-left cursor-pointer hover:text-blue-300"
                       onClick={ () => handleSort('email') }
@@ -533,7 +533,7 @@ const UsersPage: React.FC = () => {
                           <span data-profile={user.nickname} className="cursor-pointer">{ user.nickname }</span>
                         </div>
                       </td>
-                      { ['SuperAdmin', 'Admin'].includes(user?.role || '') && (
+                      { ['SuperAdmin', 'Admin'].includes(_user?.role || '') && (
                         <td className="p-4">{ user.email }</td>
                       )}
                       <td className="p-4">
@@ -646,7 +646,7 @@ const UsersPage: React.FC = () => {
                                     </button>
                                   </li>
                                 ) }
-                                {['SuperAdmin', 'Admin'].includes(user?.role || '') && (
+                                {['SuperAdmin', 'Admin'].includes(_user?.role || '') && (
                                   <li>
                                     <button
                                       className="w-full text-left px-4 py-2 hover:bg-blue-900/30 flex items-center gap-2">
