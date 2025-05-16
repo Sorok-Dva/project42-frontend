@@ -328,6 +328,7 @@ const Chat: React.FC<ChatProps> = ({
         'achievement',
         'mp',
         'player',
+        'customVote',
       ].includes(command) &&
       !hasAdditionalArgs
     ) {
