@@ -250,7 +250,7 @@ const Badges : React.FC = () => {
             <div className="flex flex-wrap items-center gap-2 mb-1">
               { setTitleSpan }
               <span
-                className="font-bold text-white title-anim">&laquo; { badge.title[i] } &raquo;</span>
+                className="font-bold text-white title-animate">&laquo; { badge.title[i] } &raquo;</span>
             </div>
             <div className="text-sm text-blue-300 ml-1">
               ({ number }
@@ -264,7 +264,7 @@ const Badges : React.FC = () => {
             <div className="flex items-center gap-2">
               { setTitleSpan }
               <span
-                style={ spanStyle } className="title-anim">&laquo; { badge.title[i] } &raquo;</span>
+                style={ spanStyle } className="title-animate">&laquo; { badge.title[i] } &raquo;</span>
             </div>
           </div>,
         )
@@ -308,7 +308,7 @@ const Badges : React.FC = () => {
         >
           <div
             className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-            <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+            <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
               <Award className="w-5 h-5"/>
               Modifier mes badges préférés
             </h3>
@@ -454,7 +454,7 @@ const Badges : React.FC = () => {
         >
           <div
             className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-            <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+            <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
               <Award className="w-5 h-5"/>
               Modifier mon titre
             </h3>
@@ -498,7 +498,7 @@ const Badges : React.FC = () => {
       >
         <div
           className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-          <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+          <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
             <Award className="w-5 h-5"/>
             Mes badges
           </h3>

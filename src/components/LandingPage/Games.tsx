@@ -78,7 +78,7 @@ const Games: React.FC = () => {
           <div className="container pt-120 pb-120">
             <div className="row justify-content-between align-items-center gy-sm-0 gy-4 mb-15">
               <div className="col-md-6 col-sm-8">
-                <h2 className="display-four tcn-1 cursor-scale growUp title-anim">
+                <h2 className="display-four tcn-1 cursor-scale growUp title-animate">
                   Liste des dernières parties
                 </h2>
               </div>
@@ -107,7 +107,7 @@ const Games: React.FC = () => {
                     <div className="tournament-content px-xl-4 px-sm-2">
                       <div className="tournament-info mb-5">
                         <Link to={`/game/${room.id}`} className="d-block">
-                          <h4 className="tournament-title tcn-1 mb-1 cursor-scale growDown title-anim">
+                          <h4 className="tournament-title tcn-1 mb-1 cursor-scale growDown title-animate">
                             {room.name}
                           </h4>
                         </Link>

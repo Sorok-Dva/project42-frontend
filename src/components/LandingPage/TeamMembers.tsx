@@ -34,7 +34,7 @@ const TeamMembers: React.FC = () => {
       <div className="container px-0 px-sm-3">
         <div className="row justify-content-between mb-15">
           <div className="col-lg-6 col-sm-10">
-            <h2 className="display-four tcn-1 cursor-scale growUp title-anim">
+            <h2 className="display-four tcn-1 cursor-scale growUp title-animate">
               <span className="d-block">L'équipe</span> de Project 42
             </h2>
           </div>
@@ -85,7 +85,7 @@ const TeamMembers: React.FC = () => {
                   </span>
                   <Image className="w-100" src={teamMember.img} alt="game" />
                 </div>
-                <h5 className="card-title text-center tcn-1 mb-4 title-anim">
+                <h5 className="card-title text-center tcn-1 mb-4 title-animate">
                   {teamMember.nickname}
                 </h5>
                 <div className="d-center">

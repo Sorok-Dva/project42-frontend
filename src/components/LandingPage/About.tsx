@@ -50,7 +50,7 @@ const About: React.FC = () => {
       <div className="container">
         <div className="row justify-content-between mb-15">
           <div className="col-lg-6 col-sm-10">
-            <h2 className="display-four tcn-1 cursor-scale growUp title-anim">
+            <h2 className="display-four tcn-1 cursor-scale growUp title-animate">
               <span className="d-block">À Propos</span> de Project 42
             </h2>
           </div>
@@ -60,7 +60,7 @@ const About: React.FC = () => {
             <div key={id} className="col-lg-4 col-md-6">
               <div className="next-level-game-card d-grid gap-5 py-lg-10 py-sm-6 py-4 px-xl-9 px-sm-5 px-3">
                 <div className="card-icon">{icon}</div>
-                <h4 className="card-title tcn-1 cursor-scale growDown2 title-anim">
+                <h4 className="card-title tcn-1 cursor-scale growDown2 title-animate">
                   {title}
                 </h4>
                 <p className="card-text tcs-6">{desc}</p>

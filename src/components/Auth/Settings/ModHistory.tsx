@@ -51,7 +51,7 @@ const ModHistory : React.FC = () => {
       >
         <div
           className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-          <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+          <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
             <Shield className="w-5 h-5"/>
             Points de comportement
           </h3>
@@ -114,7 +114,7 @@ const ModHistory : React.FC = () => {
       >
         <div
           className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-          <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+          <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
             <AlertTriangle className="w-5 h-5"/>
             Antécédents
           </h3>

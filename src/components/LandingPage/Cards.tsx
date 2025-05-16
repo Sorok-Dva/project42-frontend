@@ -27,7 +27,7 @@ const Cards: React.FC = () => {
       <div className="container">
         <div className="row justify-content-between align-items-center mb-15">
           <div className="col-6">
-            <h2 className="display-four tcn-1 cursor-scale growUp title-anim">
+            <h2 className="display-four tcn-1 cursor-scale growUp title-animate">
               Cartes du jeu
             </h2>
           </div>
@@ -82,7 +82,7 @@ const Cards: React.FC = () => {
                         {card.description}
                       </div>
                     </div>
-                    <h3 className="game-title mb-0 tcn-1 cursor-scale growDown2 title-anim">
+                    <h3 className="game-title mb-0 tcn-1 cursor-scale growDown2 title-animate">
                       {card.name}
                     </h3>
                   </div>

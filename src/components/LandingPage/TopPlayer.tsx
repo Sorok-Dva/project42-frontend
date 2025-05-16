@@ -71,7 +71,7 @@ const TopPlayer: React.FC = () => {
       <div className="container">
         <div className="row justify-content-between mb-15">
           <div className="col-sm-6">
-            <h2 className="display-four tcn-1 cursor-scale growUp title-anim">
+            <h2 className="display-four tcn-1 cursor-scale growUp title-animate">
               Top Player
             </h2>
           </div>
@@ -131,7 +131,7 @@ const TopPlayer: React.FC = () => {
                           </span>
                         </div>
                         <div>
-                          <h5 className="player-name tcn-1 mb-1 title-anim">
+                          <h5 className="player-name tcn-1 mb-1 title-animate">
                             {user.nickname}
                           </h5>
                           <span className="tcn-6 fs-sm">{ user.title }</span>

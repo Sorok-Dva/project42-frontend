@@ -57,7 +57,7 @@ const Hero: React.FC = () => {
         <div className="row g-6 justify-content-between">
           <div className="col-lg-5 col-md-6 col-sm-8">
             <div className="hero-content">
-              <ul className="d-flex gap-3 fs-2xl fw-semibold heading-font mb-5 list-icon title-anim">
+              <ul className="d-flex gap-3 fs-2xl fw-semibold heading-font mb-5 list-icon title-animate">
                 <li>Jouer</li>
                 <li>Débattre</li>
                 <li>Gagner</li>

@@ -147,7 +147,7 @@ const Settings : React.FC = () => {
         >
           <div
             className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-            <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+            <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
               <User className="w-5 h-5"/>
               Modifier mon pseudo
             </h3>
@@ -249,7 +249,7 @@ const Settings : React.FC = () => {
         >
           <div
             className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-            <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+            <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
               <Lock className="w-5 h-5"/>
               Changer de mot de passe
             </h3>
@@ -288,7 +288,7 @@ const Settings : React.FC = () => {
         >
           <div
             className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-            <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+            <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
               <Mail className="w-5 h-5"/>
               Modifier mon email
             </h3>
@@ -357,7 +357,7 @@ const Settings : React.FC = () => {
       >
         <div
           className="bg-gradient-to-r from-red-600/20 to-red-900/20 px-6 py-4 border-b border-red-500/30">
-          <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+          <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
             <Trash className="w-5 h-5"/>
             Supprimer mon compte
           </h3>

@@ -111,7 +111,7 @@ const Profile : React.FC<{
       >
         <div
           className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-          <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+          <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
             <Star className="w-5 h-5 text-yellow-400"/>
             Premium et Achats
           </h3>
@@ -156,7 +156,7 @@ const Profile : React.FC<{
                   )}
                 </>
               ): (
-                <h2 className="text-2xl font-bold mb-2 title-anim">
+                <h2 className="text-2xl font-bold mb-2 title-animate">
                   Tu n'es <span className="text-gray-400">pas Premium</span>
                 </h2>
               ) }
@@ -204,7 +204,7 @@ const Profile : React.FC<{
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-            <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+            <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
               <Image className="w-5 h-5" />
               Avatar
             </h3>
@@ -257,7 +257,7 @@ const Profile : React.FC<{
         >
           <div
             className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-            <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+            <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
               <MessageSquare className="w-5 h-5"/>
               Modifier ma signature
             </h3>
@@ -296,7 +296,7 @@ const Profile : React.FC<{
         >
           <div
             className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-            <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+            <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
               <Users className="w-5 h-5"/>
               Rectifier le genre de mon avatar
             </h3>
@@ -342,7 +342,7 @@ const Profile : React.FC<{
       >
         <div
           className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-6 py-4 border-b border-blue-500/30">
-          <h3 className="text-xl font-bold flex items-center gap-2 title-anim">
+          <h3 className="text-xl font-bold flex items-center gap-2 title-animate">
             <Star className="w-5 h-5"/>
             Titre & badges préférés
           </h3>

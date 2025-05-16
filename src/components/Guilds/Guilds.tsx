@@ -133,7 +133,7 @@ const Guilds = () => {
       <div className="container">
         {/* Titre et champ de recherche */}
         <div className="col-12 mb-4 d-flex justify-content-between align-items-center">
-          <h2 className="display-four tcn-1 cursor-scale growUp title-anim">
+          <h2 className="display-four tcn-1 cursor-scale growUp title-animate">
             Trouver des Stations
           </h2>
           <input
