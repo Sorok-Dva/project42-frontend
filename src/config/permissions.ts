@@ -17,7 +17,7 @@ export const ROLE_PERMISSIONS = {
     site: [
       'achievement', 'warn', 'ban', 'rename', 'addPoints',
       'ip', 'ipComment', 'antecedents', 'moderationNotes', 'stalk',
-      'userRole', 'dcInfos', 'removeSignature', 'guildAdmin'
+      'userRole', 'dcInfos', 'removeSignature', 'guildAdmin', 'customVote',
     ],
   },
   Admin: {
@@ -38,7 +38,7 @@ export const ROLE_PERMISSIONS = {
     site: [
       'achievement', 'warn', 'ban', 'rename', 'addPoints',
       'ip', 'ipComment', 'antecedents', 'moderationNotes', 'stalk',
-      'userRole', 'dcInfos', 'removeSignature', 'guildAdmin'
+      'userRole', 'dcInfos', 'removeSignature', 'guildAdmin', 'customVote',
     ],
   },
   Developer: {
