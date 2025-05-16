@@ -438,7 +438,7 @@ const Chat: React.FC<ChatProps> = ({
               className="bg-blue-700 hover:bg-blue-800 text-white px-3 border-t border-b border-blue-500/30 transition-colors"
               title="Ajouter un emoji"
             >
-              <span className="text-xl">😀</span>
+              <span className="text-xl mt-2">😀</span>
             </button>
             <button
               onClick={handleSendMessage}
