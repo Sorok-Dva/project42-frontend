@@ -38,6 +38,7 @@ import AdminUserProfile from 'pages/admin/users/UserProfile'
 import AdminDashboard from 'pages/admin/Dashboard'
 import AdminAlphaKeys from 'pages/admin/AlphaKeys'
 import AdminNews from 'pages/admin/News'
+import AdminRooms from 'pages/admin/games/List'
 import AdminCards from 'pages/admin/cards/List'
 import ResetPassword from 'pages/ResetPassword'
 import ServiceUnavailable from 'pages/ServiceUnavailable'
@@ -51,7 +52,6 @@ import GamePage from 'pages/Game'
 import { SocketProvider } from 'contexts/SocketContext'
 import ModalProvider from 'contexts/ModalProvider'
 import GlobalClickListener from 'components/GlobalClickListener'
-import SplitTextAnimations from 'utils/SplitTextAnim'
 import MaintenancePage from 'pages/Maintenance'
 import Guilds from 'pages/GuildsList'
 import Guild from 'pages/GuildPage'
@@ -113,6 +113,7 @@ const AppContent: React.FC = () => {
                           <Route path="alpha-keys" element={<AdminAlphaKeys />} />
                           <Route path="news" element={<AdminNews />} />
                           <Route path="cards" element={<AdminCards />} />
+                          <Route path="rooms" element={<AdminRooms />} />
                         </Route>
                       </Route>
                     )}
@@ -176,7 +177,6 @@ const App: React.FC = () => {
                   <Notifier />
                   <AppContent />
                   <ScrollToTop />
-                  <SplitTextAnimations />
                 </Bootstrap>
               </ModalProvider>
             </SocketProvider>

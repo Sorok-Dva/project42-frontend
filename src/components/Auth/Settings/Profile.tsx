@@ -8,7 +8,6 @@ import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
-import SplitTextAnimations from 'utils/SplitTextAnim'
 
 const Profile : React.FC<{
   user: User
@@ -103,7 +102,6 @@ const Profile : React.FC<{
 
   return (
     <div className="space-y-8">
-      <SplitTextAnimations trigger={1} />
       {/* Premium et Achats */ }
       <motion.div
         className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"

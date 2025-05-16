@@ -5,7 +5,6 @@ import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { User, Lock, Mail, Trash } from 'lucide-react'
-import SplitTextAnimations from 'utils/SplitTextAnim'
 
 const calculateDaysUntilNextChange = (lastNicknameChange : Date) => {
   const sixMonthsLater = new Date(lastNicknameChange.getTime())
@@ -138,7 +137,6 @@ const Settings : React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <SplitTextAnimations trigger={1} />
       <div className="row">
         {/* Modifier mon pseudo */ }
         <motion.div

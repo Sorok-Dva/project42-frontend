@@ -8,8 +8,6 @@ import React, { useEffect, useState } from 'react'
 import { RoomData } from 'hooks/useGame'
 import axios from 'axios'
 import useDropdown from 'hooks/useDropdown'
-import SplitTextAnimations from 'utils/SplitTextAnim'
-
 
 const Games: React.FC = () => {
   const { toggleOpen } = useDropdown()
@@ -66,7 +64,6 @@ const Games: React.FC = () => {
   }, [])
   return (
     <section className="tournament-section pb-120" id="tournament-hero">
-      <SplitTextAnimations trigger={topRooms.length} />
       {/* <!-- Diamond animation --> */}
       <div className="diamond-area">
         <Image className="w-100" src={diamond} alt="diamond" />

@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import { useUser } from 'contexts/UserContext'
 import { Shield, AlertTriangle, ExternalLink } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import SplitTextAnimations from 'utils/SplitTextAnim'
 
 export interface Antecedent {
   id: number
@@ -43,7 +42,6 @@ const ModHistory : React.FC = () => {
   }, [user])
   return (
     <div className="space-y-8">
-      <SplitTextAnimations trigger={1} />
       {/* Informations sur le comportement */ }
       <motion.div
         className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden"

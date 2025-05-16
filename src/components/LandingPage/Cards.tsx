@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom'
 import { Autoplay, Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import axios from 'axios'
-import SplitTextAnimations from 'utils/SplitTextAnim'
 
 const Cards: React.FC = () => {
   const [cards, setCards] = useState<{ id: number, name: string, description: string }[]>([])
@@ -24,7 +23,6 @@ const Cards: React.FC = () => {
   }, [])
   return (
     <section className="game-section">
-      <SplitTextAnimations trigger={cards.length} />
       <div className="red-ball bottom-0 end-0"></div>
       <div className="container">
         <div className="row justify-content-between align-items-center mb-15">

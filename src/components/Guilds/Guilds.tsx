@@ -6,7 +6,6 @@ import { User, useUser } from 'contexts/UserContext'
 import CreateGuildModal from 'components/Guilds/CreateModal'
 import axios from 'axios'
 import { Button, Container, Spinner } from 'reactstrap'
-import SplitTextAnimations from 'utils/SplitTextAnim'
 import { useAuth } from 'contexts/AuthContext'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
@@ -131,8 +130,6 @@ const Guilds = () => {
 
   return (
     <section className="teams-card-section pb-120">
-      <SplitTextAnimations key={`${guilds.length}-${searchQuery}`} trigger={guilds.length} />
-
       <div className="container">
         {/* Titre et champ de recherche */}
         <div className="col-12 mb-4 d-flex justify-content-between align-items-center">

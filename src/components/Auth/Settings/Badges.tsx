@@ -8,8 +8,6 @@ import { ToastDefaultOptions } from 'utils/toastOptions'
 import { useUser } from 'contexts/UserContext'
 import { Award, Info } from 'lucide-react'
 import { Tooltip } from 'react-tooltip'
-import { Button } from 'reactstrap'
-import SplitTextAnimations from 'utils/SplitTextAnim'
 
 interface Badge {
   id: number
@@ -275,7 +273,6 @@ const Badges : React.FC = () => {
       levelMax = false
     }
     return <>
-      <SplitTextAnimations trigger={lines.length} />
       { lines }
     </>
   }
