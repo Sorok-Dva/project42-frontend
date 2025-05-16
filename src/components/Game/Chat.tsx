@@ -66,6 +66,7 @@ const Chat: React.FC<ChatProps> = ({
   const giphyApiKey = process.env.REACT_APP_GIPHY_API_KEY || ''
   const [mentionSuggestions, setMentionSuggestions] = useState<string[]>([])
   const [mentionIndex, setMentionIndex] = useState(-1)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
 
   // Ref vers le composant ChatMessages qui gère le scroll
   const chatMessagesRef = useRef<ChatMessagesHandle>(null)
@@ -80,6 +81,37 @@ const Chat: React.FC<ChatProps> = ({
   useEffect(() => {
     chatMessagesRef.current?.scrollToBottom()
   }, [])
+
+  const emojis = [
+    "😀",
+    "😂",
+    "😍",
+    "🤔",
+    "😎",
+    "👍",
+    "👎",
+    "🔥",
+    "❤️",
+    "💯",
+    "🚀",
+    "✨",
+    "👽",
+    "🤖",
+    "🏆",
+    "⚔️",
+    "🛡️",
+    "🧪",
+    "💣",
+    "⚡",
+    "🌌",
+    "🌠",
+  ]
+
+  const handleEmojiSelect = (emoji: string) => {
+    setNewMessage((prev) => prev + emoji)
+    setShowEmojiPicker(false)
+    inputRef.current?.focus()
+  }
 
   const developerCommand = ['startPhase', 'endPhase', 'listCards']
 
@@ -401,6 +433,14 @@ const Chat: React.FC<ChatProps> = ({
               autoComplete="off"
             />
             <button
+              type="button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="bg-blue-700 hover:bg-blue-800 text-white px-3 border-t border-b border-blue-500/30 transition-colors"
+              title="Ajouter un emoji"
+            >
+              <span className="text-xl">😀</span>
+            </button>
+            <button
               onClick={handleSendMessage}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-r-lg transition-colors"
             >
@@ -475,6 +515,24 @@ const Chat: React.FC<ChatProps> = ({
                       loading="lazy"
                     />
                   </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Sélecteur d'emoji */}
+          {showEmojiPicker && (
+            <div className="absolute bottom-full right-0 w-64 bg-black/90 border border-blue-500/30 rounded-lg p-2 z-20">
+              <div className="text-xs text-blue-300 mb-2 pb-1 border-b border-blue-500/20">Emojis</div>
+              <div className="grid grid-cols-5 gap-2">
+                {emojis.map((emoji, index) => (
+                  <button
+                    key={index}
+                    className="text-xl hover:bg-blue-900/30 rounded p-1 transition-colors"
+                    onClick={() => handleEmojiSelect(emoji)}
+                  >
+                    {emoji}
+                  </button>
                 ))}
               </div>
             </div>
