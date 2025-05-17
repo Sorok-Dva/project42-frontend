@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import type React from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from 'contexts/AuthContext'
 import {
@@ -17,9 +18,12 @@ import {
   MicOffIcon as Mute,
   Save,
   Shield,
+  Plus,
   Trophy,
   Users,
   X,
+  Search,
+  Download,
 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'components/UI/Tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'components/UI/Card'
@@ -33,14 +37,7 @@ import { Input } from 'components/UI/Input'
 import { Textarea } from 'components/UI/Textarea'
 import { RadioGroup, RadioGroupItem } from 'components/UI/RadioGroup'
 import { Label } from 'components/UI/Label'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from 'components/UI/Dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from 'components/UI/Dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,56 +57,62 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   Legend,
   ResponsiveContainer,
 } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from 'components/UI/Chart'
 import { toast } from 'react-toastify'
-import { BadgesData } from 'components/Auth/Settings/Badges'
+import type { BadgesData } from 'components/Auth/Settings/Badges'
+import ShopItems from './shop-items'
+import type { Item, Transaction } from 'types/shop'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'components/UI/Select'
+import { ToastDefaultOptions } from 'utils/toastOptions'
 
-type NicknameChanges = [{
-  oldNickname: string,
-  newNickname: string,
-  createdAt: Date,
-}]
+type NicknameChanges = [
+  {
+    oldNickname: string
+    newNickname: string
+    createdAt: Date
+  },
+]
 
 interface User {
-  id: string,
-  email: string,
-  nickname: string,
-  avatar: string,
-  isMale: boolean,
-  roleId: number,
-  role: { id: number, name: string },
-  points: number,
-  level: number,
-  title: string,
-  signature: string,
-  premium: Date,
-  validated: boolean,
-  registerIp: string,
-  lastLoginIp: string,
-  behaviorPoints: number,
-  moderatorPoints: number,
-  discordId: string,
-  lastNicknameChange: Date,
-  createdAt: Date,
-  online: boolean,
-  gameStatus: string, // 'online', 'offline', 'in_pregame', 'in_game', 'spectating'
-  currentGameId: number,
+  id: string
+  email: string
+  nickname: string
+  avatar: string
+  isMale: boolean
+  roleId: number
+  role: { id: number; name: string }
+  points: number
+  level: number
+  title: string
+  signature: string
+  premium: Date
+  validated: boolean
+  registerIp: string
+  lastLoginIp: string
+  behaviorPoints: number
+  moderatorPoints: number
+  discordId: string
+  lastNicknameChange: Date
+  createdAt: Date
+  online: boolean
+  gameStatus: string // 'online', 'offline', 'in_pregame', 'in_game', 'spectating'
+  currentGameId: number
   guildMembership: {
     guild: {
-      id: number,
-      name: string,
-      tag: string,
-      points: number,
-      leader: boolean,
-    },
-    role: string,
-  },
-  achievements: BadgesData,
-  stats: { type: 0 | 1 | 2 | 3 | 4 | 5 | 'all', playedGames: number, wins: number}[]
+      id: number
+      name: string
+      tag: string
+      points: number
+      leader: boolean
+    }
+    role: string
+  }
+  achievements: BadgesData
+  stats: { type: 0 | 1 | 2 | 3 | 4 | 5 | 'all'; playedGames: number; wins: number }[]
   nicknameChanges: NicknameChanges
 }
 
@@ -280,29 +283,47 @@ const messageTypeData = [
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
 
 interface Role {
-  id : number;
-  name : string;
+  id: number
+  name: string
 }
 
 export default function UserDetailsPage() {
-  const { id } = useParams<{ id : string }>()
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { token } = useAuth()
   const [user, setUser] = useState<User | null>(null)
   const [roles, setRoles] = useState<Role[]>([])
-  const [gameStats, setGameStats] = useState<{ type: number | string, wins: number, playedGames: number }>({ type: 'all', playedGames: 0, wins: 0 })
+  const [gameStats, setGameStats] = useState<{ type: number | string; wins: number; playedGames: number }>({
+    type: 'all',
+    playedGames: 0,
+    wins: 0,
+  })
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
   const [isAddPointsModalOpen, setAddPointsModalOpen] = useState(false)
   const [pointsToAdd, setPointsToAdd] = useState<number>(0)
   const [reason, setReason] = useState<string>('Event')
   const [nicknameChanges, setNicknameChanges] = useState<NicknameChanges>()
-  const [gameResultsData, setGameResultsData] = useState<[
-    { name: 'Victoires', value: number, color: '#4CAF50' },
-    { name: 'Défaites', value: number, color: '#F44336' },
-  ]>([
+  const [gameResultsData, setGameResultsData] = useState<
+    [{ name: 'Victoires'; value: number; color: '#4CAF50' }, { name: 'Défaites'; value: number; color: '#F44336' }]
+  >([
     { name: 'Victoires', value: 0, color: '#4CAF50' },
     { name: 'Défaites', value: 0, color: '#F44336' },
   ])
+
+  // États pour les transactions
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
+  const [transactionSearch, setTransactionSearch] = useState('')
+  const [transactionTypeFilter, setTransactionTypeFilter] = useState<string>('all')
+  const [transactionStatusFilter, setTransactionStatusFilter] = useState<string>('all')
+  const [showTransactionDetails, setShowTransactionDetails] = useState<Transaction | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [showAddItemDialog, setShowAddItemDialog] = useState(false)
+  const [selectedItemToAdd, setSelectedItemToAdd] = useState<Item | null>(null)
+  const [availableItems, setAvailableItems] = useState<Item[]>([])
+  const [showRemoveItemDialog, setShowRemoveItemDialog] = useState(false)
+  const [selectedItemToRemove, setSelectedItemToRemove] = useState<number | null>(null)
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -319,13 +340,13 @@ export default function UserDetailsPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch(`/api/admin/users/${ id }`, {
+        const response = await fetch(`/api/admin/users/${id}`, {
           headers: {
-            Authorization: `Bearer ${ token }`,
+            Authorization: `Bearer ${token}`,
           },
         })
-        const data = await response.json() as User
-        const gameStatsData = data.stats.filter(stat => {
+        const data = (await response.json()) as User
+        const gameStatsData = data.stats.filter((stat) => {
           return stat.type === 'all'
         })[0]
         setUser(data)
@@ -333,8 +354,18 @@ export default function UserDetailsPage() {
         setLoading(false)
         setGameStats(gameStatsData)
         setGameResultsData([
-          { name: 'Victoires', value: Number(((gameStatsData.wins / gameStatsData.playedGames) * 100).toFixed(0)), color: '#4CAF50' },
-          { name: 'Défaites', value: Number((((gameStatsData.playedGames - gameStatsData.wins) / gameStatsData.playedGames) * 100).toFixed(0)), color: '#F44336' },
+          {
+            name: 'Victoires',
+            value: Number(((gameStatsData.wins / gameStatsData.playedGames) * 100).toFixed(0)),
+            color: '#4CAF50',
+          },
+          {
+            name: 'Défaites',
+            value: Number(
+              (((gameStatsData.playedGames - gameStatsData.wins) / gameStatsData.playedGames) * 100).toFixed(0),
+            ),
+            color: '#F44336',
+          },
         ])
       } catch (err) {
         console.error('Failed to fetch user', err)
@@ -345,7 +376,7 @@ export default function UserDetailsPage() {
       try {
         const response = await fetch('/api/admin/roles', {
           headers: {
-            Authorization: `Bearer ${ token }`,
+            Authorization: `Bearer ${token}`,
           },
         })
         const data = await response.json()
@@ -355,16 +386,77 @@ export default function UserDetailsPage() {
       }
     }
 
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch(`/api/admin/users/${id}/transactions`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        const data = await response.json()
+        setTransactions(data)
+        setFilteredTransactions(data)
+      } catch (err) {
+        console.error('Failed to fetch transactions', err)
+      }
+    }
+
+    const fetchAvailableItems = async () => {
+      try {
+        const response = await fetch('/api/admin/items', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        const data = await response.json()
+        setAvailableItems(data)
+      } catch (err) {
+        console.error('Failed to fetch available items', err)
+      }
+    }
+
     fetchUser()
     fetchRoles()
+    fetchTransactions()
+    fetchAvailableItems()
   }, [id, token])
+
+  // Filtrer les transactions
+  useEffect(() => {
+    let filtered = [...transactions]
+
+    // Filtre par recherche
+    if (transactionSearch) {
+      const searchLower = transactionSearch.toLowerCase()
+      filtered = filtered.filter(
+        (t) =>
+          t.item?.name?.toLowerCase().includes(searchLower) ||
+          t.premiumPlan?.name?.toLowerCase().includes(searchLower) ||
+          t.recipient?.nickname?.toLowerCase().includes(searchLower) ||
+          t.sender?.nickname?.toLowerCase().includes(searchLower),
+      )
+    }
+
+    // Filtre par type
+    if (transactionTypeFilter !== 'all') {
+      filtered = filtered.filter((t) => t.type === transactionTypeFilter)
+    }
+
+    // Filtre par statut
+    if (transactionStatusFilter !== 'all') {
+      filtered = filtered.filter((t) => t.status === transactionStatusFilter)
+    }
+
+    setFilteredTransactions(filtered)
+    setCurrentPage(1)
+  }, [transactionSearch, transactionTypeFilter, transactionStatusFilter, transactions])
 
   const handleDelete = async () => {
     try {
-      await fetch(`/api/admin/users/${ id }`, {
+      await fetch(`/api/admin/users/${id}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${ token }`,
+          Authorization: `Bearer ${token}`,
         },
       })
       navigate('/admin/users')
@@ -373,16 +465,16 @@ export default function UserDetailsPage() {
     }
   }
 
-  const handleUpdate = async (e : React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
       if (!user) return
       console.log(user)
-      await fetch(`/api/admin/users/${ id }`, {
+      await fetch(`/api/admin/users/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${ token }`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(user),
       })
@@ -392,7 +484,7 @@ export default function UserDetailsPage() {
     }
   }
 
-  const handleChange = (e : React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setUser((prevUser) => {
       if (prevUser) {
@@ -402,7 +494,7 @@ export default function UserDetailsPage() {
     })
   }
 
-  const handleRoleChange = (e : React.ChangeEvent<HTMLInputElement>) => {
+  const handleRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const roleId = Number(e.target.value)
     const selectedRole = roles.find((role) => role.id === roleId)
     if (selectedRole && user) {
@@ -508,6 +600,94 @@ export default function UserDetailsPage() {
     }
   }
 
+  // Gestion des transactions
+  const handleExportTransactions = () => {
+    const dataStr = JSON.stringify(filteredTransactions, null, 2)
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr)
+
+    const exportFileDefaultName = `transactions-${id}-${new Date().toISOString().slice(0, 10)}.json`
+
+    const linkElement = document.createElement('a')
+    linkElement.setAttribute('href', dataUri)
+    linkElement.setAttribute('download', exportFileDefaultName)
+    linkElement.click()
+  }
+
+  // Pagination
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  const currentTransactions = filteredTransactions.slice(indexOfFirstItem, indexOfLastItem)
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage)
+
+  // Gestion de l'inventaire
+  const handleAddItemToInventory = async () => {
+    if (!selectedItemToAdd) return
+
+    try {
+      await fetch(`/api/admin/users/${id}/inventory/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          itemId: selectedItemToAdd.id,
+        }),
+      })
+
+      // Mettre à jour les transactions
+      const response = await fetch(`/api/admin/users/${id}/transactions`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      const data = await response.json()
+      setTransactions(data)
+      setFilteredTransactions(data)
+
+      toast.success(`Item ${selectedItemToAdd.name} ajouté à l'inventaire`, ToastDefaultOptions)
+      setShowAddItemDialog(false)
+      setSelectedItemToAdd(null)
+    } catch (err) {
+      console.error('Failed to add item to inventory', err)
+      toast.error('Erreur lors de l\'ajout de l\'item à l\'inventaire', ToastDefaultOptions)
+    }
+  }
+
+  const handleRemoveItemFromInventory = async () => {
+    if (!selectedItemToRemove) return
+
+    try {
+      await fetch(`/api/admin/users/${id}/inventory/remove`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          itemId: selectedItemToRemove,
+        }),
+      })
+
+      // Mettre à jour les transactions
+      const response = await fetch(`/api/admin/users/${id}/transactions`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      const data = await response.json()
+      setTransactions(data)
+      setFilteredTransactions(data)
+
+      toast.success('Item retiré de l\'inventaire', ToastDefaultOptions)
+      setShowRemoveItemDialog(false)
+      setSelectedItemToRemove(null)
+    } catch (err) {
+      console.error('Failed to remove item from inventory', err)
+      toast.error('Erreur lors du retrait de l\'item de l\'inventaire', ToastDefaultOptions)
+    }
+  }
+
   const getStatusText = (status: string) => {
     switch (status) {
     case 'online':
@@ -539,6 +719,23 @@ export default function UserDetailsPage() {
       return 'bg-purple-500'
     default:
       return 'bg-gray-500'
+    }
+  }
+
+  const getTransactionTypeLabel = (type: string) => {
+    switch (type) {
+    case 'item_bought':
+      return 'Achat d\'item'
+    case 'premium_bought':
+      return 'Achat premium'
+    case 'credits_bought':
+      return 'Achat de crédits'
+    case 'gift_sent':
+      return 'Cadeau envoyé'
+    case 'gift_received':
+      return 'Cadeau reçu'
+    default:
+      return type
     }
   }
 
@@ -577,6 +774,21 @@ export default function UserDetailsPage() {
       hour: '2-digit',
       minute: '2-digit',
     })
+  }
+
+  const getRarityColor = (rarity: string) => {
+    switch (rarity) {
+    case 'common':
+      return 'bg-gray-500'
+    case 'rare':
+      return 'bg-blue-500'
+    case 'epic':
+      return 'bg-purple-500'
+    case 'legendary':
+      return 'bg-yellow-500'
+    default:
+      return 'bg-gray-500'
+    }
   }
 
   return (
@@ -627,7 +839,10 @@ export default function UserDetailsPage() {
                 <Ban size={16} />
                 <span>Bannir l'utilisateur</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center gap-2 text-yellow-500" onClick={() => setShowMuteDialog(true)}>
+              <DropdownMenuItem
+                className="flex items-center gap-2 text-yellow-500"
+                onClick={() => setShowMuteDialog(true)}
+              >
                 <Mute size={16} />
                 <span>Mute l'utilisateur</span>
               </DropdownMenuItem>
@@ -734,10 +949,7 @@ export default function UserDetailsPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Email</p>
                 {isEditing ? (
-                  <Input
-                    value={user.email}
-                    onChange={(e) => setUser({ ...user, email: e.target.value })}
-                  />
+                  <Input value={user.email} onChange={(e) => setUser({ ...user, email: e.target.value })} />
                 ) : (
                   <p className="font-medium">{user.email}</p>
                 )}
@@ -822,7 +1034,7 @@ export default function UserDetailsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{ gameStats.playedGames }</div>
+                <div className="text-2xl font-bold">{gameStats.playedGames}</div>
                 <p className="text-xs text-muted-foreground">+15% ce mois-ci</p>
               </CardContent>
             </Card>
@@ -834,8 +1046,10 @@ export default function UserDetailsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{ gameStats.wins }</div>
-                <p className="text-xs text-muted-foreground">Taux: { ((gameStats.wins / gameStats.playedGames) * 100).toFixed(0) }%</p>
+                <div className="text-2xl font-bold">{gameStats.wins}</div>
+                <p className="text-xs text-muted-foreground">
+                  Taux: {((gameStats.wins / gameStats.playedGames) * 100).toFixed(0)}%
+                </p>
               </CardContent>
             </Card>
             <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
@@ -858,15 +1072,17 @@ export default function UserDetailsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{ user.achievements.possessed.length }/401</div>
-                <p className="text-xs text-muted-foreground">{ ((user.achievements.possessed.length / 401) * 100).toFixed(0) }% complétés</p>
+                <div className="text-2xl font-bold">{user.achievements.possessed.length}/401</div>
+                <p className="text-xs text-muted-foreground">
+                  {((user.achievements.possessed.length / 401) * 100).toFixed(0)}% complétés
+                </p>
               </CardContent>
             </Card>
           </div>
 
           {/* Onglets d'information */}
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid grid-cols-7 mb-4">
+            <TabsList className="grid grid-cols-9 mb-4">
               <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
               <TabsTrigger value="achievements">Succès</TabsTrigger>
               <TabsTrigger value="guild">Guilde</TabsTrigger>
@@ -874,6 +1090,8 @@ export default function UserDetailsPage() {
               <TabsTrigger value="messages">Messages</TabsTrigger>
               <TabsTrigger value="nicknames">Pseudos</TabsTrigger>
               <TabsTrigger value="sanctions">Sanctions</TabsTrigger>
+              <TabsTrigger value="inventory">Inventaire</TabsTrigger>
+              <TabsTrigger value="transactions">Transactions</TabsTrigger>
             </TabsList>
 
             {/* Vue d'ensemble */}
@@ -951,7 +1169,7 @@ export default function UserDetailsPage() {
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(value) => [`${value}%`, '']} />
+                          <RechartsTooltip formatter={(value) => [`${value}%`, '']} />
                           <Legend />
                         </PieChart>
                       </ResponsiveContainer>
@@ -981,7 +1199,7 @@ export default function UserDetailsPage() {
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(value) => [`${value}%`, '']} />
+                          <RechartsTooltip formatter={(value) => [`${value}%`, '']} />
                           <Legend />
                         </PieChart>
                       </ResponsiveContainer>
@@ -1122,7 +1340,7 @@ export default function UserDetailsPage() {
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                             <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" />
                             <YAxis stroke="rgba(255,255,255,0.5)" />
-                            <Tooltip />
+                            <RechartsTooltip />
                             <Bar dataKey="points" fill="#3B82F6" />
                           </BarChart>
                         </ResponsiveContainer>
@@ -1355,7 +1573,246 @@ export default function UserDetailsPage() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {/* Inventaire */}
+            <TabsContent value="inventory">
+              <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle>Inventaire de l'utilisateur</CardTitle>
+                      <CardDescription>Items possédés par l'utilisateur</CardDescription>
+                    </div>
+                    <Button onClick={() => setShowAddItemDialog(true)} className="flex items-center gap-2">
+                      <Plus size={16} />
+                      Ajouter un item
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ShopItems inventory={true} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Transactions */}
+            <TabsContent value="transactions">
+              <Card className="backdrop-blur-md bg-opacity-80 bg-gray-900 border-gray-800">
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle>Historique des transactions</CardTitle>
+                      <CardDescription>Achats, cadeaux et autres transactions</CardDescription>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" onClick={handleExportTransactions} className="flex items-center gap-2">
+                        <Download size={16} />
+                        Exporter
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Filtres */}
+                    <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                      <div className="relative flex-grow">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="Rechercher..."
+                          value={transactionSearch}
+                          onChange={(e) => setTransactionSearch(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+
+                      <Select value={transactionTypeFilter} onValueChange={setTransactionTypeFilter}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Type de transaction" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tous les types</SelectItem>
+                          <SelectItem value="item_bought">Achat d'item</SelectItem>
+                          <SelectItem value="premium_bought">Achat premium</SelectItem>
+                          <SelectItem value="credits_bought">Achat de crédits</SelectItem>
+                          <SelectItem value="gift_sent">Cadeau envoyé</SelectItem>
+                          <SelectItem value="gift_received">Cadeau reçu</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <Select value={transactionStatusFilter} onValueChange={setTransactionStatusFilter}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Statut" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tous les statuts</SelectItem>
+                          <SelectItem value="completed">Complété</SelectItem>
+                          <SelectItem value="pending">En attente</SelectItem>
+                          <SelectItem value="canceled">Annulé</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Tableau des transactions */}
+                    <div className="rounded-md border border-gray-700">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Description</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Montant</TableHead>
+                            <TableHead>Crédits</TableHead>
+                            <TableHead>Statut</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {currentTransactions.length > 0 ? (
+                            currentTransactions.map((transaction) => (
+                              <TableRow key={transaction.id} className="hover:bg-gray-700/30">
+                                <TableCell className="whitespace-nowrap">
+                                  {new Date(transaction.createdAt).toLocaleDateString()}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="font-medium">
+                                    {transaction.item?.name ||
+                                      transaction.premiumPlan?.name ||
+                                      `${transaction.creditsPack?.credits} crédits`}
+                                  </div>
+                                  {transaction.type === 'gift_sent' && (
+                                    <div className="text-xs text-gray-400">
+                                      Envoyé à {transaction.recipient?.nickname}
+                                    </div>
+                                  )}
+                                  {transaction.type === 'gift_received' && (
+                                    <div className="text-xs text-gray-400">Reçu de {transaction.sender?.nickname}</div>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant="outline" className="bg-indigo-500/20 text-indigo-300">
+                                    {getTransactionTypeLabel(transaction.type)}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  {transaction.price && Number.parseInt(transaction.price) > 0
+                                    ? `${transaction.price}€`
+                                    : '-'}
+                                </TableCell>
+                                <TableCell>
+                                  <span
+                                    className={
+                                      transaction.credits && transaction.credits > 0
+                                        ? 'text-green-400'
+                                        : transaction.credits && transaction.credits < 0
+                                          ? 'text-red-400'
+                                          : ''
+                                    }
+                                  >
+                                    {transaction.credits && transaction.credits > 0
+                                      ? `+${transaction.credits}`
+                                      : transaction.credits}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge
+                                    className={
+                                      transaction.status === 'completed'
+                                        ? 'bg-green-500'
+                                        : transaction.status === 'pending'
+                                          ? 'bg-yellow-500'
+                                          : 'bg-red-500'
+                                    }
+                                  >
+                                    {transaction.status === 'completed'
+                                      ? 'Complété'
+                                      : transaction.status === 'pending'
+                                        ? 'En attente'
+                                        : 'Annulé'}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setShowTransactionDetails(transaction)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={7} className="h-24 text-center">
+                                Aucune transaction trouvée.
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Pagination */}
+                    {filteredTransactions.length > 0 && (
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-gray-400">
+                          Affichage de {indexOfFirstItem + 1} à {Math.min(indexOfLastItem, filteredTransactions.length)}{' '}
+                          sur {filteredTransactions.length} transactions
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                            disabled={currentPage === 1}
+                          >
+                            Précédent
+                          </Button>
+                          <div className="flex items-center space-x-1">
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                              const pageNumber = i + 1
+                              return (
+                                <Button
+                                  key={i}
+                                  variant={currentPage === pageNumber ? 'default' : 'outline'}
+                                  size="sm"
+                                  onClick={() => setCurrentPage(pageNumber)}
+                                  className="w-8 h-8 p-0"
+                                >
+                                  {pageNumber}
+                                </Button>
+                              )
+                            })}
+                            {totalPages > 5 && <span className="mx-1">...</span>}
+                            {totalPages > 5 && (
+                              <Button
+                                variant={currentPage === totalPages ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => setCurrentPage(totalPages)}
+                                className="w-8 h-8 p-0"
+                              >
+                                {totalPages}
+                              </Button>
+                            )}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                          >
+                            Suivant
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
+
           {/* Modale de bannissement */}
           <Dialog open={showBanDialog} onOpenChange={setShowBanDialog}>
             <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white border-gray-800">
@@ -1452,6 +1909,229 @@ export default function UserDetailsPage() {
                 </Button>
                 <Button type="button" variant="destructive" onClick={handleMuteUser}>
                   Mute
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Modale de détails de transaction */}
+          <Dialog open={!!showTransactionDetails} onOpenChange={() => setShowTransactionDetails(null)}>
+            <DialogContent className="sm:max-w-[600px] bg-gray-900 text-white border-gray-800">
+              <DialogHeader>
+                <DialogTitle>Détails de la transaction</DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Informations complètes sur la transaction
+                </DialogDescription>
+              </DialogHeader>
+              {showTransactionDetails && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="text-sm font-medium text-muted-foreground">ID de transaction</h4>
+                      <p className="mt-1 font-medium">{showTransactionDetails.id}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-muted-foreground">Date</h4>
+                      <p className="mt-1 font-medium">{formatDate(showTransactionDetails.createdAt)}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-muted-foreground">Type</h4>
+                      <p className="mt-1 font-medium">{getTransactionTypeLabel(showTransactionDetails.type)}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-muted-foreground">Statut</h4>
+                      <Badge
+                        className={
+                          showTransactionDetails.status === 'completed'
+                            ? 'bg-green-500'
+                            : showTransactionDetails.status === 'pending'
+                              ? 'bg-yellow-500'
+                              : 'bg-red-500'
+                        }
+                      >
+                        {showTransactionDetails.status === 'completed'
+                          ? 'Complété'
+                          : showTransactionDetails.status === 'pending'
+                            ? 'En attente'
+                            : 'Annulé'}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {showTransactionDetails.item && (
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground">Item</h4>
+                        <p className="mt-1 font-medium">{showTransactionDetails.item.name}</p>
+                      </div>
+                    )}
+                    {showTransactionDetails.premiumPlan && (
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground">Plan premium</h4>
+                        <p className="mt-1 font-medium">{showTransactionDetails.premiumPlan.name}</p>
+                      </div>
+                    )}
+                    {showTransactionDetails.creditsPack && (
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground">Pack de crédits</h4>
+                        <p className="mt-1 font-medium">{showTransactionDetails.creditsPack.credits} crédits</p>
+                      </div>
+                    )}
+                    {showTransactionDetails.price && (
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground">Montant</h4>
+                        <p className="mt-1 font-medium">
+                          {Number.parseInt(showTransactionDetails.price) > 0 ? `${showTransactionDetails.price}€` : '-'}
+                        </p>
+                      </div>
+                    )}
+                    {showTransactionDetails.credits && (
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground">Crédits</h4>
+                        <p
+                          className={`mt-1 font-medium ${
+                            showTransactionDetails.credits > 0
+                              ? 'text-green-400'
+                              : showTransactionDetails.credits < 0
+                                ? 'text-red-400'
+                                : ''
+                          }`}
+                        >
+                          {showTransactionDetails.credits > 0
+                            ? `+${showTransactionDetails.credits}`
+                            : showTransactionDetails.credits}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {(showTransactionDetails.recipient || showTransactionDetails.sender) && (
+                    <>
+                      <Separator />
+                      <div className="grid grid-cols-2 gap-4">
+                        {showTransactionDetails.recipient && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Destinataire</h4>
+                            <p className="mt-1 font-medium">{showTransactionDetails.recipient.nickname}</p>
+                          </div>
+                        )}
+                        {showTransactionDetails.sender && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Expéditeur</h4>
+                            <p className="mt-1 font-medium">{showTransactionDetails.sender.nickname}</p>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+              <DialogFooter>
+                <Button type="button" onClick={() => setShowTransactionDetails(null)}>
+                  Fermer
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Modale d'ajout d'item */}
+          <Dialog open={showAddItemDialog} onOpenChange={setShowAddItemDialog}>
+            <DialogContent className="sm:max-w-[500px] bg-gray-900 text-white border-gray-800">
+              <DialogHeader>
+                <DialogTitle>Ajouter un item à l'inventaire</DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Sélectionnez un item à ajouter à l'inventaire de l'utilisateur
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="itemSelect">Sélectionner un item</Label>
+                  <Select
+                    onValueChange={(value) => {
+                      const item = availableItems.find((i) => i.id === Number.parseInt(value))
+                      setSelectedItemToAdd(item || null)
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choisir un item" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableItems.map((item) => (
+                        <SelectItem key={item.id} value={item.id.toString()}>
+                          {item.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {selectedItemToAdd && (
+                  <div className="border border-gray-700 rounded-lg p-4 mt-4">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0">
+                        <img
+                          src={selectedItemToAdd.image || '/placeholder.svg'}
+                          alt={selectedItemToAdd.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold">{selectedItemToAdd.name}</h3>
+                        <p className="text-sm text-gray-400">{selectedItemToAdd.description}</p>
+                        <div className="flex items-center mt-2">
+                          <Badge className={`${getRarityColor(selectedItemToAdd.rarity)}`}>
+                            {selectedItemToAdd.rarity === 'common' && 'Commun'}
+                            {selectedItemToAdd.rarity === 'rare' && 'Rare'}
+                            {selectedItemToAdd.rarity === 'epic' && 'Épique'}
+                            {selectedItemToAdd.rarity === 'legendary' && 'Légendaire'}
+                          </Badge>
+                          <span className="ml-2 text-sm text-gray-400">Prix: {selectedItemToAdd.price} crédits</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowAddItemDialog(false)
+                    setSelectedItemToAdd(null)
+                  }}
+                >
+                  Annuler
+                </Button>
+                <Button onClick={handleAddItemToInventory} disabled={!selectedItemToAdd}>
+                  Ajouter à l'inventaire
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Modale de suppression d'item */}
+          <Dialog open={showRemoveItemDialog} onOpenChange={setShowRemoveItemDialog}>
+            <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white border-gray-800">
+              <DialogHeader>
+                <DialogTitle>Supprimer un item de l'inventaire</DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Êtes-vous sûr de vouloir supprimer cet item de l'inventaire de l'utilisateur ?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowRemoveItemDialog(false)
+                    setSelectedItemToRemove(null)
+                  }}
+                >
+                  Annuler
+                </Button>
+                <Button variant="destructive" onClick={handleRemoveItemFromInventory}>
+                  Supprimer
                 </Button>
               </DialogFooter>
             </DialogContent>
