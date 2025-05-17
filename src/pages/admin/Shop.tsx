@@ -16,11 +16,28 @@ import { Popover, PopoverContent, PopoverTrigger } from 'components/UI/Popover'
 import { Calendar } from 'components/UI/Calendar'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { X, Plus, CalendarIcon, Edit, Trash2, Save, Tag, ShoppingBasket } from 'lucide-react'
+import {
+  X,
+  Plus,
+  CalendarIcon,
+  Edit,
+  Trash2,
+  Save,
+  Tag,
+  ShoppingBasket,
+  CreditCard, Crown,
+} from 'lucide-react'
 import axios from 'axios'
 import { useAuth } from 'contexts/AuthContext'
 import { toast } from 'react-toastify'
-import { Category, Item, ShopData, TagType } from 'types/shop'
+import {
+  Category,
+  CreditPack,
+  Item,
+  PremiumPlan,
+  ShopData,
+  TagType, Transaction,
+} from 'types/shop'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 
 // Helper function to get icon component
@@ -122,6 +139,8 @@ const AdminShopPage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<TagType[]>([])
   const [items, setItems] = useState<Item[]>([])
+  const [creditPacks, setCreditPacks] = useState<CreditPack[]>([])
+  const [premiumPlans, setPremiumPlans] = useState<PremiumPlan[]>([])
 
   // Form states
   const [newCategory, setNewCategory] = useState<Partial<Category>>({ name: '', icon: 'sparkles' })
@@ -138,11 +157,27 @@ const AdminShopPage: React.FC = () => {
     tagId: null,
     image: '/assets/images/custom/',
   })
+  const [newCreditPack, setNewCreditPack] = useState<Partial<CreditPack>>({
+    credits: 0,
+    bonus: 0,
+    price: 0,
+    popular: false,
+  })
+  const [newPremiumPlan, setNewPremiumPlan] = useState<Partial<PremiumPlan>>({
+    name: '',
+    price: 0,
+    duration: 1,
+    credits: 0,
+    discount: 0,
+    popular: false,
+  })
 
   // Edit states
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null)
   const [editingTagId, setEditingTagId] = useState<number | null>(null)
   const [editingItemId, setEditingItemId] = useState<number | null>(null)
+  const [editingCreditPackId, setEditingCreditPackId] = useState<number | null>(null)
+  const [editingPremiumPlanId, setEditingPremiumPlanId] = useState<number | null>(null)
 
   // Filter states
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
@@ -165,7 +200,11 @@ const AdminShopPage: React.FC = () => {
     async function retrieveShop() {
       try {
         const response = await axios.get<ShopData>('/api/shop')
+        const cpResponse = await axios.get<CreditPack[]>('/api/shop/credits_packs')
+        const ppResponse = await axios.get<PremiumPlan[]>('/api/shop/premium_plans')
 
+        setCreditPacks(cpResponse.data)
+        setPremiumPlans(ppResponse.data)
         setCategories(response.data.categories)
         setItems(response.data.items)
         setTags(response.data.tags)
@@ -492,6 +531,187 @@ const AdminShopPage: React.FC = () => {
     setItems(updatedItems)
   }
 
+  // Credit Pack handlers
+  const handleAddCreditPack = async () => {
+    if (!newCreditPack.credits || !newCreditPack.price) return
+
+    try {
+      const response = await axios.post('/api/admin/shop/creditPack', newCreditPack, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.data) {
+        setCreditPacks([...creditPacks, response.data])
+        setNewCreditPack({
+          credits: 0,
+          bonus: 0,
+          price: 0,
+          popular: false,
+        })
+        toast.info(`Pack de crédit ${response.data.credits} ajouté !`, ToastDefaultOptions)
+      } else {
+        toast.info('Une erreur est survenue', ToastDefaultOptions)
+      }
+    } catch (e) {
+      console.log(e)
+      toast.info('Une erreur est survenue', ToastDefaultOptions)
+    }
+  }
+
+  const handleUpdateCreditPack = async (id: number) => {
+    try {
+      const response = await axios.put(`/api/admin/shop/creditPack/${id}`, newCreditPack, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.data) {
+        const updatedCreditPacks = creditPacks.map((pack) => (pack.id === id ? { ...pack, ...newCreditPack, id } : pack))
+        setCreditPacks(updatedCreditPacks)
+        setEditingCreditPackId(null)
+        setNewCreditPack({
+          credits: 0,
+          bonus: 0,
+          price: 0,
+          popular: false,
+        })
+        toast.info(`Pack de crédit ${response.data.credits} modifié !`, ToastDefaultOptions)
+      } else {
+        toast.info('Une erreur est survenue', ToastDefaultOptions)
+      }
+    } catch (e) {
+      console.log(e)
+      toast.info('Une erreur est survenue', ToastDefaultOptions)
+    }
+  }
+
+  const handleDeleteCreditPack = async (id: number) => {
+    try {
+      const response = await axios.delete(`/api/admin/shop/creditPack/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.data.message === 'success') {
+        setCreditPacks(creditPacks.filter((pack) => pack.id !== id))
+        toast.info('Pack de crédit supprimé', ToastDefaultOptions)
+      } else {
+        toast.info('Une erreur est survenue', ToastDefaultOptions)
+      }
+    } catch (e) {
+      console.log(e)
+      toast.info('Une erreur est survenue', ToastDefaultOptions)
+    }
+  }
+
+  const startEditingCreditPack = (pack: CreditPack) => {
+    setNewCreditPack({
+      credits: pack.credits,
+      bonus: pack.bonus,
+      price: pack.price,
+      popular: pack.popular,
+    })
+    setEditingCreditPackId(pack.id)
+  }
+
+  // Premium Plan handlers
+  const handleAddPremiumPlan = async () => {
+    if (!newPremiumPlan.name || !newPremiumPlan.price || !newPremiumPlan.duration) return
+
+    try {
+      const response = await axios.post('/api/admin/shop/premiumPlan', newPremiumPlan, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.data.name) {
+        setPremiumPlans([...premiumPlans, response.data])
+        setNewPremiumPlan({
+          name: '',
+          price: 0,
+          duration: 1,
+          credits: 0,
+          discount: 0,
+          popular: false,
+        })
+        toast.info(`Plan premium ${response.data.name} ajouté !`, ToastDefaultOptions)
+      } else {
+        toast.info('Une erreur est survenue', ToastDefaultOptions)
+      }
+    } catch (e) {
+      console.log(e)
+      toast.info('Une erreur est survenue', ToastDefaultOptions)
+    }
+  }
+
+  const handleUpdatePremiumPlan = async (id: number) => {
+    try {
+      const response = await axios.put(`/api/admin/shop/premiumPlan/${id}`, newCreditPack, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.data.name) {
+        const updatedPremiumPlans = premiumPlans.map((plan) => (plan.id === id ? { ...plan, ...newPremiumPlan, id } : plan))
+        setPremiumPlans(updatedPremiumPlans)
+        setEditingPremiumPlanId(null)
+        setNewPremiumPlan({
+          name: '',
+          price: 0,
+          duration: 1,
+          credits: 0,
+          discount: 0,
+          popular: false,
+        })
+        toast.info(`Plan premium ${response.data.name} modifié !`, ToastDefaultOptions)
+      } else {
+        toast.info('Une erreur est survenue', ToastDefaultOptions)
+      }
+    } catch (e) {
+      console.log(e)
+      toast.info('Une erreur est survenue', ToastDefaultOptions)
+    }
+  }
+
+  const handleDeletePremiumPlan = async (id: number) => {
+    try {
+      const response = await axios.delete(`/api/admin/shop/premiumPlan/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.data.message === 'success') {
+        setPremiumPlans(premiumPlans.filter((plan) => plan.id !== id))
+
+        toast.info('Plan premium supprimé', ToastDefaultOptions)
+      } else {
+        toast.info('Une erreur est survenue', ToastDefaultOptions)
+      }
+    } catch (e) {
+      console.log(e)
+      toast.info('Une erreur est survenue', ToastDefaultOptions)
+    }
+  }
+
+  const startEditingPremiumPlan = (plan: PremiumPlan) => {
+    setNewPremiumPlan({
+      name: plan.name,
+      price: plan.price,
+      duration: plan.duration,
+      credits: plan.credits,
+      discount: plan.discount,
+      popular: plan.popular,
+    })
+    setEditingPremiumPlanId(plan.id)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-indigo-950 to-gray-900 text-white p-4 md:p-8">
       <motion.div
@@ -509,7 +729,7 @@ const AdminShopPage: React.FC = () => {
         <Tabs defaultValue="categories" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="relative mb-8">
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 blur-lg"></div>
-            <TabsList className="relative grid w-full grid-cols-3 bg-gray-800/50 backdrop-blur-sm border border-indigo-500/30 rounded-lg h-14">
+            <TabsList className="relative grid w-full grid-cols-5 bg-gray-800/50 backdrop-blur-sm border border-indigo-500/30 rounded-lg h-14">
               <TabsTrigger
                 value="categories"
                 className="data-[state=active]:bg-indigo-900/50 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 rounded-md transition-all"
@@ -544,6 +764,24 @@ const AdminShopPage: React.FC = () => {
                 <span className="flex items-center">
                   <ShoppingBasket className="h-4 w-4 mr-2" />
                   Items
+                </span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="credits"
+                className="data-[state=active]:bg-indigo-900/50 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 rounded-md transition-all"
+              >
+                <span className="flex items-center">
+                  <CreditCard className="h-5 w-5 mr-2" />
+                  Crédits
+                </span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="premium"
+                className="data-[state=active]:bg-indigo-900/50 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 rounded-md transition-all"
+              >
+                <span className="flex items-center">
+                  <Crown className="h-5 w-5 mr-2" />
+                  Premium
                 </span>
               </TabsTrigger>
             </TabsList>
@@ -1209,6 +1447,369 @@ const AdminShopPage: React.FC = () => {
                       </p>
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+          {/* Premium Plans Tab */}
+          <TabsContent value="premium" className="mt-0">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Add/Edit Premium Plan Form */}
+              <div className="lg:col-span-1">
+                <Card className="bg-gray-800/50 backdrop-blur-sm border border-indigo-500/30 p-6 sticky top-4">
+                  <h3 className="text-xl font-semibold mb-4">
+                    {editingPremiumPlanId ? 'Modifier le plan premium' : 'Ajouter un plan premium'}
+                  </h3>
+
+                  <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+                    <div>
+                      <Label htmlFor="plan-name">Nom</Label>
+                      <Input
+                        id="plan-name"
+                        value={newPremiumPlan.name}
+                        onChange={(e) => setNewPremiumPlan({ ...newPremiumPlan, name: e.target.value })}
+                        placeholder="Nom du plan"
+                        className="bg-gray-900/50 border-indigo-500/30 mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="plan-price">Prix (€)</Label>
+                      <Input
+                        id="plan-price"
+                        type="number"
+                        value={newPremiumPlan.price?.toString() || '0'}
+                        onChange={(e) => setNewPremiumPlan({ ...newPremiumPlan, price: Number.parseInt(e.target.value) || 0 })}
+                        placeholder="Prix du plan"
+                        className="bg-gray-900/50 border-indigo-500/30 mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="plan-credits">Crédits offerts</Label>
+                      <Input
+                        id="plan-credits"
+                        type="number"
+                        value={newPremiumPlan.credits?.toString() || '0'}
+                        onChange={(e) => setNewPremiumPlan({ ...newPremiumPlan, credits: Number.parseInt(e.target.value) || 0 })}
+                        placeholder="Crédits offerts"
+                        className="bg-gray-900/50 border-indigo-500/30 mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="plan-duration">Durée (jours)</Label>
+                      <Input
+                        id="plan-duration"
+                        type="number"
+                        value={newPremiumPlan.duration?.toString() || '30'}
+                        onChange={(e) => setNewPremiumPlan({ ...newPremiumPlan, duration: Number.parseInt(e.target.value) || 30 })}
+                        placeholder="Durée en jours"
+                        className="bg-gray-900/50 border-indigo-500/30 mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="plan-discount">Réduction (%)</Label>
+                      <Input
+                        id="plan-discount"
+                        type="number"
+                        value={newPremiumPlan.discount?.toString() || '0'}
+                        onChange={(e) => setNewPremiumPlan({ ...newPremiumPlan, discount: Number.parseInt(e.target.value) || 0 })}
+                        placeholder="Réduction en pourcentage"
+                        className="bg-gray-900/50 border-indigo-500/30 mt-1"
+                      />
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="plan-popular"
+                        checked={newPremiumPlan.popular}
+                        onCheckedChange={(checked) => setNewPremiumPlan({ ...newPremiumPlan, popular: checked })}
+                      />
+                      <Label htmlFor="plan-popular">Plan populaire</Label>
+                    </div>
+
+                    <div className="pt-4">
+                      {editingPremiumPlanId ? (
+                        <div className="flex space-x-2">
+                          <Button
+                            onClick={() => handleUpdatePremiumPlan(editingPremiumPlanId)}
+                            className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                          >
+                            <Save className="h-4 w-4 mr-2" />
+                            Mettre à jour
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setEditingPremiumPlanId(null)
+                              setNewPremiumPlan({
+                                name: '',
+                                price: 0,
+                                credits: 0,
+                                duration: 30,
+                                popular: false,
+                                discount: 0,
+                              })
+                            }}
+                            variant="outline"
+                            className="border-indigo-500/30 hover:bg-gray-700/50"
+                          >
+                            Annuler
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          onClick={handleAddPremiumPlan}
+                          className="w-full bg-indigo-600 hover:bg-indigo-700"
+                          disabled={!newPremiumPlan.name}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Ajouter le plan
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Premium Plans List */}
+              <div className="lg:col-span-3">
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
+                    Plans Premium
+                  </h2>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {premiumPlans.map((plan) => (
+                      <Card
+                        key={plan.id}
+                        className={`overflow-hidden bg-gray-800/50 backdrop-blur-sm border ${
+                          plan.popular ? 'border-purple-500 shadow-lg shadow-purple-500/20' : 'border-indigo-500/30'
+                        } transition-all h-full flex flex-col`}
+                      >
+                        {plan.popular && (
+                          <div className="bg-purple-500 text-white text-center py-1 font-medium">PLUS POPULAIRE</div>
+                        )}
+                        <div className="p-6 flex flex-col h-full">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="text-xl font-bold">{plan.name}</h3>
+                            <div className="flex space-x-1">
+                              <Button
+                                onClick={() => startEditingPremiumPlan(plan)}
+                                variant="outline"
+                                size="sm"
+                                className="h-8 w-8 p-0 border-indigo-500/30"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                onClick={() => handleDeletePremiumPlan(plan.id)}
+                                variant="destructive"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="flex items-baseline mb-4">
+                            <span className="text-3xl font-bold">{plan.price}€</span>
+                            {plan.discount > 0 && <Badge className="ml-2 bg-green-500">-{plan.discount}%</Badge>}
+                          </div>
+
+                          <ul className="space-y-3 mb-6 flex-grow">
+                            <li className="flex items-center">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 mr-2 text-green-500"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                              Durée: {plan.duration} jours
+                            </li>
+                            <li className="flex items-center">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 mr-2 text-green-500"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                              <span className="font-semibold text-indigo-300">{plan.credits}</span> crédits offerts
+                            </li>
+                          </ul>
+                        </div>
+                      </Card>
+                    ))}
+
+                    {premiumPlans.length === 0 && (
+                      <div className="col-span-3 text-center p-6 text-gray-400">
+                        Aucun plan premium n'a été créé. Ajoutez-en un !
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Credit Packs Tab */}
+          <TabsContent value="credits" className="mt-0">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Add/Edit Credit Pack Form */}
+              <div className="lg:col-span-1">
+                <Card className="bg-gray-800/50 backdrop-blur-sm border border-indigo-500/30 p-6 sticky top-4">
+                  <h3 className="text-xl font-semibold mb-4">
+                    {editingCreditPackId ? 'Modifier le pack de crédits' : 'Ajouter un pack de crédits'}
+                  </h3>
+
+                  <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+                    <div>
+                      <Label htmlFor="pack-credits">Nombre de crédits</Label>
+                      <Input
+                        id="pack-credits"
+                        type="number"
+                        value={newCreditPack.credits?.toString() || '0'}
+                        onChange={(e) => setNewCreditPack({ ...newCreditPack, credits: Number.parseInt(e.target.value) || 0 })}
+                        placeholder="Nombre de crédits"
+                        className="bg-gray-900/50 border-indigo-500/30 mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="pack-bonus">Bonus de crédits</Label>
+                      <Input
+                        id="pack-bonus"
+                        type="number"
+                        value={newCreditPack.bonus?.toString() || '0'}
+                        onChange={(e) => setNewCreditPack({ ...newCreditPack, bonus: Number.parseInt(e.target.value) || 0 })}
+                        placeholder="Bonus de crédits"
+                        className="bg-gray-900/50 border-indigo-500/30 mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="pack-price">Prix (€)</Label>
+                      <Input
+                        id="pack-price"
+                        type="number"
+                        value={newCreditPack.price?.toString() || '0'}
+                        onChange={(e) => setNewCreditPack({ ...newCreditPack, price: Number.parseInt(e.target.value) || 0 })}
+                        placeholder="Prix du pack"
+                        className="bg-gray-900/50 border-indigo-500/30 mt-1"
+                      />
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="pack-popular"
+                        checked={newCreditPack.popular}
+                        onCheckedChange={(checked) => setNewCreditPack({ ...newCreditPack, popular: checked })}
+                      />
+                      <Label htmlFor="pack-popular">Pack populaire</Label>
+                    </div>
+
+                    <div className="pt-4">
+                      {editingCreditPackId ? (
+                        <div className="flex space-x-2">
+                          <Button
+                            onClick={() => handleUpdateCreditPack(editingCreditPackId)}
+                            className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                          >
+                            <Save className="h-4 w-4 mr-2" />
+                            Mettre à jour
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setEditingCreditPackId(null)
+                              setNewCreditPack({
+                                credits: 0,
+                                bonus: 0,
+                                price: 0,
+                                popular: false
+                              })
+                            }}
+                            variant="outline"
+                            className="border-indigo-500/30 hover:bg-gray-700/50"
+                          >
+                            Annuler
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          onClick={handleAddCreditPack}
+                          className="w-full bg-indigo-600 hover:bg-indigo-700"
+                          disabled={!newCreditPack.credits || !newCreditPack.price}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Ajouter le pack
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Credit Packs List */}
+              <div className="lg:col-span-3">
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">
+                    Packs de Crédits
+                  </h2>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {creditPacks.map((pack) => (
+                      <Card
+                        key={pack.id}
+                        className={`overflow-hidden bg-gray-800/50 backdrop-blur-sm border ${
+                          pack.popular ? 'border-indigo-500 shadow-lg shadow-indigo-500/20' : 'border-indigo-500/30'
+                        } transition-all h-full flex flex-col`}
+                      >
+                        {pack.popular && (
+                          <div className="bg-indigo-500 text-white text-center py-1 font-medium">MEILLEURE OFFRE</div>
+                        )}
+                        <div className="p-6 flex flex-col items-center text-center">
+                          <div className="mb-4">
+                            <div className="text-3xl font-bold text-white mb-1">{pack.credits}</div>
+                            <div className="text-indigo-300 font-medium">Crédits</div>
+                          </div>
+
+                          {pack.bonus > 0 && <Badge className="mb-4 bg-green-500">+{pack.bonus} BONUS</Badge>}
+
+                          <div className="text-2xl font-bold mb-6">{pack.price}€</div>
+
+                          <div className="flex space-x-2 mt-auto">
+                            <Button
+                              onClick={() => startEditingCreditPack(pack)}
+                              variant="outline"
+                              size="sm"
+                              className="border-indigo-500/30"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button onClick={() => handleDeleteCreditPack(pack.id)} variant="destructive" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+
+                    {creditPacks.length === 0 && (
+                      <div className="col-span-5 text-center p-6 text-gray-400">
+                        Aucun pack de crédits n'a été créé. Ajoutez-en un !
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
