@@ -1,3 +1,5 @@
+import { User } from 'types/user'
+
 export interface Category {
   id: number
   name: string
@@ -44,4 +46,42 @@ export interface ShopData {
 export interface UserInventory {
   itemId: number
   equipped: boolean
+}
+
+export interface CreditPack {
+  id: number
+  credits: number
+  price: number
+  bonus: number
+  popular: boolean
+}
+
+export interface PremiumPlan {
+  id: number
+  name: string
+  discount: string
+  price: number
+  credits: number
+  popular: boolean
+}
+
+export interface Transaction {
+  id: number;
+  userId: number;
+  itemId?: number | null;
+  premiumPlanId?: number | null;
+  creditsPackId?: number | null;
+  price?: string;// DECIMAL(10,2) est mappé sur string
+  credits?: number;
+  type: 'item_bought' | 'premium_bought' | 'credits_bought' | 'gift_sent' | 'gift_received';
+  giftTo?: number | null;
+  giftFrom?: number | null;
+  status: 'pending' | 'completed' | 'canceled';
+  item?: Item
+  premiumPlan?: PremiumPlan
+  creditsPack?: CreditPack
+  recipient?: User,
+  sender?: User,
+  createdAt: Date;
+  updatedAt?: Date;
 }
