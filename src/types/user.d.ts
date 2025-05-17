@@ -6,6 +6,7 @@ export interface User {
   dreamsCount: number;
   points: number;
   level: number;
+  credits: number;
   title: string;
   validated: boolean;
   createdAt: Date;
@@ -14,7 +15,4 @@ export interface User {
 export interface UserProfile extends User {
   avatar: string;
   isAdmin: boolean;
-  totalDreams: number;
-  publicDreams: number;
-  totalViews: number;
 }
