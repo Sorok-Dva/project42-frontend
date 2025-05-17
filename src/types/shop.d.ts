@@ -81,6 +81,7 @@ export interface Transaction {
   item?: Item
   premiumPlan?: PremiumPlan
   creditsPack?: CreditPack
+  user: User,
   recipient?: User,
   sender?: User,
   createdAt: Date;

@@ -91,6 +91,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
       title: 'Boutique',
       icon: <Store size={20} />,
       href: '/shop',
+      subItems: [
+        { title: 'Gestion', href: '/shop' },
+        { title: 'Transactions', href: '/shop/transactions' },
+      ],
       disabled: !['SuperAdmin', 'Admin', 'Developer'].includes(user?.role || ''),
     },
     {
