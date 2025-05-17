@@ -59,7 +59,8 @@ export interface CreditPack {
 export interface PremiumPlan {
   id: number
   name: string
-  discount: string
+  discount: number
+  duration: number
   price: number
   credits: number
   popular: boolean
