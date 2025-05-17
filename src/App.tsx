@@ -38,6 +38,7 @@ import AdminUserProfile from 'pages/admin/users/UserProfile'
 import AdminDashboard from 'pages/admin/Dashboard'
 import AdminAlphaKeys from 'pages/admin/AlphaKeys'
 import AdminNews from 'pages/admin/News'
+import AdminShop from 'pages/admin/Shop'
 // import AdminRooms from 'pages/admin/games/List'
 import AdminCards from 'pages/admin/cards/List'
 import ResetPassword from 'pages/ResetPassword'
@@ -56,6 +57,7 @@ import MaintenancePage from 'pages/Maintenance'
 import Guilds from 'pages/GuildsList'
 import Guild from 'pages/GuildPage'
 import News from 'pages/News'
+import Shop from 'pages/Shop'
 
 import Tchat from 'components/HomePage/Tchat'
 import LoadingScreen from 'components/Layouts/LoadingScreen'
@@ -112,6 +114,7 @@ const AppContent: React.FC = () => {
                           <Route path="users/:id" element={<AdminUserProfile />} />
                           <Route path="alpha-keys" element={<AdminAlphaKeys />} />
                           <Route path="news" element={<AdminNews />} />
+                          <Route path="shop" element={<AdminShop />} />
                           <Route path="cards" element={<AdminCards />} />
                           {/*<Route path="rooms" element={<AdminRooms />} />*/}
                         </Route>
@@ -147,6 +150,7 @@ const AppContent: React.FC = () => {
             <Route path="/game/:id" element={<GamePage />} />
             <Route path="/stations" element={<Guilds />} />
             <Route path="/station/:id" element={<Guild />} />
+            <Route path="/shop" element={<Shop />} />
             <Route path="*" element={<NotFound />} />
           </>
         )}

@@ -1,4 +1,4 @@
-export const rolify = (role: string) => {
+export const rolify = (role: string, isMale = true) => {
   switch (role) {
   case 'SuperAdmin':
     return {
@@ -7,28 +7,33 @@ export const rolify = (role: string) => {
     }
   case 'Admin':
     return {
-      name: 'Administrateur',
+      name: isMale ? 'Administrateur' : 'Administratrice',
       color: '#982726',
     }
   case 'Developers':
     return {
-      name: 'Développeur',
+      name: isMale ? 'Développeur' : 'Développeuse',
       color: 'blue',
     }
   case 'Moderator':
     return {
-      name: 'Modérateur',
+      name: isMale ? 'Modérateur' : 'Modératrice',
       color: 'green',
     }
   case 'ModeratorTest':
     return {
-      name: 'Modérateur en test',
+      name: isMale ? 'Modérateur en test' : 'Modératrice en test',
       color: 'green',
     }
   case 'Animator':
     return {
-      name: 'Animateur',
+      name: isMale ? 'Animateur' : 'Animatrice',
       color: '#c8c80e',
+    }
+  case 'User':
+    return {
+      name: isMale ? 'Joueur' : 'Joueuse',
+      color: isMale ? '#2baaf7' : '#e15fc3',
     }
   default:
     return null

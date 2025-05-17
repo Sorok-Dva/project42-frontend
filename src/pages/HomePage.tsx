@@ -102,7 +102,7 @@ const HomePage = () => {
                     <div
                       className="bg-black/40 backdrop-blur-sm p-4 rounded-xl border border-gray-800">
                       <div className="text-sm text-gray-400">Crédits</div>
-                      <div className="text-2xl font-bold">0</div>
+                      <div className="text-2xl font-bold">{ user?.credits?.toLocaleString('fr-FR') || 0 }</div>
                     </div>
                     <div
                       className="bg-black/40 backdrop-blur-sm p-4 rounded-xl border border-gray-800">

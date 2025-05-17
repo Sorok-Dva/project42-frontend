@@ -50,6 +50,11 @@ const menuData = [
   },
   {
     id: 5,
+    title: 'Boutique',
+    url: '/shop',
+  },
+  {
+    id: 6,
     title: 'Admin',
     isAdmin: true,
     submenus: [
@@ -76,7 +81,7 @@ const menuData = [
     ],
   },
   {
-    id: 6,
+    id: 7,
     title: 'Modération',
     isMod: true,
     submenus: [

@@ -35,6 +35,7 @@ export interface User {
   lastNicknameChange: Date;
   level: number;
   points?: number;
+  credits?: number;
   title: string;
   signature?: string;
   discordId?: string;
