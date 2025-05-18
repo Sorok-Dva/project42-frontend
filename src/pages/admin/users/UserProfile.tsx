@@ -64,7 +64,7 @@ import {
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from 'components/UI/Chart'
 import { toast } from 'react-toastify'
 import type { BadgesData } from 'components/Auth/Settings/Badges'
-import ShopItems from './shop-items'
+import ShopItems from 'components/Shop/Items'
 import type { Item, Transaction } from 'types/shop'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'components/UI/Select'
 import { ToastDefaultOptions } from 'utils/toastOptions'
