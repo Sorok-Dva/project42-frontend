@@ -66,7 +66,7 @@ export const ROLE_PERMISSIONS = {
       'modo', 'warn', 'kick', 'ban', 'mute', 'unmute',
       'crea', 'mp', '42', 'player',
     ],
-    godPowers: [],
+    godPowers: ['addBot', 'removeBot', 'editBot', 'seeBot'],
     animationPowers: [],
     site: [
       'warn', 'ban', 'rename',
