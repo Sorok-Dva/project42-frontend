@@ -8,6 +8,8 @@ import { Tooltip } from 'react-tooltip'
 import { motion } from 'framer-motion'
 import hero from 'assets/img/hero.png'
 import { Img as Image } from 'react-image'
+import DailyRewardsStatus from 'components/DailyRewardStatus'
+import { Calendar } from 'lucide-react'
 
 const HomePage = () => {
   const { user } = useUser()
@@ -147,8 +149,28 @@ const HomePage = () => {
           </div>
         </section>
 
+        {/* Section connexions quotidiennes */ }
+        <section className="relative" style={{ marginTop: '-10%', zIndex: 99 }}>
+          <motion.div
+            className="container mx-auto bg-black/50 backdrop-blur-md rounded-2xl border border-gray-800/50 shadow-xl p-8"
+            initial={ { opacity: 0, y: 20 } }
+            animate={ { opacity: 1, y: 0 } }
+            transition={ { duration: 0.8, delay: 0.4 } }
+          >
+            <div className="flex items-center mb-8">
+              <Calendar className="h-5 w-5 mr-2 text-indigo-400" />
+              <h2 className="text-2xl md:text-3xl font-bold">
+                Connexions Journalières</h2>
+            </div>
+
+            <div>
+              <DailyRewardsStatus />
+            </div>
+          </motion.div>
+        </section>
+
         {/* Section des salons de jeu */ }
-        <section className="relative" style={{ marginTop: '-5%', zIndex: 99 }}>
+        <section className="relative mt-4 mb-4">
           <motion.div
             className="container mx-auto bg-black/50 backdrop-blur-md rounded-2xl border border-gray-800/50 shadow-xl p-8"
             initial={ { opacity: 0, y: 20 } }

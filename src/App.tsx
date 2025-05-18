@@ -62,6 +62,8 @@ import Shop from 'pages/Shop'
 
 import Tchat from 'components/HomePage/Tchat'
 import LoadingScreen from 'components/Layouts/LoadingScreen'
+import { DailyRewardsProvider } from 'contexts/DailyRewardsContext'
+import DailyRewardsPopup from 'components/DailyRewardPopup'
 
 const AppContent: React.FC = () => {
   const { serverMaintenance, loading: maintenanceLoading } = useMaintenance()
@@ -189,11 +191,14 @@ const App: React.FC = () => {
             <SocketProvider>
               <ModalProvider>
                 <Bootstrap>
-                  <GlobalClickListener />
-                  <GoogleTagManager />
-                  <Notifier />
-                  <AppContent />
-                  <ScrollToTop />
+                  <DailyRewardsProvider>
+                    <GlobalClickListener />
+                    <GoogleTagManager />
+                    <Notifier />
+                    <AppContent />
+                    <ScrollToTop />
+                    <DailyRewardsPopup />
+                  </DailyRewardsProvider>
                 </Bootstrap>
               </ModalProvider>
             </SocketProvider>
