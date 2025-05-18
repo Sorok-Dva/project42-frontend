@@ -40,6 +40,7 @@ import AdminAlphaKeys from 'pages/admin/AlphaKeys'
 import AdminNews from 'pages/admin/News'
 import AdminShop from 'pages/admin/Shop'
 import AdminShopTransactions from 'pages/admin/ShopTransactions'
+import AdminCreditTransactions from 'pages/admin/CreditTransactions'
 // import AdminRooms from 'pages/admin/games/List'
 import AdminCards from 'pages/admin/cards/List'
 import ResetPassword from 'pages/ResetPassword'
@@ -119,6 +120,7 @@ const AppContent: React.FC = () => {
                           <Route path="news" element={<AdminNews />} />
                           <Route path="shop" element={<AdminShop />} />
                           <Route path="shop/transactions" element={<AdminShopTransactions />} />
+                          <Route path="credits/transactions" element={<AdminCreditTransactions />} />
                           <Route path="cards" element={<AdminCards />} />
                           {/*<Route path="rooms" element={<AdminRooms />} />*/}
                         </Route>

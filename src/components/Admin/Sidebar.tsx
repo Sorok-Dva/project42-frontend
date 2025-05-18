@@ -17,7 +17,7 @@ import {
   Key,
   Gamepad2,
   ChartArea,
-  Store,
+  Store, Coins,
 } from 'lucide-react'
 import { useUser } from 'contexts/UserContext'
 
@@ -95,6 +95,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
         { title: 'Gestion', href: '/shop' },
         { title: 'Transactions', href: '/shop/transactions' },
       ],
+      disabled: !['SuperAdmin', 'Admin', 'Developer'].includes(user?.role || ''),
+    },
+    {
+      title: 'Transaction de crédits',
+      icon: <Coins size={20} />,
+      href: '/credits/transactions',
       disabled: !['SuperAdmin', 'Admin', 'Developer'].includes(user?.role || ''),
     },
     {

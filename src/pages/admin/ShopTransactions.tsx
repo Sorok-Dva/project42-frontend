@@ -501,12 +501,11 @@ const AdminTransactionsPage: React.FC = () => {
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0 bg-gray-800 border border-indigo-500/30">
                           <DateRangePicker
-                            initialFocus
-                            mode="range"
-                            defaultMonth={dateRange.from}
-                            selected={dateRange}
-                            onSelect={setDateRange as OnSelectHandler<DateRange|undefined>}
-                            numberOfMonths={2}
+                            value={dateRange}
+                            onChange={(range) => {
+                              if (!range?.from || !range.to) return
+                              setDateRange({ from: range.from, to: range.to })
+                            }}
                           />
                         </PopoverContent>
                       </Popover>
