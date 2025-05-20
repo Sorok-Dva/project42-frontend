@@ -61,7 +61,7 @@ const GameRules: React.FC<GameRulesProps> = ({ gameType }) => {
     1: 'bg-blue-500', // Fun
     2: 'bg-red-500', // Sérieuse
     3: 'bg-purple-500', // Carnage
-    4: 'bg-yellow-500', // Animation
+    4: 'bg-yellow-400', // Animation
     5: 'bg-orange-500', // Test
   }
 
