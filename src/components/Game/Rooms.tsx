@@ -282,7 +282,7 @@ const RoomList = () => {
       1: 'bg-blue-500', // FUN
       2: 'bg-red-600', // SERIOUS
       3: 'bg-purple-600', // CARNAGE
-      4: 'bg-yellow-400', // SPECIAL
+      4: 'special-gradient border-yellow-300', // SPECIAL
       5: 'bg-orange-600', // TEST
     }
 

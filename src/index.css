@@ -430,3 +430,15 @@ code {
 .ql-picker-item {
   color: #93c5fd !important;
 }
+
+@keyframes gradient-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.special-gradient {
+  background: linear-gradient(90deg, #ab8218, #c5b11c, #ab8c0e, #be9107);
+  background-size: 300% 300%;
+  animation: gradient-animation 3s ease infinite;
+}
