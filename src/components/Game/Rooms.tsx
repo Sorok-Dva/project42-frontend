@@ -108,11 +108,11 @@ const RoomList = () => {
   const fetchRooms = useCallback(async () => {
     try {
       const { data } = await axios.get('/api/games/rooms')
-      const waitingFun = data.filter((room: RoomData) => room.status === 'waiting' && [1, 3].includes(room.type))
-      const inProgressFun = data.filter((room: RoomData) => room.status === 'in_progress' && [1, 3].includes(room.type))
-      const waitingSerious = data.filter((room: RoomData) => room.status === 'waiting' && [0, 2].includes(room.type))
+      const waitingFun = data.filter((room: RoomData) => room.status === 'waiting' && [1, 3, 4, 5].includes(room.type))
+      const inProgressFun = data.filter((room: RoomData) => room.status === 'in_progress' && [1, 3, 4, 5].includes(room.type))
+      const waitingSerious = data.filter((room: RoomData) => room.status === 'waiting' && [0, 2, 4, 5].includes(room.type))
       const inProgressSerious = data.filter(
-        (room: RoomData) => room.status === 'in_progress' && [0, 2].includes(room.type),
+        (room: RoomData) => room.status === 'in_progress' && [0, 2, 4, 5].includes(room.type),
       )
 
       setRoomsWaitingFun(waitingFun)
@@ -282,6 +282,8 @@ const RoomList = () => {
       1: 'bg-blue-500', // FUN
       2: 'bg-red-600', // SERIOUS
       3: 'bg-purple-600', // CARNAGE
+      4: 'bg-yellow-400', // SPECIAL
+      5: 'bg-orange-600', // TEST
     }
 
     const typeColor = typeColors[game.type as keyof typeof typeColors] || 'bg-gray-500'
