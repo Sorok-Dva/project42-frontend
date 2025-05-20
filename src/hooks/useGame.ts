@@ -53,6 +53,7 @@ export interface Card {
   id: number
   name: string
   description: string
+  disabled: boolean
 }
 
 export interface RoomCard {
