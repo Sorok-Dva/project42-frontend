@@ -131,6 +131,9 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
   const cardLimit = (id: number) => {
     let limit = 0
     switch (id) {
+    case 15:
+      limit = 12
+      break
     case 16:
       limit = 10
       break
@@ -189,28 +192,26 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
 
   const renderCards = (array: number[]) => {
     return array.map((i) => {
-      const card = cards[i]
-      let number = 0
+      const cardData = cards[i]
+      const inventoryCount = cardData?.quantity ?? 0
+      const cardInfo = allCards[i]
+      const isDisabled = cardInfo?.disabled === true
 
-      if (card) {
-        number = card.quantity
-      } else if (i === 1) {
-        const manualUsedSlots = Object.entries(cards)
-          .filter(([key]) => Number(key) !== 1)
-          .reduce((total, [, cardData]) => total + (cardData.quantity || 0), 0)
-        number = Math.max(0, slots - manualUsedSlots)
-      }
-
-      const selected = number !== 0
-      const cardUnavailable = cardLimit(i) > slots
+      const selected = inventoryCount > 0
+      const unavailable = cardLimit(i) > slots
 
       let classNames = 'compo_edit_card '
-      classNames += selected && !cardUnavailable ? 'card_selected ' : ''
-      classNames += cardUnavailable ? 'card_unavailable ' : ''
+      if (selected && !unavailable && !isDisabled) classNames += 'card_selected '
+      if (unavailable || isDisabled) classNames += 'card_unavailable '
 
       let dataTooltip = ''
-      if (i === 1)
-        dataTooltip = 'Le nombre de Membre d\'équipage est automatique.'
+      if (isDisabled) {
+        dataTooltip = 'Cette carte est désactivée pour le moment.'
+      } else if (unavailable) {
+        dataTooltip = `Pas assez de joueurs. Il faut ${cardLimit(i)} places.`
+      } else if (i === 1) {
+        dataTooltip = 'Le nombre de membres d\'équipage est automatique.'
+      }
 
       let qtecards = 1
       if (i === 1 || i === 2 || i === 16) {
@@ -223,11 +224,21 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
         <div
           key={i}
           data-id-card={i}
-          data-state={number}
+          data-state={inventoryCount}
           className={classNames}
-          {...(dataTooltip ? { 'data-tooltip-content': dataTooltip } : {})}
-          data-tooltip-id={String(i)}
-          onClick={() => handleCardClick(i, number)}
+          {...(dataTooltip
+            ? {
+              'data-tooltip-content': dataTooltip,
+              'data-tooltip-id': `card-${i}-tooltip`
+            }
+            : {}
+          )}
+          // NE PAS binder si disabled
+          onClick={() => {
+            if (!isDisabled && !unavailable) {
+              handleCardClick(i, inventoryCount)
+            }
+          }}
         >
           <div className="card_wrapper">
             {Array.from({ length: qtecards }).map((_, idx) => (
@@ -245,12 +256,12 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
             )}
             {i === 1 && (
               <div className="role_amount">
-                <span className="role_amount_sv">{number}</span>
+                <span className="role_amount_sv">{inventoryCount}</span>
               </div>
             )}
             {i === 2 && (
               <div className="role_amount">
-                <span className="role_amount_lg">{number}</span>
+                <span className="role_amount_lg">{inventoryCount}</span>
               </div>
             )}
           </div>
@@ -258,22 +269,22 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
           {i === 2 && (
             <div className="buttons_array small_array bglightblue">
               <div
-                className="button array_clickable sound-tick sound-unselect"
-                data-tooltip-id={String(i)}
+                className="button array_clickable"
+                data-tooltip-id={`card-${i}-tooltip`}
                 data-tooltip-content="Enlever un Alien"
                 onClick={(e) => updateAliens('remove', e)}
-              >
-                –
-              </div>
+              >–</div>
               <div
-                className="button array_clickable sound-tick sound-select"
-                data-tooltip-id={String(i)}
+                className="button array_clickable"
+                data-tooltip-id={`card-${i}-tooltip`}
                 data-tooltip-content="Ajouter un Alien"
                 onClick={(e) => updateAliens('add', e)}
               >+</div>
             </div>
           )}
-          <Tooltip id={String(i)} />
+
+          {/* Tooltip */}
+          {dataTooltip && <Tooltip id={`card-${i}-tooltip`} />}
         </div>
       )
     })
@@ -331,19 +342,16 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
                 <div className="compo_row">
                   <div className="compo_category">
                     <h3>Aliens</h3>
-                    {/* @TODO make 21*/}
-                    {renderCards([2, 20])}
+                    {renderCards([2, 20, 21])}
                   </div>
                   <div className="compo_category">
                     <h3>Personnages solitaires</h3>
-                    {/* @TODO make 21*/}
                     {renderCards([9, 15, 19])}
                   </div>
                 </div>
                 <div className="compo_category">
                   <h3>Innocents</h3>
-                  {/* @TODO make 8 & 12 */}
-                  {renderCards([1, 3, 4, 5, 6, 7, 10, 13, 16, 17, 22, 23])}
+                  {renderCards([1, 3, 4, 5, 6, 7, 8, 10, 12, 13, 16, 17, 22, 23])}
                 </div>
               </>
             )}
