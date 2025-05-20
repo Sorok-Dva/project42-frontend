@@ -1,6 +1,6 @@
 import type React from 'react'
 import { motion } from 'framer-motion'
-import type { User } from 'contexts/UserContext'
+import type { User } from 'types/user'
 import { Star, Image, MessageSquare, Users } from 'lucide-react'
 import { useState } from 'react'
 import axios from 'axios'

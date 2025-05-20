@@ -1,6 +1,7 @@
-import { Role, useUser } from '../contexts/UserContext'
+import { useUser } from '../contexts/UserContext'
 import { hasPermission } from '../helpers/permissionHelper'
 import { Categories } from '../config/permissions'
+import { Role } from 'types/user'
 
 export const usePermissions = () => {
   const { user } = useUser()

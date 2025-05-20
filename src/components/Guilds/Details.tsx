@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Img as Image } from 'react-image'
 import { Guild } from 'components/Guilds/Guilds'
 import { useAuth } from 'contexts/AuthContext'
-import { User, useUser } from 'contexts/UserContext'
+import { useUser } from 'contexts/UserContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
@@ -10,6 +10,7 @@ import { Button } from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowAltCircleUp, faCommentDots, faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
 import { Tooltip } from 'react-tooltip'
+import { User } from 'types/user'
 
 interface GuildDetailsProps {
   guild: Guild

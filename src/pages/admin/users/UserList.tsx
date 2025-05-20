@@ -19,9 +19,10 @@ import {
   Eye,
 } from 'lucide-react'
 import { Img as Image } from 'react-image'
-import { User, useUser } from 'contexts/UserContext'
+import { useUser } from 'contexts/UserContext'
 import { useAuth } from 'contexts/AuthContext'
 import { rolify } from 'utils/rolify'
+import { User } from 'types/user'
 
 // Rôles et leurs couleurs
 const roleColors = {

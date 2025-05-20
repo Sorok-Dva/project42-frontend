@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { Message, PlayerType, Viewer } from 'hooks/useGame'
-import { User } from 'contexts/UserContext'
+import type { User } from 'types/user'
 import { useSocket } from 'contexts/SocketContext'
 import { motion } from 'framer-motion'
 import ChatMessages, { ChatMessagesHandle } from 'components/Game/ChatMessage'

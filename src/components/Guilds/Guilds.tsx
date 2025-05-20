@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Img as Image } from 'react-image'
 import { Link, useNavigate } from 'react-router-dom'
 import { Tooltip } from 'react-tooltip'
-import { User, useUser } from 'contexts/UserContext'
+import { useUser } from 'contexts/UserContext'
 import CreateGuildModal from 'components/Guilds/CreateModal'
 import axios from 'axios'
 import { Button, Container, Spinner } from 'reactstrap'
@@ -10,6 +10,7 @@ import { useAuth } from 'contexts/AuthContext'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import JoinGuildModal from './JoinModal'
+import { User } from 'types/user'
 
 export interface Guild {
   id: number;

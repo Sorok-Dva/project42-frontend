@@ -1,3 +1,17 @@
+import { User } from 'types/user'
+
+const rolesHierarchy = [
+  'SuperAdmin',
+  'Admin',
+  'Developer',
+  'Moderator',
+  'ModeratorTest',
+  'Animator',
+  'User',
+] as const
+
+export type RoleName = typeof rolesHierarchy[number]
+
 export const rolify = (role: string, isMale = true) => {
   switch (role) {
   case 'SuperAdmin':
@@ -38,4 +52,23 @@ export const rolify = (role: string, isMale = true) => {
   default:
     return null
   }
+}
+
+export function hasRole (user: User, requiredRole: RoleName) {
+  const requiredIndex = rolesHierarchy.indexOf(requiredRole)
+  if (requiredIndex === -1) return false
+
+  if (!user || !user.role) {
+    return false
+  }
+
+  const userRoleName = user.role as RoleName
+  const userIndex = rolesHierarchy.indexOf(userRoleName)
+
+  // Si l’utilisateur est dans la hiérarchie et qu’il est "au-dessus"
+  if (userIndex !== -1 && userIndex <= requiredIndex) {
+    return true
+  }
+
+  return false
 }
