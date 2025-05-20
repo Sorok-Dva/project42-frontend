@@ -7,6 +7,7 @@ import { useSocket } from 'contexts/SocketContext'
 import type { RoomCard, RoomData } from 'hooks/useGame'
 import { useAuth } from 'contexts/AuthContext'
 import { leaveGame } from 'services/gameService'
+import { hasRole } from 'utils/rolify'
 
 const generateCards = (cards: RoomCard[]) => {
   return cards.map((c) => {
@@ -590,7 +591,7 @@ const RoomList = () => {
 
             <div className="space-y-8">
               <div>
-                <h4 className="text-lg font-medium text-blue-300 mb-4">1 - Choisis le type de partie - {formData.type}</h4>
+                <h4 className="text-lg font-medium text-blue-300 mb-4">1 - Choisis le type de partie</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                   <button
                     className={ `px-4 py-2
@@ -601,28 +602,43 @@ const RoomList = () => {
                   </button>
                   <button
                     className={ `px-4 py-2
-                    ${formData.type !== 1 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700 ': 'bg-gradient-to-r from-blue-400 to-blue-600  text-white rounded-lg shadow-lg'} cursor-not-allowed` }
+                    ${formData.type !== 1 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700 ': 'bg-gradient-to-r from-blue-400 to-blue-600  text-white rounded-lg shadow-lg'}` }
                     onClick={() => setFormData((prev) => ({ ...prev, type: 1 }))}
-                    disabled={true}
                   >
                     FUN
                   </button>
                   <button
                     className={ `px-4 py-2
-                    ${formData.type !== 0 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700 ': 'bg-gradient-to-r from-green-600 to-green-800  text-white rounded-lg shadow-lg'} cursor-not-allowed` }
+                    ${formData.type !== 0 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700 ': 'bg-gradient-to-r from-green-600 to-green-800  text-white rounded-lg shadow-lg'}` }
                     onClick={() => setFormData((prev) => ({ ...prev, type: 0 }))}
-                    disabled={!user?.isAdmin}
                   >
                     NORMALE
                   </button>
                   <button
                     className={ `px-4 py-2
-                    ${formData.type !== 2 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700': 'bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg shadow-lg'} cursor-not-allowed` }
+                    ${formData.type !== 2 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700': 'bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg shadow-lg'}` }
                     onClick={() => setFormData((prev) => ({ ...prev, type: 2 }))}
-                    disabled={true}
                   >
                     SÉRIEUSE
                   </button>
+                  { user && hasRole(user, 'Animator') && (
+                    <button
+                      className={ `px-4 py-2
+                      ${formData.type !== 4 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700': 'bg-gradient-to-r from-yellow-600 to-yellow-800 text-white rounded-lg shadow-lg'}` }
+                      onClick={() => setFormData((prev) => ({ ...prev, type: 4 }))}
+                    >
+                      SPÉCIALE
+                    </button>
+                  )}
+                  { user && hasRole(user, 'Developer') && (
+                    <button
+                      className={ `px-4 py-2
+                      ${formData.type !== 5 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700': 'bg-gradient-to-r from-orange-600 to-orange-800 text-white rounded-lg shadow-lg'}` }
+                      onClick={() => setFormData((prev) => ({ ...prev, type: 5 }))}
+                    >
+                      TEST
+                    </button>
+                  )}
                 </div>
 
                 { formData.type === 3 && (
@@ -654,6 +670,22 @@ const RoomList = () => {
                   <div className="bg-black/40 rounded-lg p-4 border border-red-500/20">
                     <p className="text-red-300">
                       Règles strictes pour joueurs aimant le challenge. Concentration et participation active. Accroche-toi !
+                    </p>
+                  </div>
+                )}
+
+                { formData.type === 4 && (
+                  <div className="bg-black/40 rounded-lg p-4 border border-yellow-500/20">
+                    <p className="text-yellow-300">
+                      Partie spéciale animée par l'équipe d'animation.
+                    </p>
+                  </div>
+                )}
+
+                { formData.type === 5 && (
+                  <div className="bg-black/40 rounded-lg p-4 border border-orange-500/20">
+                    <p className="text-orange-300">
+                      Partie test pour les développeurs. Aucun points ni badges enregistrés.
                     </p>
                   </div>
                 )}
