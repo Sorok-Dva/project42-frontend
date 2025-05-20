@@ -177,7 +177,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         if (player) {
           await axios.post(
             `/api/games/room/${replayGameId}/join`,
-            {},
+            { replayFrom: gameId },
             {
               headers: {
                 Authorization: `Bearer ${token}`,
