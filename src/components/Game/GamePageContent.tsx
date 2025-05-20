@@ -452,6 +452,14 @@ const GamePage = () => {
   if (roomData.whiteFlag) {
     options.push('Sans Points')
   }
+  const gameTypeColors = {
+    0: 'text-green-500', // Normale
+    1: 'text-blue-500', // Fun
+    2: 'text-red-500', // Sérieuse
+    3: 'text-purple-500', // Carnage
+    4: 'text-yellow-400', // Animation
+    5: 'text-orange-500', // Test
+  }
   return (
     <>
       {isAuthorized && creator ? (
@@ -473,7 +481,7 @@ const GamePage = () => {
                   </div>
                   <div>
                     <h1 className="text-xl font-bold">
-                      <span className="text-blue-300">[{GAME_TYPES[roomData.type]}]</span> {roomData.name}
+                      <span className={gameTypeColors[roomData.type as keyof typeof gameTypeColors]}>[{GAME_TYPES[roomData.type]}]</span> {roomData.name}
                     </h1>
                     <p className="text-sm text-blue-300">
                       {players.length}/{slots} joueurs • Options: {options.length > 0 ? options.join(', ') : 'Aucune'} • {isNight ? 'Phase nocturne' : 'Phase diurne'}
