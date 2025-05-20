@@ -662,7 +662,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                   </motion.button>
                 )}
 
-                {isEditCompositionOpen && <EditCompoModal roomId={roomData.id} onClose={closeEditComposition} />}
+                {isEditCompositionOpen && <EditCompoModal roomId={roomData.id} roomType={roomData.type} onClose={closeEditComposition} />}
                 {isTransferLeadOpen && (
                   <TransferLeadModal
                     roomId={roomData.id}

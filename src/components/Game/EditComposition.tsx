@@ -8,10 +8,11 @@ import { createPortal } from 'react-dom'
 
 interface EditCompoModalProps {
   roomId: number
+  roomType: number
   onClose: () => void
 }
 
-const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
+const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, roomType, onClose }) => {
   const [error, setError] = useState<string | null>(null)
   const [cards, setCards] = useState<Record<number, RoomCard>>({})
   const [allCards, setAllCards] = useState<Record<number, Card>>({})
@@ -202,10 +203,10 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, onClose }) => {
 
       let classNames = 'compo_edit_card '
       if (selected && !unavailable && !isDisabled) classNames += 'card_selected '
-      if (unavailable || isDisabled) classNames += 'card_unavailable '
+      if (unavailable || (isDisabled && roomType !== 5)) classNames += 'card_unavailable '
 
       let dataTooltip = ''
-      if (isDisabled) {
+      if (isDisabled && roomType !== 5) {
         dataTooltip = 'Cette carte est désactivée pour le moment.'
       } else if (unavailable) {
         dataTooltip = `Pas assez de joueurs. Il faut ${cardLimit(i)} places.`
