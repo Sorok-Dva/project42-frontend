@@ -62,7 +62,7 @@ const GameRules: React.FC<GameRulesProps> = ({ gameType }) => {
     2: 'bg-red-500', // Sérieuse
     3: 'bg-purple-500', // Carnage
     4: 'bg-yellow-500', // Animation
-    5: 'bg-orange-500', // Animation
+    5: 'bg-orange-500', // Test
   }
 
   // Noms des types de partie
@@ -71,8 +71,8 @@ const GameRules: React.FC<GameRulesProps> = ({ gameType }) => {
     1: 'Fun',
     2: 'Sérieuse',
     3: 'Carnage',
-    6: 'Animation',
-    9: 'Test',
+    4: 'Animation',
+    5: 'Test',
   }
 
   // Vérifier si le type de partie existe
