@@ -74,6 +74,24 @@ export interface User {
       nextLevelTo?: number
     }]
   },
+  cardsStatistics: {
+    statsByRole: { cardsPlayed: number, wins: number, losses: number, winRate: number, lossRate: number }[],
+    topCard: {
+      name: string
+      playedCount: 50
+    }
+  },
+  gamesStatistics: [],
+  gamesHistoryFull: {
+    id: string
+    idRole: number,
+    date: string,
+    link: string,
+    meanClaps: number,
+    name: string
+    result: string
+    type: string
+  }[],
   activity: {
     state: 'ingame' | 'pregame' | 'spectator' | 'none' | string;
     gameId?: number;

@@ -5,9 +5,10 @@ import { usePermissions } from 'hooks/usePermissions'
 import AchievementBadge from 'components/Profile/AchievementBadge'
 import ModerationPanel from 'components/Moderation/ProfilePanel'
 import RenderGameLine from 'components/Profile/RenderGameLine'
+import { User } from 'components/ProfileModal'
 
 interface ProfileDetailsProps {
-  user: any;
+  user: User;
   relation: string; // 'me', 'none', 'waiting', 'friend', etc.
 }
 
@@ -38,33 +39,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, relation }) => {
     }
   }, [detailsIsShown, moderationIsShown])
 
-  const cardsStatistics = user.cardsStatistics.reduce((acc: any, game: any) => {
-    const { idRole, state } = game
-    if (!acc[idRole]) {
-      acc[idRole] = { victories: 0, defeats: 0, draws: 0 }
-    }
-    if (state === 'Victoire') {
-      acc[idRole].victories += 1
-    } else if (state === 'Défaite') {
-      acc[idRole].defeats += 1
-    } else if (state === 'Égalité') {
-      acc[idRole].draws += 1
-    }
-    return acc
-  }, {})
-
-  const calculateRatios = (stats: any) => {
-    for (const idRole in stats) {
-      const { victories, defeats, draws } = stats[idRole]
-      stats[idRole].total = victories + defeats + draws
-      stats[idRole].ratio =
-        defeats === 0 ? (victories > 0 ? 'Infinity' : 0) : (victories / defeats).toFixed(2)
-      stats[idRole].ratio = stats[idRole].ratio === 'Infinity' ? victories : parseFloat(stats[idRole].ratio)
-    }
-    return stats
-  }
-
-  const calculatedStats = calculateRatios({ ...cardsStatistics })
+  const cardsStatistics = user.cardsStatistics.statsByRole
 
   const badgesArray = Object.values(user.achievements.possessed).filter(
     (a: any) => !a.memory
@@ -143,7 +118,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, relation }) => {
                 </p>
               ) : (
                 <p>
-                  <strong>{user.username}</strong> vient seulement de débarquer sur Project 42.
+                  <strong>{user.nickname}</strong> vient seulement de débarquer sur Project 42.
                   <br />
                   {user.isMale ? 'Il' : 'Elle'} n'a pas encore joué de partie.
                 </p>
@@ -276,9 +251,9 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, relation }) => {
                   </>
                 )}
                 <div id="roles-stats">
-                  {Object.entries(calculatedStats).map(([idRole, stats]: [string, any], index) => {
-                    const s = stats.total > 1 ? 's' : ''
-                    const tooltip = `<b>Statistiques sur ${stats.total} partie${s} jouée${s}.</b><br/><b>Victoires : ${stats.victories}</b>・<b>Défaites : ${stats.defeats}</b>・<b>Égalités : ${stats.draws}</b> <br/><b>Ratio :</b> ${stats.ratio}`
+                  {Object.entries(cardsStatistics).map(([cardId, { cardsPlayed, wins, losses, winRate, lossRate}], index) => {
+                    const s = cardsPlayed > 1 ? 's' : ''
+                    const tooltip = `<b>Statistiques sur <strong>${cardsPlayed}</strong> partie${s} jouée${s}.</b><br/><b>Victoires</b> : <strong>${wins}</strong>・<b>Défaites</b> : <strong>${losses}</strong>・<br/><b>Taux de victoire :</b> <strong>${winRate}%</strong>`
                     return (
                       <div
                         className="role role-stats sound-tick"
@@ -288,7 +263,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, relation }) => {
                       >
                         <img
                           className="carte"
-                          src={`/jeu/assets/images/carte${idRole}.png`}
+                          src={`/assets/images/carte${cardId}.png`}
                           alt=""
                         />
                         <Tooltip id={String(index)} />
