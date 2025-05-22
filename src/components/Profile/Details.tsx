@@ -252,6 +252,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, relation }) => {
                 )}
                 <div id="roles-stats">
                   {Object.entries(cardsStatistics).map(([cardId, { cardsPlayed, wins, losses, winRate, lossRate}], index) => {
+                    if (cardId === 'unknown') return
                     const s = cardsPlayed > 1 ? 's' : ''
                     const tooltip = `<b>Statistiques sur <strong>${cardsPlayed}</strong> partie${s} jouée${s}.</b><br/><b>Victoires</b> : <strong>${wins}</strong>・<b>Défaites</b> : <strong>${losses}</strong>・<br/><b>Taux de victoire :</b> <strong>${winRate}%</strong>`
                     return (
