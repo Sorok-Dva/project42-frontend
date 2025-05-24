@@ -61,9 +61,9 @@ const RenderGameLine: React.FC<RenderGameLineProps> = ({ game, key, wasMdj = fal
                       ? 'type-4'
                       : game.type === 'test'
                         ? 'type-5'
-                      : game.type === 'spéciale'
-                        ? 'type-9'
-                        : ''
+                        : game.type === 'spéciale'
+                          ? 'type-9'
+                          : ''
           }`}
         ></div>
         <strong>
