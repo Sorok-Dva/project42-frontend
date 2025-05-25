@@ -191,7 +191,6 @@ const GameControls: React.FC<GameControlsProps> = ({
             },
           )
         }
-        localStorage.removeItem(`game_auth_${gameId}`)
 
         window.location.href = `/game/${gameId}`
       } catch (error: any) {
