@@ -181,6 +181,15 @@ const GameControls: React.FC<GameControlsProps> = ({
             player: player ? { id: user?.id, nickname: response?.nickname, realNickname: response?.realNickname } : null,
             viewer,
           })
+          await axios.post(
+            `/api/games/room/${gameId}/spectate`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          )
         }
         localStorage.removeItem(`game_auth_${gameId}`)
 
