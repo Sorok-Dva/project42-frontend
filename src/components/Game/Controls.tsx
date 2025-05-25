@@ -11,7 +11,7 @@ import {
   updateMaxPlayers,
   updateRoomTimer,
   updateRoomCards,
-  addFavoriteGame,
+  addFavoriteGame, leaveGame,
 } from 'services/gameService'
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
@@ -168,6 +168,30 @@ const GameControls: React.FC<GameControlsProps> = ({
     } catch (e: any) {
       console.error('Erreur lors du relancement :', e)
       alert(e.response?.data?.error || 'Erreur lors du relancement de la partie')
+    }
+  }
+
+  const handleJoinSpectate = async () => {
+    if (gameId && player && !gameStarted && !gameFinished) {
+      try {
+        const response = await leaveGame(token)
+        if (response.message) {
+          socket.emit('leaveRoom', {
+            roomId: gameId,
+            player: player ? { id: user?.id, nickname: response?.nickname, realNickname: response?.realNickname } : null,
+            viewer,
+          })
+        }
+        localStorage.removeItem(`game_auth_${gameId}`)
+
+        window.location.href = `/game/${gameId}`
+      } catch (error: any) {
+        if (error.response?.data?.error) {
+          toast.error(`Une erreur est survenue: ${error.response.data.error}`, ToastDefaultOptions)
+        } else {
+          toast.error('Erreur lors de la tentative de rejoindre la partie.', ToastDefaultOptions)
+        }
+      }
     }
   }
 
@@ -434,6 +458,16 @@ const GameControls: React.FC<GameControlsProps> = ({
             </div>
 
             <div className="p-4 text-center">
+              { player && !gameStarted && !gameFinished && (
+                <motion.button
+                  className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow-lg mb-2"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleJoinSpectate}
+                >
+                  Rejoindre en tant que spectateur
+                </motion.button>
+              )}
               {player && canBeReady && !player.ready ? (
                 <motion.button
                   className="sound-tick px-6 py-3 bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 text-white rounded-lg shadow-lg shadow-green-500/20 animate-pulse"
