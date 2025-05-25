@@ -455,83 +455,83 @@ const RoomList = () => {
             <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
                 <div className="flex items-center mb-2">
-              <div className="w-4 h-4 bg-blue-500 rounded-sm mr-2"></div>
-              <h4 className="font-bold">
+                  <div className="w-4 h-4 bg-blue-500 rounded-sm mr-2"></div>
+                  <h4 className="font-bold">
                 Partie <span className="text-blue-400">FUN</span>
-              </h4>
-            </div>
-            <p className="text-sm text-gray-300">Des parties rapides, ambiance détente, peu de prise de tête.</p>
-          </div>
+                  </h4>
+                </div>
+                <p className="text-sm text-gray-300">Des parties rapides, ambiance détente, peu de prise de tête.</p>
+              </div>
 
-          <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
-            <div className="flex items-center mb-2">
-              <div className="w-4 h-4 bg-green-600 rounded-sm mr-2"></div>
-              <h4 className="font-bold">
+              <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+                <div className="flex items-center mb-2">
+                  <div className="w-4 h-4 bg-green-600 rounded-sm mr-2"></div>
+                  <h4 className="font-bold">
                 Partie <span className="text-green-500">NORMALE</span>
-              </h4>
-            </div>
-            <p className="text-sm text-gray-300">
+                  </h4>
+                </div>
+                <p className="text-sm text-gray-300">
               Des parties comme dans la vraie vie, réflexion et bluff sont de rigueur.
-            </p>
-          </div>
+                </p>
+              </div>
 
-          <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
-            <div className="flex items-center mb-2">
-              <div className="w-4 h-4 bg-purple-600 rounded-sm mr-2"></div>
-              <h4 className="font-bold">
+              <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+                <div className="flex items-center mb-2">
+                  <div className="w-4 h-4 bg-purple-600 rounded-sm mr-2"></div>
+                  <h4 className="font-bold">
                 Partie <span className="text-purple-400">CARNAGE</span>
-              </h4>
-            </div>
-            <p className="text-sm text-gray-300">
+                  </h4>
+                </div>
+                <p className="text-sm text-gray-300">
               Très rapide, 6 rôles, peu voire aucune stratégie, beaucoup d'éliminations à chaque tour.
-            </p>
-          </div>
+                </p>
+              </div>
 
-          <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
-            <div className="flex items-center mb-2">
-              <div className="w-4 h-4 bg-red-600 rounded-sm mr-2"></div>
-              <h4 className="font-bold">
+              <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+                <div className="flex items-center mb-2">
+                  <div className="w-4 h-4 bg-red-600 rounded-sm mr-2"></div>
+                  <h4 className="font-bold">
                 Partie <span className="text-red-500">SÉRIEUSE</span>
-              </h4>
-            </div>
-            <p className="text-sm text-gray-300">
+                  </h4>
+                </div>
+                <p className="text-sm text-gray-300">
               Demande beaucoup de concentration et de persuasion. Règles strictes favorisant le débat.
-            </p>
-          </div>
-          {/*<div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+                </p>
+              </div>
+              {/*<div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
             <div className="flex items-center mb-2">
               <img src="/assets/img/chatelain.png" className="w-6 h-6 mr-2" alt="Partie Premium" />
               <h4 className="font-bold">Partie Premium</h4>
             </div>
             <p className="text-sm text-gray-300">Plus de rôles, plus d'options, plus de tout !</p>
           </div>*/}
-        </div>
+            </div>
 
-        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-          <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
-            <div className="flex items-center mb-2">
-              <div className="w-4 h-4 special-gradient border-yellow-300 rounded-sm mr-2"></div>
-              <h4 className="font-bold">
+            <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+              <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+                <div className="flex items-center mb-2">
+                  <div className="w-4 h-4 special-gradient border-yellow-300 rounded-sm mr-2"></div>
+                  <h4 className="font-bold">
                 Partie <span className="text-yellow-500">SPÉCIALE</span>
-              </h4>
-            </div>
-            <p className="text-sm text-gray-300">
+                  </h4>
+                </div>
+                <p className="text-sm text-gray-300">
               Une partie spéciale animée par l'équipe du site ! Venez jouer une partie spéciale et unique !
-            </p>
-          </div>
+                </p>
+              </div>
 
-          <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
-            <div className="flex items-center mb-2">
-              <div className="w-4 h-4 bg-orange-600 rounded-sm mr-2"></div>
-              <h4 className="font-bold">
+              <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+                <div className="flex items-center mb-2">
+                  <div className="w-4 h-4 bg-orange-600 rounded-sm mr-2"></div>
+                  <h4 className="font-bold">
                 Partie <span className="text-orange-500">TEST</span>
-              </h4>
-            </div>
-            <p className="text-sm text-gray-300">
+                  </h4>
+                </div>
+                <p className="text-sm text-gray-300">
               Des parties animées par les développeurs pour tester et déveloper de nouvelles fonctionnalités !
-            </p>
-          </div>
-        </div>
+                </p>
+              </div>
+            </div>
           </>
         )}
       </div>
