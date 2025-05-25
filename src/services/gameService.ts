@@ -136,8 +136,12 @@ export const updateRoomTimer = async (timer: number, gameId: string, token: stri
 /**
  * Transfère les droits du créateur vers un autre joueur
  */
-export const transferCreatorRights = async (gameId: string, newCreatorId: string) => {
-  const response = await axios.post(`/api/games/${gameId}/transfer`, { newCreatorId })
+export const transferCreatorRights = async (gameId: string, nickname: string, token: string) => {
+  const response = await axios.post(`/api/games/room/${gameId}/setLeader`, { nickname }, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  })
   return response.data
 }
 

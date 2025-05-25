@@ -2,6 +2,10 @@ import React, { FC, useEffect, useState } from 'react'
 import { PlayerType } from 'hooks/useGame'
 import { transferCreatorRights } from 'services/gameService'
 import { createPortal } from 'react-dom'
+import { useAuth } from 'contexts/AuthContext'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { ToastDefaultOptions } from 'utils/toastOptions'
 
 interface TransferLeadModalProps {
   roomId: number
@@ -11,6 +15,7 @@ interface TransferLeadModalProps {
 }
 
 const TransferLeadModal: FC<TransferLeadModalProps> = ({ roomId, creator, players, onClose }) => {
+  const { token } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
 
@@ -19,13 +24,26 @@ const TransferLeadModal: FC<TransferLeadModalProps> = ({ roomId, creator, player
     return () => setMounted(false)
   }, [])
 
-  const transferLead = async (player: number) => {
+  const transferLead = async (player: string) => {
     try {
-      const response = await transferCreatorRights(String(roomId), String(player))
+      if (!token) return
+      const response = await transferCreatorRights(String(roomId), player, token)
       onClose()
     } catch (e) {
-      console.error(e)
-      setError((e as Error).message)
+      if (axios.isAxiosError(error)) {
+        const errorData = await error?.response?.data
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          errorData.errors.forEach((error : { msg : string }) => {
+            setError(error.msg)
+            toast.error(error.msg, ToastDefaultOptions)
+          })
+        } else if (errorData.error) {
+          setError(errorData.error)
+          toast.error(errorData.error, ToastDefaultOptions)
+        }
+      } else {
+        setError('Une erreur est survenue.')
+      }
     }
   }
 
@@ -69,7 +87,7 @@ const TransferLeadModal: FC<TransferLeadModalProps> = ({ roomId, creator, player
         <div className="modal-content">
           <div className="modal_player_select_wrapper">
             { players.map((player: PlayerType) => player.nickname !== creator ? (
-              <div key={player.nickname} className="player_select_option sound-tick" onClick={() => transferLead(Number(player.id))}>
+              <div key={player.nickname} className="player_select_option sound-tick" onClick={() => transferLead(player.nickname)}>
                 <span>{player.nickname}</span>
               </div>
             ): null)}
