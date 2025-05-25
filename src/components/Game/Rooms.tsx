@@ -8,6 +8,7 @@ import type { RoomCard, RoomData } from 'hooks/useGame'
 import { useAuth } from 'contexts/AuthContext'
 import { leaveGame } from 'services/gameService'
 import { hasRole } from 'utils/rolify'
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 
 const generateCards = (cards: RoomCard[]) => {
   return cards.map((c) => {
@@ -49,6 +50,7 @@ const RoomList = () => {
     anonymousGame: false,
     type: 3,
   })
+  const [isGameTypesInfoExpanded, setIsGameTypesInfoExpanded] = useState(true)
 
   const channel = new BroadcastChannel('site-channel')
 
@@ -438,13 +440,21 @@ const RoomList = () => {
 
       {/* Game Types Info */}
       <div className="bg-gradient-to-r from-black/60 to-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-500/30 overflow-hidden mb-6">
-        <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30">
+        <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 px-4 py-3 border-b border-blue-500/30 flex items-center justify-between">
           <h3 className="text-lg font-bold text-white">Types de parties</h3>
+          <button
+            onClick={() => setIsGameTypesInfoExpanded(!isGameTypesInfoExpanded)}
+            className="bg-transparent text-white hover:text-gray-300 p-1 rounded-md"
+          >
+            {isGameTypesInfoExpanded ? <ChevronUpIcon size={24} /> : <ChevronDownIcon size={24} />}
+          </button>
         </div>
 
-        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
-            <div className="flex items-center mb-2">
+        {isGameTypesInfoExpanded && (
+          <>
+            <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+                <div className="flex items-center mb-2">
               <div className="w-4 h-4 bg-blue-500 rounded-sm mr-2"></div>
               <h4 className="font-bold">
                 Partie <span className="text-blue-400">FUN</span>
@@ -522,6 +532,8 @@ const RoomList = () => {
             </p>
           </div>
         </div>
+          </>
+        )}
       </div>
 
       {!showForm && (
