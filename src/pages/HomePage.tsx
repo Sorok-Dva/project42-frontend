@@ -1,6 +1,6 @@
 import 'styles/Room.scss'
 
-import React from 'react'
+import React, { useState } from 'react'
 import RoomList from 'components/Game/Rooms'
 import { useUser } from 'contexts/UserContext'
 import { staticStars, parallaxStars } from 'utils/animations'
@@ -9,10 +9,11 @@ import { motion } from 'framer-motion'
 import hero from 'assets/img/hero.png'
 import { Img as Image } from 'react-image'
 import DailyRewardsStatus from 'components/DailyRewardStatus'
-import { Calendar } from 'lucide-react'
+import { Calendar, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 
 const HomePage = () => {
   const { user } = useUser()
+  const [isDailyRewardsExpanded, setIsDailyRewardsExpanded] = useState(true)
   return (
     <>
       <div
@@ -157,15 +158,26 @@ const HomePage = () => {
             animate={ { opacity: 1, y: 0 } }
             transition={ { duration: 0.8, delay: 0.4 } }
           >
-            <div className="flex items-center mb-8">
-              <Calendar className="h-5 w-5 mr-2 text-indigo-400" />
-              <h2 className="text-2xl md:text-3xl font-bold">
-                Connexions Journalières</h2>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center">
+                <Calendar className="h-5 w-5 mr-2 text-indigo-400" />
+                <h2 className="text-2xl md:text-3xl font-bold">
+                  Connexions Journalières
+                </h2>
+              </div>
+              <button
+                onClick={() => setIsDailyRewardsExpanded(!isDailyRewardsExpanded)}
+                className="bg-transparent text-white hover:text-gray-300 p-1 rounded-md"
+              >
+                {isDailyRewardsExpanded ? <ChevronUpIcon size={24} /> : <ChevronDownIcon size={24} />}
+              </button>
             </div>
 
-            <div>
-              <DailyRewardsStatus />
-            </div>
+            {isDailyRewardsExpanded && (
+              <div>
+                <DailyRewardsStatus />
+              </div>
+            )}
           </motion.div>
         </section>
 
