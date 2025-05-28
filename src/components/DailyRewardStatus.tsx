@@ -1,29 +1,29 @@
 'use client'
 
-import type React from 'react'
+import React from 'react'
 import { useDailyRewards } from 'contexts/DailyRewardsContext'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './UI/Card'
+import { Card, CardContent, CardDescription, CardHeader } from './UI/Card'
 import { Button } from './UI/Button'
 import { Progress } from './UI/Progress'
-import { Calendar, Gift } from 'lucide-react'
+import { Gift } from 'lucide-react'
 
 const DailyRewardsStatus: React.FC = () => {
   const { rewards, currentStreak, canClaimToday, claimReward, showPopup } = useDailyRewards()
 
-  // Calculer le jour actuel (limité à 7)
-  const currentDay = Math.min(currentStreak + (canClaimToday ? 1 : 0), 7)
+  const canClaim = canClaimToday
 
-  // Calculer le progrès de la semaine
+  const currentDay = Math.min(currentStreak + (canClaim ? 1 : 0), 7)
+
   const weekProgress = (currentStreak / 7) * 100
 
   return (
     <Card className="bg-gray-800/50 backdrop-blur-sm border border-indigo-500/30">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
-          <div>
-            <CardDescription>Connectez-vous chaque jour pour obtenir des récompenses</CardDescription>
-          </div>
-          {canClaimToday && (
+          <CardDescription>
+            Connectez-vous chaque jour pour obtenir des récompenses
+          </CardDescription>
+          {canClaim && (
             <div className="animate-pulse">
               <span className="inline-block px-2 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
                 Disponible
@@ -32,8 +32,10 @@ const DailyRewardsStatus: React.FC = () => {
           )}
         </div>
       </CardHeader>
+
       <CardContent>
         <div className="space-y-4">
+          {/* Progression de la semaine */}
           <div>
             <div className="flex justify-between mb-1">
               <span className="text-sm text-gray-400">Progression de la semaine</span>
@@ -42,11 +44,13 @@ const DailyRewardsStatus: React.FC = () => {
             <Progress value={weekProgress} className="h-2" />
           </div>
 
+          {/* Grille des jours */}
           <div className="grid grid-cols-7 gap-1">
-            {rewards.map((reward, index) => {
-              const isPast = index < currentStreak
-              const isCurrent = index === currentStreak && canClaimToday
-              const isFuture = index > currentStreak || (index === currentStreak && !canClaimToday)
+            {rewards.map((reward, idx) => {
+              const isPast = idx < currentStreak
+              const isCurrent = idx === currentStreak && canClaim
+              // futur = pas encore dispo
+              const isFuture = idx > currentStreak || (idx === currentStreak && !canClaim)
 
               return (
                 <div
@@ -83,7 +87,8 @@ const DailyRewardsStatus: React.FC = () => {
             })}
           </div>
 
-          {canClaimToday ? (
+          {/* Bouton de claim */}
+          {canClaim ? (
             <Button
               onClick={claimReward}
               className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
@@ -97,9 +102,12 @@ const DailyRewardsStatus: React.FC = () => {
             </Button>
           )}
 
+          {/* Bonus semaine complète */}
           {currentDay === 7 && (
             <div className="p-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-center">
-              <span className="text-yellow-300 text-sm">Bonus de semaine complète disponible! 🎉</span>
+              <span className="text-yellow-300 text-sm">
+                Bonus de semaine complète disponible! 🎉
+              </span>
             </div>
           )}
         </div>

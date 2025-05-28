@@ -70,11 +70,11 @@ export const DailyRewardsProvider: React.FC<{ children: ReactNode }> = ({ childr
   const canClaimToday = (): boolean => {
     if (!state.lastClaimDate) return true
 
-    const lastClaimDate = new Date(state.lastClaimDate)
-    const today = new Date()
-
-    // Ne peut pas réclamer deux fois le même jour
-    return !isSameDay(lastClaimDate, today)
+    const last = new Date(state.lastClaimDate)
+    const now = new Date()
+    const diff = now.getTime() - last.getTime()
+    // on autorise le claim uniquement si au moins 24 h se sont écoulées
+    return diff >= 86400000
   }
 
   const checkRewards = async () => {
@@ -89,7 +89,10 @@ export const DailyRewardsProvider: React.FC<{ children: ReactNode }> = ({ childr
       const { currentStreak, lastClaimDate, rewards } = response.data
 
       // Vérifier si l'utilisateur peut réclamer aujourd'hui
-      const canClaim = lastClaimDate ? !isSameDay(new Date(lastClaimDate), new Date()) : true
+      const now = new Date()
+      const last = lastClaimDate ? new Date(lastClaimDate) : null
+      const diff = last ? now.getTime() - last.getTime() : Infinity
+      const canClaim = diff >= 86400000
 
       setState({
         currentStreak,
@@ -116,72 +119,72 @@ export const DailyRewardsProvider: React.FC<{ children: ReactNode }> = ({ childr
     if (!token || !user || !canClaimToday()) return
 
     try {
-      const today = new Date().toISOString()
-      const newStreak = state.lastClaimDate
-        ? isConsecutiveDay(new Date(state.lastClaimDate), new Date())
-          ? state.currentStreak + 1
-          : 1
-        : 1
+      const now = new Date()
+      const last = state.lastClaimDate ? new Date(state.lastClaimDate): null
 
-      // Limiter le streak à 7 jours (une semaine)
-      const limitedStreak = Math.min(newStreak, 7)
+      const oneDayMs = 24 * 60 * 60 * 1000
+      const twoDaysMs = 2 * oneDayMs
 
-      // Trouver la récompense du jour
-      const todayReward = state.rewards.find((r) => r.day === limitedStreak)
+      // 1) Calcul du nouveau streak (1 à 7, reset sinon)
+      let newStreak = 1
+      if (last) {
+        const diff = now.getTime() - last.getTime()
+        // si on est entre 24 h et 48 h depuis le dernier claim ET streak < 7, on incrémente
+        if (diff >= oneDayMs && diff < twoDaysMs && state.currentStreak < 7) {
+          newStreak = state.currentStreak + 1
+        }
+        // sinon newStreak reste à 1 (reset automatique)
+      }
 
+      // 2) On récupère la récompense du jour (en fonction de newStreak)
+      const todayReward = state.rewards.find((r) => r.day === newStreak)
       if (!todayReward) return
 
-      // Appeler l'API pour réclamer la récompense
-      const response = await axios.post(
+      await axios.post(
         '/api/daily-rewards/claim',
-        {
-          day: limitedStreak,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { day: newStreak },
+        { headers: { Authorization: `Bearer ${ token }` } },
       )
 
-      // Mettre à jour les crédits de l'utilisateur
-      if (user && setUser) {
+      if (setUser) {
         setUser({
           ...user,
           credits: (user.credits || 0) + todayReward.credits,
         })
       }
 
-      // Mettre à jour l'état local
       const updatedRewards = state.rewards.map((reward) =>
-        reward.day === limitedStreak ? { ...reward, claimed: true } : reward,
+        reward.day === newStreak
+          ? { ...reward, claimed: true }
+          : reward,
       )
 
       const newState = {
-        currentStreak: limitedStreak,
-        lastClaimDate: today,
+        currentStreak: newStreak,
+        lastClaimDate: now.toISOString(),
         rewards: updatedRewards,
         showPopup: false,
       }
-
       setState(newState)
-
-      // Sauvegarder dans localStorage comme fallback
       localStorage.setItem('dailyRewards', JSON.stringify(newState))
 
       toast.success(
-        `Vous avez reçu ${todayReward.credits} crédits pour votre connexion du jour ${limitedStreak}!`,
+        `Vous avez reçu ${ todayReward.credits } crédits pour votre connexion du jour ${ newStreak }!`,
         ToastDefaultOptions,
       )
 
-      // Si c'est le 7ème jour, féliciter l'utilisateur
-      if (limitedStreak === 7) {
-        toast.info('Félicitations! Vous avez complété une semaine entière de connexions!', {
-          ...ToastDefaultOptions,
-          autoClose: 5000,
-        })
+      if (newStreak === 7) {
+        toast.info(
+          'Félicitations ! Vous avez complété une semaine entière de connexions !',
+          { ...ToastDefaultOptions, autoClose: 5000 },
+        )
       }
     } catch (error) {
-      console.error('Erreur lors de la réclamation de la récompense:', error)
-      toast.error('Une erreur est survenue lors de la réclamation de votre récompense.', ToastDefaultOptions)
+      console.error('Erreur lors de la réclamation de la récompense :', error)
+      toast.error(
+        'Une erreur est survenue lors de la réclamation de votre récompense.',
+        ToastDefaultOptions,
+      )
     }
   }
 
