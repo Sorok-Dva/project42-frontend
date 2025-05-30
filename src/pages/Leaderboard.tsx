@@ -84,9 +84,11 @@ const LeaderboardPage: React.FC = () => {
         setLoading(true)
 
         const response = await axios.get<LeaderboardResponse>('/api/users/leaderboard', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          ...(token ? {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          } : {}),
           params: {
             page: currentPage,
             limit: itemsPerPage,
