@@ -84,7 +84,7 @@ const Discord: React.FC = () => {
     try {
       setLoading(true)
       await axios.post(
-        '/api/auth/discord/unlink',
+        '/api/users/me/unlink-discord',
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
