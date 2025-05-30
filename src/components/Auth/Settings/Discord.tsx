@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useUser } from 'contexts/UserContext'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { toast } from 'react-toastify'
+import { User } from 'types/user'
 
 interface DiscordData {
   id: string
@@ -12,71 +13,52 @@ interface DiscordData {
   avatar: string
 }
 
-const CLIENT_ID = process.env.REACT_APP_DISCORD_CLIENT_ID!
+const CLIENT_ID    = process.env.REACT_APP_DISCORD_CLIENT_ID!
 const REDIRECT_URI = process.env.REACT_APP_DISCORD_REDIRECT_URI!
-const SCOPE = 'identify%20email'
-const AUTH_URL = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
+const SCOPE        = 'identify%20email'
+const AUTH_URL     = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
   REDIRECT_URI
 )}&response_type=code&scope=${SCOPE}`
 
 const Discord: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user, setUser, login } = useUser()
+  const { user, setUser } = useUser()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [discordData, setDiscordData] = useState<DiscordData | null>(null)
 
+  const exchangedRef = useRef(false)
+
   useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const code = params.get('code')
-    if (!code) return
+    const code = new URLSearchParams(location.search).get('code')
+    if (!code || exchangedRef.current) return
+
+    exchangedRef.current = true
     ;(async () => {
       try {
         setLoading(true)
         const res = await axios.post(
           '/api/auth/discord/callback',
-          {
-            code,
-            redirectUri: REDIRECT_URI,
-          },
-          {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-          },
+          { code, redirectUri: REDIRECT_URI },
+          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } },
         )
-
-        const { token, user } = res.data
-        if (token) setUser({ ...user, discordId: user?.discordId })
-        setLoading(false)
+        const { token, user: resUser } = res.data
+        if (token) setUser({
+          ...user,
+          discordId: resUser.discordId,
+        } as User)
       } catch (err) {
         console.error(err)
         toast.error('Échec de la connexion via Discord.', ToastDefaultOptions)
         setError('Échec de la connexion via Discord.')
+      } finally {
         setLoading(false)
+        // on nettoie l’URL pour enlever ?code=…
+        navigate(location.pathname, { replace: true })
       }
     })()
-  }, [location.search, login, navigate, setUser])
-
-  useEffect(() => {
-    if (user?.discordId) {
-      const fetchDiscordData = async () => {
-        try {
-          setLoading(true)
-          const res = await axios.get('/api/auth/discord/user', {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-          })
-          setDiscordData(res.data)
-          setLoading(false)
-        } catch (err) {
-          console.error(err)
-          setError('Impossible de récupérer les informations Discord.')
-          setLoading(false)
-        }
-      }
-
-      fetchDiscordData()
-    }
-  }, [user?.discordId])
+  }, [location.search, navigate, setUser, location.pathname])
 
   const handleUnlinkDiscord = async () => {
     if (!window.confirm('Êtes-vous sûr de vouloir délier votre compte Discord ?')) return
@@ -84,7 +66,7 @@ const Discord: React.FC = () => {
     try {
       setLoading(true)
       await axios.post(
-        '/api/users/me/unlink-discord',
+        '/api/users/unlink-discord',
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -92,18 +74,17 @@ const Discord: React.FC = () => {
       )
 
       if (user) {
-        const updatedUser = { ...user }
-        delete updatedUser.discordId
-        setUser(updatedUser)
+        const updated = { ...user }
+        delete updated.discordId
+        setUser(updated)
       }
-
       setDiscordData(null)
       toast.success('Compte Discord délié avec succès.', ToastDefaultOptions)
-      setLoading(false)
     } catch (err) {
       console.error(err)
       toast.error('Échec de la déconnexion Discord.', ToastDefaultOptions)
       setError('Échec de la déconnexion Discord.')
+    } finally {
       setLoading(false)
     }
   }
