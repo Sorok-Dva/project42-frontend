@@ -18,7 +18,7 @@ const TopPlayer: React.FC = () => {
   useEffect(() => {
     async function retrieveTopPlayers() {
       const response = await axios.get('/api/users/leaderboard?limit=5')
-      setTopPlayers(response.data.users)
+      setTopPlayers(response.data.players)
     }
     retrieveTopPlayers()
   }, [])
