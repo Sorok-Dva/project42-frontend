@@ -49,7 +49,7 @@ import ValidateUser from 'pages/ValidateUser'
 
 import { ToastContainer } from 'react-toastify'
 import Notifier from 'components/Notifier'
-import Leaderboard from './pages/Leaderboard'
+import Leaderboard from 'pages/Leaderboard'
 import GamePage from 'pages/Game'
 import { SocketProvider } from 'contexts/SocketContext'
 import ModalProvider from 'contexts/ModalProvider'
@@ -151,7 +151,7 @@ const AppContent: React.FC = () => {
             <Route path="/terms-of-service" element={<TOSPage />} />
             <Route path="/users/validate/:token" element={<ValidateUser />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/community/leaderboard" element={<Leaderboard />} />
+            <Route path="/leaderboard/players" element={<Leaderboard />} />
             <Route path="/news" element={<News />} />
             <Route path="/game/:id" element={<GamePage />} />
             <Route path="/stations" element={<Guilds />} />
