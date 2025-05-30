@@ -24,29 +24,12 @@ const menuData = [
   {
     id: 3,
     title: 'Stations',
-    submenus: [
-      {
-        id: 1,
-        title: 'Liste',
-        url: '/stations/',
-      },
-    ],
+    url: '/stations/',
   },
   {
     id: 4,
-    title: 'Classements',
-    submenus: [
-      {
-        id: 1,
-        title: 'Joueurs',
-        url: '/leaderboard/players/',
-      },
-      {
-        id: 2,
-        title: 'Guildes',
-        url: '/leaderboard/stations',
-      },
-    ],
+    title: 'Classement',
+    url: '/leaderboard/players/',
   },
   {
     id: 5,
