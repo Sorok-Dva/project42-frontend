@@ -28,7 +28,7 @@ const Profile: React.FC = () => {
   }
 
   let progressPercentage = 0
-  let nextLevelPointsDisplay = ''
+  const nextLevelPointsDisplay = ''
 
   if (user) {
     const currentPoints = user.points || 0
