@@ -110,6 +110,7 @@ const AppContent: React.FC = () => {
                   <>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/account/settings" element={<UserSettingsPage />} />
+                    <Route path="/shop" element={<Shop />} />
                     { user.isAdmin && (
                       <Route element={<AdminRoute />}>
                         <Route path="/admin" element={<AdminLayout />}>
@@ -156,7 +157,6 @@ const AppContent: React.FC = () => {
             <Route path="/game/:id" element={<GamePage />} />
             <Route path="/stations" element={<Guilds />} />
             <Route path="/station/:id" element={<Guild />} />
-            <Route path="/shop" element={<Shop />} />
             <Route path="*" element={<NotFound />} />
           </>
         )}

@@ -52,6 +52,7 @@ const menuData = [
     id: 5,
     title: 'Boutique',
     url: '/shop',
+    isUser: true,
   },
   {
     id: 6,
@@ -174,7 +175,8 @@ const Navbar: React.FC<{
                   className="custom-nav gap-lg-7 gap-3 cursor-scale growDown2 ms-xxl-10 d-none d-lg-flex"
                   data-lenis-prevent
                 >
-                  {menuData.map(({ id, title, submenus, url, isAdmin, isMod }) => {
+                  {menuData.map(({ id, title, submenus, url, isAdmin, isUser, isMod }) => {
+                    if (isUser && !user) return
                     if (isAdmin && !user?.isAdmin) return
                     if (isMod &&(user?.role !== 'Moderator' && user?.role !== 'ModeratorTest')) return
                     return url ? (
