@@ -93,7 +93,7 @@ const AppContent: React.FC = () => {
       {!isGameRoute && !isAdminRoute && (
         <>
           <Navbar isTransparent={true} />
-          <Tchat />
+          { user && (<Tchat />)}
         </>
       )}
       <Routes>
