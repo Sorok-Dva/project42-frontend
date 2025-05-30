@@ -12,27 +12,79 @@ const Profile: React.FC = () => {
   const { user, logout } = useUser()
   const { open, toggleOpen } = useDropdown()
 
+  // Coefficient pour la formule de niveau (ajusté pour une progression plus douce)
+  // Formula: level = floor(levelCoefficient * sqrt(points)) + 1
+  const levelCoefficient = 0.32
+
+  /**
+   * Calcule le niveau d'un utilisateur basé sur ses points.
+   * La formule est: niveau = floor(levelCoefficient * sqrt(points)) + 1
+   * @param {number} points Le nombre de points de l'utilisateur.
+   * @returns {number} Le niveau calculé.
+   */
+  const calculateLevel = (points: number): number => {
+    const safePoints = Math.max(0, points)
+    return Math.floor(levelCoefficient * Math.sqrt(safePoints)) + 1
+  }
+
+  let progressPercentage = 0
+  let nextLevelPointsDisplay = ''
+
+  if (user) {
+    const currentPoints = user.points || 0
+    const currentLevel = calculateLevel(currentPoints)
+
+    const pointsRequiredForCurrentLevel = currentLevel === 1 ? 0 : Math.ceil(Math.pow((currentLevel - 1) / levelCoefficient, 2))
+
+    const pointsRequiredForNextLevel = Math.ceil(Math.pow(currentLevel / levelCoefficient, 2))
+
+    const pointsEarnedInCurrentLevel = currentPoints - pointsRequiredForCurrentLevel
+
+    const totalPointsForCurrentLevel = pointsRequiredForNextLevel - pointsRequiredForCurrentLevel
+
+    progressPercentage = totalPointsForCurrentLevel > 0
+      ? (pointsEarnedInCurrentLevel / totalPointsForCurrentLevel) * 100
+      : 0 // Si pas de points à gagner pour le niveau, la progression est 0
+
+    if (progressPercentage > 100) {
+      progressPercentage = 100
+    }
+  }
+
   const handleLogout = () => {
     logout()
     localStorage.removeItem('token')
   }
 
   useEffect(() => {
+    // Gère la fermeture du dropdown lorsque l'utilisateur clique en dehors
+    const handleMouseUp = (event: MouseEvent) => {
+      // Vérifie si le clic est en dehors du dropdown et du bouton d'ouverture
+      const dropdownElement = document.getElementById('profile-dropdown-menu')
+      const toggleButton = document.getElementById('profile-toggle-button')
+
+      if (open && dropdownElement && toggleButton && !dropdownElement.contains(event.target as Node) && !toggleButton.contains(event.target as Node)) {
+        toggleOpen()
+      }
+    }
+
     if (open) {
-      document.addEventListener('mouseup', toggleOpen)
+      document.addEventListener('mouseup', handleMouseUp)
     } else {
-      document.removeEventListener('mouseup', toggleOpen)
+      document.removeEventListener('mouseup', handleMouseUp)
     }
     return () => {
-      document.removeEventListener('mouseup', toggleOpen)
+      document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [open])
+  }, [open, toggleOpen])
+
 
   if (!user) return null
 
   return (
     <div className="relative flex-shrink-0">
       <div
+        id="profile-toggle-button" // Ajout d'un ID pour la référence dans useEffect
         onClick={toggleOpen}
         className="flex items-center gap-3 px-3 py-2 rounded-full bg-slate-800/50 border border-slate-700/50 cursor-pointer hover:bg-slate-700/50 transition-all duration-300"
       >
@@ -45,6 +97,7 @@ const Profile: React.FC = () => {
       </div>
 
       <div
+        id="profile-dropdown-menu" // Ajout d'un ID pour la référence dans useEffect
         className={clsx(
           'absolute right-0 top-full mt-2 w-64 bg-slate-900/90 backdrop-blur-md rounded-lg border border-slate-700/50 shadow-xl shadow-indigo-900/20 z-50 transform transition-all duration-300 origin-top-right',
           open ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none',
@@ -61,8 +114,11 @@ const Profile: React.FC = () => {
               <div className="h-2 bg-slate-700/50 rounded-full mt-1 overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"
-                  style={{ width: '30%' }}
+                  style={{ width: `${progressPercentage}%` }} // Largeur dynamique
                 ></div>
+              </div>
+              <div className="flex justify-end text-xs font-medium text-gray-400 mt-1">
+                <span>{nextLevelPointsDisplay}</span> {/* Affichage des points de progression */}
               </div>
             </div>
           </div>
