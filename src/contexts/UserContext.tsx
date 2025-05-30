@@ -44,7 +44,7 @@ export const UserProvider : React.FC<{ children : ReactNode }> = ({ children }) 
     setLoading(true)
     setUser(null)
     localStorage.removeItem('token')
-    navigateTo('/')
+    window.location.href = '/'
   }, [navigateTo])
 
   const fetchMe = useCallback((forceReload?: boolean) => {
