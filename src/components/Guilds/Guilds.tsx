@@ -10,27 +10,7 @@ import { useAuth } from 'contexts/AuthContext'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import JoinGuildModal from './JoinModal'
-import { User } from 'types/user'
-
-export interface Guild {
-  id: number;
-  name: string;
-  tag: string;
-  description: string;
-  signature: string;
-  leader: number;
-  banner: string;
-  points: number;
-  money: number;
-  createdAt: Date;
-  members: {
-    isOnline: boolean;
-    id: number;
-    userId: number;
-    role: string;
-    user: User;
-  }[]
-}
+import { Guild } from 'types/guild'
 
 const Guilds = () => {
   const { token } = useAuth()

@@ -9,7 +9,7 @@ import {
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { useAuth } from 'contexts/AuthContext'
-import { Guild } from 'components/Guilds/Guilds'
+import { Guild } from 'types/guild'
 
 interface JoinGuildModalProps {
   guild: Guild | null

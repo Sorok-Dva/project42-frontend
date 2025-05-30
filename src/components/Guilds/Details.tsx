@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Img as Image } from 'react-image'
-import { Guild } from 'components/Guilds/Guilds'
+import { Guild } from 'types/guild'
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import axios from 'axios'
