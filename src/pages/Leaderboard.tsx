@@ -112,7 +112,7 @@ const LeaderboardPage: React.FC = () => {
   const [search, setSearch] = useState('')
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'points', direction: 'desc' })
   const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>('points')
-  const itemsPerPage = 20
+  const itemsPerPage = 50
 
   // Fetch data from backend
   useEffect(() => {
@@ -141,7 +141,6 @@ const LeaderboardPage: React.FC = () => {
         setMyRank(result.myRank)
       } catch (error) {
         console.error('Erreur lors du chargement du leaderboard:', error)
-        // tu peux ajouter un setError(error) ici si tu gères un état d'erreur
       } finally {
         setLoading(false)
       }
