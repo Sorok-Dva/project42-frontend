@@ -40,6 +40,8 @@ interface Player {
   winRate: number
   abandonRate: number
   level: number
+  eloFunRating: number
+  eloSeriousRating: number
   title?: string
   guild?: {
     name: string,
@@ -310,6 +312,24 @@ const LeaderboardPage: React.FC = () => {
                             <SortIndicator column="abandonRate" />
                           </div>
                         </th>
+                        <th
+                          className="px-4 py-3 text-left text-sm font-medium text-gray-300 cursor-pointer hover:text-white transition-colors"
+                          onClick={() => handleSort('eloFunRating')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Elo Fun
+                            <SortIndicator column="eloFunRating" />
+                          </div>
+                        </th>
+                        <th
+                          className="px-4 py-3 text-left text-sm font-medium text-gray-300 cursor-pointer hover:text-white transition-colors"
+                          onClick={() => handleSort('eloSeriousRating')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Elo Sérieuses
+                            <SortIndicator column="eloSeriousRating" />
+                          </div>
+                        </th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Guilde</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Statut</th>
                       </tr>
@@ -382,8 +402,22 @@ const LeaderboardPage: React.FC = () => {
                               </div>
                             </td>
                             <td className="px-4 py-3">
+                              <div className="font-medium">
+                                <Badge variant="outline" className="border-blue-600 bg-blue-500 text-gray-300">
+                                  {player.eloFunRating}
+                                </Badge>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="font-medium">
+                                <Badge variant="outline" className="border-red-600 bg-red-500 text-gray-300">
+                                  {player.eloSeriousRating}
+                                </Badge>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
                               {player.guild ? (
-                                <Badge variant="outline" className="border-gray-600 text-gray-300">
+                                <Badge variant="outline" className="border-gray-600 bg-green-200 text-gray-300">
                                   {player.guild.name}
                                 </Badge>
                               ) : (
