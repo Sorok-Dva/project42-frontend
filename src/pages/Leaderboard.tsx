@@ -22,6 +22,7 @@ import {
   Crown,
   Star,
   Gamepad2,
+  Filter, TrendingUp, Flame, Shield,
 } from 'lucide-react'
 import { Img as Image } from 'react-image'
 import { useUser } from 'contexts/UserContext'
@@ -67,6 +68,39 @@ interface SortConfig {
   direction: 'asc' | 'desc'
 }
 
+type LeaderboardType = 'points' | 'level' | 'eloFun' | 'eloSerious'
+
+const leaderboardTypes = [
+  {
+    key: 'points' as LeaderboardType,
+    label: 'Points',
+    icon: Zap,
+    color: 'from-yellow-500 to-orange-500',
+    description: 'Classement par points totaux',
+  },
+  {
+    key: 'level' as LeaderboardType,
+    label: 'Niveau',
+    icon: TrendingUp,
+    color: 'from-green-500 to-emerald-500',
+    description: 'Classement par niveau',
+  },
+  {
+    key: 'eloFun' as LeaderboardType,
+    label: 'Elo Fun',
+    icon: Flame,
+    color: 'from-blue-500 to-cyan-500',
+    description: 'Classement Elo parties fun',
+  },
+  {
+    key: 'eloSerious' as LeaderboardType,
+    label: 'Elo Sérieux',
+    icon: Shield,
+    color: 'from-red-500 to-pink-500',
+    description: 'Classement Elo parties sérieuses',
+  },
+]
+
 const LeaderboardPage: React.FC = () => {
   const { token } = useAuth()
   const { user } = useUser()
@@ -77,6 +111,7 @@ const LeaderboardPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [search, setSearch] = useState('')
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'points', direction: 'desc' })
+  const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>('points')
   const itemsPerPage = 20
 
   // Fetch data from backend
@@ -116,6 +151,14 @@ const LeaderboardPage: React.FC = () => {
   }, [currentPage, search, sortConfig])
 
   // Handlers
+  const handleLeaderboardTypeChange = (type: LeaderboardType) => {
+    setLeaderboardType(type)
+    setCurrentPage(1)
+    // Reset sort to the main metric for this leaderboard type
+    const sortKey = type === 'eloFun' ? 'eloFunRating' : type === 'eloSerious' ? 'eloSeriousRating' : type
+    setSortConfig({ key: sortKey as keyof Player, direction: 'desc' })
+  }
+
   const handleSort = (key: keyof Player) => {
     setSortConfig(prev => ({
       key,
@@ -226,6 +269,52 @@ const LeaderboardPage: React.FC = () => {
           </Card>
         </motion.div>
 
+        {/* Leaderboard Type Selector */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <Card className="bg-black/30 border-gray-800/50 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Filter className="w-5 h-5 text-blue-400" />
+                <h3 className="text-lg font-semibold text-white">Type de Classement</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {leaderboardTypes.map((type) => {
+                  const Icon = type.icon
+                  const isActive = leaderboardType === type.key
+                  return (
+                    <motion.button
+                      key={type.key}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleLeaderboardTypeChange(type.key)}
+                      className={`p-4 rounded-lg border transition-all ${
+                        isActive
+                          ? 'bg-gradient-to-r ' + type.color + ' border-white/20 text-white shadow-lg'
+                          : 'bg-black/30 border-gray-700 text-gray-300 hover:bg-white/5 hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className={`w-6 h-6 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+                        <div className="text-left">
+                          <div className="font-semibold">{type.label}</div>
+                          <div className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
+                            {type.description}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.button>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Controls */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -286,7 +375,6 @@ const LeaderboardPage: React.FC = () => {
                         </th>
                         <th
                           className="px-4 py-3 text-left text-sm font-medium text-gray-300 cursor-pointer hover:text-white transition-colors"
-                          onClick={() => handleSort('level')}
                         >
                           <div className="flex items-center gap-1">
                             Niveau
@@ -314,7 +402,6 @@ const LeaderboardPage: React.FC = () => {
                         </th>
                         <th
                           className="px-4 py-3 text-left text-sm font-medium text-gray-300 cursor-pointer hover:text-white transition-colors"
-                          onClick={() => handleSort('eloFunRating')}
                         >
                           <div className="flex items-center gap-1">
                             Elo Fun
@@ -323,7 +410,6 @@ const LeaderboardPage: React.FC = () => {
                         </th>
                         <th
                           className="px-4 py-3 text-left text-sm font-medium text-gray-300 cursor-pointer hover:text-white transition-colors"
-                          onClick={() => handleSort('eloSeriousRating')}
                         >
                           <div className="flex items-center gap-1">
                             Elo Sérieux
