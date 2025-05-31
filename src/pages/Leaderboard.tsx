@@ -326,7 +326,7 @@ const LeaderboardPage: React.FC = () => {
                           onClick={() => handleSort('eloSeriousRating')}
                         >
                           <div className="flex items-center gap-1">
-                            Elo Sérieuses
+                            Elo Sérieux
                             <SortIndicator column="eloSeriousRating" />
                           </div>
                         </th>
