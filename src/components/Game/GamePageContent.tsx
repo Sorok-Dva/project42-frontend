@@ -1,8 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+'use client'
+
+import type React from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Box } from '@mui/material'
 import { Container, Spinner } from 'reactstrap'
 import { useParams } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
@@ -10,10 +13,7 @@ import { useSocket } from 'contexts/SocketContext'
 import { useGameContext } from 'contexts/GameContext'
 import { useYouTubeAudioPlayer } from 'hooks/useYoutubeAudioPlayer'
 
-import {
-  fetchGameDetails,
-  leaveGame,
-} from 'services/gameService'
+import { fetchGameDetails, leaveGame } from 'services/gameService'
 import Controls from './Controls'
 import Chat from './Chat'
 import PlayersList from './PlayersList'
@@ -22,7 +22,6 @@ import { getRandomColor } from 'utils/getRandomColor'
 import 'styles/Game.scss'
 import Composition from './Composition'
 import { parallaxStars, staticStars } from 'utils/animations'
-import { PlayerType } from 'hooks/useGame'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -47,6 +46,16 @@ const GamePage = () => {
 
   const [highlightedPlayers, setHighlightedPlayers] = useState<{ [nickname: string]: string }>({})
 
+  // États pour la gestion de la connexion
+  const wasDisconnectedRef = useRef(false)
+  const [isConnected, setIsConnected] = useState(true)
+  const [showDisconnectionModal, setShowDisconnectionModal] = useState(false)
+  const [reconnectAttempts, setReconnectAttempts] = useState(0)
+  const [isReconnecting, setIsReconnecting] = useState(false)
+  const [disconnectionTime, setDisconnectionTime] = useState<Date | null>(null)
+  const maxReconnectAttempts = 5
+  const reconnectIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
   const [audioPlaying, setAudioPlaying] = useState<boolean>(false)
   const [audioTrack, setAudioTrack] = useState<{
     title: string
@@ -59,21 +68,75 @@ const GamePage = () => {
   const [audioVolume, setAudioVolume] = useState<number>(0.5)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  const handleVideoInfo = useCallback((info: { video_id: string; title: string; author: string }) => {
-    setAudioTrack(prev =>
-      prev && prev.type === 'youtube'
-        ? { ...prev, title: info.title, artist: info.author }
-        : prev
-    )
-  }, [setAudioTrack])
+  const handleVideoInfo = useCallback(
+    (info: { video_id: string; title: string; author: string }) => {
+      setAudioTrack((prev) =>
+        prev && prev.type === 'youtube' ? { ...prev, title: info.title, artist: info.author } : prev,
+      )
+    },
+    [setAudioTrack],
+  )
 
   const handlePlayerEnd = useCallback(() => {
     setAudioPlaying(false)
     setAudioTrack(null)
   }, [])
 
-  const { loadAndPlay, playVideo, pause, setVolume: setYTVolume } =
-    useYouTubeAudioPlayer(handleVideoInfo, handlePlayerEnd)
+  const {
+    loadAndPlay,
+    playVideo,
+    pause,
+    setVolume: setYTVolume,
+  } = useYouTubeAudioPlayer(handleVideoInfo, handlePlayerEnd)
+
+  /**
+   * Gestion de la reconnexion automatique
+   */
+  const attemptReconnection = useCallback(() => {
+    setIsReconnecting(true)
+
+    if (reconnectAttempts >= maxReconnectAttempts) {
+      setIsReconnecting(false)
+      return
+    }
+
+    setReconnectAttempts(prev => prev + 1)
+  }, [reconnectAttempts])
+
+  useEffect(() => {
+    if (!isReconnecting) return
+
+    // Si on a dépassé la limite, on arrête
+    if (reconnectAttempts > maxReconnectAttempts) {
+      setIsReconnecting(false)
+      return
+    }
+
+    // Calcul du délai basé sur la tentative courante
+    const delay = Math.min(3000 * Math.pow(2, reconnectAttempts - 1), 10000)
+    reconnectIntervalRef.current = setTimeout(() => {
+      if (socket && isReconnecting) {
+        socket.connect()
+      }
+      setReconnectAttempts(prev => prev + 1)
+    }, delay)
+
+    return () => {
+      if (reconnectIntervalRef.current) {
+        clearTimeout(reconnectIntervalRef.current)
+        reconnectIntervalRef.current = null
+      }
+    }
+  }, [reconnectAttempts, isReconnecting, socket])
+
+  /**
+   * Gestion manuelle de la reconnexion
+   */
+  const handleManualReconnect = useCallback(() => {
+    setReconnectAttempts(1)
+    setIsReconnecting(true)
+  }, [])
+
   /**
    * Toggles the highlighting of a player based on their nickname.
    * If the player is already highlighted, they will be removed from the highlighted list.
@@ -136,6 +199,93 @@ const GamePage = () => {
     setGameFinished,
   } = useGameContext()
 
+  // Gestion des événements de connexion socket
+  useEffect(() => {
+    if (!socket) return
+
+    const handleConnect = () => {
+      console.log('Socket connecté')
+      setIsConnected(true)
+      setShowDisconnectionModal(false)
+      setReconnectAttempts(0)
+      setIsReconnecting(false)
+      setDisconnectionTime(null)
+
+      // Nettoyer l'intervalle de reconnexion
+      if (reconnectIntervalRef.current) {
+        clearTimeout(reconnectIntervalRef.current)
+        reconnectIntervalRef.current = null
+      }
+
+      console.log('was disconnected', wasDisconnectedRef.current)
+      if (wasDisconnectedRef.current) {
+        wasDisconnectedRef.current = false
+        console.log('reload')
+        window.location.reload()
+      }
+    }
+
+    const handleDisconnect = (reason: string) => {
+      console.log('Socket déconnecté:', reason)
+      setIsConnected(false)
+      setDisconnectionTime(new Date())
+
+      // Ne pas afficher la modale si c'est une déconnexion volontaire
+      if (reason !== 'io client disconnect' && reason !== 'transport close') {
+        setShowDisconnectionModal(true)
+        wasDisconnectedRef.current = true
+        setReconnectAttempts(1)
+        setIsReconnecting(true)
+      }
+    }
+
+    const handleConnectError = (error: Error) => {
+      console.error('Erreur de connexion socket:', error)
+      setIsConnected(false)
+      setShowDisconnectionModal(true)
+      wasDisconnectedRef.current = true
+    }
+
+    const handleReconnect = (attemptNumber: number) => {
+      console.log('Reconnexion réussie après', attemptNumber, 'tentatives')
+      setIsConnected(true)
+      setShowDisconnectionModal(false)
+      setReconnectAttempts(0)
+      setIsReconnecting(false)
+    }
+
+    const handleReconnectError = (error: Error) => {
+      console.error('Erreur de reconnexion:', error)
+      if (reconnectAttempts < maxReconnectAttempts) {
+        attemptReconnection()
+      } else {
+        setIsReconnecting(false)
+      }
+    }
+
+    // Écouter les événements de connexion
+    socket.on('connect', handleConnect)
+    socket.on('disconnect', handleDisconnect)
+    socket.on('connect_error', handleConnectError)
+    socket.on('reconnect', handleReconnect)
+    socket.on('reconnect_error', handleReconnectError)
+
+    // Vérifier l'état initial
+    setIsConnected(socket.connected)
+
+    return () => {
+      socket.off('connect', handleConnect)
+      socket.off('disconnect', handleDisconnect)
+      socket.off('connect_error', handleConnectError)
+      socket.off('reconnect', handleReconnect)
+      socket.off('reconnect_error', handleReconnectError)
+
+      if (reconnectIntervalRef.current) {
+        clearTimeout(reconnectIntervalRef.current)
+      }
+    }
+  }, [socket, attemptReconnection])
+
   // Debug - Écouter tous les événements socket
   useEffect(() => {
     if (!socket) return
@@ -181,14 +331,12 @@ const GamePage = () => {
 
       if (!data.url || data.url === '') return
 
-      const ytMatch = data.url.match(
-        /(?:youtube\.com\/(?:watch\?.*?v=)|youtu\.be\/)([A-Za-z0-9_-]{11})(?=[?&]|$)/
-      )
+      const ytMatch = data.url.match(/(?:youtube\.com\/(?:watch\?.*?v=)|youtu\.be\/)([A-Za-z0-9_-]{11})(?=[?&]|$)/)
       const videoId = ytMatch?.[1] ?? null
 
       if (videoId) {
         setAudioTrack({ title: data.title, artist: data.artist, videoId, type: 'youtube' })
-        loadAndPlay(videoId)    // pourra être mis en attente
+        loadAndPlay(videoId) // pourra être mis en attente
         setAudioPlaying(true)
       } else {
         const audioUrl = data.url
@@ -260,7 +408,9 @@ const GamePage = () => {
         if (response.message) {
           socket.emit('leaveRoom', {
             roomId: gameId,
-            player: player ? { id: user?.id, nickname: response?.nickname, realNickname: response?.realNickname } : null,
+            player: player
+              ? { id: user?.id, nickname: response?.nickname, realNickname: response?.realNickname }
+              : null,
             viewer,
           })
         }
@@ -277,7 +427,6 @@ const GamePage = () => {
    */
   const handleToggleAudio = () => {
     if (!audioTrack) return
-
 
     if (audioPlaying) {
       if (audioTrack.type === 'youtube') {
@@ -299,7 +448,7 @@ const GamePage = () => {
    * Gérer le changement de volume
    */
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value)
+    const newVolume = Number.parseFloat(e.target.value)
     setAudioVolume(newVolume)
 
     if (audioTrack?.type === 'youtube') {
@@ -349,21 +498,21 @@ const GamePage = () => {
     const isLeaveMessage = gameError.includes('Vous avez bien quitté la partie.')
     return (
       <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
-        <div className="absolute inset-0 z-0">{ staticStars }</div>
+        <div className="absolute inset-0 z-0">{staticStars}</div>
 
-        {/* Nébuleuses colorées */ }
+        {/* Nébuleuses colorées */}
         <div className="absolute inset-0 z-0">
           <div
             className="absolute inset-0 opacity-40"
-            style={ {
+            style={{
               background:
                 'radial-gradient(circle at 70% 30%, rgba(111, 66, 193, 0.6), transparent 60%), radial-gradient(circle at 30% 70%, rgba(59, 130, 246, 0.6), transparent 60%), radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.3), transparent 70%)',
-            } }
+            }}
           />
         </div>
 
-        {/* Étoiles avec parallaxe */ }
-        <div className="absolute inset-0 z-1">{ parallaxStars }</div>
+        {/* Étoiles avec parallaxe */}
+        <div className="absolute inset-0 z-1">{parallaxStars}</div>
 
         <motion.div
           className={`z-20 bg-black/60 backdrop-blur-md rounded-xl border ${isLeaveMessage ? 'border-green-500/30' : 'border-red-500/30'} p-8 max-w-md text-center`}
@@ -390,21 +539,21 @@ const GamePage = () => {
   if (passwordRequired && !isAuthorized) {
     return (
       <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
-        <div className="absolute inset-0 z-0">{ staticStars }</div>
+        <div className="absolute inset-0 z-0">{staticStars}</div>
 
-        {/* Nébuleuses colorées */ }
+        {/* Nébuleuses colorées */}
         <div className="absolute inset-0 z-0">
           <div
             className="absolute inset-0 opacity-40"
-            style={ {
+            style={{
               background:
                 'radial-gradient(circle at 70% 30%, rgba(111, 66, 193, 0.6), transparent 60%), radial-gradient(circle at 30% 70%, rgba(59, 130, 246, 0.6), transparent 60%), radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.3), transparent 70%)',
-            } }
+            }}
           />
         </div>
 
-        {/* Étoiles avec parallaxe */ }
-        <div className="absolute inset-0 z-1">{ parallaxStars }</div>
+        {/* Étoiles avec parallaxe */}
+        <div className="absolute inset-0 z-1">{parallaxStars}</div>
 
         <motion.div
           className="bg-black/60 backdrop-blur-md rounded-xl border border-blue-500/30 p-8 max-w-md w-full z-10"
@@ -460,15 +609,155 @@ const GamePage = () => {
     4: 'text-yellow-400', // Animation
     5: 'text-orange-500', // Test
   }
+
   return (
     <>
+      {/* Modal de déconnexion */}
+      <AnimatePresence>
+        {showDisconnectionModal && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-gradient-to-br from-red-900/90 to-red-800/90 backdrop-blur-md rounded-xl border border-red-500/50 p-8 max-w-md w-full mx-4 shadow-2xl"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            >
+              {/* Icône d'alerte */}
+              <div className="flex justify-center mb-4">
+                <motion.div
+                  className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+                >
+                  <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
+                  </svg>
+                </motion.div>
+              </div>
+
+              {/* Titre */}
+              <h2 className="text-2xl font-bold text-white text-center mb-2">Connexion perdue</h2>
+
+              {/* Informations */}
+              <div className="text-center mb-6 space-y-2">
+                <p className="text-red-200">La connexion avec le serveur a été interrompue</p>
+                {disconnectionTime && (
+                  <p className="text-red-300 text-sm">Déconnecté à {disconnectionTime.toLocaleTimeString()}</p>
+                )}
+              </div>
+
+              {/* Barre de progression des tentatives */}
+              {isReconnecting && (
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-red-200">Reconnexion en cours...</span>
+                    <span className="text-sm text-red-300">
+                      {reconnectAttempts}/{maxReconnectAttempts}
+                    </span>
+                  </div>
+                  <div className="w-full bg-red-900/50 rounded-full h-2">
+                    <motion.div
+                      className="bg-gradient-to-r from-red-500 to-red-400 h-2 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(reconnectAttempts / maxReconnectAttempts) * 100}%` }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Boutons d'action */}
+              <div className="space-y-3">
+                {/*<motion.button
+                  className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg transition-all shadow-lg flex items-center justify-center gap-2"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => window.location.reload()}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  Actualiser la page
+                </motion.button>*/}
+
+                <motion.button
+                  className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleManualReconnect}
+                  disabled={isReconnecting}
+                >
+                  {reconnectAttempts >= maxReconnectAttempts
+                    ? 'Plus de tentatives possibles. Réessayer'
+                    : isReconnecting
+                      ? (
+                        <>
+                          <motion.svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                            />
+                          </motion.svg>
+                          Reconnexion…
+                        </>
+                      )
+                      : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"
+                            />
+                          </svg>
+                          Tenter la reconnexion
+                        </>
+                      )
+                  }
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {isAuthorized && creator ? (
         <>
-          <Box className="game-page" display="flex" flexDirection="column"
+          <Box
+            className="game-page"
+            display="flex"
+            flexDirection="column"
             sx={{
-              backgroundImage: (isNight || gameFinished) ?
-                'url(/assets/images/games/background-night.png)'
-                : 'url(/assets/images/games/background2.png)',
+              backgroundImage:
+                isNight || gameFinished
+                  ? 'url(/assets/images/games/background-night.png)'
+                  : 'url(/assets/images/games/background2.png)',
               backgroundSize: 'cover',
             }}
           >
@@ -481,11 +770,28 @@ const GamePage = () => {
                   </div>
                   <div>
                     <h1 className="text-xl font-bold">
-                      <span className={gameTypeColors[roomData.type as keyof typeof gameTypeColors]}>[{GAME_TYPES[roomData.type]}]</span> {roomData.name}
+                      <span className={gameTypeColors[roomData.type as keyof typeof gameTypeColors]}>
+                        [{GAME_TYPES[roomData.type]}]
+                      </span>{' '}
+                      {roomData.name}
                     </h1>
-                    <p className="text-sm text-blue-300">
-                      {players.length}/{slots} joueurs • Options: {options.length > 0 ? options.join(', ') : 'Aucune'} • {isNight ? 'Phase nocturne' : 'Phase diurne'}
-                    </p>
+                    <div className="flex items-center gap-4 text-sm text-blue-300">
+                      <p className="text-sm text-blue-300">
+                        {players.length}/{slots} joueurs • Options: {options.length > 0 ? options.join(', ') : 'Aucune'} • {isNight ? 'Phase nocturne' : 'Phase diurne'}
+                      </p>
+
+                      {/* Indicateur de connexion */}
+                      <div className="flex items-center gap-1">
+                        <motion.div
+                          className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}
+                          animate={!isConnected ? { scale: [1, 1.2, 1] } : {}}
+                          transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY }}
+                        />
+                        <span className={`text-xs ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
+                          {isConnected ? 'Connecté' : 'Déconnecté'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -528,8 +834,12 @@ const GamePage = () => {
                           )}
                         </motion.button>
                         <div className="flex flex-col">
-                          <span className="text-xs text-white font-medium truncate max-w-[100px]">{audioTrack?.title || '…'}</span>
-                          <span className="text-xs text-blue-300 truncate max-w-[100px]">{audioTrack?.artist || '…'}</span>
+                          <span className="text-xs text-white font-medium truncate max-w-[100px]">
+                            {audioTrack?.title || '…'}
+                          </span>
+                          <span className="text-xs text-blue-300 truncate max-w-[100px]">
+                            {audioTrack?.artist || '…'}
+                          </span>
                         </div>
                         <input
                           type="range"
@@ -548,14 +858,19 @@ const GamePage = () => {
                       whileTap={{ scale: 0.95 }}
                       onClick={handleClearChat}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
                         <path
                           fillRule="evenodd"
                           d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
                           clipRule="evenodd"
                         />
                       </svg>
-                    Effacer
+                      Effacer
                     </motion.button>
                     <motion.button
                       className="px-3 py-1 bg-red-900/40 hover:bg-red-900/60 text-red-300 hover:text-white border border-red-500/30 rounded-lg transition-all flex items-center gap-1"
@@ -563,14 +878,19 @@ const GamePage = () => {
                       whileTap={{ scale: 0.95 }}
                       onClick={handleLeaveGame}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
                         <path
                           fillRule="evenodd"
                           d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-4-4H3zm9 2.586L14.586 8H12V5.586zM5 5h5v2H5V5zm0 4h10v6H5V9z"
                           clipRule="evenodd"
                         />
                       </svg>
-                    Quitter
+                      Quitter
                     </motion.button>
                   </div>
                 )}
@@ -580,13 +900,7 @@ const GamePage = () => {
             {/* Contenu principal */}
             <Box display="flex" flex={1} p={2} className="game-page-container">
               {/* Colonne gauche : Controls */}
-              <Box
-                display="flex"
-                flexDirection="column"
-                width="25%"
-                className="left-column"
-                mr={2}
-              >
+              <Box display="flex" flexDirection="column" width="25%" className="left-column" mr={2}>
                 <Box mb={2}>
                   <Controls
                     gameId={gameId}
@@ -613,14 +927,7 @@ const GamePage = () => {
               </Box>
 
               {/* Colonne centrale : Chat */}
-              <Box
-                display="flex"
-                flexDirection="column"
-                width="50%"
-                className="chat-column"
-                mr={2}
-                height="85vh"
-              >
+              <Box display="flex" flexDirection="column" width="50%" className="chat-column" mr={2} height="85vh">
                 {loading ? (
                   <Container className="loader-container loader-container-two">
                     <div className="spinner-wrapper">
@@ -650,12 +957,7 @@ const GamePage = () => {
               </Box>
 
               {/* Colonne droite : Liste des joueurs */}
-              <Box
-                display="flex"
-                flexDirection="column"
-                width="25%"
-                className="right-column"
-              >
+              <Box display="flex" flexDirection="column" width="25%" className="right-column">
                 <Composition roomData={roomData} />
                 <PlayersList
                   players={players}
@@ -689,13 +991,13 @@ const GamePage = () => {
               </div>
               {player && (
                 <div>
-                Connecté en tant que: <span className="text-white font-medium">{player.nickname}</span>
+                  Connecté en tant que: <span className="text-white font-medium">{player.nickname}</span>
                 </div>
               )}
             </div>
           </div>
         </>
-      ): (
+      ) : (
         <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
           <div className="text-center">
             <div className="relative">
