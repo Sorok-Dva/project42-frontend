@@ -114,7 +114,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, relation }) => {
                 <p>
                   Tu viens seulement de débarquer sur Project 42.
                   <br />
-                  Rejoins vite les autres villageois en partie !
+                  Rejoins vite les autres membres d'équipage en partie !
                 </p>
               ) : (
                 <p>
