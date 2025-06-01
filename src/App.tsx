@@ -68,7 +68,6 @@ import DailyRewardsPopup from 'components/DailyRewardPopup'
 const AppContent: React.FC = () => {
   const { serverMaintenance, loading: maintenanceLoading } = useMaintenance()
   const { serverError } = useError()
-  const { token } = useAuth()
   const { user, loading: userLoading } = useUser()
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/moderator')
@@ -77,7 +76,7 @@ const AppContent: React.FC = () => {
   const isInitializing = maintenanceLoading || userLoading
 
   if (serverError) {
-    return <ServiceUnavailable />;
+    return <ServiceUnavailable />
   }
 
   if (isInitializing) {
@@ -101,63 +100,56 @@ const AppContent: React.FC = () => {
         </>
       )}
       <Routes>
-        <>
-          {token ? (
-            <>
-              { user && (
-                  <>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/account/settings" element={<UserSettingsPage />} />
-                    <Route path="/shop" element={<Shop />} />
-                    { user.isAdmin && (
-                      <Route element={<AdminRoute />}>
-                        <Route path="/admin" element={<AdminLayout />}>
-                          <Route path="/admin" element={<AdminDashboard />} />
-                          <Route path="users" element={<UserList />} />
-                          <Route path="users/:id" element={<AdminUserProfile />} />
-                          <Route path="alpha-keys" element={<AdminAlphaKeys />} />
-                          <Route path="news" element={<AdminNews />} />
-                          <Route path="shop" element={<AdminShop />} />
-                          <Route path="shop/transactions" element={<AdminShopTransactions />} />
-                          <Route path="credits/transactions" element={<AdminCreditTransactions />} />
-                          <Route path="cards" element={<AdminCards />} />
-                          {/*<Route path="rooms" element={<AdminRooms />} />*/}
-                        </Route>
-                      </Route>
-                    )}
-                    { user.role === 'Moderator' && (
-                      <Route element={<AdminRoute />}>
-                        <Route path="/moderator" element={<AdminLayout />}>
-                          <Route path="/moderator" element={<AdminDashboard />} />
-                          <Route path="users" element={<UserList />} />
-                          <Route path="users/:id" element={<AdminUserProfile />} />
-                          <Route path="alpha-keys" element={<AdminAlphaKeys />} />
-                          {/*<Route path="rooms" element={<AdminRooms />} />*/}
-                        </Route>
-                      </Route>
-                    )}
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/recover-password" element={<RecoverPassword />} />
-              </>
+        { user ? (
+          <>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/account/settings" element={<UserSettingsPage />} />
+            <Route path="/shop" element={<Shop />} />
+            { user.isAdmin && (
+              <Route element={<AdminRoute />}>
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="users" element={<UserList />} />
+                  <Route path="users/:id" element={<AdminUserProfile />} />
+                  <Route path="alpha-keys" element={<AdminAlphaKeys />} />
+                  <Route path="news" element={<AdminNews />} />
+                  <Route path="shop" element={<AdminShop />} />
+                  <Route path="shop/transactions" element={<AdminShopTransactions />} />
+                  <Route path="credits/transactions" element={<AdminCreditTransactions />} />
+                  <Route path="cards" element={<AdminCards />} />
+                  {/*<Route path="rooms" element={<AdminRooms />} />*/}
+                </Route>
+              </Route>
             )}
-            <Route path="/terms-of-service" element={<TOSPage />} />
-            <Route path="/users/validate/:token" element={<ValidateUser />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/leaderboard/players" element={<Leaderboard />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/game/:id" element={<GamePage />} />
-            <Route path="/stations" element={<Guilds />} />
-            <Route path="/station/:id" element={<Guild />} />
-            <Route path="*" element={<NotFound />} />
+            { user.role === 'Moderator' && (
+              <Route element={<AdminRoute />}>
+                <Route path="/moderator" element={<AdminLayout />}>
+                  <Route path="/moderator" element={<AdminDashboard />} />
+                  <Route path="users" element={<UserList />} />
+                  <Route path="users/:id" element={<AdminUserProfile />} />
+                  <Route path="alpha-keys" element={<AdminAlphaKeys />} />
+                  {/*<Route path="rooms" element={<AdminRooms />} />*/}
+                </Route>
+              </Route>
+            )}
+          </>
+        ) : (
+          <>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/recover-password" element={<RecoverPassword />} />
           </>
         )}
+        <Route path="/terms-of-service" element={<TOSPage />} />
+        <Route path="/users/validate/:token" element={<ValidateUser />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/leaderboard/players" element={<Leaderboard />} />
+        <Route path="/news" element={<News />} />
+        <Route path="/game/:id" element={<GamePage />} />
+        <Route path="/stations" element={<Guilds />} />
+        <Route path="/station/:id" element={<Guild />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       {(!isAdminRoute && !isGameRoute) && <Footer />}
       <ToastContainer position="bottom-right" autoClose={5000} hideProgressBar style={{ zIndex: 9999 }} />
@@ -184,8 +176,8 @@ const App: React.FC = () => {
   }, [])
 
   return (
-    <MaintenanceProvider>
-      <ErrorProvider>
+    <ErrorProvider>
+      <MaintenanceProvider>
         <AuthProvider>
           <UserProvider>
             <SocketProvider>
@@ -204,8 +196,8 @@ const App: React.FC = () => {
             </SocketProvider>
           </UserProvider>
         </AuthProvider>
-      </ErrorProvider>
-    </MaintenanceProvider>
+      </MaintenanceProvider>
+    </ErrorProvider>
   )
 }
 
