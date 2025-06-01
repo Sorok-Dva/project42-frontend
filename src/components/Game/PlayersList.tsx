@@ -198,15 +198,15 @@ const PlayersList: React.FC<PlayersListProps> = ({
     return card ? card.cardId : 0
   }
 
-  const votePlayer = (player: Player) => {
-    if (!socket) return
+  const votePlayer = (_player: Player) => {
+    if (!socket || !player?.alive) return
     socket.emit('phaseActionResponse', {
       roomId: gameId,
       playerId: user!.id,
       actionCard: 1,
-      targetId: lastVotedPlayer === player.id ? -1 : Number(player.id) ?? -1,
+      targetId: lastVotedPlayer === _player.id ? -1 : Number(_player.id) ?? -1,
     })
-    setLastVotedPlayer(lastVotedPlayer !== player.id ? parseInt(player.id as string ?? -1) : null)
+    setLastVotedPlayer(lastVotedPlayer !== _player.id ? parseInt(_player.id as string ?? -1) : null)
   }
 
   return (
