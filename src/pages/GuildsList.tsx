@@ -57,7 +57,9 @@ const GuildsList = () => {
     if (user?.premium && !user.guildMembership) {
       const premiumDate = new Date(user.premium)
       if (premiumDate.getTime() - now.getTime() > 7 * 24 * 60 * 60 * 1000) {
-        setCanCreateStation(true)
+        if (user.level >= 3) {
+          setCanCreateStation(true)
+        }
       }
     }
   }, [user])
@@ -236,7 +238,7 @@ const GuildsList = () => {
                     : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                 }`}
                 data-tooltip-content={
-                  !canCreateStation ? 'Tu dois posséder minimum 7 jours premium pour créer ta propre station.' : ''
+                  user!.level < 3 ? 'Vous devez être niveau 3 pour créer une station.' : !canCreateStation ? 'Tu dois posséder minimum 7 jours premium pour créer ta propre station.' : ''
                 }
                 data-tooltip-id="createGuild"
               >
