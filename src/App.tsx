@@ -76,6 +76,10 @@ const AppContent: React.FC = () => {
 
   const isInitializing = maintenanceLoading || userLoading
 
+  if (serverError) {
+    return <ServiceUnavailable />;
+  }
+
   if (isInitializing) {
     return <LoadingScreen />
   }
@@ -97,15 +101,10 @@ const AppContent: React.FC = () => {
         </>
       )}
       <Routes>
-        {serverError ? (
-          <>
-            <Route path="*" element={<ServiceUnavailable />} />
-          </>
-        ) : (
-          <>
-            {token ? (
-              <>
-                { user && (
+        <>
+          {token ? (
+            <>
+              { user && (
                   <>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/account/settings" element={<UserSettingsPage />} />
