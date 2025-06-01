@@ -100,6 +100,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   const [suspiciousCards, setSuspiciousCards] = useState<SuspiciousCard[]>([])
   const [showCardSelector, setShowCardSelector] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [lastVotedPlayer, setLastVotedPlayer] = useState<number | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -195,6 +196,17 @@ const PlayersList: React.FC<PlayersListProps> = ({
   const getSuspiciousCardId = (nickname: string): number => {
     const card = suspiciousCards.find((card) => card.playerNickname === nickname)
     return card ? card.cardId : 0
+  }
+
+  const votePlayer = (player: Player) => {
+    if (!socket) return
+    socket.emit('phaseActionResponse', {
+      roomId: gameId,
+      playerId: user!.id,
+      actionCard: 1,
+      targetId: lastVotedPlayer === player.id ? -1 : Number(player.id) ?? -1,
+    })
+    setLastVotedPlayer(lastVotedPlayer !== player.id ? parseInt(player.id as string ?? -1) : null)
   }
 
   return (
@@ -313,7 +325,8 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   {/* Indicateur de vote */}
                   {gameStarted && _player.alive && !isNight && !gameFinished && (
                     <div
-                      className={`w-5 h-5 flex items-center justify-center rounded-full ${mostVotes ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-300'} text-xs font-bold`}
+                      className={`w-5 h-5 cursor-pointer flex items-center justify-center rounded-full ${mostVotes ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-300'} text-xs font-bold`}
+                      onClick={() => votePlayer(_player)}
                     >
                       {voteCounts[_player.nickname] || 0}
                     </div>
