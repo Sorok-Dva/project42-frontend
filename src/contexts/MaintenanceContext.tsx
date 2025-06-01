@@ -1,5 +1,6 @@
 import React, { createContext, ReactNode, useContext, useState, useEffect } from 'react'
 import axios from 'axios'
+import { useError } from '../contexts/ErrorContext'
 
 interface MaintenanceContextType {
   serverMaintenance: boolean;
@@ -15,6 +16,7 @@ export const MaintenanceProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [serverMaintenance, setServerMaintenance] = useState(false)
   const [maintenanceMessage, setMaintenanceMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const { setServerError } = useError()
 
   useEffect(() => {
     axios.get('/api/server/maintenance')
@@ -27,8 +29,9 @@ export const MaintenanceProvider: React.FC<{ children: ReactNode }> = ({ childre
       })
       .catch(error => {
         console.error('Erreur lors de la vérification de la maintenance du serveur :', error)
+        setServerError(error)
       }).finally(() => setLoading(false))
-  }, [])
+  }, [setServerError])
 
   return (
     <MaintenanceContext.Provider value={{ serverMaintenance, setServerMaintenance, maintenanceMessage, setMaintenanceMessage, loading }}>
