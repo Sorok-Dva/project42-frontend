@@ -33,7 +33,7 @@ const GameRules: React.FC<GameRulesProps> = ({ gameType }) => {
     3: [
       // Carnage
       'Il est strictement <strong>interdit d\'insulter</strong> un autre joueur et d\'avoir une attitude malsaine. Toute forme d\'<strong>anti-jeu</strong> sera sanctionnée.',
-      'La sorcière <strong>doit utiliser</strong> sa potion de mort la première nuit.',
+      'La Bio-Ingénieure <strong>doit utiliser</strong> sa potion de mort la première nuit.',
       'Le tireur d\'élite <strong>doit tirer</strong>.',
       'Les parties sont <strong>très courtes et <strong>intenses</strong>.',
       'Les phases sont <strong>accélérées</strong>, soyez réactifs.',
