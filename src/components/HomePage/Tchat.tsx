@@ -144,6 +144,7 @@ const UnifiedChat: React.FC = () => {
   }, [isOpen])
 
   useEffect(() => {
+    if (!user.guildMembership?.guild?.id) return
     const fetchGuildsMessagesAndMembers = async () => {
       try {
         if (user?.guildMembership?.guild?.id) {
@@ -329,6 +330,7 @@ const UnifiedChat: React.FC = () => {
   }
 
   const openGuildChat = () => {
+    if (!user?.guildMembership) return
     setView('guild')
     setGuildUnreadCount(0)
   }
@@ -494,7 +496,7 @@ const UnifiedChat: React.FC = () => {
                     } border-2 border-black`}
                   />
                 </>
-              ) : view === 'guild' ? (
+              ) : view === 'guild' && user?.guildMembership ? (
                 <>
                   <button className="text-gray-300 hover:text-white mr-2" onClick={backToContacts}>
                     <ArrowLeft size={18} />
@@ -517,7 +519,7 @@ const UnifiedChat: React.FC = () => {
                     <span className="text-xs font-medium text-purple-300">{onlineContactsCount}</span>
                   </div>
                 )}
-                {view === 'guild' && (
+                {view === 'guild' && user?.guildMembership && (
                   <div
                     className="flex items-center bg-purple-900/50 px-2 py-1 rounded-full mr-3 cursor-help"
                     data-tooltip-id={tooltipId}
@@ -664,7 +666,7 @@ const UnifiedChat: React.FC = () => {
                   )}
                 </div>
               </>
-            ) : view === 'guild' ? (
+            ) : view === 'guild' && user?.guildMembership ? (
               <>
                 {/* Messages de guilde */}
                 <div
