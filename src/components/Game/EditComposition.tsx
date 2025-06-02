@@ -352,7 +352,7 @@ const EditCompoModal: FC<EditCompoModalProps> = ({ roomId, roomType, onClose }) 
                 </div>
                 <div className="compo_category">
                   <h3>Innocents</h3>
-                  {renderCards([1, 3, 4, 5, 6, 7, 8, 10, 12, 13, 16, 17, 22, 23])}
+                  {renderCards([1, 3, 4, 5, 6, 7, 8, 10, 12, 13, 16, 17, 22, 23, 24])}
                 </div>
               </>
             )}
