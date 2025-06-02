@@ -18,7 +18,7 @@ import { MaintenanceProvider, useMaintenance } from 'contexts/MaintenanceContext
 
 import Bootstrap from 'components/Layouts/Bootstrap'
 
-import GoogleTagManager from 'components/GoogleTagManager'
+import TagManager from 'react-gtm-module'
 import Navbar from 'components/Layouts/navbar/Navbar'
 import Footer from 'components/Layouts/Footer'
 import NotFound from 'components/ErrorPage/404'
@@ -159,6 +159,13 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   useEffect(() => {
+    const tagManagerArgs = {
+      gtmId: 'GTM-NTL7XM79'
+    };
+    TagManager.initialize(tagManagerArgs);
+  }, []);
+
+  useEffect(() => {
     const uiTick = new Audio('/assets/sounds/ui-tick.mp3')
 
     const handleMouseOver = (event: MouseEvent) => {
@@ -185,7 +192,6 @@ const App: React.FC = () => {
                 <Bootstrap>
                   <DailyRewardsProvider>
                     <GlobalClickListener />
-                    <GoogleTagManager />
                     <Notifier />
                     <AppContent />
                     <ScrollToTop />
