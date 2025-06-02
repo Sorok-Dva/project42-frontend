@@ -144,7 +144,7 @@ const UnifiedChat: React.FC = () => {
   }, [isOpen])
 
   useEffect(() => {
-    if (!user.guildMembership?.guild?.id) return
+    if (!user) return
     const fetchGuildsMessagesAndMembers = async () => {
       try {
         if (user?.guildMembership?.guild?.id) {
