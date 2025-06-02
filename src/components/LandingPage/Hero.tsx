@@ -122,7 +122,7 @@ const Hero: React.FC = () => {
                 <div className="flex items-center justify-center w-12 h-12 bg-blue-600/20 rounded-full mb-2 mx-auto">
                   <Trophy className="w-6 h-6 text-blue-400" />
                 </div>
-                <div className="text-2xl font-bold text-white">21</div>
+                <div className="text-2xl font-bold text-white">24</div>
                 <div className="text-sm text-gray-400">Cartes uniques</div>
               </div>
               <div className="text-center">
