@@ -45,7 +45,7 @@ const InvitationBlock: React.FC<InvitationBlockProps> = ({ gameId, players, isCr
       } catch (error) {
         if (axios.isAxiosError(error)) {
           const errorData = await error?.response?.data
-          if (errorData.errors && Array.isArray(errorData.errors)) {
+          if (errorData && errorData.errors && Array.isArray(errorData.errors)) {
             errorData.errors.forEach((error : { msg : string }) => {
               toast.error(error.msg, ToastDefaultOptions)
             })
