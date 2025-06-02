@@ -228,7 +228,7 @@ const GuildsList = () => {
               />
             </div>
 
-            {!user?.guildMembership && (
+            {!user?.guildMembership && user && (
               <button
                 onClick={handleCreateGuild}
                 disabled={!canCreateStation}
