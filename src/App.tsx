@@ -161,9 +161,9 @@ const App: React.FC = () => {
   useEffect(() => {
     const tagManagerArgs = {
       gtmId: 'GTM-NTL7XM79'
-    };
-    TagManager.initialize(tagManagerArgs);
-  }, []);
+    }
+    TagManager.initialize(tagManagerArgs)
+  }, [])
 
   useEffect(() => {
     const uiTick = new Audio('/assets/sounds/ui-tick.mp3')
