@@ -203,7 +203,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
     socket.emit('phaseActionResponse', {
       roomId: gameId,
       playerId: user!.id,
-      actionCard: 1,
+      actionCard: -1,
       targetId: lastVotedPlayer === _player.id ? -1 : Number(_player.id) ?? -1,
     })
     setLastVotedPlayer(lastVotedPlayer !== _player.id ? parseInt(_player.id as string ?? -1) : null)
