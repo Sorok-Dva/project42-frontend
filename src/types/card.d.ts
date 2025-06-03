@@ -3,6 +3,7 @@ export interface Card {
   name : string
   description : string
   imageUrl : string
+  status: 'alive' | 'dead';
   createdAt : Date
   updatedAt : Date
 }

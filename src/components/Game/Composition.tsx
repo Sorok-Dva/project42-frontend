@@ -88,6 +88,11 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData }) => {
                 const cardDesc = roomCard.card.description
                 const cardImg = `/assets/images/carte${roomCard.cardId}.png`
                 const isOdd = i % 2 === 0
+                const cardStatus = roomCard.card.status;
+                const cardStyle = {
+                  filter: cardStatus === 'dead' ? 'grayscale(100%)' : 'none',
+                  opacity: cardStatus === 'dead' ? 0.5 : 1,
+                };
 
                 return (
                   <motion.div
@@ -107,6 +112,7 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData }) => {
                           className={`cursor-pointer absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-md filter drop-shadow-md transition-all duration-300
                       ${isOdd ? 'scale-[0.6] rotate-[10deg]' : 'scale-[0.6] -rotate-[10deg]'}
                       group-hover:scale-100 group-hover:rotate-0 group-hover:z-10`}
+                          style={cardStyle}
                         />
                         <img
                           src={cardImg || '/placeholder.svg'}
@@ -114,6 +120,7 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData }) => {
                           className={`cursor-pointer absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-md filter drop-shadow-md transition-all duration-300
                       ${!isOdd ? 'scale-[0.6] rotate-[10deg]' : 'scale-[0.6] -rotate-[10deg]'}
                       group-hover:opacity-0`}
+                          style={cardStyle}
                         />
                         <div className="absolute z-[1] w-[18px] h-[18px] leading-[18px] top-[5px] right-[5px] rotate-45 shadow-md bg-white/75 transition-opacity duration-300 group-hover:opacity-0">
                           <span className="block -rotate-45 text-xs font-bold text-center">{roomCard.quantity}</span>
@@ -126,6 +133,7 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData }) => {
                         className={`cursor-pointer absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-md filter drop-shadow-md transition-all duration-300
                     ${isOdd ? 'scale-[0.6] rotate-[10deg]' : 'scale-[0.6] -rotate-[10deg]'}
                     group-hover:scale-100 group-hover:rotate-0 group-hover:z-10`}
+                          style={cardStyle}
                       />
                     )}
 
