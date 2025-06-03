@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 interface GuideRequestModalProps {
   show: boolean;
@@ -16,7 +16,7 @@ const GuideRequestModal: React.FC<GuideRequestModalProps> = ({
   // onClose // Not used by a visible button for now
 }) => {
   if (!show) {
-    return null;
+    return null
   }
 
   const buttonBaseStyle: React.CSSProperties = {
@@ -28,17 +28,17 @@ const GuideRequestModal: React.FC<GuideRequestModalProps> = ({
     cursor: 'pointer',
     transition: 'background-color 0.2s',
     fontSize: '0.9rem',
-  };
+  }
 
   const acceptButtonStyle: React.CSSProperties = {
     ...buttonBaseStyle,
     backgroundColor: '#38A169', // Simulates green-600
-  };
+  }
 
   const rejectButtonStyle: React.CSSProperties = {
     ...buttonBaseStyle,
     backgroundColor: '#E53E3E', // Simulates red-600
-  };
+  }
 
   return (
     <div style={{
@@ -98,7 +98,7 @@ const GuideRequestModal: React.FC<GuideRequestModalProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default GuideRequestModal;
+export default GuideRequestModal

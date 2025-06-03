@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import type { Socket } from 'socket.io-client';
-import { useSocket } from 'contexts/SocketContext'; // Assuming this is the correct path
-import { useUser } from 'contexts/UserContext'; // To get current user's nickname
+import React, { useState, useEffect, useRef } from 'react'
+import type { Socket } from 'socket.io-client'
+import { useSocket } from 'contexts/SocketContext' // Assuming this is the correct path
+import { useUser } from 'contexts/UserContext' // To get current user's nickname
 
 interface GuideChatProps {
   guideRoomName: string;
-  partnerNickname: string; // Nickname of the other person in the chat (guide or guided)
-  amIGuide: boolean; // To label who is who
-  onSessionTerminated: () => void; // Callback when session is terminated
+  partnerNickname: string; // Pseudonyme de l'autre personne dans le chat (guide ou guidé)
+  amIGuide: boolean; // Pour identifier qui est qui
+  onSessionTerminated: () => void; // Rappel lorsque la session est terminée
 }
 
 interface Message {
-  // The backend sends senderId, senderNickname, message, timestamp.
-  // We'll primarily use senderNickname on the client for display.
+  // Le backend envoie senderId, senderNickname, message, timestamp.
+  // Nous utiliserons principalement senderNickname sur le client pour l'affichage.
   senderId?: number; // Optional on client if not directly used for display logic beyond differentiation
   senderNickname: string;
   message: string;
@@ -25,29 +25,29 @@ const GuideChat: React.FC<GuideChatProps> = ({
   amIGuide,
   onSessionTerminated,
 }) => {
-  const { socket } = useSocket();
-  const { user } = useUser();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [isTerminated, setIsTerminated] = useState(false);
-  const messagesEndRef = useRef<null | HTMLDivElement>(null);
+  const { socket } = useSocket()
+  const { user } = useUser()
+  const [messages, setMessages] = useState<Message[]>([])
+  const [newMessage, setNewMessage] = useState('')
+  const [isTerminated, setIsTerminated] = useState(false)
+  const messagesEndRef = useRef<null | HTMLDivElement>(null)
 
-  const currentUserNickname = user?.nickname || 'You';
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  const currentUserNickname = user?.nickname || 'Vous'
 
   useEffect(() => {
-    if (!socket) return;
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  useEffect(() => {
+    if (!socket) return
 
     const handleNewMessage = (message: Message) => {
-      // Ensure the message is for the current active guide room
-      // This check might be redundant if the component is only mounted when a specific room is active
-      // but good for safety if socket events are handled more globally before reaching this component.
-      // For now, assuming parent component ensures this component is only active for its guideRoomName.
-      setMessages((prevMessages) => [...prevMessages, message]);
-    };
+      // S'assurer que le message est pour la salle de guide actuellement active
+      // Cette vérification pourrait être redondante si le composant n'est monté que lorsqu'une salle spécifique est active
+      // mais c'est une bonne pratique de sécurité si les événements socket sont gérés plus globalement avant d'atteindre ce composant.
+      // Pour l'instant, nous supposons que le composant parent s'assure que ce composant n'est actif que pour son guideRoomName.
+      setMessages((prevMessages) => [...prevMessages, message])
+    }
 
     const handleSessionTerminated = (data: { guideRoomName: string; reason: string; roomId: number }) => {
       if (data.guideRoomName === guideRoomName) {
@@ -55,39 +55,39 @@ const GuideChat: React.FC<GuideChatProps> = ({
           ...prevMessages,
           {
             senderNickname: 'System',
-            message: `Session terminated: ${data.reason}`,
+            message: `Session terminée : ${data.reason}`,
             timestamp: new Date().toISOString(),
           },
-        ]);
-        setIsTerminated(true);
+        ])
+        setIsTerminated(true)
         if (onSessionTerminated) {
-            onSessionTerminated();
+          onSessionTerminated()
         }
       }
-    };
+    }
 
-    // Listen for messages specifically for this guide channel
-    // The backend emits to a room, so the client just needs to listen to the event.
-    socket.on('new_guide_message', handleNewMessage);
-    socket.on('guide_session_terminated', handleSessionTerminated);
+    // Écouter les messages spécifiquement pour ce canal de guide
+    // Le backend émet vers une salle, donc le client a juste besoin d'écouter l'événement.
+    socket.on('new_guide_message', handleNewMessage)
+    socket.on('guide_session_terminated', handleSessionTerminated)
 
     return () => {
-      socket.off('new_guide_message', handleNewMessage);
-      socket.off('guide_session_terminated', handleSessionTerminated);
-    };
-  }, [socket, guideRoomName, onSessionTerminated]);
+      socket.off('new_guide_message', handleNewMessage)
+      socket.off('guide_session_terminated', handleSessionTerminated)
+    }
+  }, [socket, guideRoomName, onSessionTerminated])
 
   const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!socket || !newMessage.trim() || isTerminated) return;
+    e.preventDefault()
+    if (!socket || !newMessage.trim() || isTerminated) return
 
     socket.emit('send_guide_message', {
       guideRoomName,
       message: newMessage.trim(),
-    });
-    setNewMessage('');
-  };
-
+    })
+    setNewMessage('')
+  }
+  // Stylisé avec Tailwind CSS comme référence pour les couleurs et les ombres
   return (
     <div style={{
       border: '1px solid #4A5568', // Updated border color (Tailwind gray-700)
@@ -114,7 +114,7 @@ const GuideChat: React.FC<GuideChatProps> = ({
         fontWeight: '600', // Tailwind font-semibold
         color: '#A0AEC0' // Tailwind gray-400
       }}>
-        Chat: {partnerNickname} <span style={{fontSize: '0.8rem', color: '#718096'}}>({amIGuide ? 'Guiding' : 'Guided'})</span>
+        Chat : {partnerNickname} <span style={{fontSize: '0.8rem', color: '#718096'}}>({amIGuide ? 'Guidant' : 'Guidé'})</span>
       </h4>
       {isTerminated && (
         <p style={{ color: '#F56565', textAlign: 'center', fontWeight: 'bold', padding: '10px 0' }}>
@@ -137,7 +137,7 @@ const GuideChat: React.FC<GuideChatProps> = ({
               boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' // Tailwind shadow-md
             }}>
               <strong style={{fontSize: '0.875rem', display: 'block', marginBottom: '2px'}}>
-                {msg.senderNickname === currentUserNickname ? 'Me' : msg.senderNickname}
+                {msg.senderNickname === currentUserNickname ? 'Moi' : msg.senderNickname}
               </strong>
               <p style={{ margin: 0, wordWrap: 'break-word', fontSize: '0.9rem', lineHeight: '1.4' }}>{msg.message}</p>
               <small style={{ fontSize: '0.7rem', opacity: 0.6, display: 'block', marginTop: '4px', textAlign: 'right' }}>
@@ -153,7 +153,7 @@ const GuideChat: React.FC<GuideChatProps> = ({
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          placeholder={isTerminated ? "Session ended" : "Type a message..."}
+          placeholder={isTerminated ? 'Session terminée' : 'Écrivez un message...'}
           disabled={isTerminated}
           style={{
             flexGrow: 1,
@@ -176,11 +176,11 @@ const GuideChat: React.FC<GuideChatProps> = ({
           opacity: (isTerminated || !newMessage.trim()) ? 0.6 : 1,
           fontWeight: '600'
         }}>
-          Send
+          Envoyer
         </button>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default GuideChat;
+export default GuideChat
