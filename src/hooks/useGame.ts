@@ -22,7 +22,7 @@ export interface Message {
 }
 
 export interface UserType {
-  id: string
+  id: number
   nickname: string
 }
 

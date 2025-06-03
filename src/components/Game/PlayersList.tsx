@@ -236,8 +236,8 @@ const PlayersList: React.FC<PlayersListProps> = ({
             // Determine if the current user is a spectator and can request to guide this player
             // user from useUser() is the logged-in user.
             // viewer prop means this user is a spectator in this room.
-            const isCurrentUserSpectator = !!(viewer && viewer.user && viewer.user.id === user?.id && !player);
-            const canRequestGuide = isCurrentUserSpectator && !gameStarted && typeof _player.id === 'number' && user?.id !== _player.id;
+            const isCurrentUserSpectator = !!(viewer && viewer.user && viewer.user.id === user?.id && !player)
+            const canRequestGuide = isCurrentUserSpectator && !gameStarted && typeof _player.id === 'number' && user?.id !== _player.id
 
             return (
               <div
@@ -443,11 +443,11 @@ const PlayersList: React.FC<PlayersListProps> = ({
                           socket.emit('request_guide_player', {
                             targetPlayerId: Number(_player.id), // Assumes _player.id is the target User ID (Player.playerId)
                             roomId: gameId,
-                          });
-                          console.log(`Requesting to guide player ${_player.nickname} (ID: ${_player.id}) in room ${gameId}`);
+                          })
+                          console.log(`Requesting to guide player ${_player.nickname} (ID: ${_player.id}) in room ${gameId}`)
                           // Future: Add client-side feedback (e.g., disable button, toast)
                         } else {
-                          console.error('Socket not available or player ID undefined to request guide');
+                          console.error('Socket not available or player ID undefined to request guide')
                         }
                       }}
                       title={`Request to guide ${_player.nickname}`}
