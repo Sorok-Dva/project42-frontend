@@ -347,7 +347,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   </span>
 
                   {/* Visual indicator for Galactic Jester without voting rights */}
-                  {_player.cardId === 14 && _player.canVote === false && (
+                  {_player.canVote === false && (
                     <span className="ml-1 text-yellow-400" title="Ne peut plus voter">
                       <FontAwesomeIcon icon={faBan} />
                     </span>
