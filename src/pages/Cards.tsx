@@ -83,6 +83,11 @@ const gameCards: GameCard[] = [
     camp: 'Équipage',
   },
   {
+    id: 14,
+    equivalent: 'Idiot du village',
+    camp: 'Équipage',
+  },
+  {
     id: 15,
     equivalent: 'Joueur de flûte',
     camp: 'Solitaires',
