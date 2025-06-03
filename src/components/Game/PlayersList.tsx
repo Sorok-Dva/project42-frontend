@@ -199,7 +199,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   }
 
   const votePlayer = (_player: Player) => {
-    if (!socket || !player?.alive) return
+    if (!socket || !player?.alive || viewer) return
     socket.emit('phaseActionResponse', {
       roomId: gameId,
       playerId: user!.id,
