@@ -958,7 +958,7 @@ const GamePage = () => {
 
               {/* Colonne droite : Liste des joueurs */}
               <Box display="flex" flexDirection="column" width="25%" className="right-column">
-                <Composition roomData={roomData} />
+                <Composition roomData={roomData} players={players} />
                 <PlayersList
                   players={players}
                   player={player}
