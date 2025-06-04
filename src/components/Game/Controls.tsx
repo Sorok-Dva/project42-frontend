@@ -156,7 +156,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
       await axios.post(
         `/api/games/room/${newGame.id}/join`,
-        {},
+        { creator: newGame.creator },
         {
           headers: {
             Authorization: `Bearer ${token}`,
