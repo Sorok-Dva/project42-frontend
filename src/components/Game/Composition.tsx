@@ -138,7 +138,7 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData, players }) 
                       group-hover:opacity-0`}
                           />
                           <div className="absolute z-[1] w-[18px] h-[18px] leading-[18px] top-[5px] right-[5px] transform rotate-45 shadow-md bg-black/80 transition-opacity duration-300 group-hover:opacity-0">
-                            <span className="text-xs font-bold transform -rotate-45">{roomCard.quantity - (players.filter((player) => player.cardId === roomCard.cardId && !player.alive).length)}</span>
+                            <span className="inline-block text-xs font-bold transform -rotate-45">{roomCard.quantity - (players.filter((player) => player.cardId === roomCard.cardId && !player.alive).length)}</span>
                           </div>
                         </div>
 
@@ -157,7 +157,7 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData, players }) 
 
                         {/* Quantity indicator */}
                         <div className="absolute z-[1] w-[18px] h-[18px] leading-[18px] top-[5px] right-[5px] transform rotate-45 shadow-md bg-black/80 transition-opacity duration-300 group-hover:opacity-0">
-                          <span className="text-xs font-bold transform -rotate-45">{roomCard.quantity - (players.filter((player) => player.cardId === roomCard.cardId && !player.alive).length)}</span>
+                          <span className="inline-block text-xs font-bold transform -rotate-45">{roomCard.quantity - (players.filter((player) => player.cardId === roomCard.cardId && !player.alive).length)}</span>
                         </div>
 
                         {/* Dead indicator */}
