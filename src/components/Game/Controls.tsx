@@ -872,7 +872,7 @@ const GameControls: React.FC<GameControlsProps> = ({
       91: 1,
       92: 6,
       94: 15,
-      95: 9,
+      95: 19,
       99: -1,
     }
 
