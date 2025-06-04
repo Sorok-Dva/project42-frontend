@@ -1,52 +1,54 @@
-import React, { useState, useEffect, useRef } from 'react'
-import type { Socket } from 'socket.io-client'
-import { useSocket } from 'contexts/SocketContext' // Assuming this is the correct path
-import { useUser } from 'contexts/UserContext' // To get current user's nickname
+'use client'
+
+import type React from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useSocket } from 'contexts/SocketContext'
+import { useUser } from 'contexts/UserContext'
 
 interface GuideChatProps {
-  guideRoomName: string;
-  partnerNickname: string; // Pseudonyme de l'autre personne dans le chat (guide ou guidé)
-  amIGuide: boolean; // Pour identifier qui est qui
-  onSessionTerminated: () => void; // Rappel lorsque la session est terminée
+  guideRoomName: string
+  partnerNickname: string
+  amIGuide: boolean
+  onSessionTerminated: () => void
 }
 
 interface Message {
-  // Le backend envoie senderId, senderNickname, message, timestamp.
-  // Nous utiliserons principalement senderNickname sur le client pour l'affichage.
-  senderId?: number; // Optional on client if not directly used for display logic beyond differentiation
-  senderNickname: string;
-  message: string;
-  timestamp: string;
+  senderId?: number
+  senderNickname: string
+  message: string
+  timestamp: string
 }
 
-const GuideChat: React.FC<GuideChatProps> = ({
-  guideRoomName,
-  partnerNickname,
-  amIGuide,
-  onSessionTerminated,
-}) => {
+const GuideChat: React.FC<GuideChatProps> = ({ guideRoomName, partnerNickname, amIGuide, onSessionTerminated }) => {
   const { socket } = useSocket()
   const { user } = useUser()
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isTerminated, setIsTerminated] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
+  const [hasUnreadMessages, setHasUnreadMessages] = useState(false)
   const messagesEndRef = useRef<null | HTMLDivElement>(null)
 
   const currentUserNickname = user?.nickname || 'Vous'
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    if (isExpanded) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      setHasUnreadMessages(false)
+    }
+  }, [messages, isExpanded])
 
   useEffect(() => {
     if (!socket) return
 
     const handleNewMessage = (message: Message) => {
-      // S'assurer que le message est pour la salle de guide actuellement active
-      // Cette vérification pourrait être redondante si le composant n'est monté que lorsqu'une salle spécifique est active
-      // mais c'est une bonne pratique de sécurité si les événements socket sont gérés plus globalement avant d'atteindre ce composant.
-      // Pour l'instant, nous supposons que le composant parent s'assure que ce composant n'est actif que pour son guideRoomName.
       setMessages((prevMessages) => [...prevMessages, message])
+
+      // Si le chat est réduit et que ce n'est pas notre message, marquer comme non lu
+      if (!isExpanded && message.senderNickname !== currentUserNickname) {
+        setHasUnreadMessages(true)
+      }
     }
 
     const handleSessionTerminated = (data: { guideRoomName: string; reason: string; roomId: number }) => {
@@ -66,8 +68,6 @@ const GuideChat: React.FC<GuideChatProps> = ({
       }
     }
 
-    // Écouter les messages spécifiquement pour ce canal de guide
-    // Le backend émet vers une salle, donc le client a juste besoin d'écouter l'événement.
     socket.on('new_guide_message', handleNewMessage)
     socket.on('guide_session_terminated', handleSessionTerminated)
 
@@ -75,7 +75,7 @@ const GuideChat: React.FC<GuideChatProps> = ({
       socket.off('new_guide_message', handleNewMessage)
       socket.off('guide_session_terminated', handleSessionTerminated)
     }
-  }, [socket, guideRoomName, onSessionTerminated])
+  }, [socket, guideRoomName, onSessionTerminated, isExpanded, currentUserNickname])
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
@@ -87,99 +87,159 @@ const GuideChat: React.FC<GuideChatProps> = ({
     })
     setNewMessage('')
   }
-  // Stylisé avec Tailwind CSS comme référence pour les couleurs et les ombres
+
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded)
+    if (!isExpanded) {
+      setHasUnreadMessages(false)
+    }
+  }
+
+  const handleTerminateSession = () => {
+    if (socket && confirm('Êtes-vous sûr de vouloir terminer cette session de guide ?')) {
+      socket.emit('terminate_guide_session', { guideRoomName })
+    }
+  }
+
   return (
-    <div style={{
-      border: '1px solid #4A5568', // Updated border color (Tailwind gray-700)
-      borderRadius: '8px',
-      padding: '16px', // Increased padding
-      width: '350px', // Adjusted width
-      backgroundColor: '#1A202C', // Updated background color (Tailwind gray-900)
-      color: '#E2E8F0', // Updated text color (Tailwind gray-300)
-      position: 'fixed',
-      bottom: '20px',
-      right: '20px',
-      zIndex: 1000,
-      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', // Tailwind shadow-lg
-      display: 'flex',
-      flexDirection: 'column',
-      height: '450px', // Adjusted height
-    }}>
-      <h4 style={{
-        marginTop: 0,
-        marginBottom: '12px',
-        paddingBottom: '12px',
-        borderBottom: '1px solid #2D3748', // Tailwind gray-700
-        fontSize: '1.125rem', // Tailwind text-lg
-        fontWeight: '600', // Tailwind font-semibold
-        color: '#A0AEC0' // Tailwind gray-400
-      }}>
-        Chat : {partnerNickname} <span style={{fontSize: '0.8rem', color: '#718096'}}>({amIGuide ? 'Guidant' : 'Guidé'})</span>
-      </h4>
-      {isTerminated && (
-        <p style={{ color: '#F56565', textAlign: 'center', fontWeight: 'bold', padding: '10px 0' }}>
-          This guide session has been terminated.
-        </p>
-      )}
-      <div style={{ flexGrow: 1, overflowY: 'auto', marginBottom: '12px', paddingRight: '8px' }}>
-        {messages.map((msg, index) => (
-          <div key={index} style={{
-            marginBottom: '10px',
-            display: 'flex',
-            justifyContent: msg.senderNickname === currentUserNickname ? 'flex-end' : 'flex-start',
-          }}>
-            <div style={{
-              padding: '10px 15px',
-              borderRadius: '20px',
-              backgroundColor: msg.senderNickname === currentUserNickname ? '#3182CE' : (msg.senderNickname === 'System' ? '#4A5568' : '#2D3748'), // Tailwind blue-600, gray-700, gray-800
-              color: msg.senderNickname === 'System' ? '#A0AEC0' : 'white', // Tailwind gray-400 for system messages
-              maxWidth: '80%',
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' // Tailwind shadow-md
-            }}>
-              <strong style={{fontSize: '0.875rem', display: 'block', marginBottom: '2px'}}>
-                {msg.senderNickname === currentUserNickname ? 'Moi' : msg.senderNickname}
-              </strong>
-              <p style={{ margin: 0, wordWrap: 'break-word', fontSize: '0.9rem', lineHeight: '1.4' }}>{msg.message}</p>
-              <small style={{ fontSize: '0.7rem', opacity: 0.6, display: 'block', marginTop: '4px', textAlign: 'right' }}>
-                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </small>
-            </div>
+    <motion.div
+      className="fixed top-20 left-1/2 transform -translate-x-1/2 z-40 w-96"
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -100, opacity: 0 }}
+      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+    >
+      {/* En-tête du chat (toujours visible) */}
+      <motion.div
+        className="bg-gradient-to-r from-purple-600/90 to-blue-600/90 backdrop-blur-md rounded-t-xl border border-purple-500/30 cursor-pointer"
+        onClick={toggleExpanded}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <div className="px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-white font-semibold text-sm">Guide: {partnerNickname}</span>
+            <span className="text-purple-200 text-xs">({amIGuide ? 'Guidant' : 'Guidé'})</span>
+            {hasUnreadMessages && (
+              <motion.div
+                className="w-2 h-2 bg-red-400 rounded-full"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY }}
+              />
+            )}
           </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-      <form onSubmit={handleSendMessage} style={{ display: 'flex', marginTop: 'auto' }}>
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder={isTerminated ? 'Session terminée' : 'Écrivez un message...'}
-          disabled={isTerminated}
-          style={{
-            flexGrow: 1,
-            padding: '10px 15px',
-            borderRadius: '20px',
-            border: '1px solid #2D3748', // Tailwind gray-700
-            backgroundColor: '#2D3748', // Tailwind gray-800
-            color: '#E2E8F0', // Tailwind gray-300
-            marginRight: '8px',
-            outline: 'none',
-          }}
-        />
-        <button type="submit" disabled={isTerminated || !newMessage.trim()} style={{
-          padding: '10px 20px',
-          borderRadius: '20px',
-          border: 'none',
-          backgroundColor: '#3182CE', // Tailwind blue-600
-          color: 'white',
-          cursor: (isTerminated || !newMessage.trim()) ? 'not-allowed' : 'pointer',
-          opacity: (isTerminated || !newMessage.trim()) ? 0.6 : 1,
-          fontWeight: '600'
-        }}>
-          Envoyer
-        </button>
-      </form>
-    </div>
+
+          <div className="flex items-center gap-2">
+            <motion.button
+              className="text-purple-200 hover:text-white transition-colors"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleTerminateSession()
+              }}
+              title="Terminer la session"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </motion.button>
+
+            <motion.div
+              className="text-purple-200"
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Contenu du chat (rétractable) */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            className="bg-black/80 backdrop-blur-md rounded-b-xl border-x border-b border-purple-500/30 shadow-2xl"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {isTerminated && (
+              <div className="px-4 py-2 bg-red-900/20 border-b border-red-500/30">
+                <p className="text-red-300 text-center text-sm font-medium">Session terminée</p>
+              </div>
+            )}
+
+            {/* Zone des messages */}
+            <div className="h-64 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-purple-500/30 scrollbar-track-transparent">
+              {messages.map((msg, index) => (
+                <motion.div
+                  key={index}
+                  className={`flex ${msg.senderNickname === currentUserNickname ? 'justify-end' : 'justify-start'}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-lg px-3 py-2 ${
+                      msg.senderNickname === currentUserNickname
+                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                        : msg.senderNickname === 'System'
+                          ? 'bg-gray-700/50 text-gray-300'
+                          : 'bg-gray-800/50 text-gray-100'
+                    }`}
+                  >
+                    <div className="text-xs opacity-75 mb-1">
+                      {msg.senderNickname === currentUserNickname ? 'Moi' : msg.senderNickname}
+                    </div>
+                    <p className="text-sm break-words">{msg.message}</p>
+                    <div className="text-xs opacity-60 mt-1 text-right">
+                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Zone de saisie */}
+            <div className="p-4 border-t border-purple-500/30">
+              <form onSubmit={handleSendMessage} className="flex gap-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder={isTerminated ? 'Session terminée' : 'Écrivez votre message...'}
+                  disabled={isTerminated}
+                  className="flex-1 bg-gray-800/50 border border-purple-500/30 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent disabled:opacity-50"
+                />
+                <motion.button
+                  type="submit"
+                  disabled={isTerminated || !newMessage.trim()}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 text-white rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={{ scale: isTerminated || !newMessage.trim() ? 1 : 1.05 }}
+                  whileTap={{ scale: isTerminated || !newMessage.trim() ? 1 : 0.95 }}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                    />
+                  </svg>
+                </motion.button>
+              </form>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }
 
