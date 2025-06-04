@@ -137,8 +137,8 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData, players }) 
                       ${!isOdd ? 'scale-[0.6] rotate-[10deg]' : 'scale-[0.6] -rotate-[10deg]'}
                       group-hover:opacity-0`}
                           />
-                          <div className="absolute z-[1] w-[18px] h-[18px] leading-[18px] top-[5px] right-[5px] rotate-45 shadow-md bg-white/75 transition-opacity duration-300 group-hover:opacity-0">
-                            <span className="block -rotate-45 text-xs font-bold text-center">{roomCard.quantity}</span>
+                          <div className="absolute z-[1] w-[18px] h-[18px] leading-[18px] top-[5px] right-[5px] rotate-45 shadow-md bg-black/80 transition-opacity duration-300 group-hover:opacity-0">
+                            <span className="block -rotate-45 text-xs font-bold text-center">{roomCard.quantity - (players.filter((player) => player.cardId === roomCard.cardId && !player.alive).length)}</span>
                           </div>
                         </div>
 
@@ -156,7 +156,7 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData, players }) 
                         </div>
 
                         {/* Quantity indicator */}
-                        <div className="absolute top-1 right-1 w-5 h-5 bg-white/80 rounded-full flex items-center justify-center transform rotate-45 shadow-md z-10 group-hover:opacity-0 transition-opacity">
+                        <div className="absolute z-[1] w-[18px] h-[18px] leading-[18px] top-[5px] right-[5px] rotate-45 shadow-md bg-black/80 transition-opacity duration-300 group-hover:opacity-0">
                           <span className="text-xs font-bold transform -rotate-45">{roomCard.quantity - (players.filter((player) => player.cardId === roomCard.cardId && !player.alive).length)}</span>
                         </div>
 
