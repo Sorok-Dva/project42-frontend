@@ -9,6 +9,7 @@ import { Tooltip } from 'react-tooltip'
 import { faUserAstronaut } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faHeart } from '@fortawesome/free-solid-svg-icons/faHeart'
+import { faBan } from '@fortawesome/free-solid-svg-icons/faBan'
 import axios from 'axios'
 import { createPortal } from 'react-dom'
 import { useUser } from 'contexts/UserContext'
@@ -27,6 +28,7 @@ interface Player {
   isInfected: boolean
   customVote?: number
   id?: string | number
+  canVote?: boolean
 }
 
 interface PlayersListProps {
@@ -343,6 +345,13 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   <span className="player sound-tick" data-profile={user?.isAdmin ? _player.realNickname || _player.nickname : _player.nickname}>
                     {_player.nickname}
                   </span>
+
+                  {/* Visual indicator for Galactic Jester without voting rights */}
+                  {_player.canVote === false && (
+                    <span className="ml-1 text-yellow-400" title="Ne peut plus voter">
+                      <FontAwesomeIcon icon={faBan} />
+                    </span>
+                  )}
 
                   {/* Badges de statut */}
                   <div className="inline-flex gap-1 ml-1">
