@@ -114,6 +114,9 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData, players }) 
                     data-tooltip-id={String(roomCard.card.id)}
                     data-tooltip-content={cardName}
                   >
+                    { mounted && (
+                      createPortal(<Tooltip id={String(roomCard.card.id)} />, document.body)
+                    )}
                     {roomCard.quantity > 1 ? (
                       <div className="relative w-full h-full">
                         {/* First card with rotation */}
@@ -150,10 +153,6 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData, players }) 
                              ${isOdd ? 'scale-[0.6] rotate-[10deg]' : 'scale-[0.6] -rotate-[10deg]'}
                              group-hover:rotate-0 group-hover:scale-100 group-hover:z-10`}
                           />
-
-                          { mounted && (
-                            createPortal(<Tooltip id={String(roomCard.card.id)} />, document.body)
-                          )}
                         </div>
 
                         {/* Quantity indicator */}
