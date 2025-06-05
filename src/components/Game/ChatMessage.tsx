@@ -89,6 +89,7 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
       return messages.filter((msg) => {
         if (msg.channel === 0) return true
         if (msg.channel === 1 && viewer) return true
+        if (msg.channel === 7 && player) return true
         if (
           msg.channel === 3 &&
           player &&

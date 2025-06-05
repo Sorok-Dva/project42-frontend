@@ -18,6 +18,7 @@ export interface Message {
   isPerso: boolean
   isMsgSite: boolean
   cssClass?: string | null
+  toPlayer?: number | null
   createdAt: Date
 }
 

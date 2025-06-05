@@ -1707,32 +1707,13 @@ tr.dead span {
   color: #0acc5a;
 }
 
-.canal_guide {
-  /* Guide/Disciple */
-  color: #000000;
-  display: block;
+.canal_7 {
   width: auto !important;
-  text-align: left;
-
-  .guide-notice {
-    background-color: #abd4b2;
-    border-radius: 5px;
-    padding: 10px;
-  }
-
-  .canal_joueurs {
-    display: inline-block;
-    width: auto !important;
-    background-color: #abd4b2 !important;
-    border-radius: 0 35px 35px 0;
-    padding: 5px 20px 5px 10px;
-    margin: 1px 0;
-    overflow: initial;
-
-    .msg-date {
-      color: #636363;
-    }
-  }
+  background-color: #abd4b2 !important;
+  border-radius: 0 35px 35px 0;
+  padding: 5px 20px 5px 10px;
+  margin: 1px 0;
+  overflow: initial;
 }
 
 .canal_center {
