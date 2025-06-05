@@ -5,6 +5,14 @@ export interface Player {
   role?: string
   isAlive?: boolean
   isReady?: boolean
+  guide?: {
+    id: string;
+    nickname: string;
+  };
+  guidedBy?: {
+    id: string;
+    nickname: string;
+  };
 }
 
 export interface Card {
