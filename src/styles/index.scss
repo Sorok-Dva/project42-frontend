@@ -1962,6 +1962,13 @@ tr.dead span {
     background-color: #c5cee0;
     pointer-events: none;
   }
+
+  &.chat-badge-guide {
+    border: 1px solid #088d3f;
+    color: #0acc5a;
+    background-color: #c5cee0;
+    pointer-events: none;
+  }
 }
 
 .canal_joueurs::after {
