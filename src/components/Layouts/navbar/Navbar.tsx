@@ -89,7 +89,7 @@ const Navbar: React.FC<{ isTransparent?: boolean }> = ({ isTransparent }) => {
           </motion.div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1">
+          <nav className="sm:hidden lg:flex items-center space-x-1">
             {menuData.map(({ id, title, url, icon, isUser, isAdmin, isMod, submenus }) => {
               if (isUser && !user) return null
               if (isAdmin && !user?.isAdmin) return null
