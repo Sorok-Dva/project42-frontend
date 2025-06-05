@@ -82,14 +82,11 @@ const Navbar: React.FC<{ isTransparent?: boolean }> = ({ isTransparent }) => {
                 <Image className="h-10 w-auto" src={logo || '/placeholder.svg'} alt="Project 42" />
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-lg" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent hidden sm:block">
-                Project 42
-              </span>
             </Link>
           </motion.div>
 
           {/* Desktop Navigation */}
-          <nav className="sm:hidden lg:flex items-center space-x-1">
+          <nav className="hidden lg:flex items-center space-x-1">
             {menuData.map(({ id, title, url, icon, isUser, isAdmin, isMod, submenus }) => {
               if (isUser && !user) return null
               if (isAdmin && !user?.isAdmin) return null
@@ -199,7 +196,7 @@ const Navbar: React.FC<{ isTransparent?: boolean }> = ({ isTransparent }) => {
           </motion.button>
 
           {/* User Actions */}
-          <div className="sm:hidden lg:flex items-center space-x-3">
+          <div className="lg:flex items-center space-x-3">
             {!user ? <Login /> : <><Friends /><Notification /><Profile /></>}
           </div>
         </div>
@@ -291,19 +288,6 @@ const Navbar: React.FC<{ isTransparent?: boolean }> = ({ isTransparent }) => {
                   </div>
                 )
               })}
-
-              {/* Mobile User Actions */}
-              {!user ? (
-                <div className="pt-4 border-t border-white/10">
-                  <Login />
-                </div>
-              ) : (
-                <div className="pt-4 border-t border-white/10 flex items-center space-x-3">
-                  <Friends />
-                  <Notification />
-                  <Profile />
-                </div>
-              )}
             </div>
           </motion.div>
         )}
