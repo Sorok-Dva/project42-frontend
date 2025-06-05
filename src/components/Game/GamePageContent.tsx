@@ -22,8 +22,8 @@ import { getRandomColor } from 'utils/getRandomColor'
 import 'styles/Game.scss'
 import Composition from './Composition'
 import { parallaxStars, staticStars } from 'utils/animations'
-import GuideRequestModal from './GuideRequestModal' // Added
-import GuideChat from './GuideChat' // Added
+import GuideRequestModal from './GuideRequestModal'
+import GuideChat from './GuideChat'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -1134,6 +1134,7 @@ const GamePage = () => {
           )}
           {activeGuideSession && user && (
             <GuideChat
+              roomId={roomData.id}
               guideRoomName={activeGuideSession.guideRoomName}
               partnerNickname={activeGuideSession.partnerNickname}
               amIGuide={activeGuideSession.amIGuide}
