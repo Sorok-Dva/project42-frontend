@@ -15,6 +15,7 @@ import axios from 'axios'
 import { createPortal } from 'react-dom'
 import { useUser } from 'contexts/UserContext'
 import { Player } from 'types/player'
+import { GraduationCap } from 'lucide-react'
 
 interface PlayersListProps {
   players: Player[]
@@ -335,7 +336,15 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   `}
                 >
                   <span className="player sound-tick" data-profile={user?.isAdmin ? _player.realNickname || _player.nickname : _player.nickname}>
-                    {_player.nickname}
+                    {_player.nickname}{' '}
+                    {_player.guide && (
+                      <>
+                        <span className="h-5 w-5" data-tooltip-content={`${_player.nickname} est guidé par ${_player.guide}`} data-tooltip-id={`tooltip-${_player.guide}`}>
+                          <GraduationCap />
+                          <Tooltip id={`tooltip-${_player.guide}`} />
+                        </span>
+                      </>
+                    )}
                   </span>
 
                   {/* Visual indicator for Galactic Jester without voting rights */}
@@ -430,7 +439,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
                 {/* Actions sur le joueur */}
                 <div className="flex items-center">
-                  {canRequestGuide && (
+                  {canRequestGuide && !_player.guide && (
                     <button
                       onClick={() => {
                         if (socket && _player.id !== undefined) { // Ensure _player.id is defined
@@ -475,7 +484,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
                   {/* Bouton de mise en évidence */}
                   <button
-                    className="w-6 h-6 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors mr-1"
+                    className="w-6 h-6 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
                     onClick={() => toggleHighlightPlayer(_player.nickname)}
                     title="Mettre en évidence ce joueur"
                   >
@@ -487,7 +496,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   {/* Bouton d'expulsion (pour le créateur) */}
                   {!gameStarted && !gameFinished && player && isCreator && creatorNickname !== _player.nickname && (
                     <button
-                      className="w-6 h-6 rounded-full bg-red-900/40 flex items-center justify-center text-red-300 hover:text-white hover:bg-red-900/60 transition-colors mr-1"
+                      className="w-6 h-6 rounded-full bg-red-900/40 flex items-center justify-center text-red-300 hover:text-white hover:bg-red-900/60 transition-colors"
                       onClick={() => handleKickPlayer(_player.nickname)}
                       data-tooltip-html={`Expulser <strong>${_player.nickname}</strong> de la partie`}
                       data-tooltip-id={`kick_${_player.nickname}`}

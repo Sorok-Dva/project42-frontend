@@ -1,4 +1,5 @@
 export interface Player {
+  playerId: number
   nickname: string
   realNickname: string
   ready: boolean
@@ -12,5 +13,6 @@ export interface Player {
   isInfected: boolean
   customVote?: number
   id?: string | number
-  canVote?: boolean
+  canVote: boolean
+  guide: string | null
 }
