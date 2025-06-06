@@ -69,14 +69,14 @@ const GuideRequestModal: React.FC<GuideRequestModalProps> = ({
           marginBottom: '15px',
           fontSize: '1.25rem'
         }}>
-          Guide Request
+          Un joueur souhaite te guider !
         </h3>
         <p style={{
           color: '#CBD5E0',
           marginBottom: '25px',
           fontSize: '1rem'
         }}>
-          <strong style={{color: '#A0AEC0'}}>{guideNickname}</strong> would like to guide you.
+          <strong style={{color: '#A0AEC0'}}>{guideNickname}</strong> aimerait te guider lors de cette partie.
         </p>
         <div style={{ display: 'flex', justifyContent: 'space-around' }}>
           <button
@@ -85,7 +85,7 @@ const GuideRequestModal: React.FC<GuideRequestModalProps> = ({
             onClick={onAccept}
             style={acceptButtonStyle}
           >
-            Accept
+            Accepter
           </button>
           <button
             onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#C53030')} // Simulates red-700
@@ -93,7 +93,7 @@ const GuideRequestModal: React.FC<GuideRequestModalProps> = ({
             onClick={onReject}
             style={rejectButtonStyle}
           >
-            Reject
+            Refuser
           </button>
         </div>
       </div>
