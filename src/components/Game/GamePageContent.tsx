@@ -549,6 +549,9 @@ const GamePage = () => {
     if (confirm('Êtes-vous sûr de vouloir quitter la partie ?')) {
       try {
         if (viewer && !viewer.user) {
+          if (activeGuideSession) {
+            socket.emit('terminate_guide_session', { guideRoomName: activeGuideSession.guideRoomName, roomId: gameId })
+          }
           window.location.href = '/'
           return
         }
@@ -556,6 +559,9 @@ const GamePage = () => {
         const response = await leaveGame(token)
         console.log('leave response', response)
         if (response.message) {
+          if (activeGuideSession) {
+            socket.emit('terminate_guide_session', { guideRoomName: activeGuideSession.guideRoomName, roomId: gameId })
+          }
           socket.emit('leaveRoom', {
             roomId: gameId,
             player: player
