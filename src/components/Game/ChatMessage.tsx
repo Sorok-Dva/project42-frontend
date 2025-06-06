@@ -42,6 +42,7 @@ interface ChatMessagesProps {
   viewer?: Viewer
   isNight: boolean
   gameFinished: boolean
+  gameStarted: boolean
   handleMentionClick: (nickname: string) => void
   isInn: boolean
   onUnreadChange: (unread: number) => void
@@ -78,6 +79,7 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
       player,
       viewer,
       isNight,
+      gameStarted,
       gameFinished,
       handleMentionClick,
       isInn,
@@ -90,6 +92,7 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
       return messages.filter((msg) => {
         if (msg.channel === 0) return true
         if (msg.channel === 1 && viewer) return true
+        if (msg.channel === 1 && player && !gameStarted) return true
         if (msg.channel === 7 && player) return true
         if (
           msg.channel === 3 &&

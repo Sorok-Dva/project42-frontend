@@ -419,6 +419,7 @@ const Chat: React.FC<ChatProps> = ({
           viewer={viewer}
           isNight={isNight}
           gameFinished={gameFinished}
+          gameStarted={gameStarted}
           handleMentionClick={handleMentionClick}
           isInn={isInn}
           onUnreadChange={handleUnreadChange}
