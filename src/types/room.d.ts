@@ -1,10 +1,20 @@
 export interface Player {
-  id: string
-  username: string
-  avatar?: string
-  role?: string
-  isAlive?: boolean
-  isReady?: boolean
+  playerId: number
+  nickname: string
+  realNickname: string
+  ready: boolean
+  alive: boolean
+  cardId?: number
+  target?: string
+  inLove: boolean
+  isSister: boolean
+  isBrother: boolean
+  isCharmed: boolean
+  isInfected: boolean
+  customVote?: number
+  id?: string | number
+  card?: { id: number; name: string; description: string; }
+  guide: string | null
 }
 
 export interface Card {

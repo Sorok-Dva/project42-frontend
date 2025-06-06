@@ -1,17 +1,18 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
-import { Message, PlayerType, Viewer } from 'hooks/useGame'
+import { Message, Viewer } from 'hooks/useGame'
 import type { User } from 'types/user'
 import { useSocket } from 'contexts/SocketContext'
 import { motion } from 'framer-motion'
 import ChatMessages, { ChatMessagesHandle } from 'components/Game/ChatMessage'
 import GameRule from 'components/Game/Rules'
 import axios from 'axios'
+import { Player } from 'types/room'
 
 interface ChatProps {
   gameId: string
-  players?: PlayerType[]
+  players?: Player[]
   playerId?: string | number
-  player?: PlayerType
+  player?: Player
   user?: User
   viewer?: Viewer
   userRole?: string

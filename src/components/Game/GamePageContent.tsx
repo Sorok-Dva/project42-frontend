@@ -1062,51 +1062,23 @@ const GamePage = () => {
                     </div>
                   </Container>
                 ) : (
-                  <>
-                    {/*
-                      Si le spectateur est en train de guider (activeGuideSession.amIGuide),
-                      on récupère le PlayerType du joueur guidé (par nickname) pour le passer
-                      à la prop `player`. Sinon on laisse le vrai `player`.
-                    */}
-                    {(() => {
-                      // Déterminer quel "player" transmettre au Chat
-                      let displayPlayer = player
-                      if (
-                        activeGuideSession?.amIGuide &&
-                        activeGuideSession.partnerNickname
-                      ) {
-                        // On cherche dans la liste des joueurs celui qui a le même nickname
-                        const guided = players.find(
-                          (pl) => pl.nickname === activeGuideSession.partnerNickname
-                        )
-                        if (guided) {
-                          displayPlayer = guided
-                        }
-                      }
-
-                      console.log(activeGuideSession, displayPlayer)
-
-                      return (
-                        <Chat
-                          gameId={gameId!}
-                          playerId={user?.id}
-                          player={displayPlayer ?? undefined}
-                          viewer={viewer ?? undefined}
-                          players={players}
-                          user={user ?? undefined}
-                          userRole={user?.role}
-                          messages={messages}
-                          highlightedPlayers={highlightedPlayers}
-                          isNight={isNight}
-                          gameStarted={gameStarted}
-                          gameFinished={gameFinished}
-                          isArchive={isArchive}
-                          isInn={isInn}
-                          gameType={roomData.type}
-                        />
-                      )
-                    })()}
-                  </>
+                  <Chat
+                    gameId={gameId!}
+                    playerId={user?.id}
+                    player={player ?? undefined}
+                    viewer={viewer ?? undefined}
+                    players={players}
+                    user={user ?? undefined}
+                    userRole={user?.role}
+                    messages={messages}
+                    highlightedPlayers={highlightedPlayers}
+                    isNight={isNight}
+                    gameStarted={gameStarted}
+                    gameFinished={gameFinished}
+                    isArchive={isArchive}
+                    isInn={isInn}
+                    gameType={roomData.type}
+                  />
                 )}
               </Box>
 

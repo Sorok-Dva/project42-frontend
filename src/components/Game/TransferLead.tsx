@@ -1,16 +1,16 @@
 import React, { FC, useEffect, useState } from 'react'
-import { PlayerType } from 'hooks/useGame'
 import { transferCreatorRights } from 'services/gameService'
 import { createPortal } from 'react-dom'
 import { useAuth } from 'contexts/AuthContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
+import { Player } from 'types/room'
 
 interface TransferLeadModalProps {
   roomId: number
   creator: string
-  players: PlayerType[]
+  players: Player[]
   onClose: () => void
 }
 
@@ -86,7 +86,7 @@ const TransferLeadModal: FC<TransferLeadModalProps> = ({ roomId, creator, player
         </div>
         <div className="modal-content">
           <div className="modal_player_select_wrapper">
-            { players.map((player: PlayerType) => player.nickname !== creator ? (
+            { players.map((player: Player) => player.nickname !== creator ? (
               <div key={player.nickname} className="player_select_option sound-tick" onClick={() => transferLead(player.nickname)}>
                 <span>{player.nickname}</span>
               </div>

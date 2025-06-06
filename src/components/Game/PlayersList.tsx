@@ -13,22 +13,7 @@ import { faHeart } from '@fortawesome/free-solid-svg-icons/faHeart'
 import axios from 'axios'
 import { createPortal } from 'react-dom'
 import { useUser } from 'contexts/UserContext'
-
-interface Player {
-  nickname: string
-  realNickname: string
-  ready: boolean
-  alive: boolean
-  cardId?: number
-  target?: string
-  inLove: boolean
-  isSister: boolean
-  isBrother: boolean
-  isCharmed: boolean
-  isInfected: boolean
-  customVote?: number
-  id?: string | number
-}
+import { Player } from 'types/room'
 
 interface PlayersListProps {
   players: Player[]
@@ -516,7 +501,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
       </div>
 
       {/* Liste des spectateurs */}
-      <ViewersList viewer={viewer} viewers={viewers} />
+      <ViewersList viewer={viewer} viewers={viewers} players={players} />
     </div>
   )
 }

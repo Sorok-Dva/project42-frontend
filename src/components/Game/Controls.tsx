@@ -17,7 +17,7 @@ import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import GameTimer from './Timer'
 import PhaseAction from './PhaseAction'
-import type { PlayerType, RoomData, Viewer } from 'hooks/useGame'
+import type { RoomData, Viewer } from 'hooks/useGame'
 import EditCompoModal from 'components/Game/EditComposition'
 import TransferLeadModal from 'components/Game/TransferLead'
 import axios from 'axios'
@@ -27,13 +27,14 @@ import { useSocket } from 'contexts/SocketContext'
 import { Tooltip } from 'react-tooltip'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
+import { Player } from 'types/room'
 
 interface GameControlsProps {
   gameId: string | undefined
   roomData: RoomData
-  creator: PlayerType
-  player: PlayerType | null
-  players: PlayerType[]
+  creator: Player
+  player: Player | null
+  players: Player[]
   viewer: Viewer | null
   isCreator: boolean
   canBeReady: boolean
@@ -46,7 +47,7 @@ interface GameControlsProps {
   isArchive: boolean
   setSlots: React.Dispatch<React.SetStateAction<number>>
   setRoomData: React.Dispatch<React.SetStateAction<RoomData>>
-  setPlayer: React.Dispatch<React.SetStateAction<PlayerType | null>>
+  setPlayer: React.Dispatch<React.SetStateAction<Player | null>>
   isInn: boolean
 }
 

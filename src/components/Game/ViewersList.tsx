@@ -1,12 +1,16 @@
 import React from 'react'
 import { Viewer } from 'hooks/useGame'
+import { Player } from 'types/room'
+import { Badge } from 'reactstrap'
+import { Tooltip } from 'react-tooltip'
 
 interface ViewersListProps {
   viewers: Viewer[]
+  players: Player[]
   viewer: Viewer | null
 }
 
-const ViewersList: React.FC<ViewersListProps> = ({ viewers, viewer }) => {
+const ViewersList: React.FC<ViewersListProps> = ({ viewers, viewer, players }) => {
   if (viewers.length === 0) return null
 
   let anonymousViewers = 0
@@ -38,6 +42,19 @@ const ViewersList: React.FC<ViewersListProps> = ({ viewers, viewer }) => {
                 <span className="player sound-tick text-blue-200 group-hover:text-white transition-colors cursor-pointer"  data-profile={ v.user.nickname }>
                   {v.user.nickname}
                 </span>
+                { players.find(p => p.guide === v.user?.nickname) && (
+                  <>
+                    <div
+                      data-tooltip-content={ `Ce spectateur guide ${players.find(p => p.guide === v.user?.nickname)?.nickname}.` }
+                      data-tooltip-id={`${v.user?.nickname}_guide`}
+                    >
+                      <span className="inline-block px-1 text-xs bg-green-900/60 text-green-300 rounded">
+                        Guide
+                      </span>
+                    </div>
+                    <Tooltip id={`${v.user?.nickname}_guide`} />
+                  </>
+                )}
               </div>
             )
           })}
