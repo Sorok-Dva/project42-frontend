@@ -32,7 +32,7 @@ export const mockRooms: {
   anonymousVotes : boolean;
   privateGame : boolean;
   password : string | null;
-  status : "waiting" | "in_progress" | "completed";
+  status : 'waiting' | 'in_progress' | 'completed';
   phase : number;
   limitPhase : Date;
   timer : number;

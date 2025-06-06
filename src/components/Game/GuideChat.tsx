@@ -66,7 +66,7 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, guideRoomName, partnerNic
 
   const handleTerminateSession = () => {
     if (socket && confirm('Êtes-vous sûr de vouloir terminer cette session de guide ?')) {
-      socket.emit('terminate_guide_session', { guideRoomName })
+      socket.emit('terminate_guide_session', { guideRoomName, roomId })
     }
   }
 

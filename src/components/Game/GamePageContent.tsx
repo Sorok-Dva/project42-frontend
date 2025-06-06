@@ -493,6 +493,31 @@ const GamePage = () => {
     setIsCreator(player?.nickname === creator?.nickname)
   }, [creator])
 
+  useEffect(() => {
+    if (viewer && players.find(p => p.guide === viewer.user?.nickname)) {
+      const partner = players.find(p => p.guide === viewer.user?.nickname)
+      if (!partner) return
+      console.log('guideRoomName', `guide_${roomData.id}_${viewer.userId}_${partner.playerId}`)
+      setActiveGuideSession({
+        guideRoomName: `guide_${roomData.id}_${viewer.userId}_${partner.playerId}`,
+        partnerNickname: partner.nickname,
+        amIGuide: true,
+      })
+    }
+
+    if (viewers && player?.guide) {
+      const partner = viewers.find(v => v.user?.nickname === player.guide)
+      if (!partner?.user) return
+      console.log('guideRoomName', `guide_${roomData.id}_${partner.userId}_${player.playerId}`)
+
+      setActiveGuideSession({
+        guideRoomName: `guide_${roomData.id}_${partner.userId}_${player.playerId}`,
+        partnerNickname: partner.user?.nickname,
+        amIGuide: true,
+      })
+    }
+  }, [players, viewer])
+
   /**
    * Requête pour recharger certains détails du jeu (ex : titre, etc.)
    * @todo check if this is used anymore
@@ -1062,23 +1087,49 @@ const GamePage = () => {
                     </div>
                   </Container>
                 ) : (
-                  <Chat
-                    gameId={gameId!}
-                    playerId={user?.id}
-                    player={player ?? undefined}
-                    viewer={viewer ?? undefined}
-                    players={players}
-                    user={user ?? undefined}
-                    userRole={user?.role}
-                    messages={messages}
-                    highlightedPlayers={highlightedPlayers}
-                    isNight={isNight}
-                    gameStarted={gameStarted}
-                    gameFinished={gameFinished}
-                    isArchive={isArchive}
-                    isInn={isInn}
-                    gameType={roomData.type}
-                  />
+                  <>
+                    {/*
+                      Si le spectateur est en train de guider (activeGuideSession.amIGuide),
+                      on récupère le PlayerType du joueur guidé (par nickname) pour le passer
+                      à la prop `player`. Sinon on laisse le vrai `player`.
+                    */}
+                    {(() => {
+                      // Déterminer quel "player" transmettre au Chat
+                      let displayPlayer = player
+                      if (
+                        activeGuideSession?.amIGuide &&
+                        activeGuideSession.partnerNickname
+                      ) {
+                        // On cherche dans la liste des joueurs celui qui a le même nickname
+                        const guided = players.find(
+                          (pl) => pl.nickname === activeGuideSession.partnerNickname
+                        )
+                        if (guided) {
+                          displayPlayer = guided
+                        }
+                      }
+
+                      return (
+                        <Chat
+                          gameId={gameId!}
+                          playerId={user?.id}
+                          player={displayPlayer ?? undefined}
+                          viewer={viewer ?? undefined}
+                          players={players}
+                          user={user ?? undefined}
+                          userRole={user?.role}
+                          messages={messages}
+                          highlightedPlayers={highlightedPlayers}
+                          isNight={isNight}
+                          gameStarted={gameStarted}
+                          gameFinished={gameFinished}
+                          isArchive={isArchive}
+                          isInn={isInn}
+                          gameType={roomData.type}
+                        />
+                      )
+                    })()}
+                  </>
                 )}
               </Box>
 
