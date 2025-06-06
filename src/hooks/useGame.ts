@@ -7,6 +7,7 @@ import {
   fetchViewers,
 } from '../services/gameService'
 import axios from 'axios'
+import { Player } from 'types/room'
 
 export interface Message {
   nickname: string
@@ -18,17 +19,12 @@ export interface Message {
   isPerso: boolean
   isMsgSite: boolean
   cssClass?: string | null
+  toPlayer?: number | null
   createdAt: Date
 }
 
 export interface UserType {
-  id: string
-  nickname: string
-}
-
-export interface PlayerType {
-  id: string
-  playerId: string
+  id: number
   nickname: string
   realNickname: string
   ready: boolean
@@ -79,7 +75,7 @@ export interface RoomData {
   whiteFlag: boolean
   anonymousGame: boolean
   cards: RoomCard[]
-  players?: Partial<PlayerType>[]
+  players?: Partial<Player>[]
   createdAt: Date
   updatedAt: Date
 }
@@ -117,11 +113,11 @@ export const useGame = (
   const [passwordRequired, setPasswordRequired] = useState(false)
   const [password, setPassword] = useState('')
   const [isAuthorized, setIsAuthorized] = useState(false)
-  const [player, setPlayer] = useState<PlayerType | null>(null)
-  const [players, setPlayers] = useState<PlayerType[]>([])
+  const [player, setPlayer] = useState<Player | null>(null)
+  const [players, setPlayers] = useState<Player[]>([])
   const [viewer, setViewer] = useState<Viewer | null>(null)
   const [viewers, setViewers] = useState<Viewer[]>([])
-  const [creator, setCreator] = useState<PlayerType | null>(null)
+  const [creator, setCreator] = useState<Player | null>(null)
   const [isCreator, setIsCreator] = useState<boolean>(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [canBeReady, setCanBeReady] = useState(false)
@@ -219,8 +215,8 @@ export const useGame = (
       setLoading(false)
 
       const allPlayersReady = playersData
-        .filter((player: PlayerType) => player.playerId !== creator?.playerId)
-        .every((player: PlayerType) => player.ready)
+        .filter((player: Player) => player.playerId !== creator?.playerId)
+        .every((player: Player) => player.ready)
 
       if (allPlayersReady && playersData.length === roomData.maxPlayers) {
         setCanStartGame(true)
@@ -329,7 +325,7 @@ export const useGame = (
       ])
     })
 
-    socket.on('updatePlayers', (updatedPlayers: PlayerType[]) => {
+    socket.on('updatePlayers', (updatedPlayers: Player[]) => {
       setPlayers(updatedPlayers)
       if (updatedPlayers.length >= roomData.maxPlayers) setCanBeReady(true)
     })
@@ -378,7 +374,7 @@ export const useGame = (
       setCanStartGame(state)
     })
 
-    socket.on('newCreator', (creatorData: PlayerType) => {
+    socket.on('newCreator', (creatorData: Player) => {
       setCreator(creatorData)
     })
 

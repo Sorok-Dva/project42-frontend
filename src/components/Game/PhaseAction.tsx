@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useSocket } from 'contexts/SocketContext'
 import { useUser } from 'contexts/UserContext'
-import type { PlayerType } from 'hooks/useGame'
 import PhaseActionCard5 from 'components/Game/Cards/PhaseActionCard5'
 import PhaseActionCard20 from 'components/Game/Cards/PhaseActionCard20'
+import { Player } from 'types/room'
 
 interface PhaseActionRequest {
   phase: number
@@ -21,7 +21,7 @@ interface PhaseActionRequest {
 }
 
 interface PhaseActionProps {
-  player: PlayerType
+  player: Player
   roomId: number
   gameType: number
   isInn: boolean

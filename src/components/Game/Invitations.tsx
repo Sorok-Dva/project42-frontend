@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import type { PlayerType } from 'hooks/useGame'
-import { Copy, Check, Share2 } from 'lucide-react'
+import { Check, Share2 } from 'lucide-react'
 import { Tooltip } from 'react-tooltip'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { useAuth } from 'contexts/AuthContext'
+import { Player } from 'types/room'
 
 interface InvitationBlockProps {
   gameId: string | undefined
   isCreator: boolean
-  players: PlayerType[]
+  players: Player[]
 }
 
 export interface Friend {

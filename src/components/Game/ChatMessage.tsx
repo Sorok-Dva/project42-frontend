@@ -7,8 +7,9 @@ import React, {
   forwardRef,
 } from 'react'
 import { Box, Typography } from '@mui/material'
-import { Message, PlayerType, Viewer } from 'hooks/useGame'
+import { Message, Viewer } from 'hooks/useGame'
 import { emotes } from 'components/Game/Chat'
+import { Player } from 'types/room'
 
 function stripHTML(input: string) {
   const tempDiv = document.createElement('div')
@@ -37,7 +38,7 @@ function stripHTMLKeepImages(input: string): string {
 interface ChatMessagesProps {
   messages: Message[]
   highlightedPlayers: { [nickname: string]: string }
-  player?: PlayerType
+  player?: Player
   viewer?: Viewer
   isNight: boolean
   gameFinished: boolean
@@ -89,6 +90,7 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
       return messages.filter((msg) => {
         if (msg.channel === 0) return true
         if (msg.channel === 1 && viewer) return true
+        if (msg.channel === 7 && player) return true
         if (
           msg.channel === 3 &&
           player &&

@@ -33,7 +33,7 @@ const GamesAdminPage: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="rooms" className="space-y-4">
-          <RoomsTable rooms={mockRooms} />
+          {/*<RoomsTable rooms={mockRooms} />*/}
         </TabsContent>
       </Tabs>
     </div>

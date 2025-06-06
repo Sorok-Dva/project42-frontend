@@ -8,6 +8,7 @@ import type { Viewer } from 'hooks/useGame'
 import { Tooltip } from 'react-tooltip'
 import { faUserAstronaut } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faHandshakeAngle } from '@fortawesome/free-solid-svg-icons'
 import { faHeart } from '@fortawesome/free-solid-svg-icons/faHeart'
 import { faBan } from '@fortawesome/free-solid-svg-icons/faBan'
 import axios from 'axios'
@@ -88,6 +89,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   const [mounted, setMounted] = useState(false)
   const [lastVotedPlayer, setLastVotedPlayer] = useState<number | null>(null)
 
+  const guideAskHistory: string[] =[]
   useEffect(() => {
     setMounted(true)
     return () => setMounted(false)
@@ -217,6 +219,12 @@ const PlayersList: React.FC<PlayersListProps> = ({
             const mostVotes = voteCounts[_player.nickname] === maxVotes() && maxVotes() > 0
             const isCurrentPlayer = _player.nickname === player?.nickname
             const suspiciousCardId = getSuspiciousCardId(_player.nickname)
+
+            // Determine if the current user is a spectator and can request to guide this player
+            // user from useUser() is the logged-in user.
+            // viewer prop means this user is a spectator in this room.
+            const isCurrentUserSpectator = !!(viewer && viewer.user && viewer.user.id === user?.id && !player)
+            const canRequestGuide = isCurrentUserSpectator && !gameStarted && typeof _player.id === 'number' && user?.id !== _player.id && !players.find(p => p.guide === viewer?.user?.nickname)
 
             return (
               <div
@@ -422,6 +430,31 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
                 {/* Actions sur le joueur */}
                 <div className="flex items-center">
+                  {canRequestGuide && (
+                    <button
+                      onClick={() => {
+                        if (socket && _player.id !== undefined) { // Ensure _player.id is defined
+                          if (guideAskHistory.includes(_player.nickname)) {
+                            alert('Vous avez déjà demandé à guider ce joueur')
+                            return
+                          }
+                          socket.emit('request_guide_player', {
+                            targetPlayerId: Number(_player.id),
+                            roomId: gameId,
+                          })
+                          console.log(`Requesting to guide player ${_player.nickname} (ID: ${_player.id}) in room ${gameId}`)
+                          guideAskHistory.push(_player.nickname)
+                          // Future: Add client-side feedback (e.g., disable button, toast)
+                        } else {
+                          console.error('Socket not available or player ID undefined to request guide')
+                        }
+                      }}
+                      title={`Demander à guider ${_player.nickname}`}
+                      className="w-6 h-6 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-white transition-colors mr-1"
+                    >
+                      <FontAwesomeIcon icon={faHandshakeAngle} className="h-3 w-3" />
+                    </button>
+                  )}
                   {/* Indicateur "prêt" */}
                   {!gameStarted && !gameFinished && _player.ready && (
                     <div className="text-green-400" title="Ce joueur est prêt">
@@ -442,7 +475,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
                   {/* Bouton de mise en évidence */}
                   <button
-                    className="w-6 h-6 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
+                    className="w-6 h-6 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors mr-1"
                     onClick={() => toggleHighlightPlayer(_player.nickname)}
                     title="Mettre en évidence ce joueur"
                   >
@@ -454,7 +487,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   {/* Bouton d'expulsion (pour le créateur) */}
                   {!gameStarted && !gameFinished && player && isCreator && creatorNickname !== _player.nickname && (
                     <button
-                      className="w-6 h-6 rounded-full bg-red-900/40 flex items-center justify-center text-red-300 hover:text-white hover:bg-red-900/60 transition-colors"
+                      className="w-6 h-6 rounded-full bg-red-900/40 flex items-center justify-center text-red-300 hover:text-white hover:bg-red-900/60 transition-colors mr-1"
                       onClick={() => handleKickPlayer(_player.nickname)}
                       data-tooltip-html={`Expulser <strong>${_player.nickname}</strong> de la partie`}
                       data-tooltip-id={`kick_${_player.nickname}`}
@@ -482,7 +515,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
       </div>
 
       {/* Liste des spectateurs */}
-      <ViewersList viewer={viewer} viewers={viewers} />
+      <ViewersList viewer={viewer} viewers={viewers} players={players} />
     </div>
   )
 }

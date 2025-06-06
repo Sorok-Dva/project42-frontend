@@ -22,7 +22,38 @@ export const roomTypes = [
 ]
 
 // Génération de données fictives pour les parties
-export const mockRooms: RoomAttributes[] = Array.from({ length: 50 }, (_, i) => {
+export const mockRooms: {
+  id : number;
+  name : string;
+  creator : string;
+  instance : number;
+  type : number;
+  maxPlayers : number;
+  anonymousVotes : boolean;
+  privateGame : boolean;
+  password : string | null;
+  status : 'waiting' | 'in_progress' | 'completed';
+  phase : number;
+  limitPhase : Date;
+  timer : number;
+  currentRound : number;
+  maxRounds : number;
+  pointsMultiplier : number;
+  players : {
+    id : string;
+    username : string;
+    isAlive : boolean;
+    isReady : boolean
+  }[];
+  cards : {
+    id : number;
+    name : string;
+    type : string;
+    description : string
+  }[];
+  createdAt : Date;
+  updatedAt : Date
+}[] = Array.from({ length: 50 }, (_, i) => {
   const createdAt = randomDate()
   const status = ['waiting', 'in_progress', 'completed'][Math.floor(Math.random() * 3)] as
     | 'waiting'
