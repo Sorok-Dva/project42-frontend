@@ -49,6 +49,11 @@ interface GameControlsProps {
   setRoomData: React.Dispatch<React.SetStateAction<RoomData>>
   setPlayer: React.Dispatch<React.SetStateAction<Player | null>>
   isInn: boolean
+  activeGuideSession: {
+    guideRoomName: string;
+    partnerNickname: string;
+    amIGuide: boolean;
+  } | null
 }
 
 /**
@@ -74,6 +79,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   isArchive,
   isInn,
   setPlayer,
+  activeGuideSession,
 }) => {
   const { token } = useAuth()
   const { user } = useUser()
@@ -177,6 +183,9 @@ const GameControls: React.FC<GameControlsProps> = ({
       try {
         const response = await leaveGame(token)
         if (response.message) {
+          if (activeGuideSession) {
+            socket.emit('terminate_guide_session', { guideRoomName: activeGuideSession.guideRoomName, roomId: gameId })
+          }
           socket.emit('leaveRoom', {
             roomId: gameId,
             player: player ? { id: user?.id, nickname: response?.nickname, realNickname: response?.realNickname } : null,
@@ -386,6 +395,9 @@ const GameControls: React.FC<GameControlsProps> = ({
           },
         },
       )
+      if (activeGuideSession) {
+        socket.emit('terminate_guide_session', { guideRoomName: activeGuideSession.guideRoomName, roomId: gameId })
+      }
       window.location.href = `/game/${response.data.game.id}`
     } catch (error) {
       console.error('Erreur lors du join room:', error)

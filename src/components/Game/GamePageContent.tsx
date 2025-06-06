@@ -1078,6 +1078,7 @@ const GamePage = () => {
                     isInn={isInn}
                     viewer={viewer}
                     setPlayer={setPlayer}
+                    activeGuideSession={activeGuideSession}
                   />
                 </Box>
               </Box>
