@@ -391,12 +391,11 @@ const GamePage = () => {
     }
 
     const handleGuideRequestSent = (data: { message: string }) => {
-      // Feedback for the viewer who sent the request
-      alert(`Guide System: ${data.message}`)
+      alert(`Système de guide: ${data.message}`)
     }
 
     const handleGuideRequestExpired = (data: { playerId?: number; playerNickname?: string; roomId: number; reason: string }) => {
-      alert(`Guide System: Request expired. Reason: ${data.reason}`)
+      alert(`Système de guide: la demande a expirée. Raison: ${data.reason}`)
       if (showGuideRequestModal && Number(data.roomId) === Number(gameId)) {
         setShowGuideRequestModal(false)
         setGuideRequestDetails(null)
@@ -406,7 +405,7 @@ const GamePage = () => {
     const handleGuideRequestRejected = (data: { playerId?: number; playerNickname?: string; guideUserId?: number, roomId: number; reason: string }) => {
       // This event can be for the guide (their request was rejected)
       // or for the player (the request they were considering is no longer valid, e.g. guide busy)
-      alert(`Guide System: Request rejected/invalid. Player: ${data.playerNickname || 'N/A'}. Reason: ${data.reason}`)
+      alert(`Système de guide: Demande rejetée ou invalide. Joueur: ${data.playerNickname || 'N/A'}. Raison: ${data.reason}`)
       if (showGuideRequestModal && Number(data.roomId) === Number(gameId)) {
         // If the currently open modal's guide matches the guide involved in rejection, close it.
         if (guideRequestDetails && data.guideUserId && data.guideUserId === guideRequestDetails.guideUserId) {
@@ -441,14 +440,14 @@ const GamePage = () => {
 
     const handleExternalGuideSessionTerminated = (data: { guideRoomName: string; reason: string; roomId: number }) => {
       if (activeGuideSession && data.guideRoomName === activeGuideSession.guideRoomName) {
-        alert(`Guide session ended: ${data.reason}`)
+        alert(`Session de guide terminée: ${data.reason}`)
         setActiveGuideSession(null)
       }
     }
 
     const handleBackendError = (data: { message: string }) => {
       if (data.message && data.message.toLowerCase().includes('guide')) {
-        alert(`Guide Error: ${data.message}`)
+        alert(`Erreur guide: ${data.message}`)
       } else {
         console.warn('Received non-guide error or generic error:', data.message)
       }
