@@ -157,7 +157,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
       await axios.post(
         `/api/games/room/${newGame.id}/join`,
-        {},
+        { creator: newGame.creator },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -863,8 +863,10 @@ const GameControls: React.FC<GameControlsProps> = ({
       90: 'Les <b>Aliens infiltrés</b> ont gagné !',
       91: 'Les <b>Membres de la station</b> ont gagné !',
       92: 'Les <b>Amoureux</b> ont gagné !',
+      93: 'L\'<b>Alien Solitaire</b> a gagné !',
       94: 'Le <b>Maître des Ondes</b> a gagné !',
       95: 'Le <b>Séraphin</b> a gagné !',
+      96: 'Le <b>Séraphin</b> a gagné !',
       99: 'Tout le monde est mort !',
     }
 
@@ -872,9 +874,11 @@ const GameControls: React.FC<GameControlsProps> = ({
       90: 2,
       91: 1,
       92: 6,
+      93: 9,
       94: 15,
-      95: 9,
-      99: -1,
+      95: 19,
+      96: 19,
+      99: 0,
     }
 
     return (

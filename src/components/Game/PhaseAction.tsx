@@ -44,6 +44,20 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
   const [hint, setHint] = useState<string | null>(null)
   const [selectHeight, setSelectHeight] = useState(0)
 
+  // Add this check for Galactic Jester
+  if (player.card?.id === 14 && player.canVote === false) {
+    return (
+      <motion.div
+        className="bg-black/40 backdrop-blur-sm rounded-lg border border-yellow-500/30 p-4 mt-4 text-center"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <h3 className="text-lg font-bold text-yellow-300">Vous avez perdu votre pouvoir de vote.</h3>
+      </motion.div>
+    )
+  }
+
   useEffect(() => {
     if (actionRequest && actionRequest.eligibleTargets.length > 0 && actionRequest.action.targetCount === 1) {
       const firstTargetId = actionRequest.eligibleTargets[0].id

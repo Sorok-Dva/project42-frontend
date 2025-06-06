@@ -44,6 +44,7 @@ export interface User {
   },
   registerIp?: string;
   lastLoginIp?: string;
+  canVote?: boolean;
 }
 
 export interface UserProfile extends User {

@@ -26,6 +26,16 @@ export interface Message {
 export interface UserType {
   id: number
   nickname: string
+  realNickname: string
+  ready: boolean
+  alive: boolean
+  card?: { id: number; name: string; description: string; }
+  inLove: boolean
+  isSister: boolean
+  isBrother: boolean
+  isCharmed: boolean
+  isInfected: boolean
+  canVote?: boolean
 }
 
 export interface Viewer {

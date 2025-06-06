@@ -155,7 +155,7 @@ const RoomList = () => {
       fetchRooms()
       await axios.post(
         `/api/games/room/${response.data.game.id}/join`,
-        {},
+        { creator: response.data.game.creator },
         {
           headers: {
             Authorization: `Bearer ${token}`,
