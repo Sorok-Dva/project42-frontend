@@ -88,6 +88,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   const [mounted, setMounted] = useState(false)
   const [lastVotedPlayer, setLastVotedPlayer] = useState<number | null>(null)
 
+  const guideAskHistory: string[] =[]
   useEffect(() => {
     setMounted(true)
     return () => setMounted(false)
@@ -222,7 +223,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
             // user from useUser() is the logged-in user.
             // viewer prop means this user is a spectator in this room.
             const isCurrentUserSpectator = !!(viewer && viewer.user && viewer.user.id === user?.id && !player)
-            const canRequestGuide = isCurrentUserSpectator && !gameStarted && typeof _player.id === 'number' && user?.id !== _player.id
+            const canRequestGuide = isCurrentUserSpectator && !gameStarted && typeof _player.id === 'number' && user?.id !== _player.id && !players.find(p => p.guide === viewer?.user?.nickname)
 
             return (
               <div
@@ -425,17 +426,22 @@ const PlayersList: React.FC<PlayersListProps> = ({
                     <button
                       onClick={() => {
                         if (socket && _player.id !== undefined) { // Ensure _player.id is defined
+                          if (guideAskHistory.includes(_player.nickname)) {
+                            alert('Vous avez déjà demandé à guider ce joueur')
+                            return
+                          }
                           socket.emit('request_guide_player', {
-                            targetPlayerId: Number(_player.id), // Assumes _player.id is the target User ID (Player.playerId)
+                            targetPlayerId: Number(_player.id),
                             roomId: gameId,
                           })
                           console.log(`Requesting to guide player ${_player.nickname} (ID: ${_player.id}) in room ${gameId}`)
+                          guideAskHistory.push(_player.nickname)
                           // Future: Add client-side feedback (e.g., disable button, toast)
                         } else {
                           console.error('Socket not available or player ID undefined to request guide')
                         }
                       }}
-                      title={`Request to guide ${_player.nickname}`}
+                      title={`Demander à guider ${_player.nickname}`}
                       className="w-6 h-6 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-white transition-colors mr-1"
                     >
                       <FontAwesomeIcon icon={faHandshakeAngle} className="h-3 w-3" />
