@@ -59,12 +59,23 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
   }
 
   useEffect(() => {
-    if (actionRequest && actionRequest.eligibleTargets.length > 0 && actionRequest.action.targetCount === 1) {
+    // Réinitialise toujours la sélection lorsqu'une nouvelle action débute
+    setSelectedTargets([])
+    setSelectedNickname(null)
+    setSelectedNicknames([])
+
+    if (
+      actionRequest &&
+      actionRequest.eligibleTargets.length > 0 &&
+      actionRequest.action.targetCount === 1
+    ) {
       const firstTargetId = actionRequest.eligibleTargets[0].id
       setSelectedTargets([firstTargetId])
 
       // Mettre à jour également le nickname sélectionné
-      const selectedTarget = actionRequest.eligibleTargets.find((target) => target.id === firstTargetId)
+      const selectedTarget = actionRequest.eligibleTargets.find(
+        (target) => target.id === firstTargetId,
+      )
       if (selectedTarget) {
         setSelectedNickname(selectedTarget.nickname)
       }
