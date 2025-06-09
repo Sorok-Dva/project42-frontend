@@ -649,7 +649,8 @@ const GamePage = () => {
   }, [audioVolume])
 
   if (gameError) {
-    localStorage.setItem('gameFinished', 'true')
+    // Using a unique value ensures the storage event always triggers
+    localStorage.setItem('gameFinished', Date.now().toString())
 
     const isLeaveMessage = gameError.includes('Vous avez bien quitté la partie.')
     return (
