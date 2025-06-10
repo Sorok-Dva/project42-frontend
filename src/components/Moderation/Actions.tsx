@@ -63,13 +63,15 @@ const ModerationActions: React.FC<ModerationActionsProps> = ({ targetUser, compa
       {!actionIsShown && (
         <div className={`actions flex flex-wrap items-center ${compact ? 'gap-1' : 'gap-2'}`}>
           {permissions.antecedents && (
-            <a
-              role="button"
+            <Button
               onClick={() => setIsHistoryOpen(true)}
-              className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'} button_secondary bgred`}
+              className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'}
+                bg-gradient-to-r from-yellow-600 to-amber-600
+                hover:from-yellow-700 hover:to-amber-700
+                text-white rounded-lg transition-all`}
             >
               Antécédents
-            </a>
+            </Button>
           )}
           {permissions.moderationNotes && (
             <Button
@@ -148,7 +150,7 @@ const ModerationActions: React.FC<ModerationActionsProps> = ({ targetUser, compa
           )}
           {permissions.ip && (
             <Button
-              onClick={() => setIsBanModalOpen(true)}
+              onClick={() => setIsIpOpen(true)}
               className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'}
                 bg-gradient-to-r from-green-600 to-green-800
                 hover:from-green-700 hover:to-green-900
