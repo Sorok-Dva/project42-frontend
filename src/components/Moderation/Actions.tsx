@@ -72,13 +72,15 @@ const ModerationActions: React.FC<ModerationActionsProps> = ({ targetUser, compa
             </a>
           )}
           {permissions.moderationNotes && (
-            <a
-              role="button"
+            <Button
               onClick={() => setIsNoteOpen(true)}
-              className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'} button_secondary bgred`}
+              className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'}
+                bg-gradient-to-r from-yellow-600 to-amber-600
+                hover:from-yellow-700 hover:to-amber-700
+                text-white rounded-lg transition-all`}
             >
               Notes sur le joueur
-            </a>
+            </Button>
           )}
           {permissions.warn && (
             <Button
@@ -107,19 +109,37 @@ const ModerationActions: React.FC<ModerationActionsProps> = ({ targetUser, compa
             </a>
           )}
           {permissions.dcInfos && (
-            <a role="button" onClick={() => setIsDoublesOpen(true)} className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'} button_secondary bgred`}>
+            <Button
+              onClick={() => setIsDoublesOpen(true)}
+              className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'}
+                bg-gradient-to-r from-yellow-600 to-amber-600
+                hover:from-yellow-700 hover:to-amber-700
+                text-white rounded-lg transition-all`}
+            >
               Doubles-Comptes
-            </a>
+            </Button>
           )}
           {permissions.rename && (
-            <a role="button" onClick={() => setIsRenameOpen(true)} className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'} button_secondary bgred`}>
+            <Button
+              onClick={() => setIsRenameOpen(true)}
+              className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'}
+                bg-gradient-to-r from-yellow-600 to-amber-600
+                hover:from-yellow-700 hover:to-amber-700
+                text-white rounded-lg transition-all`}
+            >
               Renommer
-            </a>
+            </Button>
           )}
           {permissions.removeSignature && (
-            <a role="button" onClick={() => setIsRemoveSignatureOpen(true)} className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'} button_secondary bgred`}>
+            <Button
+              onClick={() => setIsRemoveSignatureOpen(true)}
+              className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'}
+                bg-gradient-to-r from-red-600 to-red-800
+                hover:from-red-700 hover:to-red-900
+                text-white rounded-lg transition-all`}
+            >
               Supprimer la signature
-            </a>
+            </Button>
           )}
           {permissions.addPoints && (
             <a role="button" className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'} button_secondary bgred`}>
@@ -127,9 +147,15 @@ const ModerationActions: React.FC<ModerationActionsProps> = ({ targetUser, compa
             </a>
           )}
           {permissions.ip && (
-            <a role="button" onClick={() => setIsIpOpen(true)} className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'} button_secondary bgred`}>
+            <Button
+              onClick={() => setIsBanModalOpen(true)}
+              className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'}
+                bg-gradient-to-r from-green-600 to-green-800
+                hover:from-green-700 hover:to-green-900
+                text-white rounded-lg transition-all`}
+            >
               Voir l’IP
-            </a>
+            </Button>
           )}
           {permissions.ban && (
             <Button
@@ -152,13 +178,13 @@ const ModerationActions: React.FC<ModerationActionsProps> = ({ targetUser, compa
 
       <WarnModal isOpen={isWarnModalOpen} onClose={() => setIsWarnModalOpen(false)} targetUser={targetUser} />
       <BanModal isOpen={isBanModalOpen} onClose={() => setIsBanModalOpen(false)} targetUser={targetUser} />
-      <HistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} userId={targetUser.id} />
-      <NoteModal isOpen={isNoteOpen} onClose={() => setIsNoteOpen(false)} userId={targetUser.id} />
-      <DoublesModal isOpen={isDoublesOpen} onClose={() => setIsDoublesOpen(false)} userId={targetUser.id} />
-      <RenameModal isOpen={isRenameOpen} onClose={() => setIsRenameOpen(false)} userId={targetUser.id} />
-      <RemoveSignatureModal isOpen={isRemoveSignatureOpen} onClose={() => setIsRemoveSignatureOpen(false)} userId={targetUser.id} />
-      <RemoveAvatarModal isOpen={isRemoveAvatarOpen} onClose={() => setIsRemoveAvatarOpen(false)} userId={targetUser.id} />
-      <IpModal isOpen={isIpOpen} onClose={() => setIsIpOpen(false)} userId={targetUser.id} />
+      <HistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} targetUser={targetUser} />
+      <NoteModal isOpen={isNoteOpen} onClose={() => setIsNoteOpen(false)} targetUser={targetUser} />
+      <DoublesModal isOpen={isDoublesOpen} onClose={() => setIsDoublesOpen(false)} targetUser={targetUser} />
+      <RenameModal isOpen={isRenameOpen} onClose={() => setIsRenameOpen(false)} targetUser={targetUser} />
+      <RemoveSignatureModal isOpen={isRemoveSignatureOpen} onClose={() => setIsRemoveSignatureOpen(false)} targetUser={targetUser} />
+      <RemoveAvatarModal isOpen={isRemoveAvatarOpen} onClose={() => setIsRemoveAvatarOpen(false)} targetUser={targetUser} />
+      <IpModal isOpen={isIpOpen} onClose={() => setIsIpOpen(false)} targetUser={targetUser} />
     </>
   )
 }
