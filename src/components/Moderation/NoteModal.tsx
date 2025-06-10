@@ -6,6 +6,8 @@ import { useAuth } from 'contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from 'components/UI/Button'
 import { Textarea } from 'components/UI/Textarea'
+import { toast } from 'react-toastify'
+import { ToastDefaultOptions } from 'utils/toastOptions'
 
 interface NoteModalProps {
   isOpen: boolean
@@ -36,8 +38,13 @@ const NoteModal: React.FC<NoteModalProps> = ({ isOpen, onClose, targetUser }) =>
   }, [isOpen, targetUser.id])
 
   const save = async () => {
-    await axios.post(`/api/mod/note/${targetUser.id}`, { note }, authHeaders).catch(() => {})
-    onClose()
+    const res = await axios.post(`/api/mod/note/${targetUser.id}`, { note }, authHeaders)
+
+    if (res.data.id) {
+      toast.success('La note a été ajoutée avec succès.', ToastDefaultOptions)
+      setNote('')
+      onClose()
+    }
   }
 
   return (

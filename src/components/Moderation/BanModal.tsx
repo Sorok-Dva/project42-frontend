@@ -109,6 +109,8 @@ const BanModal: React.FC<BanModalProps> = ({ isOpen, onClose, targetUser }) => {
       const data = await res.json()
       if (res.ok) {
         toast.info(data.message, ToastDefaultOptions)
+        setComment('')
+        setSelectedSanction('')
         onClose()
       } else {
         toast.error(data.message || 'Erreur lors de l’application de la sanction.', ToastDefaultOptions)

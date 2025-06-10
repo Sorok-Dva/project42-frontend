@@ -54,6 +54,8 @@ const WarnModal: React.FC<WarnModalProps> = ({ isOpen, onClose, targetUser }) =>
 
       if (response.ok) {
         toast.success(`${targetUser.nickname} a été averti avec succès.`, ToastDefaultOptions)
+        setComment('')
+        setReason('')
         onClose()
       } else {
         toast.error(data.message || 'Une erreur est survenue lors de l\'envoi de l\'avertissement.', ToastDefaultOptions)
