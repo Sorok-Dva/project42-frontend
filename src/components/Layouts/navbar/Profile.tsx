@@ -7,6 +7,7 @@ import { Img as Image } from 'react-image'
 import clsx from 'clsx'
 import useDropdown from 'hooks/useDropdown'
 import { useUser } from 'contexts/UserContext'
+import WarningIndicator from 'components/UI/WarningIndicator'
 
 const Profile: React.FC = () => {
   const { user, logout } = useUser()
@@ -93,6 +94,7 @@ const Profile: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-transparent"></div>
         </div>
         <span className="text-slate-200 font-medium hidden lg:block">{user.nickname}</span>
+        <WarningIndicator/>
         <i className="ti ti-chevron-down text-slate-400 hidden lg:block"></i>
       </div>
 
