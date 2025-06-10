@@ -3,7 +3,7 @@ import { Tooltip } from 'react-tooltip'
 import { usePermissions } from 'hooks/usePermissions'
 
 import AchievementBadge from 'components/Profile/AchievementBadge'
-import ModerationPanel from 'components/Moderation/ProfilePanel'
+import ModerationPanel from 'components/Moderation/Actions'
 import RenderGameLine from 'components/Profile/RenderGameLine'
 import { User } from 'components/ProfileModal'
 
@@ -280,7 +280,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, relation }) => {
 
       {moderationIsShown && (
         <div id="contenu-voir-plus" ref={modPanelRef}>
-          <ModerationPanel />
+          <ModerationPanel targetUser={user} />
         </div>
       )}
     </>
