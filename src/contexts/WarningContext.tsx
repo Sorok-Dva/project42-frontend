@@ -3,7 +3,22 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { useSocket } from './SocketContext'
 import { useUser } from './UserContext'
+import BannedModal from 'components/Moderation/BannedModal'
 import WarningModal from 'components/Moderation/WarningModal'
+
+interface Ban {
+  id: number
+  reason: string
+  teamComment?: string
+  moderatorId: number
+  moderator: {
+    nickname: string
+  }
+  expiration: string
+  durationHours: string
+  pointsLoss: number
+  createdAt: string
+}
 
 interface Warning {
   id: number
@@ -40,11 +55,13 @@ interface WarningProviderProps {
 
 export const WarningProvider: React.FC<WarningProviderProps> = ({ children }) => {
   const { socket } = useSocket()
-  const { user } = useUser()
+  const { user, logout } = useUser()
   const [warnings, setWarnings] = useState<Warning[]>([])
   const [currentWarning, setCurrentWarning] = useState<Warning | null>(null)
-  const [showModal, setShowModal] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [currentBan, setCurrentBan] = useState<Ban | null>(null)
+  const [showWarningModal, setShowWarningModal] = useState(false)
+  const [showBanModal, setShowBanModal] = useState(false)
 
   useEffect(() => {
     console.log('unreadCount', warnings, warnings.filter((warning) => !warning.isRead).length)
@@ -71,17 +88,30 @@ export const WarningProvider: React.FC<WarningProviderProps> = ({ children }) =>
 
       setWarnings((prev) => [newWarning, ...prev])
       setCurrentWarning(newWarning)
-      setShowModal(true)
+      setShowWarningModal(true)
 
       // Jouer un son d'alerte
       const alertSound = new Audio('/assets/sounds/warning.mp3')
       alertSound.play().catch(console.error)
     }
 
-    socket.on('warning_received', handleNewWarning)
+    // Nouveau handler pour les bannissements
+    const handleNewBan = (banData: Ban) => {
+      setCurrentBan(banData)
+      setShowBanModal(true)
 
+      socket.disconnect()
+      // Jouer un son d'alerte plus grave pour les bans
+      const banSound = new Audio('/assets/sounds/ban.mp3')
+      banSound.volume = 0.8
+      banSound.play().catch(console.error)
+    }
+
+    socket.on('warning_received', handleNewWarning)
+    socket.on('ban_received', handleNewBan)
     return () => {
       socket.off('warning_received', handleNewWarning)
+      socket.off('ban_received', handleNewBan)
     }
   }, [socket, user])
 
@@ -103,7 +133,7 @@ export const WarningProvider: React.FC<WarningProviderProps> = ({ children }) =>
 
           if (data.length > 0) {
             setCurrentWarning(data[0])
-            setShowModal(true)
+            setShowWarningModal(true)
           }
         }
       } catch (error) {
@@ -150,6 +180,16 @@ export const WarningProvider: React.FC<WarningProviderProps> = ({ children }) =>
     }
   }
 
+  const handleCloseBanModal = () => {
+    setShowBanModal(false)
+    setCurrentBan(null)
+  }
+
+  const handleLogout = () => {
+    logout()
+    window.location.href = '/'
+  }
+
   const handleCloseModal = () => {
     if (!currentWarning) return
 
@@ -162,7 +202,7 @@ export const WarningProvider: React.FC<WarningProviderProps> = ({ children }) =>
         setCurrentWarning(remaining[0])
       } else {
         setCurrentWarning(null)
-        setShowModal(false)
+        setShowWarningModal(false)
       }
 
       return remaining
@@ -181,7 +221,11 @@ export const WarningProvider: React.FC<WarningProviderProps> = ({ children }) =>
       {children}
 
       {/* Modal d'avertissement */}
-      {currentWarning && <WarningModal warning={currentWarning} isOpen={showModal} onClose={handleCloseModal} />}
+      {currentWarning && <WarningModal warning={currentWarning} isOpen={showWarningModal} onClose={handleCloseModal} />}
+      {/* Modal de bannissement */}
+      {currentBan && (
+        <BannedModal ban={currentBan} isOpen={showBanModal} onClose={handleCloseBanModal} onLogout={handleLogout} />
+      )}
     </WarningContext.Provider>
   )
 }
