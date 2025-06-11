@@ -206,7 +206,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     }
 
     // Réinitialiser l'action pour certaines cartes
-    const resetAction = [3, 4, 6, 7, 8, 15, 20].includes(actionRequest.action.card)
+    const resetAction = [3, 6, 7, 8, 15, 20].includes(actionRequest.action.card)
     if (resetAction) setActionRequest(null)
 
     // Afficher des indications pour certaines cartes
