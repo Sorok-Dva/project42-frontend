@@ -91,7 +91,7 @@ export const WarningProvider: React.FC<WarningProviderProps> = ({ children }) =>
       setShowWarningModal(true)
 
       // Jouer un son d'alerte
-      const alertSound = new Audio('/assets/sounds/warning.mp3')
+      const alertSound = new Audio('/assets/sounds/warn.wav')
       alertSound.play().catch(console.error)
     }
 
@@ -102,7 +102,7 @@ export const WarningProvider: React.FC<WarningProviderProps> = ({ children }) =>
 
       socket.disconnect()
       // Jouer un son d'alerte plus grave pour les bans
-      const banSound = new Audio('/assets/sounds/ban.mp3')
+      const banSound = new Audio('/assets/sounds/ban.wav')
       banSound.volume = 0.8
       banSound.play().catch(console.error)
     }
