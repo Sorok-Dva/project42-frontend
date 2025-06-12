@@ -16,6 +16,7 @@ const CreateGame = () => {
     roles: ['voyageur', 'sableur', 'archiviste', 'synchronisateur'],
     anonymousVotes: false,
     privateGame: false,
+    discordChannelId: false,
     password: '',
     timer: 3,
   })
@@ -172,6 +173,19 @@ const CreateGame = () => {
                   />
                 }
                 label="Partie privée"
+              />
+            </Box>
+
+            <Box mb={2}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="discordChannelId"
+                    checked={formData.discordChannelId}
+                    onChange={handleChange}
+                  />
+                }
+                label="Partie vocale"
               />
             </Box>
 
