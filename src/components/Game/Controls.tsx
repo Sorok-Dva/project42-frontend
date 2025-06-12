@@ -12,6 +12,7 @@ import {
   updateRoomTimer,
   updateRoomCards,
   addFavoriteGame, leaveGame,
+  linkDiscordChannel,
 } from 'services/gameService'
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
@@ -93,6 +94,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const [favoriteComment, setFavoriteComment] = useState<string>('')
   const [replayGameId, setReplayGameId] = useState<number | null>(null)
   const [isSavingComment, setIsSavingComment] = useState<boolean>(false)
+  const [discordChannelInput, setDiscordChannelInput] = useState('')
 
   const openEditComposition = () => {
     if (!isCreator || isArchive || roomData.type === 3) return
@@ -432,6 +434,19 @@ const GameControls: React.FC<GameControlsProps> = ({
     socket.emit('bipNotReadyPlayers', gameId)
   }
 
+  const handleLinkChannel = async () => {
+    if (!gameId || !discordChannelInput || !token) return
+    try {
+      const data = await linkDiscordChannel(gameId, discordChannelInput, token)
+      if (data.discordChannelId) {
+        setRoomData((prev) => ({ ...prev, discordChannelId: data.discordChannelId }))
+        setDiscordChannelInput('')
+      }
+    } catch (error) {
+      console.error('Erreur lors du lien du salon Discord :', error)
+    }
+  }
+
   const cardId = player?.card?.id
   const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} isArchive={isArchive} />, [cardId, isArchive])
 
@@ -727,6 +742,31 @@ const GameControls: React.FC<GameControlsProps> = ({
                   />
                 )}
               </div>
+
+              {/* Lier un salon vocal Discord */}
+              {roomData.discordChannelId ? (
+                <p className="text-center text-green-400">
+                  Salon vocal lié : {roomData.discordChannelId}
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={discordChannelInput}
+                    onChange={(e) => setDiscordChannelInput(e.target.value)}
+                    placeholder="ID du salon vocal Discord"
+                    className="w-full p-2 bg-black/40 border border-blue-500/30 rounded-lg text-white"
+                  />
+                  <motion.button
+                    className="sound-tick w-full px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-all"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleLinkChannel}
+                  >
+                    Lier le salon vocal
+                  </motion.button>
+                </div>
+              )}
 
               {/* Bouton de lancement */}
               <motion.button

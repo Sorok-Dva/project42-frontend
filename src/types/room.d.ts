@@ -35,6 +35,7 @@ export interface RoomAttributes {
   maxPlayers: number
   anonymousVotes: boolean
   privateGame: boolean
+  discordChannelId?: string | null
   password: string | null
   status: 'waiting' | 'in_progress' | 'completed'
   phase: number

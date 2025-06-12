@@ -173,3 +173,19 @@ export const addFavoriteGame = async (gameId: string, action: 'add' | 'delete', 
   return response.data
 }
 
+/**
+ * Lie un salon vocal Discord à la partie
+ */
+export const linkDiscordChannel = async (
+  gameId: string,
+  channelId: string,
+  token: string | null,
+) => {
+  const response = await axios.post(
+    `/api/games/room/${gameId}/discord-channel`,
+    { channelId },
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  return response.data
+}
+

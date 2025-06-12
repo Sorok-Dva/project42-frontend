@@ -71,6 +71,7 @@ export interface RoomData {
   maxPlayers: number
   isPrivate: boolean
   password?: string
+  discordChannelId?: string | null
   phase: number
   whiteFlag: boolean
   anonymousGame: boolean
@@ -103,6 +104,7 @@ export const useGame = (
     type: 0,
     maxPlayers: 6,
     isPrivate: true,
+    discordChannelId: null,
     cards: [],
     phase: 0,
     whiteFlag: false,
