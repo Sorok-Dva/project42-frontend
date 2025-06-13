@@ -760,8 +760,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                 )}
               </div>
 
-              {/* Lier un salon vocal Discord */}
-              {roomData.discordChannelId !== null ? (
+              {roomData.discordChannelId !== null && (
                 <motion.button
                   className={`sound-tick w-full px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-all ${isInVoice ? 'opacity-50 cursor-not-allowed' : ''}`}
                   whileHover={isInVoice ? {} : { scale: 1.02 }}
@@ -775,24 +774,6 @@ const GameControls: React.FC<GameControlsProps> = ({
                 >
                   Rejoindre le salon Discord
                 </motion.button>
-              ) : (
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    value={discordChannelInput}
-                    onChange={(e) => setDiscordChannelInput(e.target.value)}
-                    placeholder="ID du salon vocal Discord"
-                    className="w-full p-2 bg-black/40 border border-blue-500/30 rounded-lg text-white"
-                  />
-                  <motion.button
-                    className="sound-tick w-full px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-all"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleLinkChannel}
-                  >
-                    Lier le salon vocal
-                  </motion.button>
-                </div>
               )}
 
               {/* Bouton de lancement */}
