@@ -2,9 +2,10 @@ import type React from 'react'
 
 interface GameRulesProps {
   gameType: number
+  hasVoice?: boolean
 }
 
-const GameRules: React.FC<GameRulesProps> = ({ gameType }) => {
+const GameRules: React.FC<GameRulesProps> = ({ gameType, hasVoice = false }) => {
   // Définition des règles pour chaque type de partie
   // Définition des règles pour chaque type de partie
   const rules = {
@@ -78,6 +79,11 @@ const GameRules: React.FC<GameRulesProps> = ({ gameType }) => {
   // Vérifier si le type de partie existe
   const validGameType = Object.keys(rules).includes(gameType.toString()) ? gameType : 0
   const currentRules = rules[validGameType as keyof typeof rules]
+  const voiceRules = [
+    'La communication se fait uniquement en vocal. N\'utilisez pas le chat du jeu.',
+    'Il est interdit de parler la nuit ou pendant la phase du tireur d\'élite.',
+  ]
+  const allRules = hasVoice ? [...currentRules, ...voiceRules] : currentRules
   const bulletColor = bulletColors[validGameType as keyof typeof bulletColors] || 'bg-green-500'
   const typeName = gameTypeNames[validGameType as keyof typeof gameTypeNames] || 'Normale'
 
@@ -93,7 +99,7 @@ const GameRules: React.FC<GameRulesProps> = ({ gameType }) => {
       </p>
 
       <ul className="list-disc list-inside text-xs text-blue-200 space-y-1">
-        {currentRules.map((rule, index) => (
+        {allRules.map((rule, index) => (
           <li key={index}>
             <span className="text-sm" dangerouslySetInnerHTML={{ __html: rule }} />
           </li>

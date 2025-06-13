@@ -858,19 +858,21 @@ const GameControls: React.FC<GameControlsProps> = ({
             {viewer?.user && !gameStarted && !gameFinished && (
               <motion.button
                 className={`sound-tick w-full px-4 py-2 transition-all rounded-lg ${
-                  players.length >= slots
+                  players.length >= slots || (roomData.discordChannelId && !user?.discordId)
                     ? 'bg-red-900/20 text-red-300 border border-red-500/30 opacity-70 cursor-not-allowed'
                     : 'bg-blue-600/40 hover:bg-blue-600/60 text-blue-300 hover:text-white border border-blue-500/30'
                 }`}
-                whileHover={players.length >= slots ? {} : { scale: 1.02 }}
-                whileTap={players.length >= slots ? {} : { scale: 0.98 }}
+                whileHover={players.length >= slots || (roomData.discordChannelId && !user?.discordId) ? {} : { scale: 1.02 }}
+                whileTap={players.length >= slots || (roomData.discordChannelId && !user?.discordId) ? {} : { scale: 0.98 }}
                 onClick={handleJoinGame}
-                disabled={players.length >= slots}
+                disabled={players.length >= slots || (roomData.discordChannelId && !user?.discordId)}
                 data-tooltip-id="join_game"
                 data-tooltip-content={
                   players.length >= slots
                     ? 'Vous ne pouvez pas rejoindre, la partie est pleine.'
-                    : 'Rejoindre le salon de jeu'
+                    : roomData.discordChannelId && !user?.discordId
+                      ? 'Liez votre compte Discord pour rejoindre une partie vocale'
+                      : 'Rejoindre le salon de jeu'
                 }
               >
                 Rejoindre la partie

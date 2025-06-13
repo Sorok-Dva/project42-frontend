@@ -24,6 +24,7 @@ interface ChatProps {
   highlightedPlayers: { [nickname: string]: string }
   isInn: boolean
   gameType: number
+  hasVoice?: boolean
 }
 
 interface GiphyResult {
@@ -130,6 +131,7 @@ const Chat: React.FC<ChatProps> = ({
   isArchive,
   isInn,
   gameType,
+  hasVoice = false,
 }) => {
   const { socket } = useSocket()
   const [newMessage, setNewMessage] = useState('')
@@ -407,7 +409,7 @@ const Chat: React.FC<ChatProps> = ({
       <div className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/30 scrollbar-track-black/20 bg-black/70">
         {/* Règles du jeu */ }
 
-        <GameRule gameType={gameType} />
+        <GameRule gameType={gameType} hasVoice={hasVoice} />
         <hr />
 
         {/* Messages */ }
