@@ -865,7 +865,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                 whileHover={players.length >= slots || (roomData.discordChannelId && !user?.discordId) ? {} : { scale: 1.02 }}
                 whileTap={players.length >= slots || (roomData.discordChannelId && !user?.discordId) ? {} : { scale: 0.98 }}
                 onClick={handleJoinGame}
-                disabled={players.length >= slots || (roomData.discordChannelId && !user?.discordId)}
+                disabled={players.length >= slots || (!!roomData.discordChannelId && !user?.discordId)}
                 data-tooltip-id="join_game"
                 data-tooltip-content={
                   players.length >= slots
