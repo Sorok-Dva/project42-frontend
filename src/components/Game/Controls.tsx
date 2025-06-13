@@ -744,7 +744,7 @@ const GameControls: React.FC<GameControlsProps> = ({
               </div>
 
               {/* Lier un salon vocal Discord */}
-              {roomData.discordChannelId ? (
+              {roomData.discordChannelId !== null ? (
                 <p className="text-center text-green-400">
                   Salon vocal lié : {roomData.discordChannelId}
                 </p>

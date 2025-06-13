@@ -16,7 +16,7 @@ const CreateGame = () => {
     roles: ['voyageur', 'sableur', 'archiviste', 'synchronisateur'],
     anonymousVotes: false,
     privateGame: false,
-    discordChannelId: false,
+    discordGame: false,
     password: '',
     timer: 3,
   })
@@ -180,8 +180,8 @@ const CreateGame = () => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    name="discordChannelId"
-                    checked={formData.discordChannelId}
+                    name="discordGame"
+                    checked={formData.discordGame}
                     onChange={handleChange}
                   />
                 }

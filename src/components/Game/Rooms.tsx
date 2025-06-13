@@ -60,7 +60,7 @@ const RoomList = () => {
     maxPlayers: 6,
     anonymousVotes: false,
     privateGame: false,
-    discordChannelId: false,
+    discordGame: false,
     password: "",
     timer: 3,
     whiteFlag: false,
@@ -959,13 +959,8 @@ const RoomList = () => {
                     Sélective
                   </button>
                   <button
-                    className={`px-4 py-2 rounded-lg transition-colors ${formData.discordChannelId ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg" : "bg-black/40 border border-blue-500/30 text-blue-300"}`}
-                    onClick={() =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        discordChannelId: !prev.discordChannelId,
-                      }))
-                    }
+                    className={`px-4 py-2 rounded-lg transition-colors ${formData.discordChannelId ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'}`}
+                    onClick={() => setFormData((prev) => ({ ...prev, discordChannelId: !prev.discordChannelId }))}
                   >
                     Vocale
                   </button>
