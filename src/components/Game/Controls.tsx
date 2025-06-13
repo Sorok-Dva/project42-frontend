@@ -95,6 +95,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const [replayGameId, setReplayGameId] = useState<number | null>(null)
   const [isSavingComment, setIsSavingComment] = useState<boolean>(false)
   const [discordChannelInput, setDiscordChannelInput] = useState('')
+  const [voicePlayers, setVoicePlayers] = useState<number[]>([])
 
   const openEditComposition = () => {
     if (!isCreator || isArchive || roomData.type === 3) return
@@ -449,6 +450,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
   const cardId = player?.card?.id
   const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} isArchive={isArchive} />, [cardId, isArchive])
+  const isInVoice = player ? voicePlayers.includes(player.playerId) : false
 
   // Enregistrer automatiquement le commentaire après 3 secondes d'inactivité
   useEffect(() => {
@@ -473,6 +475,21 @@ const GameControls: React.FC<GameControlsProps> = ({
 
     return () => clearTimeout(timer)
   }, [favoriteComment, isFavoriteArchive, gameId, token])
+
+  // Suivre la présence des joueurs dans le salon vocal
+  useEffect(() => {
+    if (!roomData.discordChannelId || !socket) return
+
+    const handleVoiceStatus = (playersInVoice: Player[]) => {
+      setVoicePlayers(playersInVoice.map((p) => p.playerId))
+    }
+
+    socket.on('voiceStatus', handleVoiceStatus)
+
+    return () => {
+      socket.off('voiceStatus', handleVoiceStatus)
+    }
+  }, [roomData.discordChannelId, socket])
 
   // Rendu conditionnel selon l'état du jeu
   if (player && !gameStarted && !gameFinished) {
@@ -745,9 +762,19 @@ const GameControls: React.FC<GameControlsProps> = ({
 
               {/* Lier un salon vocal Discord */}
               {roomData.discordChannelId !== null ? (
-                <p className="text-center text-green-400">
-                  Salon vocal lié : {roomData.discordChannelId}
-                </p>
+                <motion.button
+                  className={`sound-tick w-full px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-all ${isInVoice ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  whileHover={isInVoice ? {} : { scale: 1.02 }}
+                  whileTap={isInVoice ? {} : { scale: 0.98 }}
+                  onClick={() => {
+                    if (!isInVoice) {
+                      window.open(`https://discord.com/channels/${roomData.discordChannelId}`, '_blank')
+                    }
+                  }}
+                  disabled={isInVoice}
+                >
+                  Rejoindre le salon Discord
+                </motion.button>
               ) : (
                 <div className="space-y-2">
                   <input
