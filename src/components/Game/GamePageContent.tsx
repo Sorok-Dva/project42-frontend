@@ -1194,6 +1194,7 @@ const GamePage = () => {
                   isNight={isNight}
                   isInn={isInn}
                   innList={innList}
+                  hasVoice={!!roomData.discordChannelId}
                 />
               </Box>
             </Box>

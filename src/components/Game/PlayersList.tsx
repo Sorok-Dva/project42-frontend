@@ -15,7 +15,7 @@ import axios from 'axios'
 import { createPortal } from 'react-dom'
 import { useUser } from 'contexts/UserContext'
 import { Player } from 'types/player'
-import { GraduationCap } from 'lucide-react'
+import { GraduationCap, Mic, MicOff } from 'lucide-react'
 
 interface PlayersListProps {
   players: Player[]
@@ -38,6 +38,7 @@ interface PlayersListProps {
   isNight: boolean
   isInn: boolean
   innList: string[]
+  hasVoice: boolean
 }
 
 interface SuspiciousCard {
@@ -82,6 +83,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   isNight,
   isInn,
   innList,
+  hasVoice,
 }) => {
   const { user } = useUser()
   const [availableCards, setAvailableCards] = useState<{ id: number, name: string }[]>([])
@@ -89,6 +91,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   const [showCardSelector, setShowCardSelector] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [lastVotedPlayer, setLastVotedPlayer] = useState<number | null>(null)
+  const [voicePlayers, setVoicePlayers] = useState<number[]>([])
 
   const guideAskHistory: string[] =[]
   useEffect(() => {
@@ -128,6 +131,21 @@ const PlayersList: React.FC<PlayersListProps> = ({
       localStorage.setItem(`suspiciousCards_${gameId}`, JSON.stringify(suspiciousCards))
     }
   }, [suspiciousCards, gameId, player])
+
+  // Écouter le statut vocal des joueurs via Socket.IO
+  useEffect(() => {
+    if (!hasVoice || !socket) return
+
+    const handleVoiceStatus = (playersInVoice: Player[]) => {
+      setVoicePlayers(playersInVoice.map((p) => p.playerId))
+    }
+
+    socket.on('voiceStatus', handleVoiceStatus)
+
+    return () => {
+      socket.off('voiceStatus', handleVoiceStatus)
+    }
+  }, [hasVoice, socket])
 
   const handleKickPlayer = (nickname: string) => {
     if (!isCreator || !socket || gameStarted) return
@@ -337,6 +355,11 @@ const PlayersList: React.FC<PlayersListProps> = ({
                 >
                   <span className="player sound-tick" data-profile={user?.isAdmin ? _player.realNickname || _player.nickname : _player.nickname}>
                     {_player.nickname}{' '}
+                    {hasVoice && (
+                      <span className="inline-flex items-center ml-1">
+                        {voicePlayers.includes(_player.playerId) ? <Mic size={14} /> : <MicOff size={14} />}
+                      </span>
+                    )}
                     {_player.guide && (
                       <>
                         <span className="h-5 w-5" data-tooltip-content={`${_player.nickname} est guidé par ${_player.guide}`} data-tooltip-id={`tooltip-${_player.guide}`}>

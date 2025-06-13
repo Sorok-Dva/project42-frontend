@@ -189,3 +189,13 @@ export const linkDiscordChannel = async (
   return response.data
 }
 
+/**
+ * Récupère la liste des joueurs présents dans le salon vocal Discord
+ */
+export const fetchDiscordVoiceStatus = async (gameId: string) => {
+  const response = await axios.get('/api/discord/voice-status', {
+    params: { gameId },
+  })
+  return response.data
+}
+
