@@ -1,13 +1,13 @@
-"use client";
+'use client'
 
-import React, { useCallback, useEffect, useState } from "react";
-import axios from "axios";
-import { useUser } from "contexts/UserContext";
-import { useSocket } from "contexts/SocketContext";
-import type { RoomCard, RoomData } from "hooks/useGame";
-import { useAuth } from "contexts/AuthContext";
-import { leaveGame } from "services/gameService";
-import { hasRole } from "utils/rolify";
+import React, { useCallback, useEffect, useState } from 'react'
+import axios from 'axios'
+import { useUser } from 'contexts/UserContext'
+import { useSocket } from 'contexts/SocketContext'
+import type { RoomCard, RoomData } from 'hooks/useGame'
+import { useAuth } from 'contexts/AuthContext'
+import { leaveGame } from 'services/gameService'
+import { hasRole } from 'utils/rolify'
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -15,8 +15,8 @@ import {
   Flag,
   Ghost,
   Lock,
-} from "lucide-react";
-import { Tooltip } from "react-tooltip";
+} from 'lucide-react'
+import { Tooltip } from 'react-tooltip'
 
 const generateCards = (cards: RoomCard[]) => {
   return cards.map((c) => {
@@ -25,7 +25,7 @@ const generateCards = (cards: RoomCard[]) => {
         <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
           <span>{c.quantity}</span>
         </div>
-      ) : null;
+      ) : null
     return (
       <div key={c.id} className="inline-block relative">
         <img
@@ -35,81 +35,81 @@ const generateCards = (cards: RoomCard[]) => {
         />
         {amount}
       </div>
-    );
-  });
-};
+    )
+  })
+}
 
 const RoomList = () => {
-  const { user } = useUser();
-  const { token } = useAuth();
-  const socket = useSocket().socket;
-  const [inGame, setInGame] = useState(false);
-  const [roomsWaitingFun, setRoomsWaitingFun] = useState<RoomData[]>([]); // Rooms détente en attente
-  const [roomsInProgressFun, setRoomsInProgressFun] = useState<RoomData[]>([]); // Rooms détente en cours
+  const { user } = useUser()
+  const { token } = useAuth()
+  const socket = useSocket().socket
+  const [inGame, setInGame] = useState(false)
+  const [roomsWaitingFun, setRoomsWaitingFun] = useState<RoomData[]>([]) // Rooms détente en attente
+  const [roomsInProgressFun, setRoomsInProgressFun] = useState<RoomData[]>([]) // Rooms détente en cours
   const [roomsInProgressSerious, setRoomsInProgressSerious] = useState<
     RoomData[]
-  >([]); // Rooms reflexion en cours
+  >([]) // Rooms reflexion en cours
   const [roomsWaitingSerious, setRoomsWaitingSerious] = useState<RoomData[]>(
     [],
-  ); // Rooms reflexion en attente
-  const [playerRoomId, setPlayerRoomId] = useState<number | null>(null); // Room actuelle du joueur
-  const [showForm, setShowForm] = useState(false);
-  const [gameId, setGameId] = useState<number | null>(null);
+  ) // Rooms reflexion en attente
+  const [playerRoomId, setPlayerRoomId] = useState<number | null>(null) // Room actuelle du joueur
+  const [showForm, setShowForm] = useState(false)
+  const [gameId, setGameId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     name: `Partie de ${user?.nickname}`,
     maxPlayers: 6,
     anonymousVotes: false,
     privateGame: false,
     discordGame: false,
-    password: "",
+    password: '',
     timer: 3,
     whiteFlag: false,
     anonymousGame: false,
     type: 3,
-  });
-  const [isGameTypesInfoExpanded, setIsGameTypesInfoExpanded] = useState(true);
+  })
+  const [isGameTypesInfoExpanded, setIsGameTypesInfoExpanded] = useState(true)
 
-  const channel = new BroadcastChannel("site-channel");
+  const channel = new BroadcastChannel('site-channel')
 
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       timer: formData.type === 3 ? 2 : formData.timer,
-    }));
-  }, [formData.type]);
+    }))
+  }, [formData.type])
 
   useEffect(() => {
-    fetchRooms();
-    fetchPlayerRoom();
+    fetchRooms()
+    fetchPlayerRoom()
 
-    socket.on("roomsUpdated", fetchRooms);
-    window.addEventListener("storage", (e) => {
-      if (e.key === "gameFinished") {
-        fetchRooms();
-        setPlayerRoomId(null);
-        setInGame(false);
-        localStorage.removeItem("gameFinished");
+    socket.on('roomsUpdated', fetchRooms)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'gameFinished') {
+        fetchRooms()
+        setPlayerRoomId(null)
+        setInGame(false)
+        localStorage.removeItem('gameFinished')
       }
-    });
+    })
     return () => {
-      socket.off("roomsUpdated");
-    };
-  }, []);
+      socket.off('roomsUpdated')
+    }
+  }, [])
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) return
 
     socket.onAny((eventName, ...args) => {
-      console.log(`Événement reçu : ${eventName}`, args);
-    });
+      console.log(`Événement reçu : ${eventName}`, args)
+    })
 
     return () => {
-      socket.offAny();
-    };
-  }, [socket]);
+      socket.offAny()
+    }
+  }, [socket])
 
   useEffect(() => {
-    if (!socket || !user) return;
+    if (!socket || !user) return
 
     const handlePlayerLeft = (data: { message: string }) => {
       /* alert(data.message.includes(user.nickname))
@@ -118,71 +118,71 @@ const RoomList = () => {
         setPlayerRoomId(null)
         fetchRooms()
       }*/
-    };
+    }
 
-    socket.on("playerLeft", handlePlayerLeft);
+    socket.on('playerLeft', handlePlayerLeft)
 
     return () => {
-      socket.off("playerLeft", handlePlayerLeft);
-    };
-  }, [socket, user]);
+      socket.off('playerLeft', handlePlayerLeft)
+    }
+  }, [socket, user])
 
   const fetchRooms = useCallback(async () => {
     try {
-      const { data } = await axios.get("/api/games/rooms");
+      const { data } = await axios.get('/api/games/rooms')
       const waitingFun = data.filter(
         (room: RoomData) =>
-          room.status === "waiting" && [1, 3, 4, 5].includes(room.type),
-      );
+          room.status === 'waiting' && [1, 3, 4, 5].includes(room.type),
+      )
       const inProgressFun = data.filter(
         (room: RoomData) =>
-          room.status === "in_progress" && [1, 3, 4, 5].includes(room.type),
-      );
+          room.status === 'in_progress' && [1, 3, 4, 5].includes(room.type),
+      )
       const waitingSerious = data.filter(
         (room: RoomData) =>
-          room.status === "waiting" && [0, 2, 4, 5].includes(room.type),
-      );
+          room.status === 'waiting' && [0, 2, 4, 5].includes(room.type),
+      )
       const inProgressSerious = data.filter(
         (room: RoomData) =>
-          room.status === "in_progress" && [0, 2, 4, 5].includes(room.type),
-      );
+          room.status === 'in_progress' && [0, 2, 4, 5].includes(room.type),
+      )
 
-      setRoomsWaitingFun(waitingFun);
-      setRoomsInProgressFun(inProgressFun);
-      setRoomsWaitingSerious(waitingSerious);
-      setRoomsInProgressSerious(inProgressSerious);
+      setRoomsWaitingFun(waitingFun)
+      setRoomsInProgressFun(inProgressFun)
+      setRoomsWaitingSerious(waitingSerious)
+      setRoomsInProgressSerious(inProgressSerious)
     } catch (error) {
-      console.error("Erreur lors de la récupération des rooms :", error);
+      console.error('Erreur lors de la récupération des rooms :', error)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    fetchRooms();
-    const interval = setInterval(fetchRooms, 60000);
-    return () => clearInterval(interval);
-  }, [fetchRooms]);
+    fetchRooms()
+    const interval = setInterval(fetchRooms, 60000)
+    return () => clearInterval(interval)
+  }, [fetchRooms])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked } = e.target
     setFormData({
       ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
-  };
+      [name]: type === 'checkbox' ? checked : value,
+    })
+  }
 
   const handleSubmit = async () => {
-    if (inGame || !token) return;
+    if (inGame || !token) return
     try {
-      const response = await axios.post("/api/games/room", formData, {
+      const response = await axios.post('/api/games/room', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
-      setGameId(response.data.game.id);
-      setPlayerRoomId(response.data.game.id);
-      setInGame(true);
-      setShowForm(false);
-      fetchRooms();
+      })
+      setGameId(response.data.game.id)
+      setPlayerRoomId(response.data.game.id)
+      setInGame(true)
+      setShowForm(false)
+      fetchRooms()
       await axios.post(
         `/api/games/room/${response.data.game.id}/join`,
         { creator: response.data.game.creator },
@@ -191,40 +191,40 @@ const RoomList = () => {
             Authorization: `Bearer ${token}`,
           },
         },
-      );
-      window.open(`/game/${response.data.game.id}`, "_blank");
+      )
+      window.open(`/game/${response.data.game.id}`, '_blank')
     } catch (error: any) {
       if (error.response?.data?.error) {
-        alert(error.response.data.error);
+        alert(error.response.data.error)
       } else {
-        alert("Erreur lors de la création de la partie.");
+        alert('Erreur lors de la création de la partie.')
       }
     }
-  };
+  }
 
   const fetchPlayerRoom = async () => {
     try {
-      const { data } = await axios.get("/api/games/players/room", {
+      const { data } = await axios.get('/api/games/players/room', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-      });
-      setPlayerRoomId(data?.roomId || null);
-      setInGame(data?.roomId !== null);
+      })
+      setPlayerRoomId(data?.roomId || null)
+      setInGame(data?.roomId !== null)
     } catch (error) {
       console.error(
-        "Erreur lors de la récupération de la room du joueur :",
+        'Erreur lors de la récupération de la room du joueur :',
         error,
-      );
+      )
     }
-  };
+  }
 
   const handleJoinRoom = async (roomId: number) => {
     if (playerRoomId) {
       alert(
-        "Vous êtes déjà dans une partie. Quittez votre partie actuelle pour en rejoindre une autre.",
-      );
-      return;
+        'Vous êtes déjà dans une partie. Quittez votre partie actuelle pour en rejoindre une autre.',
+      )
+      return
     }
     try {
       const response = await axios.post(
@@ -232,29 +232,29 @@ const RoomList = () => {
         {},
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         },
-      );
-      setPlayerRoomId(roomId);
-      window.open(`/game/${response.data.game.id}`, "_blank");
-      setInGame(true);
-      fetchRooms();
+      )
+      setPlayerRoomId(roomId)
+      window.open(`/game/${response.data.game.id}`, '_blank')
+      setInGame(true)
+      fetchRooms()
     } catch (error: any) {
       if (error.response?.data?.error) {
-        alert(error.response.data.error);
+        alert(error.response.data.error)
       } else {
-        alert("Erreur lors de la tentative de rejoindre la partie.");
+        alert('Erreur lors de la tentative de rejoindre la partie.')
       }
     }
-  };
+  }
 
   const handleSpectateRoom = async (roomId: number) => {
     if (playerRoomId) {
       alert(
-        "Vous êtes déjà dans une partie. Quittez votre partie actuelle pour en regarder une autre.",
-      );
-      return;
+        'Vous êtes déjà dans une partie. Quittez votre partie actuelle pour en regarder une autre.',
+      )
+      return
     }
     try {
       const response = await axios.post(
@@ -265,60 +265,60 @@ const RoomList = () => {
             Authorization: `Bearer ${token}`,
           },
         },
-      );
-      setPlayerRoomId(roomId);
-      window.open(`/game/${response.data.game.id}`, "_blank");
-      setInGame(true);
-      fetchRooms();
+      )
+      setPlayerRoomId(roomId)
+      window.open(`/game/${response.data.game.id}`, '_blank')
+      setInGame(true)
+      fetchRooms()
     } catch (error: any) {
       if (error.response?.data?.error) {
-        alert(error.response.data.error);
+        alert(error.response.data.error)
       } else {
-        alert("Erreur lors de la tentative de rejoindre la partie.");
+        alert('Erreur lors de la tentative de rejoindre la partie.')
       }
     }
-  };
+  }
 
   const handleJoinCurrentRoom = async () => {
     if (!playerRoomId) {
-      alert("Vous n'êtes pas dans une partie.");
-      return;
+      alert('Vous n\'êtes pas dans une partie.')
+      return
     }
-    window.open(`/game/${playerRoomId}`, "_blank");
-  };
+    window.open(`/game/${playerRoomId}`, '_blank')
+  }
 
   const handleLeaveRoom = async () => {
     if (!playerRoomId) {
-      alert("Vous n'êtes dans aucune partie.");
-      return;
+      alert('Vous n\'êtes dans aucune partie.')
+      return
     }
     try {
-      const response = await leaveGame(token);
+      const response = await leaveGame(token)
       if (response.data.message) {
-        socket.emit("leaveRoom", {
+        socket.emit('leaveRoom', {
           roomId: playerRoomId,
           player: user
             ? {
-                id: user?.id,
-                nickname: response?.nickname,
-                realNickname: response?.realNickname,
-              }
+              id: user?.id,
+              nickname: response?.nickname,
+              realNickname: response?.realNickname,
+            }
             : null,
-        });
-        setPlayerRoomId(null);
-        setInGame(false);
-        localStorage.removeItem(`game_auth_${playerRoomId}`);
-        alert("Vous avez bien quitté votre partie.");
-        fetchRooms();
+        })
+        setPlayerRoomId(null)
+        setInGame(false)
+        localStorage.removeItem(`game_auth_${playerRoomId}`)
+        alert('Vous avez bien quitté votre partie.')
+        fetchRooms()
       }
     } catch (error: any) {
       if (error.response?.data?.error) {
-        alert(error.response.data.error);
+        alert(error.response.data.error)
       } else {
-        alert("Erreur lors de la tentative de quitter la partie.");
+        alert('Erreur lors de la tentative de quitter la partie.')
       }
     }
-  };
+  }
 
   const generateRoomLine = (
     game: RoomData,
@@ -327,16 +327,16 @@ const RoomList = () => {
   ): JSX.Element => {
     // Define type colors
     const typeColors = {
-      0: "border-green-600 bg-green-600", // NORMAL
-      1: "bg-blue-500", // FUN
-      2: "bg-red-600", // SERIOUS
-      3: "bg-purple-600", // CARNAGE
-      4: "special-gradient border-yellow-300", // SPECIAL
-      5: "bg-orange-600", // TEST
-    };
+      0: 'border-green-600 bg-green-600', // NORMAL
+      1: 'bg-blue-500', // FUN
+      2: 'bg-red-600', // SERIOUS
+      3: 'bg-purple-600', // CARNAGE
+      4: 'special-gradient border-yellow-300', // SPECIAL
+      5: 'bg-orange-600', // TEST
+    }
 
     const typeColor =
-      typeColors[game.type as keyof typeof typeColors] || "bg-gray-500";
+      typeColors[game.type as keyof typeof typeColors] || 'bg-gray-500'
 
     return (
       <div
@@ -388,9 +388,9 @@ const RoomList = () => {
                 {waitingRoom && (
                   <>
                     <button
-                      className={`px-3 py-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-colors text-sm ${game.discordChannelId && !user?.discordId ? "opacity-50 cursor-not-allowed" : ""}`}
+                      className={`px-3 py-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-colors text-sm ${game.discordChannelId && !user?.discordId ? 'opacity-50 cursor-not-allowed' : ''}`}
                       onClick={() => handleJoinRoom(game.id)}
-                      disabled={game.discordChannelId && !user?.discordId}
+                      disabled={!!(game.discordChannelId && !user?.discordId)}
                       data-tooltip-id={
                         game.discordChannelId && !user?.discordId
                           ? `discord_${game.id}`
@@ -398,7 +398,7 @@ const RoomList = () => {
                       }
                       data-tooltip-content={
                         game.discordChannelId && !user?.discordId
-                          ? "Liez votre compte Discord pour rejoindre une partie vocale"
+                          ? 'Liez votre compte Discord pour rejoindre une partie vocale'
                           : undefined
                       }
                     >
@@ -432,8 +432,8 @@ const RoomList = () => {
           </div>
         </div>
       </div>
-    );
-  };
+    )
+  }
 
   const GenerateBloc: React.FC<{
     className: string;
@@ -491,8 +491,8 @@ const RoomList = () => {
           </div>
         </div>
       </div>
-    );
-  };
+    )
+  }
 
   return (
     <section className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black text-white p-4">
@@ -536,7 +536,7 @@ const RoomList = () => {
               />
             </svg>
             <span className="text-yellow-300">
-              Tu dois quitter ta partie en cours pour <b>observer</b> ou{" "}
+              Tu dois quitter ta partie en cours pour <b>observer</b> ou{' '}
               <b>jouer</b> une autre partie !
             </span>
           </div>
@@ -763,7 +763,7 @@ const RoomList = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                   <button
                     className={`px-4 py-2
-                    ${formData.type !== 3 ? "bg-black/40 text-gray-400 rounded-lg border border-gray-700 " : "bg-gradient-to-r  from-purple-600 to-purple-900  text-white rounded-lg shadow-lg"}`}
+                    ${formData.type !== 3 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700 ' : 'bg-gradient-to-r  from-purple-600 to-purple-900  text-white rounded-lg shadow-lg'}`}
                     onClick={() =>
                       setFormData((prev) => ({ ...prev, type: 3, timer: 2 }))
                     }
@@ -772,7 +772,7 @@ const RoomList = () => {
                   </button>
                   <button
                     className={`px-4 py-2
-                    ${formData.type !== 1 ? "bg-black/40 text-gray-400 rounded-lg border border-gray-700 " : "bg-gradient-to-r from-blue-400 to-blue-600  text-white rounded-lg shadow-lg"}`}
+                    ${formData.type !== 1 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700 ' : 'bg-gradient-to-r from-blue-400 to-blue-600  text-white rounded-lg shadow-lg'}`}
                     onClick={() =>
                       setFormData((prev) => ({ ...prev, type: 1 }))
                     }
@@ -781,7 +781,7 @@ const RoomList = () => {
                   </button>
                   <button
                     className={`px-4 py-2
-                    ${formData.type !== 0 ? "bg-black/40 text-gray-400 rounded-lg border border-gray-700 " : "bg-gradient-to-r from-green-600 to-green-800  text-white rounded-lg shadow-lg"}`}
+                    ${formData.type !== 0 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700 ' : 'bg-gradient-to-r from-green-600 to-green-800  text-white rounded-lg shadow-lg'}`}
                     onClick={() =>
                       setFormData((prev) => ({ ...prev, type: 0 }))
                     }
@@ -790,17 +790,17 @@ const RoomList = () => {
                   </button>
                   <button
                     className={`px-4 py-2
-                    ${formData.type !== 2 ? "bg-black/40 text-gray-400 rounded-lg border border-gray-700" : "bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg shadow-lg"}`}
+                    ${formData.type !== 2 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700' : 'bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg shadow-lg'}`}
                     onClick={() =>
                       setFormData((prev) => ({ ...prev, type: 2 }))
                     }
                   >
                     SÉRIEUSE
                   </button>
-                  {user && hasRole(user, "Animator") && (
+                  {user && hasRole(user, 'Animator') && (
                     <button
                       className={`px-4 py-2
-                      ${formData.type !== 4 ? "bg-black/40 text-gray-400 rounded-lg border border-gray-700" : "bg-gradient-to-r from-yellow-600 to-yellow-800 text-white rounded-lg shadow-lg"}`}
+                      ${formData.type !== 4 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700' : 'bg-gradient-to-r from-yellow-600 to-yellow-800 text-white rounded-lg shadow-lg'}`}
                       onClick={() =>
                         setFormData((prev) => ({ ...prev, type: 4 }))
                       }
@@ -808,10 +808,10 @@ const RoomList = () => {
                       SPÉCIALE
                     </button>
                   )}
-                  {user && hasRole(user, "Developer") && (
+                  {user && hasRole(user, 'Developer') && (
                     <button
                       className={`px-4 py-2
-                      ${formData.type !== 5 ? "bg-black/40 text-gray-400 rounded-lg border border-gray-700" : "bg-gradient-to-r from-orange-600 to-orange-800 text-white rounded-lg shadow-lg"}`}
+                      ${formData.type !== 5 ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700' : 'bg-gradient-to-r from-orange-600 to-orange-800 text-white rounded-lg shadow-lg'}`}
                       onClick={() =>
                         setFormData((prev) => ({ ...prev, type: 5 }))
                       }
@@ -913,7 +913,7 @@ const RoomList = () => {
                   {[2, 3, 4, 5].map((timerValue) => (
                     <button
                       key={timerValue}
-                      className={`px-4 py-2 ${formData.timer === timerValue || (formData.type === 3 && timerValue === 2) ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg" : "bg-black/40 border border-blue-500/30 text-blue-300"} rounded-lg transition-colors ${formData.type === 3 ? "cursor-not-allowed" : "cursor-pointer"}`}
+                      className={`px-4 py-2 ${formData.timer === timerValue || (formData.type === 3 && timerValue === 2) ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'} rounded-lg transition-colors ${formData.type === 3 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                       onClick={() =>
                         setFormData((prev) => ({ ...prev, timer: timerValue }))
                       }
@@ -931,7 +931,7 @@ const RoomList = () => {
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   <button
-                    className={`px-4 py-2 rounded-lg transition-colors ${formData.whiteFlag ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg" : "bg-black/40 border border-blue-500/30 text-blue-300"}`}
+                    className={`px-4 py-2 rounded-lg transition-colors ${formData.whiteFlag ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'}`}
                     onClick={() =>
                       setFormData((prev) => ({
                         ...prev,
@@ -942,7 +942,7 @@ const RoomList = () => {
                     Sans points
                   </button>
                   <button
-                    className={`px-4 py-2 rounded-lg transition-colors ${formData.anonymousGame ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg" : "bg-black/40 border border-blue-500/30 text-blue-300"}`}
+                    className={`px-4 py-2 rounded-lg transition-colors ${formData.anonymousGame ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'}`}
                     onClick={() =>
                       setFormData((prev) => ({
                         ...prev,
@@ -959,13 +959,13 @@ const RoomList = () => {
                     Sélective
                   </button>
                   <button
-                    className={`px-4 py-2 rounded-lg transition-colors ${formData.discordChannelId ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'}`}
-                    onClick={() => setFormData((prev) => ({ ...prev, discordChannelId: !prev.discordChannelId }))}
+                    className={`px-4 py-2 rounded-lg transition-colors ${formData.discordGame ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'}`}
+                    onClick={() => setFormData((prev) => ({ ...prev, discordGame: !prev.discordGame }))}
                   >
                     Vocale
                   </button>
                   <button
-                    className={`px-4 py-2 rounded-lg transition-colors ${formData.privateGame ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg" : "bg-black/40 border border-blue-500/30 text-blue-300"}`}
+                    className={`px-4 py-2 rounded-lg transition-colors ${formData.privateGame ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'}`}
                     onClick={() =>
                       setFormData((prev) => ({
                         ...prev,
@@ -1000,7 +1000,7 @@ const RoomList = () => {
                   5 - Nombre de joueurs
                 </h4>
                 <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg shadow-lg">
-                  {formData.type === 3 ? "6 joueurs" : "de 6 j à 24 j"}
+                  {formData.type === 3 ? '6 joueurs' : 'de 6 j à 24 j'}
                 </button>
               </div>
 
@@ -1017,7 +1017,7 @@ const RoomList = () => {
         </div>
       )}
     </section>
-  );
-};
+  )
+}
 
-export default RoomList;
+export default RoomList
