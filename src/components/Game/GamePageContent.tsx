@@ -12,6 +12,8 @@ import { useUser } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
 import { useGameContext } from 'contexts/GameContext'
 import { useYouTubeAudioPlayer } from 'hooks/useYoutubeAudioPlayer'
+import { Mic, Flag, Ghost, Lock } from 'lucide-react'
+import { Tooltip } from 'react-tooltip'
 
 import { fetchGameDetails, leaveGame } from 'services/gameService'
 import Controls from './Controls'
@@ -933,8 +935,36 @@ const GamePage = () => {
                       {roomData.name}
                     </h1>
                     <div className="flex items-center gap-4 text-sm text-blue-300">
-                      <p className="text-sm text-blue-300">
-                        {players.length}/{slots} joueurs • Options: {options.length > 0 ? options.join(', ') : 'Aucune'} • {isNight ? 'Phase nocturne' : 'Phase diurne'}
+                      <p className="text-sm text-blue-300 flex items-center">
+                        {players.length}/{slots} joueurs • Options
+                        <span className="flex gap-1 ml-1">
+                          {roomData.discordChannelId && (
+                            <>
+                              <Mic size={16} data-tooltip-id={`voice_${roomData.id}`} />
+                              <Tooltip id={`voice_${roomData.id}`} content="Partie vocale" />
+                            </>
+                          )}
+                          {roomData.whiteFlag && (
+                            <>
+                              <Flag size={16} data-tooltip-id={`flag_${roomData.id}`} />
+                              <Tooltip id={`flag_${roomData.id}`} content="Sans points" />
+                            </>
+                          )}
+                          {roomData.anonymousGame && (
+                            <>
+                              <Ghost size={16} data-tooltip-id={`anon_${roomData.id}`} />
+                              <Tooltip id={`anon_${roomData.id}`} content="Partie anonyme" />
+                            </>
+                          )}
+                          {roomData.password && (
+                            <>
+                              <Lock size={16} data-tooltip-id={`private_${roomData.id}`} />
+                              <Tooltip id={`private_${roomData.id}`} content="Partie privée" />
+                            </>
+                          )}
+                          {options.length === 0 && ' Aucune'}
+                        </span>
+                        • {isNight ? 'Phase nocturne' : 'Phase diurne'}
                       </p>
 
                       {/* Indicateur de connexion */}
@@ -1133,6 +1163,7 @@ const GamePage = () => {
                           isArchive={isArchive}
                           isInn={isInn}
                           gameType={roomData.type}
+                          hasVoice={!!roomData.discordChannelId}
                         />
                       )
                     })()}
