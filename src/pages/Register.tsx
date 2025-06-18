@@ -21,6 +21,7 @@ import {
   faRocket,
   faShieldAlt,
 } from '@fortawesome/free-solid-svg-icons'
+import { Tooltip } from 'react-tooltip'
 
 const Register: React.FC = () => {
   const navigate = useNavigate()
@@ -83,6 +84,48 @@ const Register: React.FC = () => {
   const validatePassword = (password: string) => {
     const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z])(?=.*[\W_]).{8,}$/gm
     return re.test(password)
+  }
+
+  const getTooltipMessage = () => {
+    const issues = []
+
+    if (!validateAlphaKey(alphaKey)) {
+      issues.push('Clé Alpha invalide (format UUID requis)')
+    }
+
+    if (!validateUsername(nickname)) {
+      if (!nickname) {
+        issues.push('Pseudo requis')
+      } else {
+        issues.push('Pseudo invalide (4-10 caractères, commence par une lettre)')
+      }
+    }
+
+    if (!validateEmail(email)) {
+      if (!email) {
+        issues.push('Email requis')
+      } else {
+        issues.push('Format d\'email invalide')
+      }
+    }
+
+    if (!validatePassword(password)) {
+      if (!password) {
+        issues.push('Mot de passe requis')
+      } else {
+        issues.push('Mot de passe trop faible (8+ caractères, majuscule, minuscule, chiffre, caractère spécial)')
+      }
+    }
+
+    if (gender === '') {
+      issues.push('Genre requis')
+    }
+
+    if (!isChecked) {
+      issues.push('Acceptation des conditions requise')
+    }
+
+    return issues.length > 0 ? `Étapes manquantes :<br>• ${issues.join('<br>• ')}` : ''
   }
 
   const isFormValid = () => {
@@ -277,7 +320,6 @@ const Register: React.FC = () => {
                   )}
                 </div>
               </motion.div>
-
 
               {/* Personal Info Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -505,17 +547,15 @@ const Register: React.FC = () => {
               </motion.div>
 
               {/* Submit Button */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.0 }}
-              >
+              <div className="relative group">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={!isFormValid() || isLoading}
                   className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-300 shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  data-tooltip-id="register_tooltip"
+                  data-tooltip-html={!isFormValid() && !isLoading ? getTooltipMessage() : ''}
                 >
                   {isLoading ? (
                     <>
@@ -536,7 +576,8 @@ const Register: React.FC = () => {
                     </>
                   )}
                 </motion.button>
-              </motion.div>
+                <Tooltip id="register_tooltip" />
+              </div>
             </form>
 
             {/* Login Link */}
