@@ -423,40 +423,6 @@ const Register: React.FC = () => {
                 </div>
               </motion.div>
 
-              {/* Referrer */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.75 }}
-                className="space-y-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <input
-                    id="has-referrer"
-                    type="checkbox"
-                    checked={hasReferrer}
-                    onChange={(e) => setHasReferrer(e.target.checked)}
-                    disabled={referrerLocked}
-                    className="w-4 h-4 text-blue-600 bg-gray-900 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
-                  />
-                  <label htmlFor="has-referrer" className="text-sm text-gray-300">
-                    Je suis parrainé
-                  </label>
-                </div>
-                {hasReferrer && (
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={referrer}
-                      onChange={(e) => setReferrer(e.target.value)}
-                      placeholder="Nom du parrain"
-                      disabled={referrerLocked}
-                      className="w-full px-4 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all border-gray-700 focus:ring-blue-500/50 disabled:opacity-70"
-                    />
-                  </div>
-                )}
-              </motion.div>
-
               {/* Password Strength */}
               {password && (
                 <motion.div
@@ -502,6 +468,40 @@ const Register: React.FC = () => {
                     les Conditions Générales d'Utilisation
                   </Link>
                 </label>
+              </motion.div>
+
+              {/* Referrer */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.75 }}
+                className="space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <input
+                    id="has-referrer"
+                    type="checkbox"
+                    checked={hasReferrer}
+                    onChange={(e) => setHasReferrer(e.target.checked)}
+                    disabled={referrerLocked}
+                    className="w-4 h-4 text-blue-600 bg-gray-900 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                  <label htmlFor="has-referrer" className="text-sm text-gray-300">
+                    Je suis parrainé
+                  </label>
+                </div>
+                {hasReferrer && (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={referrer}
+                      onChange={(e) => setReferrer(e.target.value)}
+                      placeholder="Nom du parrain"
+                      disabled={referrerLocked}
+                      className="w-full px-4 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all border-gray-700 focus:ring-blue-500/50 disabled:opacity-70"
+                    />
+                  </div>
+                )}
               </motion.div>
 
               {/* Submit Button */}

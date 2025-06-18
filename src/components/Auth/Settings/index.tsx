@@ -8,6 +8,7 @@ import {
   UserCog,
   SettingsIcon,
   Shield,
+  Users,
 } from 'lucide-react'
 
 import Badges from './Badges'
@@ -15,6 +16,7 @@ import Profile from './Profile'
 import Settings from './Settings'
 import ModHistory from './ModHistory'
 import Discord from './Discord'
+import Referral from './Referral'
 
 const UserSettings : React.FC = () => {
   const { user } = useUser()
@@ -40,6 +42,11 @@ const UserSettings : React.FC = () => {
       id: 'tab-profile',
       label: 'Gestion du profil',
       icon: <UserCog className="w-5 h-5"/>,
+    },
+    {
+      id: 'tab-referral',
+      label: 'Parrainage',
+      icon: <Users className="w-5 h-5" />,
     },
     {
       id: 'tab-settings',
@@ -151,6 +158,17 @@ const UserSettings : React.FC = () => {
             <Settings/>
           </motion.div>
         ) }
+
+        {activeTab === 'tab-referral' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-6"
+          >
+            <Referral />
+          </motion.div>
+        )}
 
         { activeTab === 'tab-behavior' && (
           <motion.div
