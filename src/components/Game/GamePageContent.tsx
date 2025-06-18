@@ -26,6 +26,7 @@ import Composition from './Composition'
 import { parallaxStars, staticStars } from 'utils/animations'
 import GuideRequestModal from './GuideRequestModal'
 import GuideChat from './GuideChat'
+import BugReportModal from './BugReportModal'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -62,6 +63,7 @@ const GamePage = () => {
   } | null>(null)
 
   const [highlightedPlayers, setHighlightedPlayers] = useState<{ [nickname: string]: string }>({})
+  const [showBugReportModal, setShowBugReportModal] = useState(false)
 
   // États pour la gestion de la connexion
   const wasDisconnectedRef = useRef(false)
@@ -1059,6 +1061,28 @@ const GamePage = () => {
                       </svg>
                       Effacer
                     </motion.button>
+                    { gameStarted && (
+                      <motion.button
+                        className="px-3 py-1 bg-yellow-900/40 hover:bg-yellow-900/60 text-yellow-300 hover:text-white border border-yellow-500/30 rounded-lg transition-all flex items-center gap-1"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowBugReportModal(true)}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        Signaler un bug
+                      </motion.button>
+                    )}
                     <motion.button
                       className="px-3 py-1 bg-red-900/40 hover:bg-red-900/60 text-red-300 hover:text-white border border-red-500/30 rounded-lg transition-all flex items-center gap-1"
                       whileHover={{ scale: 1.05 }}
@@ -1246,6 +1270,16 @@ const GamePage = () => {
             <p className="mt-4 text-blue-300">Chargement de la partie...</p>
           </div>
         </div>
+      )}
+
+      {showBugReportModal && (
+        <BugReportModal
+          isOpen={showBugReportModal}
+          onClose={() => setShowBugReportModal(false)}
+          gameId={gameId}
+          userId={user?.id}
+          username={player?.nickname || viewer?.user?.nickname || 'Anonyme'}
+        />
       )}
     </>
   )
