@@ -2,7 +2,7 @@
 
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import PasswordStrengthChecker from '../components/Common/PasswordStrengthChecker'
 import { toast } from 'react-toastify'
@@ -24,11 +24,15 @@ import {
 
 const Register: React.FC = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [nickname, setNickname] = useState('')
   const [alphaKey, setAlphaKey] = useState('')
   const [gender, setGender] = useState('')
+  const [hasReferrer, setHasReferrer] = useState(false)
+  const [referrer, setReferrer] = useState('')
+  const [referrerLocked, setReferrerLocked] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [isChecked, setIsChecked] = useState(false)
@@ -49,6 +53,16 @@ const Register: React.FC = () => {
       mainRef.current.scrollTop = 0
     }
   }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const urlRef = params.get('referrer') || params.get('ref')
+    if (urlRef) {
+      setHasReferrer(true)
+      setReferrer(urlRef)
+      setReferrerLocked(true)
+    }
+  }, [location.search])
 
   const validateEmail = (email: string) => {
     if (isForbiddenEmail(email)) return false
@@ -94,7 +108,14 @@ const Register: React.FC = () => {
     }
 
     try {
-      await axios.post('/api/users/register', { email, password, nickname, alphaKey, isMale: gender === 'male' })
+      await axios.post('/api/users/register', {
+        email,
+        password,
+        nickname,
+        alphaKey,
+        isMale: gender === 'male',
+        ...(hasReferrer && referrer ? { referrer } : {}),
+      })
 
       toast.success(
         'Inscription réussie ! Veuillez vérifier votre email pour valider votre compte et finaliser la connexion.',
@@ -257,6 +278,7 @@ const Register: React.FC = () => {
                 </div>
               </motion.div>
 
+
               {/* Personal Info Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Nickname */}
@@ -359,15 +381,49 @@ const Register: React.FC = () => {
                     }`}
                     required
                   />
-                  {validateEmail(email) && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500">✓</div>
-                  )}
-                </div>
-              </motion.div>
+                {validateEmail(email) && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500">✓</div>
+                )}
+              </div>
+            </motion.div>
 
-              {/* Password */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
+            {/* Referrer */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.75 }}
+              className="space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <input
+                  id="has-referrer"
+                  type="checkbox"
+                  checked={hasReferrer}
+                  onChange={(e) => setHasReferrer(e.target.checked)}
+                  disabled={referrerLocked}
+                  className="w-4 h-4 text-blue-600 bg-gray-900 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                />
+                <label htmlFor="has-referrer" className="text-sm text-gray-300">
+                  Je suis parrainé
+                </label>
+              </div>
+              {hasReferrer && (
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={referrer}
+                    onChange={(e) => setReferrer(e.target.value)}
+                    placeholder="Nom du parrain"
+                    disabled={referrerLocked}
+                    className="w-full px-4 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all border-gray-700 focus:ring-blue-500/50 disabled:opacity-70"
+                  />
+                </div>
+              )}
+            </motion.div>
+
+            {/* Password */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.8 }}
                 className="space-y-2"
