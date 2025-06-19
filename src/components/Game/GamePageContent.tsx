@@ -27,6 +27,9 @@ import { parallaxStars, staticStars } from 'utils/animations'
 import GuideRequestModal from './GuideRequestModal'
 import GuideChat from './GuideChat'
 import BugReportModal from './BugReportModal'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { ToastDefaultOptions } from 'utils/toastOptions'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -618,6 +621,24 @@ const GamePage = () => {
     }
   }
 
+  const markGameAsBugged = async (isBugged: boolean) => {
+    try {
+      const res = await axios.post(`/api/admin/games/room/${roomData.id}/markAsBugged`, { isBugged }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (res.status === 200) {
+        toast.success('Partie marquée comme bugged', ToastDefaultOptions)
+      } else {
+        toast.error('Une erreur est survenue', ToastDefaultOptions)
+      }
+    } catch {
+      toast.error('Une erreur est survenue', ToastDefaultOptions)
+    }
+  }
+
   // Créer et gérer l'élément audio
   useEffect(() => {
     audioRef.current = new Audio()
@@ -984,7 +1005,7 @@ const GamePage = () => {
                   </div>
                 </div>
 
-                {!isArchive && (
+                {!isArchive ? (
                   <div className="flex gap-2 items-center">
                     {audioTrack && (
                       <div className="flex items-center gap-2 px-3 py-1 bg-black/40 border border-blue-500/30 rounded-lg">
@@ -1104,6 +1125,19 @@ const GamePage = () => {
                       Quitter
                     </motion.button>
                   </div>
+                ) : (
+                  <>
+                    { gameFinished && user && (user.role == 'SuperAdmin' || user.role == 'Admin' || user.role == 'Developer') && (
+                      <motion.button
+                        className="px-3 py-1 bg-orange-900/40 hover:bg-orange-900/60 text-orange-300 hover:text-white border border-orange-500/30 rounded-lg transition-all flex items-center gap-1"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => markGameAsBugged(true)}
+                      >
+                        Marquer comme bugged
+                      </motion.button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
