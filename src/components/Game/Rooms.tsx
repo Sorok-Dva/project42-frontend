@@ -373,7 +373,11 @@ const RoomList = () => {
             </span>
           </div>
           <div className="col-span-3 text-blue-300">{game.creator}</div>
-          <div className="col-span-2 text-center text-gray-300">
+          <div
+            className="col-span-2 text-center text-gray-300"
+            data-tooltip-id={`${game.id}_players`}
+            data-tooltip-html={`<h5>Joueurs dans la partie:</h5><br>${game.players?.map(p => p.nickname).join(', ')}`}
+          >
             {game.players?.length}/{game.maxPlayers}
           </div>
           <div className="col-span-3 flex justify-end gap-2">
@@ -485,6 +489,8 @@ const RoomList = () => {
               </div>
             ) : (
               <div className="space-y-1">
+
+                {rooms.map((game) => <Tooltip key={game.id} id={`${game.id}_players`} />)}
                 {rooms.map((game) => generateRoomLine(game, waiting))}
               </div>
             )}
