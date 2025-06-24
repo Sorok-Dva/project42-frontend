@@ -482,7 +482,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
                 {/* Actions sur le joueur */}
                 <div className="flex items-center">
-                  {canRequestGuide && !_player.guide && (
+                  {canRequestGuide && !gameStarted && !gameFinished && !_player.guide && (
                     <button
                       onClick={() => {
                         if (socket && _player.id !== undefined) { // Ensure _player.id is defined
