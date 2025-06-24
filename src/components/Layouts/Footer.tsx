@@ -11,7 +11,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear()
   return (
     <>
-      <footer className="footer-top-area pt-100 pb-70">
+      <div className="footer-top-area pt-100 pb-70">
         {/*<div className="container">
           <div className="row">
             <div className="col-lg-3 col-md-6">
@@ -193,9 +193,9 @@ const Footer = () => {
           <Image src={shape1} alt="Image" width={270} height={235} />
           <Image src={shape2} alt="Image" width={270} height={235} />
         </div>
-      </footer>
+      </div>
 
-      <footer className="footer-bottom-area" id="site-footer">
+      <div className="footer-bottom-area" id="site-footer">
         <div className="container">
           <div className="row align-items-center">
             <div className="col-lg-4">
@@ -226,7 +226,7 @@ const Footer = () => {
             </div>
           </div>
         </div>
-      </footer>
+      </div>
     </>
   )
 }
