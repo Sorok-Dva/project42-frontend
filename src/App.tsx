@@ -66,6 +66,7 @@ import LoadingScreen from 'components/Layouts/LoadingScreen'
 import { DailyRewardsProvider } from 'contexts/DailyRewardsContext'
 import DailyRewardsPopup from 'components/DailyRewardPopup'
 import { WarningProvider } from 'contexts/WarningContext'
+import ReplayGame from 'pages/ReplayGame'
 
 const AppContent: React.FC = () => {
   const { serverMaintenance, loading: maintenanceLoading } = useMaintenance()
@@ -149,6 +150,7 @@ const AppContent: React.FC = () => {
         <Route path="/leaderboard/players" element={<Leaderboard />} />
         <Route path="/news" element={<News />} />
         <Route path="/cards" element={<Cards />} />
+        <Route path="/game/:id/replay" element={<ReplayGame />} />
         <Route path="/game/:id" element={<GamePage />} />
         <Route path="/stations" element={<Guilds />} />
         <Route path="/station/:id" element={<Guild />} />

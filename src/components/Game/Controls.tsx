@@ -993,6 +993,15 @@ const GameControls: React.FC<GameControlsProps> = ({
                 {!isFavoriteArchive ? 'Ajouter à mes favoris' : 'Retirer de mes favoris'}
               </motion.button>
 
+              <motion.button
+                className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all shadow-lg"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => window.location.href = `/game/${gameId}/replay`}
+              >
+                Voir le replay
+              </motion.button>
+
               {isFavoriteArchive && (
                 <div className="bg-black/40 rounded-lg p-3 relative">
                   <textarea
