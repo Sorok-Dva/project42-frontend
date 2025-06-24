@@ -15,7 +15,13 @@ import axios from 'axios'
 import { createPortal } from 'react-dom'
 import { useUser } from 'contexts/UserContext'
 import { Player } from 'types/player'
-import { GraduationCap, Mic, MicOff } from 'lucide-react'
+import { Camera, GraduationCap, Mic, MicOff } from 'lucide-react'
+import { useGameContext } from 'contexts/GameContext'
+import {
+  fetchChatMessages,
+  fetchPlayers,
+  fetchViewers,
+} from 'services/gameService'
 
 interface PlayersListProps {
   players: Player[]
@@ -39,6 +45,7 @@ interface PlayersListProps {
   isInn: boolean
   innList: string[]
   hasVoice: boolean
+  isReplay: boolean
 }
 
 interface SuspiciousCard {
@@ -84,6 +91,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   isInn,
   innList,
   hasVoice,
+  isReplay,
 }) => {
   const { user } = useUser()
   const [availableCards, setAvailableCards] = useState<{ id: number, name: string }[]>([])
@@ -92,6 +100,11 @@ const PlayersList: React.FC<PlayersListProps> = ({
   const [mounted, setMounted] = useState(false)
   const [lastVotedPlayer, setLastVotedPlayer] = useState<number | null>(null)
   const [voicePlayers, setVoicePlayers] = useState<number[]>([])
+
+  const {
+    setPlayer,
+    setMessages,
+  } = useGameContext()
 
   const guideAskHistory: string[] =[]
   useEffect(() => {
@@ -214,6 +227,13 @@ const PlayersList: React.FC<PlayersListProps> = ({
       targetId: lastVotedPlayer === _player.id ? -1 : Number(_player.id) ?? -1,
     })
     setLastVotedPlayer(lastVotedPlayer !== _player.id ? parseInt(_player.id as string ?? -1) : null)
+  }
+
+  const replayAsUser = async (_player: Player) => {
+    if (!isReplay) return
+    setPlayer(_player)
+    const chatData = await fetchChatMessages(gameId, null, _player.playerId)
+    setMessages(chatData)
   }
 
   return (
@@ -487,6 +507,17 @@ const PlayersList: React.FC<PlayersListProps> = ({
                       <FontAwesomeIcon icon={faHandshakeAngle} className="h-3 w-3" />
                     </button>
                   )}
+
+                  {isReplay && (
+                    <button
+                      onClick={() => replayAsUser(_player)}
+                      title={`Voir le point de vue de ${_player.nickname}`}
+                      className="w-6 h-6 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-white transition-colors mr-1"
+                    >
+                      <Camera />
+                    </button>
+                  )}
+
                   {/* Indicateur "prêt" */}
                   {!gameStarted && !gameFinished && _player.ready && (
                     <div className="text-green-400" title="Ce joueur est prêt">

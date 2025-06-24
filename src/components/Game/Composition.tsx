@@ -103,7 +103,6 @@ const GameComposition: React.FC<GameCompositionProps> = ({ roomData, players }) 
                 const isOdd = i % 2 === 0
                 const isDead = isCardDead(roomCard.cardId)
 
-                console.log(cardName, isDead)
                 return (
                   <motion.div
                     key={i}

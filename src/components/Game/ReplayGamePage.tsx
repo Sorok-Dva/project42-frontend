@@ -3,7 +3,20 @@ import { Box } from '@mui/material'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-import { Play, Pause, SkipBack, SkipForward, FastForward, Rewind, RotateCcw, Clock, Calendar, Users, MessageSquare } from 'lucide-react'
+import {
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  FastForward,
+  Rewind,
+  RotateCcw,
+  Clock,
+  Calendar,
+  Users,
+  MessageSquare,
+  Camera,
+} from 'lucide-react'
 import { useUser } from 'contexts/UserContext'
 import { useGameContext } from 'contexts/GameContext'
 import Chat from './Chat'
@@ -25,6 +38,7 @@ const ReplayPage: React.FC = () => {
     players: contextPlayers,
     messages: contextMessages,
     isNight: initialNight,
+    player,
     creator,
     gameStarted,
     gameFinished,
@@ -194,6 +208,12 @@ const ReplayPage: React.FC = () => {
                   <Clock className="w-4 h-4" />
                   {phase === 'night' ? 'Phase nocturne' : 'Phase diurne'}
                 </span>
+                { player && (
+                  <span className="flex items-center gap-1">
+                    <Camera className="w-4 h-4" />
+                    Point de vue de {player.nickname}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -324,6 +344,7 @@ const ReplayPage: React.FC = () => {
             gameId={gameId!}
             playerId={user?.id}
             players={snapshotPlayers}
+            player={player ?? undefined}
             messages={shownMessages}
             highlightedPlayers={{}}
             isNight={phase==='night'}
@@ -359,6 +380,7 @@ const ReplayPage: React.FC = () => {
             isInn={false}
             innList={[]}
             hasVoice={false}
+            isReplay={true}
           />
         </Box>
       </Box>

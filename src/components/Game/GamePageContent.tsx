@@ -1253,6 +1253,7 @@ const GamePage = () => {
                   isInn={isInn}
                   innList={innList}
                   hasVoice={!!roomData.discordChannelId}
+                  isReplay={false}
                 />
               </Box>
             </Box>

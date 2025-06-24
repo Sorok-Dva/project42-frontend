@@ -36,9 +36,9 @@ export const fetchViewers = async (gameId: string) => {
 /**
  * Récupère l'historique du chat
  */
-export const fetchChatMessages = async (gameId: string, token: string | null) => {
+export const fetchChatMessages = async (gameId: string, token: string | null, pov?: number | null) => {
   const response = await axios.get(
-    `/api/games/room/${gameId}/tchat`,
+    `/api/games/room/${gameId}/tchat${pov ? '?pov=' + pov : ''}`,
     token ? {
       headers: { Authorization: `Bearer ${token}` },
     } : {}
