@@ -228,8 +228,22 @@ const ReplayPage: React.FC = () => {
         </div>
       </div>
       {/* Contenu principal */}
-      <Box display="flex" flex={1} p={2}>
-        <Box width="25%" mr={2}>
+      <Box
+        display="flex"
+        flex={1}
+        p={2}
+        className="game-page-container"
+        sx={{ flexDirection: { xs: 'column', md: 'row' } }}
+      >
+        {/* Colonne gauche : Controls */}
+        <Box
+          display="flex"
+          flexDirection="column"
+          mr={{ xs: 0, md: 2 }}
+          mb={{ xs: 2, md: 0 }}
+          sx={{ width: { xs: '100%', md: '25%' } }}
+          className="left-column"
+        >
           <Controls
             gameId={gameId}
             roomData={roomData}
@@ -339,7 +353,9 @@ const ReplayPage: React.FC = () => {
             </div>
           </div>
         </Box>
-        <Box width="50%" mr={2} height="85vh">
+        <div
+          className="chat-column flex flex-col mr-0 md:mr-2 mb-2 md:mb-0 w-full md:w-1/2 h-[60vh] md:h-[80vh] min-h-[400px] md:min-h-[85vh] flex-shrink-0 overflow-hidden"
+        >
           <Chat
             gameId={gameId!}
             playerId={user?.id}
@@ -355,8 +371,13 @@ const ReplayPage: React.FC = () => {
             isInn={false}
             isArchive={true}
           />
-        </Box>
-        <Box width="25%">
+        </div>
+        <Box
+          display="flex"
+          flexDirection="column"
+          sx={{ width: { xs: '100%', md: '25%' } }}
+          className="right-column"
+        >
           <Composition roomData={roomData} players={snapshotPlayers} />
 
           <PlayersList

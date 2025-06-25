@@ -1156,7 +1156,11 @@ const GamePage = () => {
                 flexDirection="column"
                 mr={{ xs: 0, md: 2 }}
                 mb={{ xs: 2, md: 0 }}
-                sx={{ width: { xs: '100%', md: '25%' } }}
+                sx={{
+                  width: { xs: '100%', md: '25%' },
+                  height: { xs: 'auto', md: '100%' },
+                  flexShrink: 0,
+                }}
                 className="left-column"
               >
                 <Box mb={2}>
@@ -1186,13 +1190,8 @@ const GamePage = () => {
               </Box>
 
               {/* Colonne centrale : Chat */}
-              <Box
-                display="flex"
-                flexDirection="column"
-                mr={{ xs: 0, md: 2 }}
-                mb={{ xs: 2, md: 0 }}
-                sx={{ width: { xs: '100%', md: '50%' }, height: { xs: 'auto', md: '85vh' } }}
-                className="chat-column"
+              <div
+                className="chat-column flex flex-col mr-0 md:mr-2 mb-2 md:mb-0 w-full md:w-1/2 h-[60vh] md:h-[80vh] min-h-[400px] md:min-h-[85vh] flex-shrink-0 overflow-hidden"
               >
                 {loading ? (
                   <Container className="loader-container loader-container-two">
@@ -1247,13 +1246,18 @@ const GamePage = () => {
                     })()}
                   </>
                 )}
-              </Box>
+              </div>
 
               {/* Colonne droite : Liste des joueurs */}
               <Box
                 display="flex"
                 flexDirection="column"
-                sx={{ width: { xs: '100%', md: '25%' } }}
+                sx={{
+                  width: { xs: '100%', md: '25%' },
+                  height: { xs: 'auto', md: '100%' },
+                  maxHeight: { xs: '50vh', md: 'none' },
+                  overflow: { xs: 'auto', md: 'visible' },
+                }}
                 className="right-column"
               >
                 <Composition roomData={roomData} players={players} />
