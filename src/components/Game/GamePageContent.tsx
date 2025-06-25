@@ -1143,9 +1143,22 @@ const GamePage = () => {
             </div>
 
             {/* Contenu principal */}
-            <Box display="flex" flex={1} p={2} className="game-page-container">
+            <Box
+              display="flex"
+              flex={1}
+              p={2}
+              className="game-page-container"
+              sx={{ flexDirection: { xs: 'column', md: 'row' } }}
+            >
               {/* Colonne gauche : Controls */}
-              <Box display="flex" flexDirection="column" width="25%" className="left-column" mr={2}>
+              <Box
+                display="flex"
+                flexDirection="column"
+                mr={{ xs: 0, md: 2 }}
+                mb={{ xs: 2, md: 0 }}
+                sx={{ width: { xs: '100%', md: '25%' } }}
+                className="left-column"
+              >
                 <Box mb={2}>
                   <Controls
                     gameId={gameId}
@@ -1173,7 +1186,14 @@ const GamePage = () => {
               </Box>
 
               {/* Colonne centrale : Chat */}
-              <Box display="flex" flexDirection="column" width="50%" className="chat-column" mr={2} height="85vh">
+              <Box
+                display="flex"
+                flexDirection="column"
+                mr={{ xs: 0, md: 2 }}
+                mb={{ xs: 2, md: 0 }}
+                sx={{ width: { xs: '100%', md: '50%' }, height: { xs: 'auto', md: '85vh' } }}
+                className="chat-column"
+              >
                 {loading ? (
                   <Container className="loader-container loader-container-two">
                     <div className="spinner-wrapper">
@@ -1230,7 +1250,12 @@ const GamePage = () => {
               </Box>
 
               {/* Colonne droite : Liste des joueurs */}
-              <Box display="flex" flexDirection="column" width="25%" className="right-column">
+              <Box
+                display="flex"
+                flexDirection="column"
+                sx={{ width: { xs: '100%', md: '25%' } }}
+                className="right-column"
+              >
                 <Composition roomData={roomData} players={players} />
                 <PlayersList
                   players={players}
