@@ -206,7 +206,7 @@ const Register: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-10 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
@@ -597,7 +597,7 @@ const Register: React.FC = () => {
           </motion.div>
         </motion.div>
       </div>
-    </div>
+    </main>
   )
 }
 

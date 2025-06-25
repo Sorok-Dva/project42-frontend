@@ -215,19 +215,19 @@ const GuildDetailsView = () => {
 
   if (loading || !guild) {
     return (
-      <motion.div className="relative flex min-h-screen pt-100 flex-col items-center justify-center overflow-hidden bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black px-4 text-white">
+      <motion.main className="relative flex min-h-screen pt-100 flex-col items-center justify-center overflow-hidden bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black px-4 text-white">
         <div className="flex justify-center items-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
           <span className="ml-3 text-gray-300">Chargement des informations de la station...</span>
         </div>
-      </motion.div>
+      </motion.main>
     )
   }
 
   const leaderNickname = guild.members.find((m) => guild.leader === m.userId)?.user.nickname || ''
 
   return (
-    <motion.div className="relative flex min-h-screen pt-100 flex-col items-center justify-center overflow-hidden bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black px-4 text-white">
+    <motion.main className="relative flex min-h-screen pt-100 flex-col items-center justify-center overflow-hidden bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black px-4 text-white">
       {/* Fond étoilé statique */}
       <div className="absolute inset-0 z-0">{staticStars}</div>
 
@@ -573,7 +573,7 @@ const GuildDetailsView = () => {
 
       {/* Modale de rejoindre */}
       {isJoinModalOpen && <JoinGuildModal guild={guild} onClose={() => setIsJoinModalOpen(false)} />}
-    </motion.div>
+    </motion.main>
   )
 }
 

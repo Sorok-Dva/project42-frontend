@@ -17,7 +17,7 @@ const PageBanner: React.FC<PageBannerProps> = ({
   activePageText,
 }) => {
   return (
-    <div className="page-title-area item-bg1">
+    <header className="page-title-area item-bg1">
       <div className="container">
         <div className="page-title-content">
           <h2>{pageTitle}</h2>
@@ -29,7 +29,7 @@ const PageBanner: React.FC<PageBannerProps> = ({
           </ul>
         </div>
       </div>
-    </div>
+    </header>
   )
 }
 

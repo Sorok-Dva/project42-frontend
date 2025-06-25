@@ -46,7 +46,7 @@ const AdminLayout : React.FC = (props) => {
           <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
           {/* Main content */}
-          <div
+          <main
             className={`flex-1 transition-all duration-300 ${sidebarOpen && isDesktop ? 'ml-72' : 'ml-0'} overflow-auto`}
           >
             {/* Header */}
@@ -83,7 +83,7 @@ const AdminLayout : React.FC = (props) => {
             <footer className="bg-gradient-to-r from-black/80 to-blue-900/30 backdrop-blur-sm border-t border-blue-500/30 p-4 text-center text-blue-300 text-sm">
               <p>Project 42 Admin Dashboard • v{process.env.REACT_APP_GAME_VERSION}</p>
             </footer>
-          </div>
+          </main>
         </div>
       </div>
     )

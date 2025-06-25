@@ -54,7 +54,7 @@ const NewsPage: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black text-white">
+    <main className="relative min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black text-white">
       {/* Background stars */}
       <div className="fixed inset-0 z-0">{staticStars}</div>
 
@@ -70,7 +70,7 @@ const NewsPage: React.FC = () => {
       </div>
 
       {/* Header */}
-      <div className="relative z-10 bg-gradient-to-r from-black/80 to-blue-900/30 backdrop-blur-sm border-b border-blue-500/30 shadow-lg">
+      <header className="relative z-10 bg-gradient-to-r from-black/80 to-blue-900/30 backdrop-blur-sm border-b border-blue-500/30 shadow-lg">
         <div className="container mx-auto px-4 py-6 mt-24">
           <motion.h1
             className="text-4xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400"
@@ -87,10 +87,10 @@ const NewsPage: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
           />
         </div>
-      </div>
+      </header>
 
       {/* Main content */}
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <section className="relative z-10 container mx-auto px-4 py-8">
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <div className="spinner-wrapper">
@@ -125,8 +125,8 @@ const NewsPage: React.FC = () => {
             )}
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   )
 }
 

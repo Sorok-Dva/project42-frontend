@@ -200,7 +200,7 @@ const CardsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 relative overflow-hidden">
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 relative overflow-hidden">
       {/* Animated background stars */}
       <div className="absolute inset-0 opacity-30">
         {Array.from({ length: 200 }).map((_, i) => (
@@ -451,7 +451,7 @@ const CardsPage: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </main>
   )
 }
 

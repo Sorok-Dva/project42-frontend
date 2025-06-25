@@ -713,7 +713,7 @@ const AdminShopPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-indigo-950 to-gray-900 text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-indigo-950 to-gray-900 text-white p-4 md:p-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1816,7 +1816,7 @@ const AdminShopPage: React.FC = () => {
           </TabsContent>
         </Tabs>
       </motion.div>
-    </div>
+    </main>
   )
 }
 

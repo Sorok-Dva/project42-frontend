@@ -16,7 +16,7 @@ const HomePage = () => {
   const [isDailyRewardsExpanded, setIsDailyRewardsExpanded] = useState(true)
   return (
     <>
-      <div
+      <main
         className="relative min-h-screen overflow-hidden bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black text-white">
         {/* Fond étoilé statique */ }
         <div className="absolute inset-0 z-0">{ staticStars }</div>
@@ -207,7 +207,7 @@ const HomePage = () => {
             </div>
           </motion.div>
         </section>
-      </div>
+      </main>
     </>
   )
 }

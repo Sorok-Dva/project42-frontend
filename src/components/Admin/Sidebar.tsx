@@ -143,7 +143,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
           onClick={() => setIsOpen(false)}
         />
       )}
-      <motion.div
+      <motion.aside
         className={`fixed top-0 left-0 h-full bg-gradient-to-b from-black/90 to-blue-900/30 backdrop-blur-md border-r border-blue-500/30 w-64 z-50 overflow-y-auto transition-transform transform ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
         initial={false}
@@ -242,7 +242,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
             <span>Retour sur Project 42</span>
           </button>
         </div>
-      </motion.div>
+      </motion.aside>
     </>
   )
 }
