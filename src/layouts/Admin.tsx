@@ -1,6 +1,6 @@
 import '../assets/vendor/nucleo/css/nucleo.css'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import AdminSidebar from 'components/Admin/Sidebar'
 import { useMediaQuery } from 'hooks/useMediaQuery'
@@ -9,8 +9,12 @@ import { useUser } from 'contexts/UserContext'
 const AdminLayout : React.FC = (props) => {
   {
     const { user } = useUser()
-    const [sidebarOpen, setSidebarOpen] = useState(true)
-    const isDesktop = true
+    const isDesktop = useMediaQuery('(min-width: 1024px)')
+    const [sidebarOpen, setSidebarOpen] = useState(isDesktop)
+
+    useEffect(() => {
+      setSidebarOpen(isDesktop)
+    }, [isDesktop])
 
     if (!user || user.role === 'User' || user.role === 'Banned') {
       window.location.href = '/'

@@ -1143,9 +1143,26 @@ const GamePage = () => {
             </div>
 
             {/* Contenu principal */}
-            <Box display="flex" flex={1} p={2} className="game-page-container">
+            <Box
+              display="flex"
+              flex={1}
+              p={2}
+              className="game-page-container"
+              sx={{ flexDirection: { xs: 'column', md: 'row' } }}
+            >
               {/* Colonne gauche : Controls */}
-              <Box display="flex" flexDirection="column" width="25%" className="left-column" mr={2}>
+              <Box
+                display="flex"
+                flexDirection="column"
+                mr={{ xs: 0, md: 2 }}
+                mb={{ xs: 2, md: 0 }}
+                sx={{
+                  width: { xs: '100%', md: '25%' },
+                  height: { xs: 'auto', md: '100%' },
+                  flexShrink: 0,
+                }}
+                className="left-column"
+              >
                 <Box mb={2}>
                   <Controls
                     gameId={gameId}
@@ -1173,7 +1190,9 @@ const GamePage = () => {
               </Box>
 
               {/* Colonne centrale : Chat */}
-              <Box display="flex" flexDirection="column" width="50%" className="chat-column" mr={2} height="85vh">
+              <div
+                className="chat-column flex flex-col mr-0 md:mr-2 mb-2 md:mb-0 w-full md:w-1/2 h-[60vh] md:h-[80vh] min-h-[400px] md:min-h-[85vh] flex-shrink-0 overflow-hidden"
+              >
                 {loading ? (
                   <Container className="loader-container loader-container-two">
                     <div className="spinner-wrapper">
@@ -1227,10 +1246,20 @@ const GamePage = () => {
                     })()}
                   </>
                 )}
-              </Box>
+              </div>
 
               {/* Colonne droite : Liste des joueurs */}
-              <Box display="flex" flexDirection="column" width="25%" className="right-column">
+              <Box
+                display="flex"
+                flexDirection="column"
+                sx={{
+                  width: { xs: '100%', md: '25%' },
+                  height: { xs: 'auto', md: '100%' },
+                  maxHeight: { xs: '50vh', md: 'none' },
+                  overflow: { xs: 'auto', md: 'visible' },
+                }}
+                className="right-column"
+              >
                 <Composition roomData={roomData} players={players} />
                 <PlayersList
                   players={players}
