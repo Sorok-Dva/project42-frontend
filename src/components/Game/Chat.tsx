@@ -257,35 +257,41 @@ const Chat: React.FC<ChatProps> = ({
   }
 
   const handleMentionSuggestions = (value: string) => {
-    // Vérifier si on est en train de taper une mention
-    const lastAtSymbolIndex = value.lastIndexOf('@')
-    if (lastAtSymbolIndex === -1) {
+    const lastAt = value.lastIndexOf('@')
+    if (lastAt === -1) {
       setMentionSuggestions([])
       return
     }
 
-    // Extraire le texte après le dernier @ jusqu'au curseur
-    const mentionText = value
-      .slice(lastAtSymbolIndex + 1)
-      .split(' ')[0]
-      .toLowerCase()
+    // Trouver le premier espace *après* le @
+    const spaceAfter = value.indexOf(' ', lastAt)
+    // Si on a un espace et que le curseur (fin de chaîne) est *au-delà* de cet espace,
+    // c'est qu'on tape du texte après une mention complétée => on arrête les suggestions
+    if (spaceAfter !== -1 && value.length > spaceAfter + 1) {
+      setMentionSuggestions([])
+      return
+    }
 
-    // Si on vient juste de taper @ sans texte après, montrer tous les joueurs
-    if (mentionText === '') {
-      const allPlayerNames = players?.map((p) => p.nickname) || []
-      setMentionSuggestions(allPlayerNames)
+    // Sinon, on est encore en train de taper la mention
+    // Extraire le texte brut après le @ jusque l'espace (ou fin de chaîne)
+    const partial = value.slice(lastAt + 1).split(' ')[0].toLowerCase()
+
+    if (partial === '') {
+      // juste '@' => afficher tous les pseudos
+      const all = players?.map((p) => p.nickname) || []
+      setMentionSuggestions(all)
       setMentionIndex(-1)
       return
     }
 
-    // Filtrer les joueurs dont le pseudo commence par le texte tapé
-    const filteredPlayers =
-      players?.filter((p) => p.nickname.toLowerCase().includes(mentionText)).map((p) => p.nickname) || []
-
-    setMentionSuggestions(filteredPlayers)
+    // filtrer sur partial
+    const filtered =
+      players
+        ?.filter((p) => p.nickname.toLowerCase().includes(partial))
+        .map((p) => p.nickname) || []
+    setMentionSuggestions(filtered)
     setMentionIndex(-1)
   }
-
 
   const handleInputChange = (value: string) => {
     setNewMessage(value)
@@ -365,7 +371,7 @@ const Chat: React.FC<ChatProps> = ({
     const endIndex = nextSpaceIndex === -1 ? newMessage.length : lastAtIndex + 1 + nextSpaceIndex
 
     // Construire le nouveau message avec la mention
-    const newMessageText = newMessage.substring(0, lastAtIndex) + `@${nickname}` + newMessage.substring(endIndex)
+    const newMessageText = newMessage.substring(0, lastAtIndex) + `@${nickname} ` + newMessage.substring(endIndex)
 
     setNewMessage(newMessageText)
     setMentionSuggestions([])
