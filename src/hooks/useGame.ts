@@ -293,7 +293,7 @@ export const useGame = (
    * Gère les listeners socket
    */
   useEffect(() => {
-    if (!socket || !gameId) return
+    if (!socket || !gameId || isArchive) return
 
     // 1) Rejoint la room si pas déjà fait
     if (!hasJoined && isAuthorized) {
