@@ -151,7 +151,7 @@ const GuildsList = () => {
   }
 
   return (
-    <motion.div className="relative flex min-h-screen pt-100 flex-col items-center justify-center overflow-hidden bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black px-4 text-white">
+    <motion.main className="relative flex min-h-screen pt-100 flex-col items-center justify-center overflow-hidden bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black px-4 text-white">
       {/* Fond étoilé statique */}
       <div className="absolute inset-0 z-0">{staticStars}</div>
 
@@ -448,7 +448,7 @@ const GuildsList = () => {
       )}
 
       {isJoinModalOpen && <JoinGuildModal guild={joinGuild} onClose={() => setIsJoinModalOpen(false)} />}
-    </motion.div>
+    </motion.main>
   )
 }
 

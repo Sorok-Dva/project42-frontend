@@ -140,7 +140,7 @@ const CustomErrorContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 relative overflow-hidden mt-20">
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 relative overflow-hidden mt-20">
       <div className="relative z-10 flex items-center justify-center min-h-screen px-4 py-12">
         <div className="w-full max-w-4xl mx-auto">
           <motion.div
@@ -326,7 +326,7 @@ const CustomErrorContent: React.FC = () => {
           </motion.div>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
 

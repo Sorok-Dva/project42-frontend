@@ -27,7 +27,7 @@ export default function MaintenancePage() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black px-4 py-12 text-white">
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black px-4 py-12 text-white">
       {/* Fond étoilé statique */}
       <div className="absolute inset-0 z-0">{staticStars}</div>
 
@@ -135,7 +135,7 @@ export default function MaintenancePage() {
 
       {/* Planète en bas */ }
       <div className="absolute -bottom-32 left-1/2 z-0 h-64 w-full max-w-3xl -translate-x-1/2 rounded-full bg-gradient-to-br from-indigo-900 to-purple-900 opacity-20 blur-3xl"></div>
-    </div>
+    </main>
   )
 }
 

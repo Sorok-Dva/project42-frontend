@@ -9,7 +9,7 @@ const GamePage: React.FC = () => {
 
   if (!gameId) {
     return (
-      <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
+      <main className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
         <div className="bg-black/60 backdrop-blur-md rounded-xl border border-red-500/30 p-8 max-w-md text-center">
           <div className="text-red-500 text-5xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold mb-4">Identifiant de partie manquant</h1>
@@ -21,7 +21,7 @@ const GamePage: React.FC = () => {
             Retour
           </button>
         </div>
-      </div>
+      </main>
     )
   }
 
