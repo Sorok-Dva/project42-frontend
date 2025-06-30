@@ -1,6 +1,6 @@
 'use client'
 
-import type React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from 'components/UI/Button'
@@ -8,6 +8,8 @@ import { Textarea } from 'components/UI/Textarea'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { useAuth } from 'contexts/AuthContext'
+import axios from 'axios'
+import { useUser } from 'contexts/UserContext'
 
 interface StalkListModalProps {
   isOpen: boolean
@@ -20,10 +22,35 @@ interface StalkListModalProps {
 }
 
 const StalkListModal: React.FC<StalkListModalProps> = ({ isOpen, onClose, targetUser }) => {
+  const { user } = useUser()
   const { token } = useAuth()
   const [reason, setReason] = useState('')
   const [expirationDate, setExpirationDate] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isAlreadyStalked, setIsAlreadyStalked] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    const isUserAlreadyStalked = async () => {
+      try {
+        const res = await axios.get(`/api/mod/isStalked/${targetUser.id}`, {
+          headers: {
+            Authorization: `Bearer ${ token }`,
+          }
+        })
+
+        if (res.data.result === 'yes') {
+          setIsAlreadyStalked(true)
+        }
+      } catch {
+        setIsAlreadyStalked(false)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    isUserAlreadyStalked()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -71,6 +98,8 @@ const StalkListModal: React.FC<StalkListModalProps> = ({ isOpen, onClose, target
   // Calculer la date minimale (aujourd'hui)
   const today = new Date().toISOString().split('T')[0]
 
+  if (isLoading || !user) return
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -100,19 +129,6 @@ const StalkListModal: React.FC<StalkListModalProps> = ({ isOpen, onClose, target
             </div>
 
             {/* Explication de la liste de surveillance */}
-            <div className="mb-6 bg-purple-900/20 p-4 rounded-lg border border-purple-500/20">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl">👁️</div>
-                <div>
-                  <h3 className="font-semibold text-purple-300 mb-2">Qu'est-ce que la liste de surveillance ?</h3>
-                  <p className="text-sm text-gray-300 leading-relaxed">
-                    La liste de surveillance permet de marquer un joueur pour un suivi particulier. Les actions de ce
-                    joueur seront surveillées de plus près par l'équipe de modération. Cette mesure est utilisée pour
-                    les joueurs ayant un comportement suspect ou limite.
-                  </p>
-                </div>
-              </div>
-            </div>
 
             <div className="flex items-center gap-3 mb-6 bg-black/30 p-3 rounded-lg border border-purple-500/20">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center overflow-hidden">
@@ -132,63 +148,75 @@ const StalkListModal: React.FC<StalkListModalProps> = ({ isOpen, onClose, target
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="reason" className="block text-sm font-medium text-purple-300 mb-1">
-                  Raison de la surveillance <span className="text-red-400">*</span>
-                </label>
-                <Textarea
-                  id="reason"
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="Décrivez pourquoi ce joueur doit être surveillé (comportement suspect, antécédents, etc.)..."
-                  className="w-full bg-black/40 border border-purple-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 min-h-[100px]"
-                  required
-                />
-              </div>
+            { !isAlreadyStalked ? (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="reason" className="block text-sm font-medium text-purple-300 mb-1">
+                    Raison de la surveillance <span className="text-red-400">*</span>
+                  </label>
+                  <Textarea
+                    id="reason"
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="Décrivez pourquoi ce joueur doit être surveillé (comportement suspect, antécédents, etc.)..."
+                    className="w-full bg-black/40 border border-purple-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 min-h-[100px]"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label htmlFor="expirationDate" className="block text-sm font-medium text-purple-300 mb-1">
-                  Date d'expiration (optionnel)
-                </label>
-                <input
-                  type="date"
-                  id="expirationDate"
-                  value={expirationDate}
-                  onChange={(e) => setExpirationDate(e.target.value)}
-                  min={today}
-                  className="w-full bg-black/40 border border-purple-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  Si aucune date n'est spécifiée, la surveillance sera permanente jusqu'à suppression manuelle.
-                </p>
-              </div>
+                <div>
+                  <label htmlFor="expirationDate" className="block text-sm font-medium text-purple-300 mb-1">
+                    Date d'expiration (optionnel)
+                  </label>
+                  <input
+                    type="date"
+                    id="expirationDate"
+                    value={expirationDate}
+                    onChange={(e) => setExpirationDate(e.target.value)}
+                    min={today}
+                    className="w-full bg-black/40 border border-purple-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    Si aucune date n'est spécifiée, la surveillance sera permanente jusqu'à suppression manuelle.
+                  </p>
+                </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+                <div className="flex justify-end gap-3 pt-2">
+                  <Button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2 bg-black/40 hover:bg-black/60 text-purple-300 hover:text-white border border-purple-500/30 rounded-lg transition-all"
+                    disabled={isSubmitting}
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-all"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        Ajout...
+                      </div>
+                    ) : (
+                      'Ajouter à la surveillance'
+                    )}
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <div className="mb-6 bg-red-900/20 p-4 rounded-lg border border-red-500/20">
+                <h3 className="font-semibold text-purple-300 mb-2">Ce joueur est déjà sous surveillance</h3>
                 <Button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 bg-black/40 hover:bg-black/60 text-purple-300 hover:text-white border border-purple-500/30 rounded-lg transition-all"
-                  disabled={isSubmitting}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  type="submit"
                   className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-all"
-                  disabled={isSubmitting}
+                  onClick={() => window.open(`/${user.role === 'Moderator' ? 'mod' : 'admin'}/users/stalk/${targetUser.id}`, '_blank')}
                 >
-                  {isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      Ajout...
-                    </div>
-                  ) : (
-                    'Ajouter à la surveillance'
-                  )}
+                  Voir la page de surveillance
                 </Button>
               </div>
-            </form>
+            )}
           </motion.div>
         </motion.div>
       )}
