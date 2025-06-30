@@ -36,16 +36,15 @@ const StalkListModal: React.FC<StalkListModalProps> = ({ isOpen, onClose, target
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('/api/mod/stalk-list', {
+      const response = await fetch(`/api/mod/stalk/${targetUser.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          userId: targetUser.id,
           reason: reason.trim(),
-          expirationDate: expirationDate || null,
+          ...(expirationDate ? { expirationDate } : {}),
         }),
       })
 

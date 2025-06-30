@@ -40,6 +40,15 @@ export const GAME_TYPES: Record<number, string> = {
   5: 'Test',
 }
 
+export const gameTypeColors = {
+  0: 'text-green-500', // Normale
+  1: 'text-blue-500', // Fun
+  2: 'text-red-500', // Sérieuse
+  3: 'text-purple-500', // Carnage
+  4: 'text-yellow-400', // Animation
+  5: 'text-orange-500', // Test
+}
+
 /**
  * The GamePage component manages and renders the game interface, user interactions, and real-time updates.
  * It integrates various elements like player controls, chat, and a list of players.
@@ -782,14 +791,6 @@ const GamePage = () => {
   }
   if (roomData.whiteFlag) {
     options.push('Sans Points')
-  }
-  const gameTypeColors = {
-    0: 'text-green-500', // Normale
-    1: 'text-blue-500', // Fun
-    2: 'text-red-500', // Sérieuse
-    3: 'text-purple-500', // Carnage
-    4: 'text-yellow-400', // Animation
-    5: 'text-orange-500', // Test
   }
 
   return (

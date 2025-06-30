@@ -34,6 +34,7 @@ import TOSPage from 'pages/TermsOfService'
 import AdminLayout from 'layouts/Admin'
 import UserList from 'pages/admin/users/UserList'
 import AdminUserProfile from 'pages/admin/users/UserProfile'
+import AdminStalkUser from 'pages/admin/users/StalkUser'
 import AdminDashboard from 'pages/admin/Dashboard'
 import AdminAlphaKeys from 'pages/admin/AlphaKeys'
 import AdminNews from 'pages/admin/News'
@@ -114,6 +115,7 @@ const AppContent: React.FC = () => {
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="users" element={<UserList />} />
                   <Route path="users/:id" element={<AdminUserProfile />} />
+                  <Route path="users/stalk/:id" element={<AdminStalkUser />} />
                   <Route path="alpha-keys" element={<AdminAlphaKeys />} />
                   <Route path="news" element={<AdminNews />} />
                   <Route path="shop" element={<AdminShop />} />
@@ -130,6 +132,7 @@ const AppContent: React.FC = () => {
                   <Route path="/moderator" element={<AdminDashboard />} />
                   <Route path="users" element={<UserList />} />
                   <Route path="users/:id" element={<AdminUserProfile />} />
+                  <Route path="users/stalk/:id" element={<AdminStalkUser />} />
                   <Route path="alpha-keys" element={<AdminAlphaKeys />} />
                   {/*<Route path="rooms" element={<AdminRooms />} />*/}
                 </Route>
