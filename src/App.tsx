@@ -68,6 +68,7 @@ import { DailyRewardsProvider } from 'contexts/DailyRewardsContext'
 import DailyRewardsPopup from 'components/DailyRewardPopup'
 import { WarningProvider } from 'contexts/WarningContext'
 import ReplayGame from 'pages/ReplayGame'
+import StalkList from 'pages/admin/users/StalkList'
 
 const AppContent: React.FC = () => {
   const { serverMaintenance, loading: maintenanceLoading } = useMaintenance()
@@ -114,6 +115,7 @@ const AppContent: React.FC = () => {
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="users" element={<UserList />} />
+                  <Route path="users/stalkList" element={<StalkList />} />
                   <Route path="users/:id" element={<AdminUserProfile />} />
                   <Route path="users/stalk/:id" element={<AdminStalkUser />} />
                   <Route path="alpha-keys" element={<AdminAlphaKeys />} />
@@ -131,6 +133,7 @@ const AppContent: React.FC = () => {
                 <Route path="/moderator" element={<AdminLayout />}>
                   <Route path="/moderator" element={<AdminDashboard />} />
                   <Route path="users" element={<UserList />} />
+                  <Route path="users/stalkList" element={<StalkList />} />
                   <Route path="users/:id" element={<AdminUserProfile />} />
                   <Route path="users/stalk/:id" element={<AdminStalkUser />} />
                   <Route path="alpha-keys" element={<AdminAlphaKeys />} />
