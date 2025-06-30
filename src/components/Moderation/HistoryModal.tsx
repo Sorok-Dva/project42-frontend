@@ -42,6 +42,14 @@ interface HistoryData {
       nickname: string
     }
   }[]
+  stalkEntries: {
+    reason: string
+    expiration?: Date
+    createdAt: Date
+    moderator: {
+      nickname: string
+    }
+  }[]
   notes: {
     note: string
     createdAt: Date
@@ -54,7 +62,7 @@ interface HistoryData {
 }
 
 interface MergedHistoryItem {
-  type: 'warning' | 'ban' | 'nickChange' | 'note'
+  type: 'warning' | 'ban' | 'nickChange' | 'note' | 'stalk'
   reason?: string
   playerComment?: string
   teamComment?: string
@@ -65,7 +73,7 @@ interface MergedHistoryItem {
   createdAt: Date
 }
 
-type FilterType = 'all' | 'warning' | 'ban' | 'nickChange' | 'note'
+type FilterType = 'all' | 'warning' | 'ban' | 'nickChange' | 'note' | 'stalk'
 
 const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser }) => {
   const { token } = useAuth()
@@ -75,6 +83,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
     bans: [],
     nickChanges: [],
     notes: [],
+    stalkEntries: [],
     behaviorPoints: 1000,
   })
   const [currentPage, setCurrentPage] = useState(1)
@@ -127,6 +136,12 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
         newNickname: n.newNickname,
         createdAt: new Date(n.createdAt),
       })),
+      ...history.stalkEntries.map((s) => ({
+        type: 'stalk' as const,
+        reason: s.reason,
+        moderator: s.moderator.nickname,
+        createdAt: new Date(s.createdAt),
+      })),
     ]
 
     return merged.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
@@ -156,6 +171,8 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
       return '✏️'
     case 'note':
       return '📝'
+    case 'stalk':
+      return '🔎'
     default:
       return '📝'
     }
@@ -171,6 +188,9 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
       return 'border-blue-500/30 bg-blue-900/20'
     case 'note':
       return 'border-purple-500/30 bg-purple-900/20'
+    case 'stalk':
+      return 'border-orange-500/30 bg-orange-900/20'
+
     default:
       return 'border-gray-500/30 bg-gray-900/20'
     }
@@ -186,6 +206,8 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
       return 'Changement de pseudo'
     case 'note':
       return 'Note de modération'
+    case 'stalk':
+      return 'Stalklist'
     default:
       return 'Action'
     }
@@ -335,7 +357,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
                             )}
                             {item.expiration && (
                               <p className="text-sm text-red-300 mb-1">
-                                <span className="font-medium">Banni jusqu'au:</span> {formatDate(item.expiration)}
+                                <span className="font-medium">jusqu'au:</span> {formatDate(item.expiration)}
                               </p>
                             )}
                             {item.moderator && (
