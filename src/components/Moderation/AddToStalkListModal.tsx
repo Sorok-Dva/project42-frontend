@@ -211,7 +211,7 @@ const StalkListModal: React.FC<StalkListModalProps> = ({ isOpen, onClose, target
                 <h3 className="font-semibold text-purple-300 mb-2">Ce joueur est déjà sous surveillance</h3>
                 <Button
                   className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-all"
-                  onClick={() => window.open(`/${user.role === 'Moderator' ? 'mod' : 'admin'}/users/stalk/${targetUser.id}`, '_blank')}
+                  onClick={() => window.open(`/${user.role === 'Moderator' ? 'moderator' : 'admin'}/users/stalk/${targetUser.id}`, '_blank')}
                 >
                   Voir la page de surveillance
                 </Button>
