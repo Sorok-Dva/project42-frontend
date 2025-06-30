@@ -13,6 +13,7 @@ import RemoveSignatureModal from './RemoveSignatureModal'
 import RemoveAvatarModal from './RemoveAvatarModal'
 import IpModal from './IpModal'
 import { usePermissions } from 'hooks/usePermissions'
+import AddToStalkListModal from 'components/Moderation/AddToStalkListModal'
 
 interface ModerationActionsProps {
   targetUser: {
@@ -38,6 +39,7 @@ const ModerationActions: React.FC<ModerationActionsProps> = ({ targetUser, compa
   const [isRenameOpen, setIsRenameOpen] = useState(false)
   const [isRemoveSignatureOpen, setIsRemoveSignatureOpen] = useState(false)
   const [isRemoveAvatarOpen, setIsRemoveAvatarOpen] = useState(false)
+  const [isAddToStalkListOpen, setIsAddToStalkListOpen] = useState(false)
   const [isIpOpen, setIsIpOpen] = useState(false)
   const [actionIsShown, setActionIsShown] = useState(false)
 
@@ -106,9 +108,15 @@ const ModerationActions: React.FC<ModerationActionsProps> = ({ targetUser, compa
             </Button>
           )}
           {permissions.stalk && (
-            <a role="button" className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'} button_secondary bgred`}>
+            <Button
+              onClick={() => setIsAddToStalkListOpen(true)}
+              className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'}
+                bg-gradient-to-r from-yellow-600 to-amber-600
+                hover:from-yellow-700 hover:to-amber-700
+                text-white rounded-lg transition-all`}
+            >
               Surveiller
-            </a>
+            </Button>
           )}
           {permissions.dcInfos && (
             <Button
@@ -187,6 +195,7 @@ const ModerationActions: React.FC<ModerationActionsProps> = ({ targetUser, compa
       <RemoveSignatureModal isOpen={isRemoveSignatureOpen} onClose={() => setIsRemoveSignatureOpen(false)} targetUser={targetUser} />
       <RemoveAvatarModal isOpen={isRemoveAvatarOpen} onClose={() => setIsRemoveAvatarOpen(false)} targetUser={targetUser} />
       <IpModal isOpen={isIpOpen} onClose={() => setIsIpOpen(false)} targetUser={targetUser} />
+      <AddToStalkListModal isOpen={isAddToStalkListOpen} onClose={() => setIsAddToStalkListOpen(false)} targetUser={targetUser} />
     </>
   )
 }
