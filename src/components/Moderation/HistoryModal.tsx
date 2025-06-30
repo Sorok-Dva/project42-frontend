@@ -56,20 +56,29 @@ interface HistoryData {
 interface MergedHistoryItem {
   type: 'warning' | 'ban' | 'nickChange' | 'note'
   reason?: string
-  playerComment?: string,
-  teamComment?: string,
-  moderator?: string,
+  playerComment?: string
+  teamComment?: string
+  moderator?: string
   oldNickname?: string
   newNickname?: string
   expiration?: Date
   createdAt: Date
 }
 
+type FilterType = 'all' | 'warning' | 'ban' | 'nickChange' | 'note'
+
 const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser }) => {
   const { token } = useAuth()
   const authHeaders = token ? { headers: { Authorization: `Bearer ${token}` } } : {}
-  const [history, setHistory] = useState<HistoryData>({ warnings: [], bans: [], nickChanges: [], notes: [], behaviorPoints: 1000 })
+  const [history, setHistory] = useState<HistoryData>({
+    warnings: [],
+    bans: [],
+    nickChanges: [],
+    notes: [],
+    behaviorPoints: 1000,
+  })
   const [currentPage, setCurrentPage] = useState(1)
+  const [filterType, setFilterType] = useState<FilterType>('all')
   const itemsPerPage = 10
 
   useEffect(() => {
@@ -80,6 +89,11 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
         .catch(() => {})
     }
   }, [isOpen, targetUser.id])
+
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filterType])
 
   // Merger et trier tous les éléments d'historique par date
   const mergedHistory = useMemo(() => {
@@ -118,11 +132,19 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
     return merged.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
   }, [history])
 
+  // Filter history based on selected type
+  const filteredHistory = useMemo(() => {
+    if (filterType === 'all') {
+      return mergedHistory
+    }
+    return mergedHistory.filter((item) => item.type === filterType)
+  }, [mergedHistory, filterType])
+
   // Pagination
-  const totalPages = Math.ceil(mergedHistory.length / itemsPerPage)
+  const totalPages = Math.ceil(filteredHistory.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const currentItems = mergedHistory.slice(startIndex, endIndex)
+  const currentItems = filteredHistory.slice(startIndex, endIndex)
 
   const getItemIcon = (type: string) => {
     switch (type) {
@@ -148,7 +170,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
     case 'nickChange':
       return 'border-blue-500/30 bg-blue-900/20'
     case 'note':
-      return 'border-orange-500/30 bg-orange-900/20'
+      return 'border-purple-500/30 bg-purple-900/20'
     default:
       return 'border-gray-500/30 bg-gray-900/20'
     }
@@ -179,6 +201,19 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
     }).format(date)
   }
 
+  const getFilterCount = (type: FilterType) => {
+    if (type === 'all') return mergedHistory.length
+    return mergedHistory.filter((item) => item.type === type).length
+  }
+
+  const filterOptions = [
+    { value: 'all', label: 'Toutes', icon: '📋' },
+    { value: 'warning', label: 'Avertissements', icon: '⚠️' },
+    { value: 'ban', label: 'Bannissements', icon: '🔨' },
+    { value: 'note', label: 'Notes', icon: '📝' },
+    { value: 'nickChange', label: 'Pseudos', icon: '✏️' },
+  ] as const
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -192,7 +227,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
         >
           {/* Conteneur modal */}
           <motion.div
-            className="bg-gradient-to-r from-black/90 to-orange-900/30 backdrop-blur-md rounded-xl border border-orange-500/30 p-6 max-w-2xl w-full mx-4 shadow-2xl max-h-[80vh] overflow-hidden"
+            className="bg-gradient-to-r from-black/90 to-orange-900/30 backdrop-blur-md rounded-xl border border-orange-500/30 p-6 max-w-4xl w-full mx-4 shadow-2xl max-h-[85vh] overflow-hidden"
             initial={{ scale: 0.9, y: 20, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.9, y: 20, opacity: 0 }}
@@ -229,11 +264,34 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-400">
-                  Total: {mergedHistory.length} action{mergedHistory.length > 1 ? 's' : ''}
+                  {filterType === 'all' ? 'Total' : 'Filtré'}: {filteredHistory.length} action
+                  {filteredHistory.length > 1 ? 's' : ''}
                 </p>
-                <p className="text-sm text-green-400">
-                  Points de comportements: {history.behaviorPoints}
-                </p>
+                <p className="text-sm text-green-400">Points de comportements: {history.behaviorPoints}</p>
+              </div>
+            </div>
+
+            {/* Filtres */}
+            <div className="mb-6">
+              <h4 className="text-sm font-medium text-gray-300 mb-3">Filtrer par type d'action :</h4>
+              <div className="flex flex-wrap gap-2">
+                {filterOptions.map((option) => (
+                  <motion.button
+                    key={option.value}
+                    onClick={() => setFilterType(option.value)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                      filterType === option.value
+                        ? 'bg-orange-600 text-white border border-orange-500'
+                        : 'bg-black/40 text-gray-300 border border-gray-600/30 hover:bg-black/60 hover:text-white'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span>{option.icon}</span>
+                    <span>{option.label}</span>
+                    <span className="bg-black/30 px-1.5 py-0.5 rounded text-xs">{getFilterCount(option.value)}</span>
+                  </motion.button>
+                ))}
               </div>
             </div>
 
@@ -252,7 +310,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
                       <div className="text-2xl">{getItemIcon(item.type)}</div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
-                          <h6 className="font-semibold text-white">{getItemTitle(item.type)}</h6>
+                          <h5 className="font-semibold text-white">{getItemTitle(item.type)}</h5>
                           <span className="text-xs text-gray-400">{formatDate(item.createdAt)}</span>
                         </div>
 
@@ -264,18 +322,26 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
                           </p>
                         ) : (
                           <>
-                            <b className="text-sm text-gray-300">{item.reason}</b>
+                            <p className="text-md text-gray-300 font-medium mb-1"><b>{item.reason}</b></p>
                             {item.teamComment && (
-                              <p className="text-sm text-gray-300">Commentaire de l'équipe: {item.teamComment}</p>
+                              <p className="text-sm text-blue-300 mb-1">
+                                <span className="font-medium">Commentaire équipe:</span> {item.teamComment}
+                              </p>
                             )}
                             {item.playerComment && (
-                              <p className="text-sm text-gray-300">Commentaire du joueur: {item.playerComment}</p>
+                              <p className="text-sm text-green-300 mb-1">
+                                <span className="font-medium">Commentaire joueur:</span> {item.playerComment}
+                              </p>
                             )}
                             {item.expiration && (
-                              <p className="text-sm text-red-300">Banni jusqu'au: {item.expiration.toLocaleDateString()} {item.expiration.toLocaleTimeString()}</p>
+                              <p className="text-sm text-red-300 mb-1">
+                                <span className="font-medium">Banni jusqu'au:</span> {formatDate(item.expiration)}
+                              </p>
                             )}
                             {item.moderator && (
-                              <p className="text-sm text-orange-300">{getItemTitle(item.type)} émit par <b>{item.moderator}</b></p>
+                              <p className="text-sm text-orange-300">
+                                <span className="font-medium">Par:</span> {item.moderator}
+                              </p>
                             )}
                           </>
                         )}
@@ -285,8 +351,12 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
                 ))
               ) : (
                 <div className="text-center py-8">
-                  <div className="text-4xl mb-4">📋</div>
-                  <p className="text-gray-400">Aucun historique disponible</p>
+                  <div className="text-4xl mb-4">{filterType === 'all' ? '📋' : getItemIcon(filterType)}</div>
+                  <p className="text-gray-400">
+                    {filterType === 'all'
+                      ? 'Aucun historique disponible'
+                      : `Aucun ${getItemTitle(filterType).toLowerCase()} trouvé`}
+                  </p>
                 </div>
               )}
             </div>
@@ -303,19 +373,32 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, targetUser
                 </button>
 
                 <div className="flex items-center gap-2">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-8 h-8 rounded transition-all ${
-                        page === currentPage
-                          ? 'bg-orange-600 text-white'
-                          : 'bg-black/40 hover:bg-black/60 text-gray-300'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
+                  {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                    let page: number
+                    if (totalPages <= 7) {
+                      page = i + 1
+                    } else if (currentPage <= 4) {
+                      page = i + 1
+                    } else if (currentPage >= totalPages - 3) {
+                      page = totalPages - 6 + i
+                    } else {
+                      page = currentPage - 3 + i
+                    }
+
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-8 h-8 rounded transition-all ${
+                          page === currentPage
+                            ? 'bg-orange-600 text-white'
+                            : 'bg-black/40 hover:bg-black/60 text-gray-300'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  })}
                 </div>
 
                 <button
