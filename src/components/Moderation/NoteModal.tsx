@@ -58,7 +58,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ isOpen, onClose, targetUser }) =>
           onClick={onClose}
         >
           <motion.div
-            className="bg-gradient-to-r from-black/90 to-orange-900/30 backdrop-blur-md rounded-xl border border-orange-500/30 p-6 max-w-md w-full shadow-2xl"
+            className="bg-gradient-to-r from-black/90 to-purple-900/30 backdrop-blur-md rounded-xl border border-purple-500/30 p-6 max-w-md w-full shadow-2xl"
             initial={{ scale: 0.9, y: 20, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.9, y: 20, opacity: 0 }}
@@ -78,7 +78,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ isOpen, onClose, targetUser }) =>
 
             {/* Profil cible */}
             <div className="flex items-center gap-3 mb-6 bg-black/30 p-3 rounded-lg border border-red-500/20">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center overflow-hidden">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center overflow-hidden">
                 {targetUser.avatar ? (
                   <img src={targetUser.avatar} alt={targetUser.nickname} className="w-full h-full object-cover" />
                 ) : (
@@ -96,7 +96,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ isOpen, onClose, targetUser }) =>
               <Textarea
                 value={note}
                 onChange={e => setNote(e.target.value)}
-                className="w-full bg-black/40 border border-orange-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                className="w-full bg-black/40 border border-purple-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
             </div>
 
@@ -112,7 +112,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ isOpen, onClose, targetUser }) =>
               <Button
                 variant="default"
                 onClick={save}
-                className="px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-800 hover:from-orange-700 hover:to-orange-900 text-white rounded-lg transition-all"
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white rounded-lg transition-all"
               >
                 Enregistrer
               </Button>

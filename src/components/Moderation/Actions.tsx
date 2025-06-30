@@ -77,8 +77,8 @@ const ModerationActions: React.FC<ModerationActionsProps> = ({ targetUser, compa
             <Button
               onClick={() => setIsNoteOpen(true)}
               className={`${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2'}
-                bg-gradient-to-r from-yellow-600 to-amber-600
-                hover:from-yellow-700 hover:to-amber-700
+                bg-gradient-to-r from-purple-600 to-purple-900
+                hover:from-purple-700 hover:to-purple-700
                 text-white rounded-lg transition-all`}
             >
               Notes sur le joueur
