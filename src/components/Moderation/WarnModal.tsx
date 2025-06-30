@@ -30,7 +30,12 @@ const WarnModal: React.FC<WarnModalProps> = ({ isOpen, onClose, targetUser }) =>
     e.preventDefault()
 
     if (!reason.trim()) {
-      toast.error('Veuillez fournir une raison pour l\'avertissement.', ToastDefaultOptions)
+      toast.error('Veuillez sélectionner une raison pour l\'avertissement.', ToastDefaultOptions)
+      return
+    }
+
+    if (!comment.trim()) {
+      toast.error('Veuillez fournir des détails pour l\'avertissement.', ToastDefaultOptions)
       return
     }
 
@@ -46,7 +51,7 @@ const WarnModal: React.FC<WarnModalProps> = ({ isOpen, onClose, targetUser }) =>
         body: JSON.stringify({
           userId: targetUser.id,
           reason,
-          comment: comment.trim() || 'Aucun commentaire',
+          comment: comment.trim(),
         }),
       })
 
@@ -118,26 +123,37 @@ const WarnModal: React.FC<WarnModalProps> = ({ isOpen, onClose, targetUser }) =>
                 <label htmlFor="reason" className="block text-sm font-medium text-blue-300 mb-1">
                   Raison de l'avertissement <span className="text-red-400">*</span>
                 </label>
-                <Textarea
+                <select
                   id="reason"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Décrivez la raison de l'avertissement..."
-                  className="w-full bg-black/40 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 min-h-[100px]"
+                  className="w-full bg-black/40 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   required
-                />
+                >
+                  <option value="">Sélectionnez une raison...</option>
+                  <option value="Langage abusif (Léger)">Langage abusif (Léger)</option>
+                  <option value="Langage abusif (Soutenu)">Langage abusif (Soutenu)</option>
+                  <option value="Humour inapproprié">Humour inapproprié</option>
+                  <option value="Nom de guilde inadapté">Nom de guilde inadapté</option>
+                  <option value="Multi-compte">Multi-compte</option>
+                  <option value="Anti-Jeu">Anti-Jeu</option>
+                  <option value="Mauvaises intentions">Mauvaises intentions</option>
+                  <option value="Triche">Triche</option>
+                  <option value="Autre">Autre</option>
+                </select>
               </div>
 
               <div>
                 <label htmlFor="comment" className="block text-sm font-medium text-blue-300 mb-1">
-                  Commentaire interne (optionnel)
+                  Détails ou contenu de l'avertissement <span className="text-red-400">*</span>
                 </label>
                 <Textarea
                   id="comment"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder="Commentaire visible uniquement par les modérateurs..."
-                  className="w-full bg-black/40 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  placeholder="Décrivez en détail le contenu de l'avertissement..."
+                  className="w-full bg-black/40 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 min-h-[100px]"
+                  required
                 />
               </div>
 
