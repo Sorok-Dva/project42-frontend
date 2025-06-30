@@ -96,6 +96,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const [isSavingComment, setIsSavingComment] = useState<boolean>(false)
   const [discordChannelInput, setDiscordChannelInput] = useState('')
   const [voicePlayers, setVoicePlayers] = useState<number[]>([])
+  const [spectatorsAreMuted, setSpectatorsAreMuted] = useState<boolean>(false)
 
   const openEditComposition = () => {
     if (!isCreator || isArchive || roomData.type === 3) return
@@ -120,6 +121,27 @@ const GameControls: React.FC<GameControlsProps> = ({
       } else {
         alert(e)
       }
+    }
+  }
+
+  const handleMuteSpectators = async () => {
+    if (!gameId || !isCreator || gameStarted || gameFinished) return
+    try {
+      const newMuteState = !spectatorsAreMuted
+      await axios.put(
+        `/api/games/room/${gameId}/muteSpectators`,
+        { muteSpectators: newMuteState },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+      setSpectatorsAreMuted(newMuteState)
+      toast.success(newMuteState ? 'Spectateurs mutés' : 'Spectateurs démutés', ToastDefaultOptions)
+    } catch (error) {
+      console.error('Erreur lors du mute des spectateurs:', error)
+      toast.error('Erreur lors du changement du statut des spectateurs', ToastDefaultOptions)
     }
   }
 
@@ -735,6 +757,34 @@ const GameControls: React.FC<GameControlsProps> = ({
                     Ajouter un bot
                   </motion.button>
                 )}
+
+                <motion.button
+                  className="sound-tick w-full px-4 py-2 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all flex items-center justify-center gap-2"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleMuteSpectators}
+                  data-tooltip-id="mute-spectators"
+                  data-tooltip-content={spectatorsAreMuted ? 'Démuter les spectateurs' : 'Muter les spectateurs'}
+                >
+                  {spectatorsAreMuted ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path
+                        fillRule="evenodd"
+                        d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.793L4.828 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.828l3.555-3.793A1 1 0 019.383 3.076zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path
+                        fillRule="evenodd"
+                        d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.793L4.828 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.828l3.555-3.793A1 1 0 019.383 3.076zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.414A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
+                </motion.button>
+                <Tooltip id="mute-spectators" />
 
                 {/* Bouton pour bipper les joueurs non prêts - visible uniquement quand le salon est plein */}
                 {players.length === slots &&
