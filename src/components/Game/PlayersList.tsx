@@ -22,6 +22,7 @@ import {
   fetchPlayers,
   fetchViewers,
 } from 'services/gameService'
+import KickPlayerModal from 'components/Game/KickPlayerModal'
 
 interface PlayersListProps {
   players: Player[]
@@ -100,6 +101,28 @@ const PlayersList: React.FC<PlayersListProps> = ({
   const [mounted, setMounted] = useState(false)
   const [lastVotedPlayer, setLastVotedPlayer] = useState<number | null>(null)
   const [voicePlayers, setVoicePlayers] = useState<number[]>([])
+  const [kickModalOpen, setKickModalOpen] = useState(false)
+  const [playerToKick, setPlayerToKick] = useState<string>('')
+
+  const handleKickClick = (nickname: string) => {
+    setPlayerToKick(nickname)
+    setKickModalOpen(true)
+  }
+
+  const handleKickConfirm = async (reason: string, isPermanent: boolean) => {
+    if (!isCreator || !socket || gameStarted || !playerToKick) return
+
+    try {
+      socket.emit('kickPlayer', {
+        roomId: gameId,
+        nickname: playerToKick,
+        reason,
+        isPermanent,
+      })
+    } catch (error) {
+      console.error('Erreur lors du kick:', error)
+    }
+  }
 
   const {
     setPlayer,
@@ -159,18 +182,6 @@ const PlayersList: React.FC<PlayersListProps> = ({
       socket.off('voiceStatus', handleVoiceStatus)
     }
   }, [hasVoice, socket])
-
-  const handleKickPlayer = (nickname: string) => {
-    if (!isCreator || !socket || gameStarted) return
-    try {
-      socket.emit('kickPlayer', {
-        roomId: gameId,
-        nickname,
-      })
-    } catch (error) {
-      console.error('Erreur lors du kick:', error)
-    }
-  }
 
   const voteCounts: Record<string, number> = players.reduce(
     (acc, _player) => {
@@ -551,7 +562,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   {!gameStarted && !gameFinished && player && isCreator && creatorNickname !== _player.nickname && (
                     <button
                       className="w-6 h-6 rounded-full bg-red-900/40 flex items-center justify-center text-red-300 hover:text-white hover:bg-red-900/60 transition-colors"
-                      onClick={() => handleKickPlayer(_player.nickname)}
+                      onClick={() => handleKickClick(_player.nickname)}
                       data-tooltip-html={`Expulser <strong>${_player.nickname}</strong> de la partie`}
                       data-tooltip-id={`kick_${_player.nickname}`}
                     >
@@ -579,6 +590,15 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
       {/* Liste des spectateurs */}
       <ViewersList viewer={viewer} viewers={viewers} players={players} />
+
+
+      { mounted && createPortal(
+        <KickPlayerModal
+          isOpen={kickModalOpen}
+          onClose={() => setKickModalOpen(false)}
+          playerName={playerToKick}
+          onConfirm={handleKickConfirm}
+        />, document.body) }
     </div>
   )
 }
