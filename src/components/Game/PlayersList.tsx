@@ -19,10 +19,9 @@ import { Camera, GraduationCap, Mic, MicOff } from 'lucide-react'
 import { useGameContext } from 'contexts/GameContext'
 import {
   fetchChatMessages,
-  fetchPlayers,
-  fetchViewers,
 } from 'services/gameService'
 import KickPlayerModal from 'components/Game/KickPlayerModal'
+import PlayerContextMenu from 'components/Game/Tools/PlayerContextMenu'
 
 interface PlayersListProps {
   players: Player[]
@@ -103,6 +102,30 @@ const PlayersList: React.FC<PlayersListProps> = ({
   const [voicePlayers, setVoicePlayers] = useState<number[]>([])
   const [kickModalOpen, setKickModalOpen] = useState(false)
   const [playerToKick, setPlayerToKick] = useState<string>('')
+  const [contextMenu, setContextMenu] = useState<{
+    isOpen: boolean
+    playerName: string
+    position: { x: number; y: number }
+  }>({
+    isOpen: false,
+    playerName: '',
+    position: { x: 0, y: 0 },
+  })
+
+  const handleRightClick = (e: React.MouseEvent, playerName: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    setContextMenu({
+      isOpen: true,
+      playerName,
+      position: { x: e.clientX, y: e.clientY },
+    })
+  }
+
+  const closeContextMenu = () => {
+    setContextMenu({ isOpen: false, playerName: '', position: { x: 0, y: 0 } })
+  }
 
   const handleKickClick = (nickname: string) => {
     setPlayerToKick(nickname)
@@ -279,8 +302,10 @@ const PlayersList: React.FC<PlayersListProps> = ({
             return (
               <div
                 key={index}
-                className={`flex items-center p-2 rounded-lg ${!_player.alive ? 'bg-red-900/20 border border-red-500/20' : isHighlighted ? '' : 'hover:bg-black/30'} transition-colors relative group`}
+                className={`flex items-center p-2 rounded-lg ${!_player.alive ? 'bg-red-900/20 border border-red-500/20' : isHighlighted ? '' : 'hover:bg-black/30'} transition-colors relative group cursor-pointer`}
                 style={{ backgroundColor: isHighlighted || '' }}
+                onContextMenu={(e) => handleRightClick(e, _player.nickname)}
+                title={isCurrentPlayer ? 'Vous' : `Clic droit pour les actions sur ${_player.nickname}`}
               >
                 {/* Indicateurs de rôle et statut */}
                 <div className="flex items-center absolute top-1/2 transform -translate-y-1/2">
@@ -550,7 +575,10 @@ const PlayersList: React.FC<PlayersListProps> = ({
                   {/* Bouton de mise en évidence */}
                   <button
                     className="w-6 h-6 rounded-full bg-black/40 flex items-center justify-center text-blue-300 hover:text-white hover:bg-black/60 transition-colors"
-                    onClick={() => toggleHighlightPlayer(_player.nickname)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleHighlightPlayer(_player.nickname)
+                    }}
                     title="Mettre en évidence ce joueur"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
@@ -588,9 +616,18 @@ const PlayersList: React.FC<PlayersListProps> = ({
         </div>
       </div>
 
+      <PlayerContextMenu
+        isOpen={contextMenu.isOpen}
+        onClose={closeContextMenu}
+        playerName={contextMenu.playerName}
+        position={contextMenu.position}
+        socket={socket}
+        gameId={gameId}
+        isCreator={isCreator}
+      />
+
       {/* Liste des spectateurs */}
       <ViewersList viewer={viewer} viewers={viewers} players={players} />
-
 
       { mounted && createPortal(
         <KickPlayerModal

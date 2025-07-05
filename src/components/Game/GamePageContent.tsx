@@ -30,6 +30,8 @@ import BugReportModal from './BugReportModal'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
+import DevCommandsPanel from 'components/Game/Tools/DevCommandsPanel'
+import ParameterCommandsPanel from 'components/Game/Tools/ParameterCommandsPanel'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -1322,6 +1324,9 @@ const GamePage = () => {
               }}
             />
           )}
+
+          <DevCommandsPanel socket={socket} gameId={gameId!} isVisible={!isArchive} />
+          <ParameterCommandsPanel socket={socket} gameId={Number(gameId)!} isVisible={!isArchive} />
         </>
       ) : (
         <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black flex items-center justify-center text-white">
