@@ -76,7 +76,7 @@ const DevCommandsPanel: React.FC<DevCommandsPanelProps> = ({ socket, gameId, isV
   const [isExpanded, setIsExpanded] = useState(false)
   const [confirmCommand, setConfirmCommand] = useState<Command | null>(null)
 
-  const canUseDev = true
+  const canUseDev = checkPermission('godPowers', 'addBot')
 
   if (!canUseDev || !isVisible) return null
 
