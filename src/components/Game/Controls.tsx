@@ -459,22 +459,9 @@ const GameControls: React.FC<GameControlsProps> = ({
     socket.emit('bipNotReadyPlayers', gameId)
   }
 
-  const handleLinkChannel = async () => {
-    if (!gameId || !discordChannelInput || !token) return
-    try {
-      const data = await linkDiscordChannel(gameId, discordChannelInput, token)
-      if (data.discordChannelId) {
-        setRoomData((prev) => ({ ...prev, discordChannelId: data.discordChannelId }))
-        setDiscordChannelInput('')
-      }
-    } catch (error) {
-      console.error('Erreur lors du lien du salon Discord :', error)
-    }
-  }
-
   const handleVoteQuickEnd = () => {
-    if (!socket || !gameId) return
-    socket.emit('quickEndPhaseVote', { roomId: gameId })
+    if (!socket || !gameId || !player?.alive) return
+    socket.emit('quickEndPhaseVote', { roomId: gameId, playerId: player.id })
     setQuickEndPhase(prev => prev ? { ...prev, hasVoted: true } : prev)
   }
 
@@ -517,29 +504,51 @@ const GameControls: React.FC<GameControlsProps> = ({
     socket.on('voiceStatus', handleVoiceStatus)
 
     return () => {
-    socket.off('voiceStatus', handleVoiceStatus)
-  }
+      socket.off('voiceStatus', handleVoiceStatus)
+    }
   }, [roomData.discordChannelId, socket])
 
   useEffect(() => {
-    if (!socket) return
-
-    const handleQuickEnd = (data: { votes: number; required: number; hasVoted?: boolean }) => {
-      setQuickEndPhase({ votes: data.votes, required: data.required, hasVoted: !!data.hasVoted })
-    }
+    if (!socket || !players) return
 
     const clearQuickEnd = () => setQuickEndPhase(null)
 
-    socket.on('quickEndPhaseProposed', handleQuickEnd)
-    socket.on('quickEndPhaseUpdated', handleQuickEnd)
+    socket.on('quickEndPhaseProposed', () => {
+      setQuickEndPhase(prev => {
+        if (prev === null) {
+          return {
+            votes: 0,
+            required: players.filter(p => p.alive).length,
+            hasVoted: false,
+          }
+        }
+        return prev
+      })
+    })
+    socket.on('quickEndPhaseUpdated', (data) => {
+      setQuickEndPhase(prev => {
+        if (prev === null) {
+          return {
+            votes: Object.values(data.votes).filter(v => v).length,
+            required: data.required,
+            hasVoted: Boolean(data.votes[player?.id ?? '']),
+          }
+        }
+        return {
+          votes: Object.values(data.votes).filter(v => v).length,
+          required: data.required,
+          hasVoted: prev.hasVoted ?? Boolean(data.votes[player?.id ?? '']),
+        }
+      })
+    })
     socket.on('phaseEnded', clearQuickEnd)
 
     return () => {
-      socket.off('quickEndPhaseProposed', handleQuickEnd)
-      socket.off('quickEndPhaseUpdated', handleQuickEnd)
+      socket.off('quickEndPhaseProposed')
+      socket.off('quickEndPhaseUpdated')
       socket.off('phaseEnded', clearQuickEnd)
     }
-  }, [socket])
+  }, [socket, players])
 
   // Rendu conditionnel selon l'état du jeu
   if (player && !gameStarted && !gameFinished) {

@@ -19,14 +19,16 @@ const QuickEndPhaseVote: React.FC<QuickEndPhaseVoteProps> = ({ votes, required, 
       transition={{ duration: 0.3 }}
     >
       <div className="flex-1">
-        <div className="w-full bg-gray-700/50 rounded-full h-3 overflow-hidden">
+        <h6>Mettre fin à la phase ?</h6>
+
+        <div className="w-full bg-gray-700/50 rounded-full h-3 mt-2 overflow-hidden">
           <motion.div
             className="h-full bg-green-500 rounded-full"
             style={{ width: `${progress}%` }}
           />
         </div>
         <div className="text-xs text-gray-300 mt-1 text-center">
-          {votes}/{required} votes pour
+          {votes}/{required} votes pour mettre fin à la phase.
         </div>
       </div>
       <motion.button
