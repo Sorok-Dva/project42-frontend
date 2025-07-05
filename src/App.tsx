@@ -47,6 +47,7 @@ import ResetPassword from 'pages/ResetPassword'
 import ServiceUnavailable from 'pages/ServiceUnavailable'
 import UserSettingsPage from 'pages/UserSettings'
 import ValidateUser from 'pages/ValidateUser'
+import PaymentSuccessPage from 'pages/PaymentSuccess'
 
 import { ToastContainer } from 'react-toastify'
 import Notifier from 'components/Notifier'
@@ -160,6 +161,7 @@ const AppContent: React.FC = () => {
         <Route path="/game/:id" element={<GamePage />} />
         <Route path="/stations" element={<Guilds />} />
         <Route path="/station/:id" element={<Guild />} />
+        <Route path="/payment/confirm" element={<PaymentSuccessPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {(!isAdminRoute && !isGameRoute) && <Footer />}
