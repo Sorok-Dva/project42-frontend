@@ -6,6 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from 'components/UI/Tabs'
 import { Badge } from 'components/UI/Badge'
 import { Button } from 'components/UI/Button'
 import { Card } from 'components/UI/Card'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from 'components/UI/DropdownMenu'
 import { Input } from 'components/UI/Input'
 import { CreditPack, PremiumPlan, Transaction } from 'types/shop'
 import axios from 'axios'
@@ -162,6 +168,34 @@ const PremiumCredits : React.FC = () => {
   const [giftType, setGiftType] = useState('credits')
   const [giftAmount, setGiftAmount] = useState('500')
   const [giftRecipient, setGiftRecipient] = useState('')
+
+  const handleBuyPremium = async (planId: number, provider: 'stripe' | 'paypal') => {
+    if (!token) return
+    try {
+      const { data } = await axios.post(
+        '/api/payments/premium',
+        { planId, provider },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      if (data.url) window.location.href = data.url
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  const handleBuyCredits = async (packId: number, provider: 'stripe' | 'paypal') => {
+    if (!token) return
+    try {
+      const { data } = await axios.post(
+        '/api/payments/credits',
+        { packId, provider },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      if (data.url) window.location.href = data.url
+    } catch (e) {
+      console.log(e)
+    }
+  }
 
   useEffect(() => {
     async function retrieveShopOffers() {
@@ -347,11 +381,19 @@ const PremiumCredits : React.FC = () => {
                         Cosmétiques exclusifs mensuels
                       </li>
                     </ul>
-                    <Button
-                      className={ `w-full ${ plan.popular ? 'bg-purple-600 hover:bg-purple-700': 'bg-indigo-600 hover:bg-indigo-700' }` }
-                    >
-                      Acheter
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          className={ `w-full ${ plan.popular ? 'bg-purple-600 hover:bg-purple-700': 'bg-indigo-600 hover:bg-indigo-700' }` }
+                        >
+                          Acheter
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleBuyPremium(plan.id, 'stripe')}>Stripe</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleBuyPremium(plan.id, 'paypal')}>PayPal</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </Card>
               )) }
@@ -419,11 +461,19 @@ const PremiumCredits : React.FC = () => {
                   <div className="text-2xl font-bold mb-6">{ pack.price }€
                   </div>
 
-                  <Button
-                    className={ `w-full ${ pack.popular ? 'bg-indigo-600 hover:bg-indigo-700': 'bg-gray-700 hover:bg-gray-600' }` }
-                  >
-                    Acheter
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        className={ `w-full ${ pack.popular ? 'bg-indigo-600 hover:bg-indigo-700': 'bg-gray-700 hover:bg-gray-600' }` }
+                      >
+                        Acheter
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleBuyCredits(pack.id, 'stripe')}>Stripe</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleBuyCredits(pack.id, 'paypal')}>PayPal</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </Card>
             )) }
