@@ -29,6 +29,7 @@ import { Tooltip } from 'react-tooltip'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { Player } from 'types/room'
+import QuickEndPhaseVote from './QuickEndPhaseVote'
 
 interface GameControlsProps {
   gameId: string | undefined
@@ -97,6 +98,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const [discordChannelInput, setDiscordChannelInput] = useState('')
   const [voicePlayers, setVoicePlayers] = useState<number[]>([])
   const [spectatorsAreMuted, setSpectatorsAreMuted] = useState<boolean>(false)
+  const [quickEndPhase, setQuickEndPhase] = useState<{ votes: number; required: number; hasVoted: boolean } | null>(null)
 
   const openEditComposition = () => {
     if (!isCreator || isArchive || roomData.type === 3) return
@@ -470,6 +472,12 @@ const GameControls: React.FC<GameControlsProps> = ({
     }
   }
 
+  const handleVoteQuickEnd = () => {
+    if (!socket || !gameId) return
+    socket.emit('quickEndPhaseVote', { roomId: gameId })
+    setQuickEndPhase(prev => prev ? { ...prev, hasVoted: true } : prev)
+  }
+
   const cardId = player?.card?.id
   const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} isArchive={isArchive} />, [cardId, isArchive])
   const isInVoice = player ? voicePlayers.includes(player.playerId) : false
@@ -509,9 +517,29 @@ const GameControls: React.FC<GameControlsProps> = ({
     socket.on('voiceStatus', handleVoiceStatus)
 
     return () => {
-      socket.off('voiceStatus', handleVoiceStatus)
-    }
+    socket.off('voiceStatus', handleVoiceStatus)
+  }
   }, [roomData.discordChannelId, socket])
+
+  useEffect(() => {
+    if (!socket) return
+
+    const handleQuickEnd = (data: { votes: number; required: number; hasVoted?: boolean }) => {
+      setQuickEndPhase({ votes: data.votes, required: data.required, hasVoted: !!data.hasVoted })
+    }
+
+    const clearQuickEnd = () => setQuickEndPhase(null)
+
+    socket.on('quickEndPhaseProposed', handleQuickEnd)
+    socket.on('quickEndPhaseUpdated', handleQuickEnd)
+    socket.on('phaseEnded', clearQuickEnd)
+
+    return () => {
+      socket.off('quickEndPhaseProposed', handleQuickEnd)
+      socket.off('quickEndPhaseUpdated', handleQuickEnd)
+      socket.off('phaseEnded', clearQuickEnd)
+    }
+  }, [socket])
 
   // Rendu conditionnel selon l'état du jeu
   if (player && !gameStarted && !gameFinished) {
@@ -887,6 +915,15 @@ const GameControls: React.FC<GameControlsProps> = ({
             ) : (
               <PhaseAction player={player} roomId={Number(gameId!)} gameType={roomData.type} isInn={isInn} />
             )}
+
+            {quickEndPhase && (
+              <QuickEndPhaseVote
+                votes={quickEndPhase.votes}
+                required={quickEndPhase.required}
+                hasVoted={quickEndPhase.hasVoted}
+                onVote={handleVoteQuickEnd}
+              />
+            )}
           </div>
         </motion.div>
       </div>
@@ -940,6 +977,15 @@ const GameControls: React.FC<GameControlsProps> = ({
 
             {/* Timer */}
             {gameStarted && <GameTimer gameId={gameId || ''} gameStarted={gameStarted} gameFinished={gameFinished} />}
+
+            {quickEndPhase && (
+              <QuickEndPhaseVote
+                votes={quickEndPhase.votes}
+                required={quickEndPhase.required}
+                hasVoted={quickEndPhase.hasVoted}
+                onVote={handleVoteQuickEnd}
+              />
+            )}
 
             {!viewer?.user && !gameFinished && (
               <motion.div
