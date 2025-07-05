@@ -509,7 +509,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }, [roomData.discordChannelId, socket])
 
   useEffect(() => {
-    if (!socket || !players) return
+    if (!socket || !players || !player?.alive || gameFinished) return
 
     const clearQuickEnd = () => setQuickEndPhase(null)
 
