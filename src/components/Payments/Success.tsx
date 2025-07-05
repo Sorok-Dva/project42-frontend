@@ -394,7 +394,7 @@ const PaymentSuccess: React.FC = () => {
                       <Coins className="w-5 h-5 text-yellow-400" />
                       <span className="text-gray-300">Crédits totaux</span>
                     </div>
-                    <p className="text-2xl font-bold text-yellow-400">{creditsAnimation.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-yellow-400">{(!paymentConfirmed ? (user.credits || 0) : creditsAnimation).toLocaleString()}</p>
                   </div>
                   {user.premium && (
                     <div className="bg-black/20 rounded-lg p-4">
