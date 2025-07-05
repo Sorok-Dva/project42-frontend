@@ -7,6 +7,8 @@ import { useAuth } from 'contexts/AuthContext'
 const CreateGame = () => {
   const { token } = useAuth()
   const { user } = useUser()
+  const premiumDate = user?.premium ? new Date(user.premium) : null
+  const isPremium = premiumDate ? new Date().getTime() < premiumDate.getTime() : false
   const [inGame, setInGame] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [gameId, setGameId] = useState<number | null>(null)
@@ -157,10 +159,16 @@ const CreateGame = () => {
                     name="anonymousVotes"
                     checked={formData.anonymousVotes}
                     onChange={handleChange}
+                    disabled={!isPremium}
                   />
                 }
                 label="Votes anonymes"
               />
+              {!isPremium && (
+                <Typography variant="caption" color="text.secondary">
+                  Réservé aux Premium
+                </Typography>
+              )}
             </Box>
 
             <Box mb={2}>
@@ -170,10 +178,16 @@ const CreateGame = () => {
                     name="privateGame"
                     checked={formData.privateGame}
                     onChange={handleChange}
+                    disabled={!isPremium}
                   />
                 }
                 label="Partie privée"
               />
+              {!isPremium && (
+                <Typography variant="caption" color="text.secondary">
+                  Réservé aux Premium
+                </Typography>
+              )}
             </Box>
 
             <Box mb={2}>
@@ -189,7 +203,7 @@ const CreateGame = () => {
               />
             </Box>
 
-            {formData.privateGame && (
+            {isPremium && formData.privateGame && (
               <Box mb={2}>
                 <TextField
                   fullWidth
