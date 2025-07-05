@@ -32,7 +32,7 @@ const PARAMETER_COMMANDS: ParameterCommand[] = [
   },
   {
     id: 'stop',
-    label: 'Arrêter Phase',
+    label: 'Fin du jeu',
     icon: '⏹️',
     color: 'from-red-600 to-red-800',
     modalType: 'stop',
