@@ -31,6 +31,7 @@ import Login from 'components/Auth/LoginForm'
 import Register from 'pages/Register'
 import RecoverPassword from 'pages/RecoverPassword'
 import TOSPage from 'pages/TermsOfService'
+import TOSalesPage from 'pages/TermsOfSales'
 import AdminLayout from 'layouts/Admin'
 import UserList from 'pages/admin/users/UserList'
 import AdminUserProfile from 'pages/admin/users/UserProfile'
@@ -153,6 +154,7 @@ const AppContent: React.FC = () => {
           </>
         )}
         <Route path="/terms-of-service" element={<TOSPage />} />
+        <Route path="/terms-of-sales" element={<TOSalesPage />} />
         <Route path="/users/validate/:token" element={<ValidateUser />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/leaderboard/players" element={<Leaderboard />} />
