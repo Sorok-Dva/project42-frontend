@@ -542,7 +542,14 @@ const PremiumCredits: React.FC = () => {
                     <div className="p-6 flex flex-col h-full">
                       <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
                       <div className="flex items-baseline mb-4">
-                        <span className="text-3xl font-bold">{plan.price}€</span>
+                        {plan.discount > 0 ? (
+                          <>
+                            <span className="text-gray-400 line-through mr-2">{plan.price}€</span>
+                            <span className="text-3xl font-bold">{Math.round(plan.price * (1 - plan.discount / 100))}€</span>
+                          </>
+                        ) : (
+                          <span className="text-3xl font-bold">{plan.price}€</span>
+                        )}
                         {plan.discount > 0 && <Badge className="ml-2 bg-green-500">-{plan.discount}%</Badge>}
                       </div>
                       <ul className="space-y-3 mb-6 flex-grow">
@@ -590,7 +597,15 @@ const PremiumCredits: React.FC = () => {
                       {/* Boutons de paiement */}
                       <div className="space-y-2">
                         <Button
-                          onClick={() =>  openPaymentModal('premium', plan.id, 'stripe', plan.name, plan.price.toString())}
+                          onClick={() =>
+                            openPaymentModal(
+                              'premium',
+                              plan.id,
+                              'stripe',
+                              plan.name,
+                              Math.round(plan.price * (1 - plan.discount / 100)).toString(),
+                            )
+                          }
                           className={`w-full ${
                             plan.popular ? 'bg-purple-600 hover:bg-purple-700' : 'bg-indigo-600 hover:bg-indigo-700'
                           } flex items-center justify-center gap-2`}
@@ -601,7 +616,14 @@ const PremiumCredits: React.FC = () => {
                           Stripe
                         </Button>
                         {/*<Button
-                        onClick={() =>  openPaymentModal("premium", plan.id, "paypal", plan.name, plan.price.toString())}
+                        onClick={() =>
+                          openPaymentModal(
+                            "premium",
+                            plan.id,
+                            "paypal",
+                            plan.name,
+                            Math.round(plan.price * (1 - plan.discount / 100)).toString(),
+                          )}
                         variant="outline"
                         className="w-full border-blue-500/50 hover:bg-blue-500/10 flex items-center justify-center gap-2"
                       >
