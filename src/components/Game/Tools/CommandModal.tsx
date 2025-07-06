@@ -97,6 +97,34 @@ const CommandModal: React.FC<CommandModalProps> = ({ isOpen, roomId, onClose, ty
         </>
       )
 
+    case 'nick':
+      return (
+        <>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
+              <span className="text-2xl">✒️</span>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-white">Renommer un joueur</h3>
+              <p className="text-blue-200 text-sm">Renommer {playerName}</p>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-blue-300 mb-2">
+                Nouveau pseudo <span className="text-red-400">*</span>
+            </label>
+            <input
+              value={params.message || ''}
+              onChange={(e) => setParams({ ...params, message: e.target.value })}
+              placeholder="Nouveau pseudo"
+              className="bg-black/40 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              maxLength={15}
+            />
+          </div>
+        </>
+      )
+
     case 'mute':
       return (
         <>
@@ -260,6 +288,8 @@ const CommandModal: React.FC<CommandModalProps> = ({ isOpen, roomId, onClose, ty
       return params.message?.trim()
     case 'mute':
       return params.reason?.trim()
+    case 'nick':
+      return params.message?.trim()
     case 'card':
       return params.cardId
     case 'timer':
@@ -283,6 +313,8 @@ const CommandModal: React.FC<CommandModalProps> = ({ isOpen, roomId, onClose, ty
       return 'to-blue-900/40'
     case 'stop':
       return 'to-red-900/40'
+    case 'nick':
+      return 'to-blue-400/40'
     default:
       return 'to-gray-900/40'
     }

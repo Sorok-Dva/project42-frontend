@@ -70,6 +70,16 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
       allowed: checkPermission('gamePowers', 'kick')
     },
     {
+      id: 'nick',
+      label: 'Renommer',
+      icon: '✒️',
+      color: 'text-blue-400',
+      command: 'nick',
+      requiresModal: true,
+      modalType: 'nick',
+      allowed: checkPermission('gamePowers', 'nick')
+    },
+    {
       id: 'kill',
       label: 'Tuer',
       icon: '💀',
@@ -187,6 +197,9 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
 
     switch (commandModal.type) {
     case 'message':
+      commandText += ` ${params.message}`
+      break
+    case 'nick':
       commandText += ` ${params.message}`
       break
     case 'mute':
