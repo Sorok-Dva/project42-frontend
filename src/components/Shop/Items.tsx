@@ -123,6 +123,8 @@ const getRarityColor = (rarity: string) => {
 const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
   const { token } = useAuth()
   const { user, setUser } = useUser()
+  const premiumDate = user?.premium ? new Date(user.premium) : null
+  const isPremium = premiumDate ? new Date().getTime() < premiumDate.getTime() : false
   const [loading, setLoading] = useState<boolean>(true)
   const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<TagType[]>([])
@@ -487,12 +489,20 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
               <option value="featured">En vedette</option>
               <option value="new">Nouveautés</option>
               <option value="price-low">Prix: Croissant</option>
-              <option value="price-high">Prix: Décroissant</option>
-            </select>
-          </div>
+          <option value="price-high">Prix: Décroissant</option>
+        </select>
+      </div>
 
-          {/* Items grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {activeCategory === 4 && !isPremium && (
+        <div className="p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-center text-yellow-300">
+          <p className="text-sm">
+            Les objets jetables sont à usage unique et réservés aux joueurs premium. Rendez-vous dans l'onglet Premium pour pouvoir les acheter.
+          </p>
+        </div>
+      )}
+
+      {/* Items grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {sortedItems.map((item) => {
               const itemPrice = item.discountPrice || item.price
               const userCanAfford = (user?.credits || 0) >= itemPrice
@@ -501,6 +511,7 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
               const equipped = isItemEquipped(item.id)
               const quantity = getItemQuantity(item.id)
               const isConsumable = item.categoryId === 4
+              const premiumLocked = !isPremium && activeCategory === 4
 
               return (
                 <motion.div
@@ -588,23 +599,28 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                                     <div>
                                       <Button
                                         className="bg-indigo-600 hover:bg-indigo-700"
-                                        disabled={!userCanAfford}
+                                        disabled={!userCanAfford || premiumLocked}
                                         onClick={() => openPurchaseModal(item)}
                                       >
                                         <ShoppingCart className="h-4 w-4 mr-1" />
                                         Acheter
                                       </Button>
-                                    </div>
-                                  </TooltipTrigger>
-                                  {!userCanAfford && (
+                                  </div>
+                                </TooltipTrigger>
+                                {premiumLocked ? (
+                                  <TooltipContent>
+                                    <p>Réservé aux Premium</p>
+                                  </TooltipContent>
+                                ) :
+                                  !userCanAfford && (
                                     <TooltipContent>
                                       <p>Il vous manque {creditsNeeded} crédits</p>
                                     </TooltipContent>
                                   )}
-                                </Tooltip>
-                              </TooltipProvider>
-                            )
-                          )}
+                              </Tooltip>
+                            </TooltipProvider>
+                          )
+                        )}
 
                           {!inventory && (
                             <TooltipProvider>
@@ -614,14 +630,18 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                                     <Button
                                       variant="outline"
                                       className="border-indigo-500/30 hover:bg-gray-700/50 bg-transparent"
-                                      disabled={!userCanAfford}
+                                      disabled={!userCanAfford || premiumLocked}
                                       onClick={() => openGiftModal(item)}
                                     >
                                       <Gift className="h-4 w-4" />
                                     </Button>
                                   </div>
                                 </TooltipTrigger>
-                                {!userCanAfford ? (
+                                {premiumLocked ? (
+                                  <TooltipContent>
+                                    <p>Réservé aux Premium</p>
+                                  </TooltipContent>
+                                ) : !userCanAfford ? (
                                   <TooltipContent>
                                     <p>Il vous manque {creditsNeeded} crédits</p>
                                   </TooltipContent>
