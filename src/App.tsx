@@ -154,7 +154,7 @@ const AppContent: React.FC = () => {
           </>
         )}
         <Route path="/terms-of-service" element={<TOSPage />} />
-        <Route path="/terms-of-sales" element={<TOSalesPage />} />
+        <Route path="/terms-of-sale" element={<TOSalesPage />} />
         <Route path="/users/validate/:token" element={<ValidateUser />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/leaderboard/players" element={<Leaderboard />} />
