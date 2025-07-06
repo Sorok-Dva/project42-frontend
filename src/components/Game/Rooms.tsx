@@ -68,6 +68,8 @@ const RoomList = () => {
     type: 3,
   })
   const [isGameTypesInfoExpanded, setIsGameTypesInfoExpanded] = useState(true)
+  const premiumDate = user?.premium ? new Date(user.premium) : null
+  const isPremium = premiumDate ? new Date().getTime() < premiumDate.getTime() : false
 
   const channel = new BroadcastChannel('site-channel')
 
@@ -948,19 +950,24 @@ const RoomList = () => {
                     Sans points
                   </button>
                   <button
-                    className={`px-4 py-2 rounded-lg transition-colors ${formData.anonymousGame ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'}`}
+                    className={`px-4 py-2 rounded-lg transition-colors ${formData.anonymousGame ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'}  ${!isPremium ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed' : ''}`}
                     onClick={() =>
                       setFormData((prev) => ({
                         ...prev,
                         anonymousGame: !prev.anonymousGame,
                       }))
                     }
+                    disabled={!isPremium}
+                    data-tooltip-id='premiumOptionDisabled1'
+                    data-tooltip-content={!isPremium ? 'Réservé aux Premium' : ''}
                   >
                     Anonyme
                   </button>
                   <button
                     className="px-4 py-2 bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
                     disabled={true}
+                    data-tooltip-id='premiumOptionDisabled2'
+                    data-tooltip-content={!isPremium ? 'Réservé aux Premium' : ''}
                   >
                     Sélective
                   </button>
@@ -971,20 +978,26 @@ const RoomList = () => {
                     Vocale
                   </button>
                   <button
-                    className={`px-4 py-2 rounded-lg transition-colors ${formData.privateGame ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'}`}
+                    className={`px-4 py-2 rounded-lg transition-colors ${formData.privateGame ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' : 'bg-black/40 border border-blue-500/30 text-blue-300'} ${!isPremium ? 'bg-black/40 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed' : ''}`}
                     onClick={() =>
                       setFormData((prev) => ({
                         ...prev,
                         privateGame: !prev.privateGame,
                       }))
                     }
+                    disabled={!isPremium}
+                    data-tooltip-id='premiumOptionDisabled3'
+                    data-tooltip-content={!isPremium ? 'Réservé aux Premium' : ''}
                   >
                     Privée
                   </button>
                 </div>
+                { [1, 2, 3].map((i) => {
+                  return <Tooltip id={`premiumOptionDisabled${i}`} key={`premiumOptionDisabled${i}`} />
+                })}
               </div>
 
-              {formData.privateGame && (
+              {formData.privateGame && isPremium && (
                 <div>
                   <h4 className="text-lg font-medium text-blue-300 mb-4">
                     4b - Donne un mot de passe à ta partie
