@@ -7,6 +7,7 @@ import { usePermissions } from 'hooks/usePermissions'
 import type { Socket } from 'socket.io-client'
 import KickPlayerModal from '../KickPlayerModal'
 import CommandModal from './CommandModal'
+import ThrowItemModal from '../ThrowItemModal'
 import { createPortal } from 'react-dom'
 import { useUser } from 'contexts/UserContext'
 
@@ -14,6 +15,7 @@ interface PlayerContextMenuProps {
   isOpen: boolean
   onClose: () => void
   playerName: string
+  playerId: number
   position: { x: number; y: number }
   socket: Socket | null
   gameId: string
@@ -36,6 +38,7 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
   isOpen,
   onClose,
   playerName,
+  playerId,
   position,
   socket,
   gameId,
@@ -45,7 +48,11 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
   const { checkPermission } = usePermissions()
   const [kickModalOpen, setKickModalOpen] = useState(false)
   const [commandModal, setCommandModal] = useState<{ type: string; command: string } | null>(null)
+  const [throwItemModalOpen, setThrowItemModalOpen] = useState(false)
   const [mounted, setMounted] = useState<boolean>(false)
+
+  const premiumDate = user?.premium ? new Date(user.premium) : null
+  const isPremium = premiumDate ? Date.now() < premiumDate.getTime() : false
 
   const canUseDev = checkPermission('godPowers', 'addBot')
 
@@ -138,6 +145,17 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
       devOnly: true,
       allowed: checkPermission('gamePowers', 'card')
     },
+    {
+      id: 'throwItem',
+      label: 'Lancer un objet',
+      icon: '🍅',
+      color: 'text-orange-400',
+      command: 'throwItem',
+      requiresModal: true,
+      modalType: 'throwItem',
+      devOnly: false,
+      allowed: isPremium,
+    },
   ]
 
   useEffect(() => {
@@ -148,6 +166,8 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
     if (command.requiresModal) {
       if (command.modalType === 'kick') {
         setKickModalOpen(true)
+      } else if (command.modalType === 'throwItem') {
+        setThrowItemModalOpen(true)
       } else {
         setCommandModal({ type: command.modalType!, command: command.command })
       }
@@ -178,6 +198,14 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
   const handleKickCancel = () => {
     setKickModalOpen(false)
     onClose() // Fermer le menu si annulation
+  }
+
+  const handleThrowItemSelect = (itemId: number) => {
+    if (socket) {
+      socket.emit('throwItem', { roomId: gameId, itemId, targetId: playerId })
+    }
+    setThrowItemModalOpen(false)
+    onClose()
   }
 
   const handleCommandSubmit = (params: any) => {
@@ -227,7 +255,7 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
 
   // Fermer le menu si on clique sur l'overlay, mais seulement si aucune modal n'est ouverte
   const handleOverlayClick = () => {
-    if (!kickModalOpen && !commandModal) {
+    if (!kickModalOpen && !commandModal && !throwItemModalOpen) {
       onClose()
     }
   }
@@ -316,6 +344,12 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
               onSubmit={handleCommandSubmit}
             />
           )}
+
+          <ThrowItemModal
+            isOpen={throwItemModalOpen}
+            onClose={() => setThrowItemModalOpen(false)}
+            onSelect={handleThrowItemSelect}
+          />
         </>, document.body)}
     </>
   )
