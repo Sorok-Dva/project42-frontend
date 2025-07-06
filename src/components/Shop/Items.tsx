@@ -489,20 +489,20 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
               <option value="featured">En vedette</option>
               <option value="new">Nouveautés</option>
               <option value="price-low">Prix: Croissant</option>
-          <option value="price-high">Prix: Décroissant</option>
-        </select>
-      </div>
+              <option value="price-high">Prix: Décroissant</option>
+            </select>
+          </div>
 
-      {activeCategory === 4 && !isPremium && (
-        <div className="p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-center text-yellow-300">
-          <p className="text-sm">
+          {activeCategory === 4 && !isPremium && (
+            <div className="p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-center text-yellow-300">
+              <p className="text-sm">
             Les objets jetables sont à usage unique et réservés aux joueurs premium. Rendez-vous dans l'onglet Premium pour pouvoir les acheter.
-          </p>
-        </div>
-      )}
+              </p>
+            </div>
+          )}
 
-      {/* Items grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Items grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {sortedItems.map((item) => {
               const itemPrice = item.discountPrice || item.price
               const userCanAfford = (user?.credits || 0) >= itemPrice
@@ -605,22 +605,22 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                                         <ShoppingCart className="h-4 w-4 mr-1" />
                                         Acheter
                                       </Button>
-                                  </div>
-                                </TooltipTrigger>
-                                {premiumLocked ? (
-                                  <TooltipContent>
-                                    <p>Réservé aux Premium</p>
-                                  </TooltipContent>
-                                ) :
-                                  !userCanAfford && (
+                                    </div>
+                                  </TooltipTrigger>
+                                  {premiumLocked ? (
                                     <TooltipContent>
-                                      <p>Il vous manque {creditsNeeded} crédits</p>
+                                      <p>Réservé aux Premium</p>
                                     </TooltipContent>
-                                  )}
-                              </Tooltip>
-                            </TooltipProvider>
-                          )
-                        )}
+                                  ) :
+                                    !userCanAfford && (
+                                      <TooltipContent>
+                                        <p>Il vous manque {creditsNeeded} crédits</p>
+                                      </TooltipContent>
+                                    )}
+                                </Tooltip>
+                              </TooltipProvider>
+                            )
+                          )}
 
                           {!inventory && (
                             <TooltipProvider>
