@@ -105,26 +105,29 @@ const PlayersList: React.FC<PlayersListProps> = ({
   const [contextMenu, setContextMenu] = useState<{
     isOpen: boolean
     playerName: string
+    playerId: number
     position: { x: number; y: number }
   }>({
     isOpen: false,
     playerName: '',
+    playerId: 0,
     position: { x: 0, y: 0 },
   })
 
-  const handleRightClick = (e: React.MouseEvent, playerName: string) => {
+  const handleRightClick = (e: React.MouseEvent, target: Player) => {
     e.preventDefault()
     e.stopPropagation()
 
     setContextMenu({
       isOpen: true,
-      playerName,
+      playerName: target.nickname,
+      playerId: target.playerId,
       position: { x: e.clientX, y: e.clientY },
     })
   }
 
   const closeContextMenu = () => {
-    setContextMenu({ isOpen: false, playerName: '', position: { x: 0, y: 0 } })
+    setContextMenu({ isOpen: false, playerName: '', playerId: 0, position: { x: 0, y: 0 } })
   }
 
   const handleKickClick = (nickname: string) => {
@@ -304,7 +307,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
                 key={index}
                 className={`flex items-center p-2 rounded-lg ${!_player.alive ? 'bg-red-900/20 border border-red-500/20' : isHighlighted ? '' : 'hover:bg-black/30'} transition-colors relative group cursor-pointer`}
                 style={{ backgroundColor: isHighlighted || '' }}
-                onContextMenu={(e) => handleRightClick(e, _player.nickname)}
+                onContextMenu={(e) => handleRightClick(e, _player)}
                 title={isCurrentPlayer ? 'Vous' : `Clic droit pour les actions sur ${_player.nickname}`}
               >
                 {/* Indicateurs de rôle et statut */}
@@ -620,6 +623,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
         isOpen={contextMenu.isOpen}
         onClose={closeContextMenu}
         playerName={contextMenu.playerName}
+        playerId={contextMenu.playerId}
         position={contextMenu.position}
         socket={socket}
         gameId={gameId}

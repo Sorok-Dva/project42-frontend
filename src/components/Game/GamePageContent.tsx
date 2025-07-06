@@ -27,6 +27,7 @@ import { parallaxStars, staticStars } from 'utils/animations'
 import GuideRequestModal from './GuideRequestModal'
 import GuideChat from './GuideChat'
 import BugReportModal from './BugReportModal'
+import ThrownItem from './ThrownItem'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
@@ -78,6 +79,11 @@ const GamePage = () => {
 
   const [highlightedPlayers, setHighlightedPlayers] = useState<{ [nickname: string]: string }>({})
   const [showBugReportModal, setShowBugReportModal] = useState(false)
+  const [thrownItems, setThrownItems] = useState<{ id: string; image: string }[]>([])
+
+  const removeThrownItem = (id: string) => {
+    setThrownItems(prev => prev.filter(item => item.id !== id))
+  }
 
   // États pour la gestion de la connexion
   const wasDisconnectedRef = useRef(false)
@@ -388,11 +394,18 @@ const GamePage = () => {
       }
     })
 
+    const handleItemThrown = (data: { item: string }) => {
+      setThrownItems(prev => [...prev, { id: `${Date.now()}-${Math.random()}`, image: data.item }])
+    }
+
+    socket.on('itemThrown', handleItemThrown)
+
     return () => {
       socket.offAny()
       socket.off('bipNotReadyPlayers')
       socket.off('music')
       socket.off('stopMusic')
+      socket.off('itemThrown', handleItemThrown)
     }
   }, [socket, player])
 
@@ -1351,6 +1364,10 @@ const GamePage = () => {
           username={player?.nickname || viewer?.user?.nickname || 'Anonyme'}
         />
       )}
+
+      {thrownItems.map((ti) => (
+        <ThrownItem key={ti.id} src={ti.image} onComplete={() => removeThrownItem(ti.id)} />
+      ))}
     </>
   )
 }
