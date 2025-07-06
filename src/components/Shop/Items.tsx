@@ -8,7 +8,7 @@ import { Card } from 'components/UI/Card'
 import axios from 'axios'
 import { useUser } from 'contexts/UserContext'
 import { useAuth } from 'contexts/AuthContext'
-import { Gift, ShoppingCart, Check } from 'lucide-react'
+import { Gift, ShoppingCart, Check, Bomb } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -44,6 +44,8 @@ const getIcon = (iconName : string) => {
           d="M12 3l1.88 5.76h6.12l-4.94 3.58 1.88 5.76-4.94-3.58-4.94 3.58 1.88-5.76-4.94-3.58h6.12z"/>
       </svg>
     )
+  case 'bomb':
+    return <Bomb />
   case 'zap':
     return (
       <svg
@@ -467,7 +469,7 @@ const ShopItems : React.FC<{ inventory: boolean }> = ({ inventory }) => {
                         className="text-gray-400 text-sm mb-4 flex-grow">{ item.description }</p>
                       <div
                         className="flex items-center justify-between mt-auto">
-                        { !inventory && !userInventory.find(ui => ui.itemId === item.id) ? (
+                        { !inventory && !userInventory.find(ui => ui.itemId === item.id && item.categoryId !== 4) ? (
                           <div className="flex items-center">
                             { item.discountPrice ? (
                               <>
