@@ -67,6 +67,14 @@ const PaymentCancel: React.FC = () => {
     const cancelPayment = async () => {
       setIsProcessing(true)
 
+      if (provider === 'stripe' && sessionId) {
+        await axios.post(
+          '/api/payments/stripe/cancel',
+          { sessionId },
+          { headers: { Authorization: `Bearer ${token}` } },
+        )
+      }
+
       // Récupération des détails de l'achat
       if (packId) {
         const response = await axios.get(`/api/shop/credits_packs/${packId}`)
