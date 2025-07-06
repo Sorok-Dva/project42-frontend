@@ -22,6 +22,8 @@ import {
 } from 'services/gameService'
 import KickPlayerModal from 'components/Game/KickPlayerModal'
 import PlayerContextMenu from 'components/Game/Tools/PlayerContextMenu'
+import PlayerActionMenu from 'components/Game/Tools/PlayerActionMenu'
+import { usePermissions } from 'hooks/usePermissions'
 
 interface PlayersListProps {
   players: Player[]
@@ -94,6 +96,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   isReplay,
 }) => {
   const { user } = useUser()
+  const { checkPermission } = usePermissions()
   const [availableCards, setAvailableCards] = useState<{ id: number, name: string }[]>([])
   const [suspiciousCards, setSuspiciousCards] = useState<SuspiciousCard[]>([])
   const [showCardSelector, setShowCardSelector] = useState<string | null>(null)
@@ -104,11 +107,13 @@ const PlayersList: React.FC<PlayersListProps> = ({
   const [playerToKick, setPlayerToKick] = useState<string>('')
   const [contextMenu, setContextMenu] = useState<{
     isOpen: boolean
+    type: 'moderator' | 'player'
     playerName: string
     playerId: number
     position: { x: number; y: number }
   }>({
     isOpen: false,
+    type: 'player',
     playerName: '',
     playerId: 0,
     position: { x: 0, y: 0 },
@@ -118,8 +123,12 @@ const PlayersList: React.FC<PlayersListProps> = ({
     e.preventDefault()
     e.stopPropagation()
 
+    const isModerator = checkPermission('gamePowers', 'modo')
+    const type = isModerator && !e.shiftKey ? 'moderator' : 'player'
+
     setContextMenu({
       isOpen: true,
+      type,
       playerName: target.nickname,
       playerId: target.playerId,
       position: { x: e.clientX, y: e.clientY },
@@ -127,7 +136,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
   }
 
   const closeContextMenu = () => {
-    setContextMenu({ isOpen: false, playerName: '', playerId: 0, position: { x: 0, y: 0 } })
+    setContextMenu({ isOpen: false, type: 'player', playerName: '', playerId: 0, position: { x: 0, y: 0 } })
   }
 
   const handleKickClick = (nickname: string) => {
@@ -620,14 +629,26 @@ const PlayersList: React.FC<PlayersListProps> = ({
       </div>
 
       <PlayerContextMenu
-        isOpen={contextMenu.isOpen}
+        isOpen={contextMenu.isOpen && contextMenu.type === 'moderator'}
         onClose={closeContextMenu}
+        onSwitchToPlayerMenu={() => setContextMenu({ ...contextMenu, type: 'player' })}
         playerName={contextMenu.playerName}
         playerId={contextMenu.playerId}
         position={contextMenu.position}
         socket={socket}
         gameId={gameId}
         isCreator={isCreator}
+      />
+
+      <PlayerActionMenu
+        isOpen={contextMenu.isOpen && contextMenu.type === 'player'}
+        onClose={closeContextMenu}
+        onSwitchToModeratorMenu={checkPermission('gamePowers', 'modo') ? () => setContextMenu({ ...contextMenu, type: 'moderator' }) : undefined}
+        playerName={contextMenu.playerName}
+        playerId={contextMenu.playerId}
+        position={contextMenu.position}
+        socket={socket}
+        gameId={gameId}
       />
 
       {/* Liste des spectateurs */}

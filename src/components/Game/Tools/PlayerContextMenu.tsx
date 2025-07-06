@@ -7,13 +7,13 @@ import { usePermissions } from 'hooks/usePermissions'
 import type { Socket } from 'socket.io-client'
 import KickPlayerModal from '../KickPlayerModal'
 import CommandModal from './CommandModal'
-import ThrowItemModal from '../ThrowItemModal'
 import { createPortal } from 'react-dom'
 import { useUser } from 'contexts/UserContext'
 
 interface PlayerContextMenuProps {
   isOpen: boolean
   onClose: () => void
+  onSwitchToPlayerMenu?: () => void
   playerName: string
   playerId: number
   position: { x: number; y: number }
@@ -37,6 +37,7 @@ interface PlayerCommand {
 const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
   isOpen,
   onClose,
+  onSwitchToPlayerMenu,
   playerName,
   playerId,
   position,
@@ -48,11 +49,8 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
   const { checkPermission } = usePermissions()
   const [kickModalOpen, setKickModalOpen] = useState(false)
   const [commandModal, setCommandModal] = useState<{ type: string; command: string } | null>(null)
-  const [throwItemModalOpen, setThrowItemModalOpen] = useState(false)
   const [mounted, setMounted] = useState<boolean>(false)
 
-  const premiumDate = user?.premium ? new Date(user.premium) : null
-  const isPremium = premiumDate ? Date.now() < premiumDate.getTime() : false
 
   const canUseDev = checkPermission('godPowers', 'addBot')
 
@@ -155,17 +153,6 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
       devOnly: true,
       allowed: checkPermission('gamePowers', 'card')
     },
-    {
-      id: 'throwItem',
-      label: 'Lancer un objet',
-      icon: '🍅',
-      color: 'text-orange-400',
-      command: 'throwItem',
-      requiresModal: true,
-      modalType: 'throwItem',
-      devOnly: false,
-      allowed: isPremium,
-    },
   ]
 
   useEffect(() => {
@@ -176,8 +163,6 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
     if (command.requiresModal) {
       if (command.modalType === 'kick') {
         setKickModalOpen(true)
-      } else if (command.modalType === 'throwItem') {
-        setThrowItemModalOpen(true)
       } else {
         setCommandModal({ type: command.modalType!, command: command.command })
       }
@@ -210,13 +195,6 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
     onClose() // Fermer le menu si annulation
   }
 
-  const handleThrowItemSelect = (itemId: number) => {
-    if (socket) {
-      socket.emit('throwItem', { roomId: gameId, itemId, targetId: playerId })
-    }
-    setThrowItemModalOpen(false)
-    onClose()
-  }
 
   const handleCommandSubmit = (params: any) => {
     if (!commandModal) return
@@ -268,7 +246,7 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
 
   // Fermer le menu si on clique sur l'overlay, mais seulement si aucune modal n'est ouverte
   const handleOverlayClick = () => {
-    if (!kickModalOpen && !commandModal && !throwItemModalOpen) {
+    if (!kickModalOpen && !commandModal) {
       onClose()
     }
   }
@@ -321,10 +299,15 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-2 border-t border-gray-500/30">
-              <p className="text-xs text-gray-500 text-center">
+            <div className="px-4 py-2 border-t border-gray-500/30 text-center">
+              <p className="text-xs text-gray-500">
                 {canUseDev ? 'Mode développeur actif' : 'Actions modérateur'}
               </p>
+              {onSwitchToPlayerMenu && (
+                <button onClick={onSwitchToPlayerMenu} className="text-xs text-blue-300 underline mt-1">
+                  Ouvrir menu joueur
+                </button>
+              )}
             </div>
           </motion.div>
         </>
@@ -358,11 +341,6 @@ const PlayerContextMenu: React.FC<PlayerContextMenuProps> = ({
             />
           )}
 
-          <ThrowItemModal
-            isOpen={throwItemModalOpen}
-            onClose={() => setThrowItemModalOpen(false)}
-            onSelect={handleThrowItemSelect}
-          />
         </>, document.body)}
     </>
   )
