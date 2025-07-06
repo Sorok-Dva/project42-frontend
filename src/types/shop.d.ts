@@ -46,6 +46,7 @@ export interface ShopData {
 export interface UserInventory {
   itemId: number
   equipped: boolean
+  quantity: number
 }
 
 export interface CreditPack {
