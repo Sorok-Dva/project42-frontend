@@ -150,11 +150,12 @@ const ThrownItem: React.FC<ThrownItemProps> = ({
     generateParticles()
 
     setTimeout(() => setScreenShake(false), 200)
+    const duration = type === 'heart' ? 3000 : 2000
     setTimeout(() => {
       setShowImpact(false)
       setParticles([])
       onComplete()
-    }, 2000)
+    }, duration)
   }
 
   return (
