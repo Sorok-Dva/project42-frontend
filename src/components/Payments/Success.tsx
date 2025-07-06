@@ -180,7 +180,7 @@ const PaymentSuccess: React.FC = () => {
         }
       }, duration / steps)
 
-      if (user) {
+      if (user && paymentConfirmed) {
         user.credits = startCredits + totalCredits
         setUser(user)
       }
