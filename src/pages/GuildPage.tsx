@@ -234,7 +234,7 @@ const GuildDetailsView = () => {
     try {
       const response = await axios.post(
         `/api/guilds/${guild!.id}/announcements`,
-        { content: newAnnouncement },
+        { content: newAnnouncement, title: 'Nouvelle annonce', private: false },
         { headers: { Authorization: `Bearer ${token}` } },
       )
       if (response.status === 201) {
@@ -627,7 +627,11 @@ const GuildDetailsView = () => {
                   {announcements.map((a) => (
                     <div key={a.id} className="p-4 bg-gray-700/30 rounded-lg">
                       <div className="text-sm text-gray-400 mb-2">
-                        {a.author.nickname} – {new Date(a.createdAt).toLocaleDateString()}
+                        { getRoleIcon(a.user.guildMembership.role) }
+                        <span className={`ml-2 text-md ${getRoleColor(a.user.guildMembership.role)}`}>
+                          {a.user.nickname}
+                        </span>
+                         – {new Date(a.createdAt).toLocaleDateString()} <i>à {new Date(a.createdAt).toLocaleTimeString()}</i>
                       </div>
                       <div
                         className="prose prose-invert"
