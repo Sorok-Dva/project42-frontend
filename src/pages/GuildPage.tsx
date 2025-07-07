@@ -26,6 +26,9 @@ import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import JoinGuildModal from 'components/Guilds/JoinModal'
 import { Guild } from 'types/guild'
+import MarkdownEditor from 'components/Common/MarkdownEditor'
+import { parseMarkdown } from 'helpers/markdown'
+import { Announcement } from 'types/announcement'
 
 interface GuildApplication {
   id: number
@@ -62,6 +65,11 @@ const GuildDetailsView = () => {
   const [permissions, setPermissions] = useState<{ level: number; role: string }>({ level: 0, role: 'none' })
   const [applications, setApplications] = useState<GuildApplication[]>([])
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false)
+  const [editingPresentation, setEditingPresentation] = useState(false)
+  const [presentationText, setPresentationText] = useState('')
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const [newAnnouncement, setNewAnnouncement] = useState('')
+  const [creatingAnnouncement, setCreatingAnnouncement] = useState(false)
 
   useEffect(() => {
     const fetchGuild = async () => {
@@ -69,6 +77,7 @@ const GuildDetailsView = () => {
         setLoading(true)
         const response = await axios.get<Guild>(`/api/guilds/info/${tag}`)
         setGuild(response.data)
+        setPresentationText(response.data.description || '')
         document.title = `Station ${response.data.name} [${response.data.tag}] - Project 42`
       } catch (err: any) {
         console.log('failed to fetch guild data', err)
@@ -122,10 +131,22 @@ const GuildDetailsView = () => {
       }
     }
 
+    const fetchAnnouncements = async () => {
+      try {
+        const response = await axios.get(`/api/guilds/${guild.id}/announcements`)
+        if (response.status === 200) {
+          setAnnouncements(response.data)
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
     if (belongsToGuild) {
       fetchPermissions()
       fetchApplications()
     }
+    fetchAnnouncements()
   }, [guild, belongsToGuild, token])
 
   const handleLeaveGuild = async () => {
@@ -188,6 +209,41 @@ const GuildDetailsView = () => {
       }
     } catch (error) {
       toast.error('Une erreur est survenue.', ToastDefaultOptions)
+    }
+  }
+
+  const savePresentation = async () => {
+    try {
+      const response = await axios.put(
+        `/api/guilds/${guild!.id}/description`,
+        { description: presentationText },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      if (response.status === 200) {
+        setGuild({ ...guild!, description: presentationText })
+        setEditingPresentation(false)
+        toast.success('Présentation mise à jour.', ToastDefaultOptions)
+      }
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour.', ToastDefaultOptions)
+    }
+  }
+
+  const createAnnouncement = async () => {
+    try {
+      const response = await axios.post(
+        `/api/guilds/${guild!.id}/announcements`,
+        { content: newAnnouncement },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      if (response.status === 201) {
+        setAnnouncements([response.data, ...announcements])
+        setNewAnnouncement('')
+        setCreatingAnnouncement(false)
+        toast.success('Annonce publiée.', ToastDefaultOptions)
+      }
+    } catch (error) {
+      toast.error('Erreur lors de la publication.', ToastDefaultOptions)
     }
   }
 
@@ -400,7 +456,40 @@ const GuildDetailsView = () => {
           {activeTab === 'presentation' && (
             <div>
               <h2 className="text-2xl font-bold text-white mb-4">À propos de la station</h2>
-              <p className="text-gray-300 text-lg">{guild.description || 'Aucune description disponible'}</p>
+              {editingPresentation ? (
+                <div className="space-y-4">
+                  <MarkdownEditor value={presentationText} onChange={setPresentationText} />
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={savePresentation}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
+                    >
+                      Enregistrer
+                    </button>
+                    <button
+                      onClick={() => setEditingPresentation(false)}
+                      className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div
+                    className="text-gray-300 text-lg space-y-2"
+                    dangerouslySetInnerHTML={{ __html: parseMarkdown(guild.description || 'Aucune description disponible') }}
+                  />
+                  {permissions.role === 'captain' && (
+                    <button
+                      onClick={() => { setEditingPresentation(true); setPresentationText(guild.description || '') }}
+                      className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
+                    >
+                      Modifier
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -504,7 +593,52 @@ const GuildDetailsView = () => {
           {activeTab === 'announcements' && (
             <div>
               <h2 className="text-2xl font-bold text-white mb-4">Annonces de la station</h2>
-              <p className="text-gray-400">Aucune annonce pour le moment.</p>
+              {creatingAnnouncement ? (
+                <div className="space-y-4 mb-6">
+                  <MarkdownEditor value={newAnnouncement} onChange={setNewAnnouncement} />
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={createAnnouncement}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
+                    >
+                      Publier
+                    </button>
+                    <button
+                      onClick={() => setCreatingAnnouncement(false)}
+                      className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                (permissions.role === 'captain' || permissions.role === 'lieutenant') && (
+                  <button
+                    onClick={() => setCreatingAnnouncement(true)}
+                    className="mb-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
+                  >
+                    Nouvelle annonce
+                  </button>
+                )
+              )}
+
+              {announcements.length === 0 ? (
+                <p className="text-gray-400">Aucune annonce pour le moment.</p>
+              ) : (
+                <div className="space-y-4">
+                  {announcements.map((a) => (
+                    <div key={a.id} className="p-4 bg-gray-700/30 rounded-lg">
+                      <div className="text-sm text-gray-400 mb-2">
+                        {a.author.nickname} – {new Date(a.createdAt).toLocaleDateString()}
+                      </div>
+                      <div
+                        className="prose prose-invert"
+                        dangerouslySetInnerHTML={{ __html: parseMarkdown(a.content) }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
