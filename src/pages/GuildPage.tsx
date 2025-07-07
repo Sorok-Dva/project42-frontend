@@ -26,8 +26,9 @@ import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import JoinGuildModal from 'components/Guilds/JoinModal'
 import { Guild } from 'types/guild'
-import MarkdownEditor from 'components/Common/MarkdownEditor'
-import { parseMarkdown } from 'helpers/markdown'
+import MarkdownEditor, {
+  renderPreview,
+} from 'components/Common/MarkdownEditor'
 import { Announcement } from 'types/announcement'
 
 interface GuildApplication {
@@ -478,9 +479,9 @@ const GuildDetailsView = () => {
                 <div>
                   <div
                     className="text-gray-300 text-lg space-y-2"
-                    dangerouslySetInnerHTML={{ __html: parseMarkdown(guild.description || 'Aucune description disponible') }}
+                    dangerouslySetInnerHTML={{ __html: renderPreview(guild.description || 'Aucune description disponible') }}
                   />
-                  {permissions.role === 'captain' && (
+                  {(permissions.role === 'captaine' || permissions.role === 'moderator') && (
                     <button
                       onClick={() => { setEditingPresentation(true); setPresentationText(guild.description || '') }}
                       className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
@@ -612,7 +613,7 @@ const GuildDetailsView = () => {
                   </div>
                 </div>
               ) : (
-                (permissions.role === 'captain' || permissions.role === 'lieutenant') && (
+                (permissions.role === 'captaine' || permissions.role === 'lieutenant' || permissions.role === 'moderator') && (
                   <button
                     onClick={() => setCreatingAnnouncement(true)}
                     className="mb-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
@@ -633,7 +634,7 @@ const GuildDetailsView = () => {
                       </div>
                       <div
                         className="prose prose-invert"
-                        dangerouslySetInnerHTML={{ __html: parseMarkdown(a.content) }}
+                        dangerouslySetInnerHTML={{ __html: renderPreview(a.content) }}
                       />
                     </div>
                   ))}
