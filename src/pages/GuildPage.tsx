@@ -61,7 +61,7 @@ const GuildDetailsView = () => {
 
   const [guild, setGuild] = useState<Guild | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('members')
+  const [activeTab, setActiveTab] = useState('presentation')
   const [belongsToGuild, setBelongsToGuild] = useState(false)
   const [permissions, setPermissions] = useState<{ level: number; role: string }>({ level: 0, role: 'none' })
   const [applications, setApplications] = useState<GuildApplication[]>([])
@@ -216,8 +216,8 @@ const GuildDetailsView = () => {
   const savePresentation = async () => {
     try {
       const response = await axios.put(
-        `/api/guilds/${guild!.id}/description`,
-        { description: presentationText },
+        `/api/guilds/${guild!.id}/edit-presentation`,
+        { content: presentationText },
         { headers: { Authorization: `Bearer ${token}` } },
       )
       if (response.status === 200) {
@@ -371,9 +371,6 @@ const GuildDetailsView = () => {
                     <span className="text-green-400 text-sm">Publique</span>
                   </div>
                 </div>
-                <p className="text-gray-300 text-lg max-w-2xl">
-                  {guild.description || 'Aucune description disponible'}
-                </p>
               </div>
 
               <div className="text-right">
@@ -481,7 +478,7 @@ const GuildDetailsView = () => {
                     className="text-gray-300 text-lg space-y-2"
                     dangerouslySetInnerHTML={{ __html: renderPreview(guild.description || 'Aucune description disponible') }}
                   />
-                  {(permissions.role === 'captaine' || permissions.role === 'moderator') && (
+                  {(permissions.role === 'capitaine' || permissions.role === 'moderator') && (
                     <button
                       onClick={() => { setEditingPresentation(true); setPresentationText(guild.description || '') }}
                       className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
@@ -613,7 +610,7 @@ const GuildDetailsView = () => {
                   </div>
                 </div>
               ) : (
-                (permissions.role === 'captaine' || permissions.role === 'lieutenant' || permissions.role === 'moderator') && (
+                (permissions.role === 'capitaine' || permissions.role === 'lieutenant' || permissions.role === 'moderator') && (
                   <button
                     onClick={() => setCreatingAnnouncement(true)}
                     className="mb-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
