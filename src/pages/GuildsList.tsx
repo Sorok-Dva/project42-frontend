@@ -338,7 +338,7 @@ const GuildsList = () => {
                             </div>
                           </div>
 
-                          {guild.description && <p className="text-gray-400 mt-2 max-w-2xl">{guild.description}</p>}
+                          {/*{guild.description && <p className="text-gray-400 mt-2 max-w-2xl">{guild.description}</p>}*/}
                         </div>
                       </div>
 
