@@ -1,7 +1,8 @@
 export interface Announcement {
   id: number
   guildId: number
-  author: { id: number; nickname: string }
+  author: number
+  user: { nickname: string; avatar: string, guildMembership: { role: string } }
   content: string
   createdAt: string
 }
