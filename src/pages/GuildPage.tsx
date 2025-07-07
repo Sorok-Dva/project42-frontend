@@ -71,6 +71,9 @@ const GuildDetailsView = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [newAnnouncement, setNewAnnouncement] = useState('')
   const [creatingAnnouncement, setCreatingAnnouncement] = useState(false)
+  const [editingBanner, setEditingBanner] = useState(false)
+  const [bannerFile, setBannerFile] = useState<File | null>(null)
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchGuild = async () => {
@@ -248,6 +251,62 @@ const GuildDetailsView = () => {
     }
   }
 
+  const handleBannerFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/gif']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Format non supporté. JPG/JPEG ou GIF uniquement.', ToastDefaultOptions)
+      return
+    }
+    const premiumDate = user?.premium ? new Date(user.premium) : null
+    const isPremium = premiumDate ? new Date().getTime() < premiumDate.getTime() : false
+    const maxSize = isPremium ? 15 * 1024 * 1024 : 5 * 1024 * 1024
+    if (file.size > maxSize) {
+      toast.error(`Le fichier dépasse la taille maximale de ${isPremium ? '15' : '5'} Mo.`, ToastDefaultOptions)
+      return
+    }
+    const objectUrl = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      if (img.width !== 1130 || img.height !== 240) {
+        toast.error('La bannière doit être de taille 1130x240.', ToastDefaultOptions)
+        URL.revokeObjectURL(objectUrl)
+        return
+      }
+      setBannerFile(file)
+      setBannerPreview(objectUrl)
+    }
+    img.src = objectUrl
+  }
+
+  const handleUploadBanner = async () => {
+    if (!bannerFile) {
+      toast.error('Aucun fichier sélectionné.', ToastDefaultOptions)
+      return
+    }
+    const formData = new FormData()
+    formData.append('banner', bannerFile)
+    try {
+      const response = await axios.post(
+        `/api/guilds/${guild!.id}/edit-banner`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } },
+      )
+      if (response.status === 200) {
+        const url = response.data.bannerUrl || response.data.url || response.data.banner
+        if (url) setGuild({ ...guild!, banner: url })
+        setEditingBanner(false)
+        setBannerFile(null)
+        setBannerPreview(null)
+        toast.success('Bannière mise à jour.', ToastDefaultOptions)
+        window.dispatchEvent(new CustomEvent('reloadGuildData'))
+      }
+    } catch (error) {
+      toast.error('Erreur lors du téléversement.', ToastDefaultOptions)
+    }
+  }
+
   const getRoleIcon = (role: string) => {
     switch (role.toLowerCase()) {
     case 'captain':
@@ -351,12 +410,47 @@ const GuildDetailsView = () => {
         <div className="relative overflow-hidden rounded-xl mb-8">
           <div className="h-64 bg-gradient-to-r from-gray-900 to-gray-800">
             <img
-              src={guild.banner || '/img/stations_banner.png'}
+              src={bannerPreview || guild.banner || '/img/stations_banner.png'}
               alt={`Bannière ${guild.name}`}
               className="w-full h-full object-cover opacity-80"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
           </div>
+          {permissions.role === 'capitaine' && (
+            <div className="absolute top-2 right-2 z-20">
+              {editingBanner ? (
+                <div className="bg-black/70 p-3 rounded-lg space-y-2">
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.gif"
+                    onChange={handleBannerFileChange}
+                    className="text-sm text-gray-300"
+                  />
+                  <div className="flex space-x-2 justify-end">
+                    <button
+                      onClick={handleUploadBanner}
+                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded-lg"
+                    >
+                      Confirmer
+                    </button>
+                    <button
+                      onClick={() => { setEditingBanner(false); setBannerFile(null); setBannerPreview(null) }}
+                      className="px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded-lg"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setEditingBanner(true)}
+                  className="px-3 py-1 bg-black/60 hover:bg-black/80 text-white rounded-lg"
+                >
+                  Modifier la bannière
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="absolute bottom-0 left-0 right-0 p-6">
             <div className="flex items-end justify-between">
