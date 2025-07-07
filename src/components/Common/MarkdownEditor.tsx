@@ -104,14 +104,6 @@ export const renderPreview = (text: string) => {
 
   // Continue with other markdown processing
   html = html
-    // Headers
-    .replace(/^### (.*$)/gim, '<h3 class="font-semibold mb-2 text-white">$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2 class="font-semibold mb-3 text-white">$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1 class="font-bold mb-4 text-white">$1</h1>')
-    // Bold and italic
-    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-    .replace(/~~(.*?)~~/g, '<del class="line-through">$1</del>')
     // Code inline `code`
     .replace(/```([\s\S]*?)```/g, (_, code) => {
       const escaped = code
@@ -121,10 +113,18 @@ export const renderPreview = (text: string) => {
       return `<pre class="bg-gray-800 text-sm text-gray-100 rounded p-4 overflow-x-auto"><code>${escaped}</code></pre>`
     })
     .replace(/`([^`]+)`/g, '<code class="bg-gray-700 px-1 py-0.5 rounded text-sm font-mono">$1</code>')
-    // Liens [texte](url)
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-blue-400 hover:text-blue-300 underline">$1</a>')
     // Images ![alt](url)
     .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="max-w-full h-auto rounded" />')
+    // Headers
+    .replace(/^### (.*$)/gim, '<h3 class="font-semibold mb-2 text-white">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="font-semibold mb-3 text-white">$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1 class="font-bold mb-4 text-white">$1</h1>')
+    // Bold and italic
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+    .replace(/~~(.*?)~~/g, '<del class="line-through">$1</del>')
+    // Liens [texte](url)
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-blue-400 hover:text-blue-300 underline">$1</a>')
     // Lists
     .replace(/^- (.+)$/gm, '<li class="ml-4">$1</li>')
     .replace(/^\d+\. (.+)$/gm, '<li class="ml-4 list-decimal">$1</li>')
@@ -132,6 +132,8 @@ export const renderPreview = (text: string) => {
     .replace(/---/g, '<hr class="border-gray-600 my-4" />')
     // Quotes
     .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-4 italic text-gray-300">$1</blockquote>')
+    // Paragraphes
+    .replace(/\n\n+/g, '</p><p>')
     // Line breaks
     .replace(/\n/g, '<br />')
 
@@ -429,18 +431,18 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ value, onChange, classN
         >
           <LinkIcon className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="sm" onClick={actions.image} className="h-8 w-8 p-0 hover:bg-gray-700/50">
+        {/*<Button variant="ghost" size="sm" onClick={actions.image} className="h-8 w-8 p-0 hover:bg-gray-700/50">
+          <ImageIcon className="h-4 w-4" />
+        </Button>*/}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={actions.imageLink}
+          className="h-8 w-8 p-0 hover:bg-gray-700/50"
+          title="Image par URL"
+        >
           <ImageIcon className="h-4 w-4" />
         </Button>
-        {/*<Button*/}
-        {/*  variant="ghost"*/}
-        {/*  size="sm"*/}
-        {/*  onClick={actions.imageLink}*/}
-        {/*  className="h-8 w-8 p-0 hover:bg-gray-700/50"*/}
-        {/*  title="Image par URL"*/}
-        {/*>*/}
-        {/*  <LinkIcon className="h-4 w-4" />*/}
-        {/*</Button>*/}
 
         <div className="w-px h-6 bg-gray-600 mx-1" />
 
