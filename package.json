@@ -43,6 +43,8 @@
     "@radix-ui/react-switch": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.9",
     "@radix-ui/react-tooltip": "^1.2.6",
+    "@react-three/drei": "^9.88.16",
+    "@react-three/fiber": "^8.13.5",
     "@sentry/cli": "^2.42.4",
     "@sentry/react": "^8.26.0",
     "@tabler/icons-react": "^3.11.0",
@@ -109,6 +111,7 @@
     "styled-components": "^6.1.11",
     "swiper": "^11.0.5",
     "tailwind-merge": "^3.2.0",
+    "three": "^0.164.0",
     "tinymce": "^7.3.0",
     "typescript": "^5.5.4",
     "web-vitals": "^2.1.4"

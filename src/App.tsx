@@ -56,6 +56,7 @@ import { ToastContainer } from 'react-toastify'
 import Notifier from 'components/Notifier'
 import Leaderboard from 'pages/Leaderboard'
 import Cards from 'pages/Cards'
+import AvatarCreator from 'pages/AvatarCreator'
 import GamePage from 'pages/Game'
 import { SocketProvider } from 'contexts/SocketContext'
 import ModalProvider from 'contexts/ModalProvider'
@@ -162,6 +163,7 @@ const AppContent: React.FC = () => {
         <Route path="/achievements" element={<AchievementsPage />} />
         <Route path="/news" element={<News />} />
         <Route path="/cards" element={<Cards />} />
+        <Route path="/avatar" element={<AvatarCreator />} />
         <Route path="/game/:id/replay" element={<ReplayGame />} />
         <Route path="/game/:id" element={<GamePage />} />
         <Route path="/stations" element={<Guilds />} />

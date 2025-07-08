@@ -140,7 +140,7 @@ const Friends: React.FC = () => {
 
       <div
         className={clsx(
-          'absolute right-0 top-full mt-2 w-80 bg-slate-900/90 backdrop-blur-md rounded-lg border border-slate-700/50 shadow-xl shadow-indigo-900/20 z-50 transform transition-all duration-300 origin-top-right',
+          'absolute right-0 top-full mt-2 w-80 bg-slate-900/90 backdrop-blur-md rounded-lg border border-slate-700/50 shadow-xl shadow-indigo-900/20 z-50 transition-all duration-300 origin-top-right',
           open ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none',
         )}
         data-lenis-prevent
