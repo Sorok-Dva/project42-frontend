@@ -1,5 +1,5 @@
 'use client'
-import type React from 'react'
+import React, { useMemo } from 'react'
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
@@ -118,54 +118,56 @@ const AchievementsPage: React.FC = () => {
   }
 
   // Filter and sort achievements
-  const filteredAchievements = achievements
-    .filter((achievement) => {
-      // Search filter
-      const matchesSearch =
-        achievement.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        achievement.levels.some(
-          (level) =>
-            level.levelName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            level.levelNameF.toLowerCase().includes(searchQuery.toLowerCase()),
-        )
+  const filteredAchievements = useMemo(() => {
+    return achievements
+      .filter((achievement) => {
+        // Search filter
+        const matchesSearch =
+          achievement.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          achievement.levels.some(
+            (level) =>
+              level.levelName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              level.levelNameF.toLowerCase().includes(searchQuery.toLowerCase()),
+          )
 
-      if (!matchesSearch) return false
+        if (!matchesSearch) return false
 
-      // Possession filter
-      if (filterBy === 'owned') {
-        return getUserProgress(achievement.id)
-      }
-      if (filterBy === 'unowned') {
-        return !getUserProgress(achievement.id)
-      }
+        // Possession filter
+        if (filterBy === 'owned') {
+          return getUserProgress(achievement.id)
+        }
+        if (filterBy === 'unowned') {
+          return !getUserProgress(achievement.id)
+        }
 
-      return true
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-      case 'owned': {
-        const aOwned = getUserProgress(a.id) ? 1 : 0
-        const bOwned = getUserProgress(b.id) ? 1 : 0
-        return bOwned - aOwned
-      }
-      case 'percentage': {
-        const aMinPercentage = Math.min(...a.levels.map((l) => l.percentage))
-        const bMinPercentage = Math.min(...b.levels.map((l) => l.percentage))
-        return bMinPercentage - aMinPercentage
-      }
-      case 'difficulty': {
-        const aMaxNumber = Math.max(...a.levels.map((l) => l.number))
-        const bMaxNumber = Math.max(...b.levels.map((l) => l.number))
-        return bMaxNumber - aMaxNumber
-      }
-      case 'rarity':
-      default: {
-        const aRarest = Math.min(...a.levels.map((l) => l.percentage))
-        const bRarest = Math.min(...b.levels.map((l) => l.percentage))
-        return aRarest - bRarest
-      }
-      }
-    })
+        return true
+      })
+      .sort((a, b) => {
+        switch (sortBy) {
+        case 'owned': {
+          const aOwned = getUserProgress(a.id) ? 1: 0
+          const bOwned = getUserProgress(b.id) ? 1: 0
+          return bOwned - aOwned
+        }
+        case 'percentage': {
+          const aMinPercentage = Math.min(...a.levels.map((l) => l.percentage))
+          const bMinPercentage = Math.min(...b.levels.map((l) => l.percentage))
+          return bMinPercentage - aMinPercentage
+        }
+        case 'difficulty': {
+          const aMaxNumber = Math.max(...a.levels.map((l) => l.number))
+          const bMaxNumber = Math.max(...b.levels.map((l) => l.number))
+          return bMaxNumber - aMaxNumber
+        }
+        case 'rarity':
+        default: {
+          const aRarest = Math.min(...a.levels.map((l) => l.percentage))
+          const bRarest = Math.min(...b.levels.map((l) => l.percentage))
+          return aRarest - bRarest
+        }
+        }
+      })
+  }, [achievements, userAchievements, searchQuery, sortBy, filterBy])
 
   const getAchievementIcon = (achievement: Achievement, level: number): JSX.Element => {
     const userProgress = getUserProgress(achievement.id)
@@ -345,7 +347,8 @@ const AchievementsPage: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  layout
+                  transition={{ duration: 0.4 }}
                   onClick={() => setSelectedAchievement(achievement)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
