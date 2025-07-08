@@ -8,6 +8,7 @@ import clsx from 'clsx'
 import useDropdown from 'hooks/useDropdown'
 import { useUser } from 'contexts/UserContext'
 import WarningIndicator from 'components/UI/WarningIndicator'
+import { Trophy } from 'lucide-react'
 
 const Profile: React.FC = () => {
   const { user, logout } = useUser()
@@ -140,6 +141,14 @@ const Profile: React.FC = () => {
           >
             <i className="ti ti-settings text-indigo-400"></i>
             Mon compte
+          </Link>
+
+          <Link
+            to="/achievements"
+            className="flex items-center gap-2 p-2 rounded-md hover:bg-slate-800/70 text-slate-300 hover:text-slate-100 transition-colors"
+          >
+            <Trophy />
+            Succès
           </Link>
 
           <div className="border-t border-slate-700/50 my-2"></div>
