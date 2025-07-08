@@ -562,7 +562,7 @@ const AchievementsPage: React.FC = () => {
 
                       <div className="flex items-center justify-between">
                         <p className={`text-sm ${isUnlocked ? 'text-gray-300' : 'text-gray-500'}`}>
-                          Requis: {level.number} {selectedAchievement.description.toLowerCase()}
+                          Requis: {level.number > 0 ? level.number : ''} {selectedAchievement.description.toLowerCase()}
                         </p>
                         {userProgress && isUnlocked && (
                           <Badge variant="outline" className="text-green-400 border-green-400">
