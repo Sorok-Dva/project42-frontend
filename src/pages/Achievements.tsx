@@ -326,11 +326,13 @@ const AchievementsPage: React.FC = () => {
             {filteredAchievements.map((achievement, index) => {
               const userProgress = getUserProgress(achievement.id)
               const difficulty = getDifficulty(achievement)
-              console.log('difficulty', difficulty)
               const rarestLevel = achievement.levels.reduce((rarest, level) =>
                 level.percentage < rarest.percentage ? level : rarest,
               )
-              const rarity = getRarity(rarestLevel.percentage)
+              /*const rarity = getRarity(rarestLevel.percentage)*/
+
+              const primaryLevel = achievement.levels.find((l) => l.level === 1)
+              const rarity = getRarity(primaryLevel?.percentage ?? 0)
 
               return (
                 <motion.div
@@ -486,9 +488,9 @@ const AchievementsPage: React.FC = () => {
                     <h2 className="text-2xl font-bold text-white mb-2">{selectedAchievement.description}</h2>
                     <div className="flex items-center gap-2">
                       <Badge
-                        className={`${getRarity(Math.min(...selectedAchievement.levels.map((l) => l.percentage))).color}`}
+                        className={`${getRarity(selectedAchievement.levels.find((l) => l.level === 1)?.percentage ?? 0).color}`}
                       >
-                        {getRarity(Math.min(...selectedAchievement.levels.map((l) => l.percentage))).name}
+                        {getRarity(selectedAchievement.levels.find((l) => l.level === 1)?.percentage ?? 0).name}
                       </Badge>
                       <Badge variant="outline" className={`${getDifficulty(selectedAchievement).color} border-current`}>
                         {getDifficulty(selectedAchievement).name}
