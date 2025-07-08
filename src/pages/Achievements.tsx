@@ -1,5 +1,4 @@
 'use client'
-
 import type React from 'react'
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -25,7 +24,8 @@ interface Achievement {
   id: number
   description: string
   type: string
-  memory: string
+  memory: boolean
+  unique: boolean
   internal_name: string
   levels: AchievementLevel[]
 }
@@ -83,19 +83,38 @@ const AchievementsPage: React.FC = () => {
   // Get rarity based on percentage
   const getRarity = (percentage: number) => {
     if (percentage >= 50) return { name: 'Commun', color: 'bg-gray-500', textColor: 'text-gray-300' }
-    if (percentage >= 20) return { name: 'Peu commun', color: 'bg-green-500', textColor: 'text-green-300' }
-    if (percentage >= 5) return { name: 'Rare', color: 'bg-blue-500', textColor: 'text-blue-300' }
-    if (percentage >= 1) return { name: 'Épique', color: 'bg-purple-500', textColor: 'text-purple-300' }
+    if (percentage >= 25) return { name: 'Peu commun', color: 'bg-green-500', textColor: 'text-green-300' }
+    if (percentage >= 15) return { name: 'Rare', color: 'bg-blue-500', textColor: 'text-blue-300' }
+    if (percentage >= 5) return { name: 'Épique', color: 'bg-purple-500', textColor: 'text-purple-300' }
     return { name: 'Légendaire', color: 'bg-yellow-500', textColor: 'text-yellow-300' }
   }
 
   // Get difficulty based on requirements
   const getDifficulty = (achievement: Achievement) => {
+    // Check if it's a memory/souvenir badge
+    if (achievement.memory) {
+      return { name: 'Impossible', color: 'text-red-900' }
+    }
+
+    if (achievement.unique) {
+      return { name: 'Exclusif', color: 'text-pink-400' }
+    }
+
     const maxNumber = Math.max(...achievement.levels.map((l) => l.number))
     if (maxNumber <= 10) return { name: 'Facile', color: 'text-green-400' }
     if (maxNumber <= 100) return { name: 'Moyen', color: 'text-yellow-400' }
     if (maxNumber <= 1000) return { name: 'Difficile', color: 'text-orange-400' }
     return { name: 'Extrême', color: 'text-red-400' }
+  }
+
+  // Calculate total levels across all achievements
+  const getTotalLevels = () => {
+    return achievements.reduce((total, achievement) => total + achievement.levels.length, 0)
+  }
+
+  // Calculate user's unlocked levels
+  const getUserUnlockedLevels = () => {
+    return userAchievements.reduce((total, ua) => total + ua.level, 0)
   }
 
   // Filter and sort achievements
@@ -125,8 +144,8 @@ const AchievementsPage: React.FC = () => {
     .sort((a, b) => {
       switch (sortBy) {
       case 'owned': {
-        const aOwned = getUserProgress(a.id) ? 1: 0
-        const bOwned = getUserProgress(b.id) ? 1: 0
+        const aOwned = getUserProgress(a.id) ? 1 : 0
+        const bOwned = getUserProgress(b.id) ? 1 : 0
         return bOwned - aOwned
       }
       case 'percentage': {
@@ -134,7 +153,6 @@ const AchievementsPage: React.FC = () => {
         const bMinPercentage = Math.min(...b.levels.map((l) => l.percentage))
         return bMinPercentage - aMinPercentage
       }
-
       case 'difficulty': {
         const aMaxNumber = Math.max(...a.levels.map((l) => l.number))
         const bMaxNumber = Math.max(...b.levels.map((l) => l.number))
@@ -145,7 +163,8 @@ const AchievementsPage: React.FC = () => {
         const aRarest = Math.min(...a.levels.map((l) => l.percentage))
         const bRarest = Math.min(...b.levels.map((l) => l.percentage))
         return aRarest - bRarest
-      }}
+      }
+      }
     })
 
   const getAchievementIcon = (achievement: Achievement, level: number): JSX.Element => {
@@ -219,8 +238,8 @@ const AchievementsPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <Award className="w-8 h-8 text-blue-400" />
               <div>
-                <p className="text-2xl font-bold text-white">{achievements.length}</p>
-                <p className="text-blue-300 text-sm">Succès totaux</p>
+                <p className="text-2xl font-bold text-white">{getTotalLevels()}</p>
+                <p className="text-blue-300 text-sm">Titres totaux</p>
               </div>
             </div>
           </div>
@@ -229,8 +248,8 @@ const AchievementsPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <CheckCircle className="w-8 h-8 text-green-400" />
               <div>
-                <p className="text-2xl font-bold text-white">{userAchievements.length}</p>
-                <p className="text-green-300 text-sm">Débloqués</p>
+                <p className="text-2xl font-bold text-white">{getUserUnlockedLevels()}</p>
+                <p className="text-green-300 text-sm">Titres débloqués</p>
               </div>
             </div>
           </div>
@@ -240,7 +259,7 @@ const AchievementsPage: React.FC = () => {
               <Target className="w-8 h-8 text-purple-400" />
               <div>
                 <p className="text-2xl font-bold text-white">
-                  {achievements.length > 0 ? Math.round((userAchievements.length / achievements.length) * 100) : 0}%
+                  {getTotalLevels() > 0 ? Math.round((getUserUnlockedLevels() / getTotalLevels()) * 100) : 0}%
                 </p>
                 <p className="text-purple-300 text-sm">Progression</p>
               </div>
@@ -251,10 +270,8 @@ const AchievementsPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <Star className="w-8 h-8 text-yellow-400" />
               <div>
-                <p className="text-2xl font-bold text-white">
-                  {userAchievements.reduce((sum, ua) => sum + ua.level, 0)}
-                </p>
-                <p className="text-yellow-300 text-sm">Niveaux totaux</p>
+                <p className="text-2xl font-bold text-white">{achievements.length}</p>
+                <p className="text-yellow-300 text-sm">Succès uniques</p>
               </div>
             </div>
           </div>
@@ -308,8 +325,8 @@ const AchievementsPage: React.FC = () => {
           <AnimatePresence>
             {filteredAchievements.map((achievement, index) => {
               const userProgress = getUserProgress(achievement.id)
-              console.log(userProgress)
               const difficulty = getDifficulty(achievement)
+              console.log('difficulty', difficulty)
               const rarestLevel = achievement.levels.reduce((rarest, level) =>
                 level.percentage < rarest.percentage ? level : rarest,
               )
@@ -351,7 +368,7 @@ const AchievementsPage: React.FC = () => {
                     </div>
 
                     {/* Progress */}
-                    {userProgress && (
+                    {userProgress && !achievement.unique && (
                       <div className="mb-4">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm text-blue-300">Progression</span>
@@ -413,7 +430,9 @@ const AchievementsPage: React.FC = () => {
                       <div className="flex items-center justify-between text-xs text-gray-400">
                         <div className="flex items-center gap-1">
                           <TrendingUp className="w-3 h-3" />
-                          <span>Plus rare: {rarestLevel.percentage}%</span>
+                          <span>
+                            {rarestLevel.percentage === 0 ? 'Jamais obtenu' : `Obtenu par ${rarestLevel.percentage}%`}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Zap className="w-3 h-3" />
