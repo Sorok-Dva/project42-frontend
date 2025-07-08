@@ -139,7 +139,7 @@ export const renderPreview = (text: string) => {
     .replace(/\n/g, '<br />')
 
 
-  return DOMPurify.sanitize(html);
+  return DOMPurify.sanitize(html)
 }
 
 const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ value, onChange, className = '', height = 'h-96' }) => {
