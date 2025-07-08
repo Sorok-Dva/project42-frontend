@@ -71,7 +71,7 @@ const AchievementsPage: React.FC = () => {
 
   // Get user progress for an achievement
   const getUserProgress = (achievementId: number) => {
-    return userAchievements.find((ua) => ua.id === achievementId)
+    return userAchievements.find((ua) => ua.id === achievementId && ua.level > 0)
   }
 
   // Check if user has achievement at specific level
