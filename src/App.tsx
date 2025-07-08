@@ -50,6 +50,7 @@ import UserSettingsPage from 'pages/UserSettings'
 import ValidateUser from 'pages/ValidateUser'
 import PaymentSuccessPage from 'pages/PaymentSuccess'
 import PaymentCancelPage from 'pages/PaymentCancel'
+import AchievementsPage from 'pages/Achievements'
 
 import { ToastContainer } from 'react-toastify'
 import Notifier from 'components/Notifier'
@@ -158,6 +159,7 @@ const AppContent: React.FC = () => {
         <Route path="/users/validate/:token" element={<ValidateUser />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/leaderboard/players" element={<Leaderboard />} />
+        <Route path="/achievements" element={<AchievementsPage />} />
         <Route path="/news" element={<News />} />
         <Route path="/cards" element={<Cards />} />
         <Route path="/game/:id/replay" element={<ReplayGame />} />
