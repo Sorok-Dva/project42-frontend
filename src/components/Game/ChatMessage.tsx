@@ -10,6 +10,7 @@ import { Box, Typography } from '@mui/material'
 import { Message, Viewer } from 'hooks/useGame'
 import { emotes } from 'components/Game/Chat'
 import { Player } from 'types/room'
+import DOMPurify from 'dompurify'
 
 function stripHTML(input: string) {
   const tempDiv = document.createElement('div')
@@ -279,9 +280,10 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
                     data-highlight-nickname={cleanNickname}
                     dangerouslySetInnerHTML={{
                       __html:
-                        cleanNickname === 'Modération'
-                          ? msg.nickname
-                          : cleanNickname,
+                        DOMPurify.sanitize(
+                          cleanNickname === 'Modération'
+                            ? msg.nickname
+                            : cleanNickname),
                     }}
                   ></b>
                   {msg.channel === 1 && (
@@ -342,10 +344,10 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
                       alt="message icon"
                     />
                   )}
-                  <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
+                  <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(processedMessage) }} />
                 </Box>
               ) : (
-                <span dangerouslySetInnerHTML={{ __html: processedMessage }} />
+                <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(processedMessage) }} />
               )}
             </Typography>
           )

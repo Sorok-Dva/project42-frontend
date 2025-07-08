@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { News as NewsItemType } from 'types/news'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import DOMPurify from 'dompurify'
 
 interface NewsItemProps {
   news: NewsItemType
@@ -65,7 +66,7 @@ const NewsItem: React.FC<NewsItemProps> = ({ news }) =>  {
         )}
 
         <div className="prose prose-invert prose-blue max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: news.content }} />
+          <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(news.content) }} />
         </div>
       </div>
     </motion.article>
