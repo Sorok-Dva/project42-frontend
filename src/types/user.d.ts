@@ -14,6 +14,8 @@ export interface User {
   oldEmail: string;
   nickname: string;
   avatar: string;
+  rpmAvatarId?: string;
+  rpmUserId?: string;
   role: Role;
   roleId: number;
   isAdmin: boolean;
