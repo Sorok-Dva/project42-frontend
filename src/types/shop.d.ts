@@ -18,6 +18,17 @@ export interface Promotion {
   endDate: Date | null
 }
 
+export interface AvatarSkin {
+  id: number,
+  rpmId: string,
+  name: string
+  locked: boolean,
+  type: string,
+  bodytype: string,
+  gender: string,
+  iconUrl: string,
+}
+
 export interface Item {
   id: number
   resourceId: number
@@ -35,6 +46,7 @@ export interface Item {
   tagId: number | null
   tag: TagType
   promotion: Promotion | null
+  avatarSkin?: AvatarSkin
 }
 
 export interface ShopData {
