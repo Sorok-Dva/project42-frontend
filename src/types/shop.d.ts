@@ -29,6 +29,16 @@ export interface AvatarSkin {
   iconUrl: string,
 }
 
+export interface AvatarAnimation {
+  id: number,
+  key: string,
+  name: string
+  locked: boolean,
+  type: string,
+  gender: string,
+  iconUrl: string,
+}
+
 export interface Item {
   id: number
   resourceId: number
@@ -47,12 +57,19 @@ export interface Item {
   tag: TagType
   promotion: Promotion | null
   avatarSkin?: AvatarSkin
+  avatarAnimation?: AvatarAnimation
 }
 
 export interface ShopData {
   categories: Category[]
   items: Item[]
   tags: TagType[]
+  pagination: {
+    total: number,
+    page: number,
+    limit: number,
+    totalPages: number,
+  }
 }
 
 export interface UserInventory {
