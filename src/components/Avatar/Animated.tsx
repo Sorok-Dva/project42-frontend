@@ -8,6 +8,7 @@ import {
   Environment,
   Sky,
   OrbitControls,
+  Stars,
 } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -58,14 +59,29 @@ function AvatarScene({ avatarUrl, animation }: { avatarUrl: string, animation: s
 
   return <primitive ref={group} object={gltf.scene} dispose={null} />
 }
-export function AvatarCanvas({ avatarUrl, animation }: { avatarUrl: string, animation: string }) {
+export function AvatarCanvas({ avatarUrl, animation, options }: { avatarUrl: string, animation: string, options?: {
+    ctrlMinDist?: number,
+    ctrlMaxDist?: number,
+  } }) {
   return (
     <Canvas shadows camera={{ position: [0, 2, 5], fov: 30 }}>
-      <color attach="background" args={['#ececec']} />
+      <color attach="background" args={['#111']} />
+
+      {/* fond étoilé */}
+      <Stars
+        radius={50}
+        depth={50}
+        count={5000}
+        factor={4}
+        saturation={0}
+        fade
+      />
+
       <ambientLight intensity={0.3} />
       <directionalLight position={[10, 10, 5]} intensity={1.2} castShadow />
       <Environment preset="sunset" />
       <Sky />
+
       <Suspense fallback={<Html center>Chargement…</Html>}>
         <group position-y={-0.2}>
           <ContactShadows
@@ -74,6 +90,7 @@ export function AvatarCanvas({ avatarUrl, animation }: { avatarUrl: string, anim
             blur={1}
             far={5}
           />
+          <AvatarScene avatarUrl={avatarUrl} animation={animation} />
           <AvatarScene avatarUrl={avatarUrl} animation={animation} />
           {/* un sol pour recevoir l’ombre */}
           <mesh
@@ -88,8 +105,8 @@ export function AvatarCanvas({ avatarUrl, animation }: { avatarUrl: string, anim
       </Suspense>
       <OrbitControls
         enablePan={false}
-        minDistance={3}
-        maxDistance={8}
+        minDistance={options?.ctrlMinDist || 3}
+        maxDistance={options?.ctrlMaxDist || 8}
         target={[0, 1, 0]}
       />
     </Canvas>
