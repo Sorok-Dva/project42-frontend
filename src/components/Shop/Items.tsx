@@ -525,8 +525,19 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
     setActiveCategory(categoryId)
     setActiveSkinType('all')
     setActiveAnimationType('all')
-    setSkinCategoriesExpanded(false)
-    setAnimationCategoriesExpanded(false)
+
+    // Auto-étendre les sous-catégories pour skins et animations
+    if (categoryId === 5) {
+      setSkinCategoriesExpanded(true)
+      setAnimationCategoriesExpanded(false)
+    } else if (categoryId === 6) {
+      setAnimationCategoriesExpanded(true)
+      setSkinCategoriesExpanded(false)
+    } else {
+      setSkinCategoriesExpanded(false)
+      setAnimationCategoriesExpanded(false)
+    }
+
     setCurrentPage(1)
   }
 
@@ -648,25 +659,26 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                   )}
                 </div>
               ))}
-              {/* User credits display */}
-              <div className="mt-6 p-3 bg-indigo-900/30 rounded-lg border border-indigo-500/30">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-300">Vos crédits:</span>
-                  <span className="text-white font-bold flex items-center">
-                    {user?.credits || 0}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 ml-1 text-indigo-400"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M16 12l-4 4-4-4M12 8v8" />
-                    </svg>
-                  </span>
-                </div>
+            </div>
+
+            {/* User credits display */}
+            <div className="mt-6 p-3 bg-indigo-900/30 rounded-lg border border-indigo-500/30">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300">Vos crédits:</span>
+                <span className="text-white font-bold flex items-center">
+                  {user?.credits || 0}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 ml-1 text-indigo-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M16 12l-4 4-4-4M12 8v8" />
+                  </svg>
+                </span>
               </div>
             </div>
           </div>
@@ -735,6 +747,42 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                 Premium pour pouvoir les acheter.
               </p>
             </div>
+          )}
+
+          {activeCategory === 5 && (
+            <>
+              <div className="p-4 bg-blue-500/20 border border-blue-500/30 rounded-lg text-center text-blue-300">
+                <p className="text-sm">
+                  Éléments de personnalisation visuelle pour l'avatar 3D
+                </p>
+              </div>
+              { (!user?.rpmUserId || !user.rpmAvatarId) && (
+                <div className="p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-center text-yellow-300">
+                  <p className="text-sm">
+                    Attention: Vous n'avez pas encore créer votre avatar. Rendez vous sur <a
+                      href="/avatar">cette page</a> pour le faire.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+
+          {activeCategory === 6 && (
+            <>
+              <div className="p-4 bg-blue-500/20 border border-blue-500/30 rounded-lg text-center text-blue-300">
+                <p className="text-sm">
+                 Mouvements et expressions pour animer votre avatar 3D
+                </p>
+              </div>
+              { (!user?.rpmUserId || !user.rpmAvatarId) && (
+                <div className="p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-center text-yellow-300">
+                  <p className="text-sm">
+                   Attention: Vous n'avez pas encore créer votre avatar. Rendez vous sur <a
+                      href="/avatar">cette page</a> pour le faire.
+                  </p>
+                </div>
+              )}
+            </>
           )}
 
           {/* Pagination info */}
@@ -926,7 +974,7 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                                           if (item.categoryId === 6) {
                                             const rect = e.currentTarget.getBoundingClientRect()
                                             const x = Math.min(rect.right + 10, window.innerWidth - 320)
-                                            const y = Math.max(rect.top, 10)
+                                            const y = rect.top - 150
                                             setAnimationTooltip({ show: true, item, x, y })
                                           }
                                         }}
