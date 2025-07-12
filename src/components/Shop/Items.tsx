@@ -183,6 +183,12 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
     y: number
   }>({ show: false, item: null, x: 0, y: 0 })
 
+  const [isAnimationEventDialogOpen, setIsAnimationEventDialogOpen] = useState(false)
+  const [selectedAnimationEvent, setSelectedAnimationEvent] = useState<'idle' | 'gameStart' | 'gameWin' | 'gameLoose'>(
+    'idle',
+  )
+  const [pendingEquipItemId, setPendingEquipItemId] = useState<number | null>(null)
+
   useEffect(() => {
     async function retrieveShop() {
       try {
@@ -241,26 +247,42 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
 
   const getSkinTypeCount = useCallback(
     (type: string) => {
-      return items.filter(
+      const filteredItems = items.filter(
         (item) =>
           item.categoryId === 5 &&
           item.avatarSkin?.type === type &&
           item.name.toLowerCase().includes(searchQuery.toLowerCase()),
-      ).length
+      )
+
+      if (inventory) {
+        // In inventory mode, count only owned items
+        return filteredItems.filter((item) => userInventory.find((ui) => ui.itemId === item.id)).length
+      } else {
+        // In shop mode, count all items
+        return filteredItems.length
+      }
     },
-    [items, searchQuery],
+    [items, searchQuery, inventory, userInventory],
   )
 
   const getAnimationTypeCount = useCallback(
     (type: string) => {
-      return items.filter(
+      const filteredItems = items.filter(
         (item) =>
           item.categoryId === 6 &&
           item.avatarAnimation?.type === type &&
           item.name.toLowerCase().includes(searchQuery.toLowerCase()),
-      ).length
+      )
+
+      if (inventory) {
+        // In inventory mode, count only owned items
+        return filteredItems.filter((item) => userInventory.find((ui) => ui.itemId === item.id)).length
+      } else {
+        // In shop mode, count all items
+        return filteredItems.length
+      }
     },
-    [items, searchQuery],
+    [items, searchQuery, inventory, userInventory],
   )
 
   // Filtrage optimisé avec useMemo
@@ -471,16 +493,22 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
     }
   }
 
-  // Handle equip item
-  const handleEquipItem = async (itemId: number) => {
+  const handleEquipItem = async (itemId: number, animationEvent?: 'idle' | 'gameStart' | 'gameWin' | 'gameLoose') => {
+    const item = items.find((i) => i.id === itemId)
+
+    // If it's an animation and no event is specified, open the event selection dialog
+    if (item?.categoryId === 6 && !animationEvent) {
+      setPendingEquipItemId(itemId)
+      setIsAnimationEventDialogOpen(true)
+      return
+    }
+
     try {
-      const response = await axios.post(
-        `/api/users/equip/${itemId}`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
+      const requestBody = item?.categoryId === 6 && animationEvent ? { animationEvent } : {}
+
+      const response = await axios.post(`/api/users/equip/${itemId}`, requestBody, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
       if (response.data.status === 'success') {
         // Update local inventory state
@@ -500,11 +528,22 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
             return item
           }),
         )
-        toast.info('Item équipé ! Vous avez équipé l\'item avec succès', ToastDefaultOptions)
+
+        const eventText = animationEvent ? ` pour l'événement ${animationEvent}` : ''
+        toast.info(`Item équipé ! Vous avez équipé l'item avec succès${eventText}`, ToastDefaultOptions)
       }
     } catch (error) {
       console.error(error)
       toast.error('Erreur: Une erreur est survenue lors de l\'équipement de l\'item', ToastDefaultOptions)
+    }
+  }
+
+  const handleAnimationEventConfirm = () => {
+    if (pendingEquipItemId) {
+      handleEquipItem(pendingEquipItemId, selectedAnimationEvent)
+      setIsAnimationEventDialogOpen(false)
+      setPendingEquipItemId(null)
+      setSelectedAnimationEvent('idle')
     }
   }
 
@@ -598,7 +637,10 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                       >
                         <span>🎯 Tous les skins</span>
                         <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">
-                          {items.filter((i) => i.categoryId === 5).length}
+                          {inventory
+                            ? items.filter((i) => i.categoryId === 5 && userInventory.find((ui) => ui.itemId === i.id))
+                              .length
+                            : items.filter((i) => i.categoryId === 5).length}
                         </span>
                       </button>
                       {availableSkinTypes.map((type) => (
@@ -633,7 +675,10 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                       >
                         <span>🎯 Toutes les animations</span>
                         <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">
-                          {items.filter((i) => i.categoryId === 6).length}
+                          {inventory
+                            ? items.filter((i) => i.categoryId === 6 && userInventory.find((ui) => ui.itemId === i.id))
+                              .length
+                            : items.filter((i) => i.categoryId === 6).length}
                         </span>
                       </button>
                       {availableAnimationTypes.map((type) => (
@@ -747,42 +792,6 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                 Premium pour pouvoir les acheter.
               </p>
             </div>
-          )}
-
-          {activeCategory === 5 && (
-            <>
-              <div className="p-4 bg-blue-500/20 border border-blue-500/30 rounded-lg text-center text-blue-300">
-                <p className="text-sm">
-                  Éléments de personnalisation visuelle pour l'avatar 3D
-                </p>
-              </div>
-              { (!user?.rpmUserId || !user.rpmAvatarId) && (
-                <div className="p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-center text-yellow-300">
-                  <p className="text-sm">
-                    Attention: Vous n'avez pas encore créer votre avatar. Rendez vous sur <a
-                      href="/avatar">cette page</a> pour le faire.
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-
-          {activeCategory === 6 && (
-            <>
-              <div className="p-4 bg-blue-500/20 border border-blue-500/30 rounded-lg text-center text-blue-300">
-                <p className="text-sm">
-                 Mouvements et expressions pour animer votre avatar 3D
-                </p>
-              </div>
-              { (!user?.rpmUserId || !user.rpmAvatarId) && (
-                <div className="p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-center text-yellow-300">
-                  <p className="text-sm">
-                   Attention: Vous n'avez pas encore créer votre avatar. Rendez vous sur <a
-                      href="/avatar">cette page</a> pour le faire.
-                  </p>
-                </div>
-              )}
-            </>
           )}
 
           {/* Pagination info */}
@@ -974,7 +983,7 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                                           if (item.categoryId === 6) {
                                             const rect = e.currentTarget.getBoundingClientRect()
                                             const x = Math.min(rect.right + 10, window.innerWidth - 320)
-                                            const y = rect.top - 150
+                                            const y = Math.max(rect.top, 10)
                                             setAnimationTooltip({ show: true, item, x, y })
                                           }
                                         }}
@@ -1373,6 +1382,99 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
           </div>
         </div>
       )}
+
+      {/* Animation Event Selection Dialog */}
+      <Dialog open={isAnimationEventDialogOpen} onOpenChange={setIsAnimationEventDialogOpen}>
+        <DialogContent className="bg-gray-800 border border-indigo-500/30 text-white">
+          <DialogHeader>
+            <DialogTitle>Sélectionner l'événement</DialogTitle>
+            <DialogDescription className="text-gray-300">
+              Pour quel événement souhaitez-vous équiper cette animation ?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setSelectedAnimationEvent('idle')}
+                className={`p-3 rounded-lg border transition-all ${
+                  selectedAnimationEvent === 'idle'
+                    ? 'border-indigo-500 bg-indigo-500/20 text-white'
+                    : 'border-gray-600 bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                }`}
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-1">🧍</div>
+                  <div className="text-sm font-medium">Attente</div>
+                  <div className="text-xs text-gray-400">Animation par défaut</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setSelectedAnimationEvent('gameStart')}
+                className={`p-3 rounded-lg border transition-all ${
+                  selectedAnimationEvent === 'gameStart'
+                    ? 'border-indigo-500 bg-indigo-500/20 text-white'
+                    : 'border-gray-600 bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                }`}
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-1">🚀</div>
+                  <div className="text-sm font-medium">Début de partie</div>
+                  <div className="text-xs text-gray-400">Quand la partie commence</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setSelectedAnimationEvent('gameWin')}
+                className={`p-3 rounded-lg border transition-all ${
+                  selectedAnimationEvent === 'gameWin'
+                    ? 'border-indigo-500 bg-indigo-500/20 text-white'
+                    : 'border-gray-600 bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                }`}
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-1">🏆</div>
+                  <div className="text-sm font-medium">Victoire</div>
+                  <div className="text-xs text-gray-400">Quand vous gagnez</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setSelectedAnimationEvent('gameLoose')}
+                className={`p-3 rounded-lg border transition-all ${
+                  selectedAnimationEvent === 'gameLoose'
+                    ? 'border-indigo-500 bg-indigo-500/20 text-white'
+                    : 'border-gray-600 bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                }`}
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-1">😞</div>
+                  <div className="text-sm font-medium">Défaite</div>
+                  <div className="text-xs text-gray-400">Quand vous perdez</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAnimationEventDialogOpen(false)
+                setPendingEquipItemId(null)
+                setSelectedAnimationEvent('idle')
+              }}
+              className="border-indigo-500/30 hover:bg-gray-700/50"
+            >
+              Annuler
+            </Button>
+            <Button onClick={handleAnimationEventConfirm} className="bg-indigo-600 hover:bg-indigo-700">
+              Équiper pour cet événement
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   )
 }
