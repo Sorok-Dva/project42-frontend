@@ -13,7 +13,7 @@ import {
 import { Canvas } from '@react-three/fiber'
 import * as THREE from 'three'
 
-function AvatarScene({ avatarUrl, animation }: { avatarUrl: string, animation: string }) {
+export function AvatarScene({ avatarUrl, animation }: { avatarUrl: string, animation: string }) {
   const group = useRef<THREE.Group>(null)
   const gltf  = useGLTF(avatarUrl)
   const fbx   = useFBX(`/assets/animations/${animation}.fbx`)
@@ -47,7 +47,6 @@ function AvatarScene({ avatarUrl, animation }: { avatarUrl: string, animation: s
   const { actions } = useAnimations(filteredClips, group)
 
   useEffect(() => {
-    console.log('actions', actions)
     const a = actions[animation.split('/')[animation.split('/').length - 1]]
     if (!a) {
       console.warn(`Action "${a}" introuvable`, Object.keys(actions))
@@ -59,10 +58,31 @@ function AvatarScene({ avatarUrl, animation }: { avatarUrl: string, animation: s
 
   return <primitive ref={group} object={gltf.scene} dispose={null} />
 }
-export function AvatarCanvas({ avatarUrl, animation, options }: { avatarUrl: string, animation: string, options?: {
+
+function SceneDecor({ url }: { url: string }) {
+  const { scene } = useGLTF(url)
+  return <primitive
+    object={scene}
+    position={[0, 1.3, 0]}
+    scale={0.04}
+    dispose={null}
+  />
+}
+
+export function AvatarCanvas({
+  avatarUrl,
+  animation,
+  options,
+  sceneUrl
+}: {
+  avatarUrl: string,
+  animation: string,
+  options?: {
     ctrlMinDist?: number,
     ctrlMaxDist?: number,
-  } }) {
+  },
+  sceneUrl?: string
+}) {
   return (
     <Canvas shadows camera={{ position: [0, 2, 5], fov: 30 }}>
       <color attach="background" args={['#111']} />
@@ -79,11 +99,17 @@ export function AvatarCanvas({ avatarUrl, animation, options }: { avatarUrl: str
 
       <ambientLight intensity={0.3} />
       <directionalLight position={[10, 10, 5]} intensity={1.2} castShadow />
-      <Environment preset="sunset" />
-      <Sky />
+
+      {!sceneUrl && (
+        <>
+          <Sky />
+          <Environment preset="sunset" />
+        </>)
+      }
 
       <Suspense fallback={<Html center>Chargement…</Html>}>
         <group position-y={-0.2}>
+          {sceneUrl && <SceneDecor url={sceneUrl} />}
           <ContactShadows
             opacity={0.4}
             scale={10}
@@ -91,16 +117,6 @@ export function AvatarCanvas({ avatarUrl, animation, options }: { avatarUrl: str
             far={5}
           />
           <AvatarScene avatarUrl={avatarUrl} animation={animation} />
-          <AvatarScene avatarUrl={avatarUrl} animation={animation} />
-          {/* un sol pour recevoir l’ombre */}
-          <mesh
-            rotation-x={-Math.PI/2}
-            position-y={-1}
-            receiveShadow
-          >
-            <planeGeometry args={[10, 10]} />
-            <shadowMaterial opacity={0.3} />
-          </mesh>
         </group>
       </Suspense>
       <OrbitControls
