@@ -9,6 +9,7 @@ import {
   SettingsIcon,
   Shield,
   Users,
+  VenetianMask,
 } from 'lucide-react'
 
 import Badges from './Badges'
@@ -17,6 +18,7 @@ import Settings from './Settings'
 import ModHistory from './ModHistory'
 import Discord from './Discord'
 import Referral from './Referral'
+import AvatarPage from 'pages/AvatarCreator'
 
 const UserSettings : React.FC = () => {
   const { user } = useUser()
@@ -37,6 +39,11 @@ const UserSettings : React.FC = () => {
       id: 'tab-badges',
       label: 'Badges & Titre',
       icon: <Medal className="w-5 h-5"/>,
+    },
+    {
+      id: 'tab-avatar',
+      label: 'Mon avatar',
+      icon: <VenetianMask className="w-5 h-5"/>,
     },
     {
       id: 'tab-profile',
@@ -134,6 +141,17 @@ const UserSettings : React.FC = () => {
             className="space-y-6"
           >
             <Badges/>
+          </motion.div>
+        ) }
+
+        { activeTab === 'tab-avatar' && (
+          <motion.div
+            initial={ { opacity: 0 } }
+            animate={ { opacity: 1 } }
+            transition={ { duration: 0.3 } }
+            className="space-y-6"
+          >
+            <AvatarPage />
           </motion.div>
         ) }
 
