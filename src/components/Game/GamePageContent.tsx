@@ -4,7 +4,7 @@ import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Box } from '@mui/material'
 import { Container, Spinner } from 'reactstrap'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 
 import { useAuth } from 'contexts/AuthContext'
@@ -33,6 +33,7 @@ import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import DevCommandsPanel from 'components/Game/Tools/DevCommandsPanel'
 import ParameterCommandsPanel from 'components/Game/Tools/ParameterCommandsPanel'
+import { MultiAvatarCanvas } from 'components/Avatar/MultiScene'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -63,7 +64,6 @@ const GamePage = () => {
   const { user } = useUser()
   const { token } = useAuth()
   const { socket } = useSocket()
-  const navigate = useNavigate()
 
   const [guideRequestDetails, setGuideRequestDetails] = useState<{
     guideUserId: number;
@@ -236,6 +236,8 @@ const GamePage = () => {
     setIsCreator,
     setGameStarted,
     setGameFinished,
+    setWinnersAvatars,
+    winnersAvatars,
   } = useGameContext()
 
   // Gestion des événements de connexion socket
@@ -269,7 +271,7 @@ const GamePage = () => {
       setIsConnected(false)
       setDisconnectionTime(new Date())
 
-      // Ne pas afficher la modale si c'est une déconnexion volontaire
+      // Ne pas afficher la modal si c'est une déconnexion volontaire
       if (reason !== 'io client disconnect' && reason !== 'transport close') {
         setShowDisconnectionModal(true)
         wasDisconnectedRef.current = true
@@ -697,6 +699,17 @@ const GamePage = () => {
     }
   }, [audioVolume])
 
+  // Auto-close winners display after 5 seconds
+  useEffect(() => {
+    if (winnersAvatars.avatars.length > 0) {
+      /*const timer = setTimeout(() => {
+        setWinnersAvatars({ avatars: [], winMsg: '' })
+      }, 7500) // 1.5s delay + 6s display time
+
+      return () => clearTimeout(timer)*/
+    }
+  }, [winnersAvatars])
+
   if (gameError) {
     // Using a unique value ensures the storage event always triggers
     localStorage.setItem('gameFinished', Date.now().toString())
@@ -810,6 +823,130 @@ const GamePage = () => {
 
   return (
     <>
+      {/* Winners Overlay */}
+      <AnimatePresence>
+        {winnersAvatars.avatars.length > 0 && (
+          <motion.div
+            className="fixed inset-0 z-[9999] flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* Background overlay */}
+            <motion.div
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            />
+
+            {/* Stars background */}
+            <div className="absolute inset-0 z-0">{staticStars}</div>
+            <div className="absolute inset-0 z-1">{parallaxStars}</div>
+
+            {/* Celebration particles */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              {Array.from({ length: 50 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-2 h-2 bg-yellow-400 rounded-full"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                  }}
+                  animate={{
+                    y: [0, -20, 0],
+                    opacity: [0, 1, 0],
+                    scale: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Number.POSITIVE_INFINITY,
+                    delay: Math.random() * 2,
+                    ease: 'easeInOut',
+                  }}
+                />
+              ))}
+            </motion.div>
+
+            {/* Main content */}
+            <motion.div
+              className="relative z-10 text-center w-[70%] mx-auto px-4"
+              initial={{ scale: 0.8, y: 50 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: -50 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            >
+              {/* Title */}
+              <motion.h3
+                className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 mb-8"
+                initial={{ opacity: 0, y: -30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+              >
+                🎉 <span dangerouslySetInnerHTML={{ __html: winnersAvatars.winMsg }} /> 🎉
+              </motion.h3>
+
+              {/* Subtitle */}
+              <motion.p
+                className="text-2xl md:text-3xl text-white mb-12"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+              >
+                Félicitations aux gagnants !
+              </motion.p>
+
+              {/* 3D Avatars Canvas */}
+              <motion.div
+                className="w-full h-96 md:h-[500px] rounded-xl overflow-hidden border-4 border-yellow-400/50 shadow-2xl shadow-yellow-400/20"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.9, duration: 0.8 }}
+              >
+                <MultiAvatarCanvas
+                  avatars={winnersAvatars.avatars}
+                  backgroundColor="#1a1a2e"
+                  ctrlMaxDist={winnersAvatars.avatars.length < 3 ? 3 : 8}
+                />
+              </motion.div>
+
+              {/* Countdown */}
+              <motion.div
+                className="mt-8 text-gray-300"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.2, duration: 0.8 }}
+              >
+                <p className="text-lg">Cette fenêtre se fermera automatiquement...</p>
+              </motion.div>
+            </motion.div>
+
+            {/* Auto-close timer */}
+            <motion.div
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-64 h-2 bg-gray-700 rounded-full overflow-hidden"
+              initial={{ opacity: 0, width: 0 }}
+              animate={{ opacity: 1, width: 256 }}
+              transition={{ delay: 1.5, duration: 0.5 }}
+            >
+              <motion.div
+                className="h-full bg-gradient-to-r from-yellow-400 to-orange-500"
+                initial={{ width: '100%' }}
+                animate={{ width: '0%' }}
+                transition={{ delay: 1.5, duration: 6, ease: 'linear' }}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Modal de déconnexion */}
       <AnimatePresence>
         {showDisconnectionModal && (
@@ -1098,28 +1235,6 @@ const GamePage = () => {
                       </svg>
                       Effacer
                     </motion.button>
-                    { gameStarted && (
-                      <motion.button
-                        className="px-3 py-1 bg-yellow-900/40 hover:bg-yellow-900/60 text-yellow-300 hover:text-white border border-yellow-500/30 rounded-lg transition-all flex items-center gap-1"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setShowBugReportModal(true)}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        Signaler un bug
-                      </motion.button>
-                    )}
                     <motion.button
                       className="px-3 py-1 bg-red-900/40 hover:bg-red-900/60 text-red-300 hover:text-white border border-red-500/30 rounded-lg transition-all flex items-center gap-1"
                       whileHover={{ scale: 1.05 }}
