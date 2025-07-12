@@ -46,6 +46,7 @@ export interface UserProfile {
   title: string
   signature: string
   avatar: string
+  avatarAnimation: string
   rpmAvatarId?: string
   rpmUserId?: string
   isMale: boolean
@@ -239,7 +240,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
         onClick={handleOverlayClick}
       >
         <motion.div
-          className="border border-slate-600 rounded-2xl w-[100vh] max-h-[90vh] overflow-hidden"
+          className="border border-slate-600 rounded-2xl w-[80vh] max-h-[90vh] overflow-hidden"
           style={{ backgroundColor: '#1f2b44' }}
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -279,7 +280,8 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                       {user.rpmAvatarId ? (
                         <AvatarCanvas
                           avatarUrl={`https://models.readyplayer.me/${user.rpmAvatarId}.glb`}
-                          animation="feminine/fbx/idle/F_Standing_Idle_Variations_001"
+                          animation={user.avatarAnimation}
+                          sceneUrl='/assets/scenes/scene.glb'
                           options={{
                             ctrlMinDist: 2,
                             ctrlMaxDist: 5,
@@ -377,7 +379,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 items items-center gap-4 mx-auto rounded-xl w-3/4">
                   <div className="bg-[#0e1735] rounded-[15px] block h-[124px] mr-[1vh] p-0">
                     {user.playedGames === 0 && relation === 'me' ? (
-                      <p>
+                      <p className="p-4">
                         Tu viens seulement de débarquer dans la station Mir.
                         <br />
                         Rejoins vite les autres explorateurs en partie !
