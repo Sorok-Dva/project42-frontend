@@ -896,7 +896,7 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                           <div className="flex items-center justify-between">
                             <span>Genre:</span>
                             <span className="text-pink-400">
-                              {item.avatarSkin.gender === 'female' ? '👩 Féminin' : '👨 Masculin'}
+                              {item.avatarSkin.gender === 'female' ? '👩 Féminin' : item.avatarSkin.gender === 'masculine' ? '👨 Masculin' : '🧙 Neutre'}
                             </span>
                           </div>
                         </div>
