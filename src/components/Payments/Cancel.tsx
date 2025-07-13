@@ -77,7 +77,7 @@ const PaymentCancel: React.FC = () => {
 
       if (provider === 'paypal' && paymentId && payerId) {
         await axios.post(
-          '/api/payments/stripe/cancel',
+          '/api/payments/paypal/cancel',
           { paymentId, payerId, packId, planId },
           { headers: { Authorization: `Bearer ${token}` } },
         )
