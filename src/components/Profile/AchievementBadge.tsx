@@ -38,7 +38,7 @@ const AchievementBadge: React.FC<AchievementBadgeProps> = ({ achievement, isMemo
     <div className="relative">
       <motion.div
         className={clsx(
-          'relative inline-flex justify-center items-center w-[50px] h-[50px] mr-[15px] rounded-[5px] border-[2px]',
+          'relative inline-flex justify-center items-center w-[30px] h-[30px] mr-[15px] rounded-[5px] border-[2px]',
           'shadow-[0_5px_5px_rgba(0,0,0,0.2),_inset_0_2px_2px_rgba(0,0,0,0.2)]',
           {
             'bg-[#1e4262] border-[#e3be70]': !isMemory,
@@ -53,10 +53,10 @@ const AchievementBadge: React.FC<AchievementBadgeProps> = ({ achievement, isMemo
         {!achievement.unique && achievement.level > 0 && (
           <div
             className="
-              absolute -top-[12px] -right-[12px]
-              w-[22px] h-[22px]
+              absolute -top-[8px] -right-[8px]
+              w-[18px] h-[18px]
               rounded-full
-              font-bold text-white leading-[2vh]
+              text-white text-sm leading-[2vh]
               px-2
               border-[inherit] bg-[inherit]
               shadow-[0_5px_5px_#0003,inset_0_2px_2px_#0003]
@@ -69,12 +69,11 @@ const AchievementBadge: React.FC<AchievementBadgeProps> = ({ achievement, isMemo
         <img
           src={`/assets/images/pictos/${achievement.id}.png`}
           alt={achievement.description}
-          className="h-10"
         />
 
         {/* Memory Indicator */}
         {isMemory && (
-          <div className="absolute -top-[25px] -right-[25px] w-full h-full flex items-center justify-center">
+          <div className="absolute -top-[15px] -right-[15px] w-full h-full flex items-center justify-center">
             <div className="w-4 h-4 bg-cyan-400 rounded-full animate-pulse"></div>
           </div>
         )}

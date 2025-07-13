@@ -20,7 +20,7 @@
     "build:scss": "npm run compile:scss && npm run minify:scss && npm run map:scss",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org project-42 --project p42-frontend ./build && sentry-cli sourcemaps upload --org project-42 --project p42-frontend ./build"
   },
-  "proxy": "http://localhost:3010/",
+  "proxy": "http://localhost:3010",
   "dependencies": {
     "@amplitude/analytics-browser": "^2.18.1",
     "@babel/runtime": "^7.25.4",
