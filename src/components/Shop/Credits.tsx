@@ -601,6 +601,27 @@ const PremiumCredits: React.FC = () => {
                             openPaymentModal(
                               'premium',
                               plan.id,
+                              'paypal',
+                              plan.name,
+                              Math.round(plan.price * (1 - plan.discount / 100)).toString(),
+                            )}
+                          variant="outline"
+                          className={`w-full ${
+                            plan.popular
+                              ? 'bg-[#003087] hover:bg-[#009CDE]'
+                              : 'bg-[#009CDE] hover:bg-[#003087]'
+                          } flex items-center justify-center gap-2 text-white font-medium`}
+                        >
+                        Payer avec <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.421c-.315-.178-.7-.284-1.18-.284h-1.73L16.68 14.83c-.1.636-.616 1.07-1.26 1.07H9.503l-.884 5.583a.387.387 0 0 0 .382.454h3.577c.315 0 .59-.23.64-.54l.026-.17.5-3.178.032-.196c.05-.31.325-.54.64-.54h.404c2.606 0 4.64-1.06 5.235-4.135.248-1.285.12-2.36-.493-3.12a2.51 2.51 0 0 0-.4-.32z" />
+                          </svg>
+                        PayPal
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            openPaymentModal(
+                              'premium',
+                              plan.id,
                               'stripe',
                               plan.name,
                               Math.round(plan.price * (1 - plan.discount / 100)).toString(),
@@ -615,23 +636,6 @@ const PremiumCredits: React.FC = () => {
                           </svg>
                           Stripe
                         </Button>
-                        {/*<Button
-                        onClick={() =>
-                          openPaymentModal(
-                            "premium",
-                            plan.id,
-                            "paypal",
-                            plan.name,
-                            Math.round(plan.price * (1 - plan.discount / 100)).toString(),
-                          )}
-                        variant="outline"
-                        className="w-full border-blue-500/50 hover:bg-blue-500/10 flex items-center justify-center gap-2"
-                      >
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.421c-.315-.178-.7-.284-1.18-.284h-1.73L16.68 14.83c-.1.636-.616 1.07-1.26 1.07H9.503l-.884 5.583a.387.387 0 0 0 .382.454h3.577c.315 0 .59-.23.64-.54l.026-.17.5-3.178.032-.196c.05-.31.325-.54.64-.54h.404c2.606 0 4.64-1.06 5.235-4.135.248-1.285.12-2.36-.493-3.12a2.51 2.51 0 0 0-.4-.32z" />
-                        </svg>
-                        PayPal
-                      </Button>*/}
                       </div>
                     </div>
                   </Card>
@@ -693,6 +697,26 @@ const PremiumCredits: React.FC = () => {
                         onClick={() => openPaymentModal(
                           'credits',
                           pack.id,
+                          'paypal',
+                          `${pack.credits} Crédits`,
+                          pack.price.toString(),
+                        )}
+                        variant="outline"
+                        className={`w-full ${
+                          pack.popular
+                            ? 'bg-[#003087] hover:bg-[#009CDE]'
+                            : 'bg-[#009CDE] hover:bg-[#003087]'
+                        } flex items-center justify-center gap-2 text-white font-medium`}
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.421c-.315-.178-.7-.284-1.18-.284h-1.73L16.68 14.83c-.1.636-.616 1.07-1.26 1.07H9.503l-.884 5.583a.387.387 0 0 0 .382.454h3.577c.315 0 .59-.23.64-.54l.026-.17.5-3.178.032-.196c.05-.31.325-.54.64-.54h.404c2.606 0 4.64-1.06 5.235-4.135.248-1.285.12-2.36-.493-3.12a2.51 2.51 0 0 0-.4-.32z" />
+                        </svg>
+                      PayPal
+                      </Button>
+                      <Button
+                        onClick={() => openPaymentModal(
+                          'credits',
+                          pack.id,
                           'stripe',
                           `${pack.credits} Crédits`,
                           pack.price.toString(),
@@ -706,22 +730,6 @@ const PremiumCredits: React.FC = () => {
                         </svg>
                         Stripe
                       </Button>
-                      {/*<Button
-                      onClick={() => openPaymentModal(
-                            "credits",
-                            pack.id,
-                            "paypal",
-                            `${pack.credits} Crédits`,
-                            pack.price.toString(),
-                          )}
-                      variant="outline"
-                      className="w-full border-blue-500/50 hover:bg-blue-500/10 flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.421c-.315-.178-.7-.284-1.18-.284h-1.73L16.68 14.83c-.1.636-.616 1.07-1.26 1.07H9.503l-.884 5.583a.387.387 0 0 0 .382.454h3.577c.315 0 .59-.23.64-.54l.026-.17.5-3.178.032-.196c.05-.31.325-.54.64-.54h.404c2.606 0 4.64-1.06 5.235-4.135.248-1.285.12-2.36-.493-3.12a2.51 2.51 0 0 0-.4-.32z" />
-                      </svg>
-                      PayPal
-                    </Button>*/}
                     </div>
                   </div>
                 </Card>
