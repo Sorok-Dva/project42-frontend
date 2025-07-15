@@ -73,7 +73,7 @@ const RenderGameLine: React.FC<RenderGameLineProps> = ({ game, key, wasMdj = fal
           {game.type[0].toUpperCase() + game.type.substring(1)}
         </strong>
 
-        <span className="italic font-thin text-sm text-white w-[70px] text-center">
+        <span className="italic font-thin text-sm text-white w-[120px] text-center">
           {game.date}
         </span>
       </div>

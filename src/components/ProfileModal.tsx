@@ -377,15 +377,15 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                 {/* Recent Games and Guild Info */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 items items-center gap-4 mx-auto rounded-xl w-3/4">
                   <div className="bg-[#0e1735] rounded-[15px] block h-[124px] mr-[1vh] p-0">
-                    <div className="text-center py-4">
+                    <div className="text-center">
                       {user.playedGames === 0 && relation === 'me' ? (
-                        <p className="text-gray-400 text-sm">
+                        <p className="text-gray-400 text-sm py-4">
                           Tu viens seulement de débarquer dans la station Mir.
                           <br />
                           Rejoins vite les autres explorateurs en partie !
                         </p>
                       ) : user.playedGames === 0 ? (
-                        <p className="text-gray-400 text-sm">
+                        <p className="text-gray-400 text-sm py-4">
                           <strong>{user.nickname}</strong> vient seulement de débarquer dans la station Mir.
                           <br />
                           {user.isMale ? 'Il' : 'Elle'} n'a pas encore joué de partie.

@@ -38,7 +38,7 @@ const AchievementBadge: React.FC<AchievementBadgeProps> = ({ achievement, isMemo
     <div className="relative">
       <motion.div
         className={clsx(
-          'relative inline-flex justify-center items-center w-[30px] h-[30px] mr-[15px] rounded-[5px] border-[2px]',
+          'relative inline-flex justify-center items-center w-[40px] h-[40px] mr-[7px] rounded-[5px] border-[2px]',
           'shadow-[0_5px_5px_rgba(0,0,0,0.2),_inset_0_2px_2px_rgba(0,0,0,0.2)]',
           {
             'bg-[#1e4262] border-[#e3be70]': !isMemory,
