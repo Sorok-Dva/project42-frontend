@@ -29,6 +29,7 @@ import {
 import { Button } from 'components/UI/Button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'components/UI/Tabs'
 import { Popover, PopoverContent, PopoverTrigger } from 'components/UI/Popover'
+import DOMPurify from 'dompurify'
 
 interface MarkdownEditorProps {
   value: string
@@ -137,7 +138,8 @@ export const renderPreview = (text: string) => {
     // Line breaks
     .replace(/\n/g, '<br />')
 
-  return html
+
+  return DOMPurify.sanitize(html)
 }
 
 const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ value, onChange, className = '', height = 'h-96' }) => {

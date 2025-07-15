@@ -57,6 +57,7 @@ const PaymentCancel: React.FC = () => {
 
   // Récupération des paramètres URL
   const provider = searchParams.get('provider') || (searchParams.get('paymentId') ? 'paypal' : 'stripe')
+  const ppToken = searchParams.get('token')
   const paymentId = searchParams.get('paymentId')
   const payerId = searchParams.get('PayerID')
   const sessionId = searchParams.get('session_id')
@@ -75,10 +76,10 @@ const PaymentCancel: React.FC = () => {
         )
       }
 
-      if (provider === 'paypal' && paymentId && payerId) {
+      if (provider === 'paypal' && token) {
         await axios.post(
-          '/api/payments/stripe/cancel',
-          { paymentId, payerId, packId, planId },
+          '/api/payments/paypal/cancel',
+          { token: ppToken, packId, planId },
           { headers: { Authorization: `Bearer ${token}` } },
         )
       }
