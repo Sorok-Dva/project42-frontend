@@ -74,6 +74,8 @@ import DailyRewardsPopup from 'components/DailyRewardPopup'
 import { WarningProvider } from 'contexts/WarningContext'
 import ReplayGame from 'pages/ReplayGame'
 import StalkList from 'pages/admin/users/StalkList'
+import EndGamePage from 'pages/Test'
+import { EventProvider } from 'components/EventSystem/EventProvider'
 
 const AppContent: React.FC = () => {
   const { serverMaintenance, loading: maintenanceLoading } = useMaintenance()
@@ -163,7 +165,7 @@ const AppContent: React.FC = () => {
         <Route path="/achievements" element={<AchievementsPage />} />
         <Route path="/news" element={<News />} />
         <Route path="/cards" element={<Cards />} />
-        <Route path="/avatar" element={<AvatarCreator />} />
+        <Route path="/avatar" element={<EndGamePage />} />
         <Route path="/game/:id/replay" element={<ReplayGame />} />
         <Route path="/game/:id" element={<GamePage />} />
         <Route path="/stations" element={<Guilds />} />
@@ -209,19 +211,21 @@ const App: React.FC = () => {
         <AuthProvider>
           <UserProvider>
             <SocketProvider>
-              <ModalProvider>
-                <Bootstrap>
-                  <DailyRewardsProvider>
-                    <WarningProvider>
-                      <GlobalClickListener />
-                      <Notifier />
-                      <AppContent />
-                      <ScrollToTop />
-                      <DailyRewardsPopup />
-                    </WarningProvider>
-                  </DailyRewardsProvider>
-                </Bootstrap>
-              </ModalProvider>
+              <EventProvider>
+                <ModalProvider>
+                  <Bootstrap>
+                    <DailyRewardsProvider>
+                      <WarningProvider>
+                        <GlobalClickListener />
+                        <Notifier />
+                        <AppContent />
+                        <ScrollToTop />
+                        <DailyRewardsPopup />
+                      </WarningProvider>
+                    </DailyRewardsProvider>
+                  </Bootstrap>
+                </ModalProvider>
+              </EventProvider>
             </SocketProvider>
           </UserProvider>
         </AuthProvider>
