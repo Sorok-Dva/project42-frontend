@@ -983,7 +983,7 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                                           if (item.categoryId === 6) {
                                             const rect = e.currentTarget.getBoundingClientRect()
                                             const x = Math.min(rect.right + 10, window.innerWidth - 320)
-                                            const y = Math.max(rect.top, 10)
+                                            const y = rect.top - 150
                                             setAnimationTooltip({ show: true, item, x, y })
                                           }
                                         }}
