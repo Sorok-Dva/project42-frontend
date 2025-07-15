@@ -1,7 +1,7 @@
 'use client'
 
 import React, { Suspense, useEffect, useRef, useState } from 'react'
-import { Canvas, useThree } from '@react-three/fiber'
+import { Canvas } from '@react-three/fiber'
 import {
   OrbitControls,
   Html,
@@ -11,7 +11,6 @@ import {
   Environment,
   useGLTF,
 } from '@react-three/drei'
-import ResizeObserver from 'resize-observer-polyfill'
 import { AvatarWithLabels } from './AvatarWithLabels'
 
 export type AvatarConfig = {
