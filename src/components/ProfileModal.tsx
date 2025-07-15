@@ -281,7 +281,6 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                         <AvatarCanvas
                           avatarUrl={`https://models.readyplayer.me/${user.rpmAvatarId}.glb`}
                           animation={user.avatarAnimation}
-                          sceneUrl='/assets/scenes/scene.glb'
                           options={{
                             ctrlMinDist: 2,
                             ctrlMaxDist: 5,

@@ -95,6 +95,8 @@ const GamePage = () => {
   const maxReconnectAttempts = 5
   const reconnectIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
+  const [canvasReady, setCanvasReady] = useState(false)
+
   const [audioPlaying, setAudioPlaying] = useState<boolean>(false)
   const [audioTrack, setAudioTrack] = useState<{
     title: string
@@ -701,14 +703,14 @@ const GamePage = () => {
 
   // Auto-close winners display after 5 seconds
   useEffect(() => {
-    if (winnersAvatars.avatars.length > 0) {
-      /*const timer = setTimeout(() => {
+    if (winnersAvatars.avatars.length > 0 && canvasReady) {
+      const timer = setTimeout(() => {
         setWinnersAvatars({ avatars: [], winMsg: '' })
-      }, 7500) // 1.5s delay + 6s display time
+      }, 6000) // 1.5s delay + 6s display time
 
-      return () => clearTimeout(timer)*/
+      return () => clearTimeout(timer)
     }
-  }, [winnersAvatars])
+  }, [winnersAvatars, canvasReady])
 
   if (gameError) {
     // Using a unique value ensures the storage event always triggers
@@ -835,16 +837,26 @@ const GamePage = () => {
           >
             {/* Background overlay */}
             <motion.div
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm cursor-pointer"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
+              onClick={() => setWinnersAvatars({ avatars: [], winMsg: '' })}
             />
 
-            {/* Stars background */}
-            <div className="absolute inset-0 z-0">{staticStars}</div>
-            <div className="absolute inset-0 z-1">{parallaxStars}</div>
+            {/* Close button - top right */}
+            <motion.button
+              onClick={() => setWinnersAvatars({ avatars: [], winMsg: '' })}
+              className="absolute top-6 right-6 z-50 w-12 h-12 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 hover:border-white/40 flex items-center justify-center text-white hover:text-red-400 transition-all duration-200 backdrop-blur-sm"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              title="Fermer (Échap)"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </motion.button>
 
             {/* Celebration particles */}
             <motion.div
@@ -910,12 +922,32 @@ const GamePage = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.9, duration: 0.8 }}
+                onAnimationComplete={() => setCanvasReady(true)}
               >
-                <MultiAvatarCanvas
-                  avatars={winnersAvatars.avatars}
-                  backgroundColor="#1a1a2e"
-                  ctrlMaxDist={winnersAvatars.avatars.length < 3 ? 3 : 8}
-                />
+                {canvasReady ? (
+                  <MultiAvatarCanvas
+                    avatars={winnersAvatars.avatars}
+                    backgroundColor="#1a1a2e"
+                    ctrlMaxDist={winnersAvatars.avatars.length < 3 ? 4 : 8}
+                    orbitsControls={false}
+                  />
+                ) : (
+                  <span className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </span>
+                )}
               </motion.div>
 
               {/* Countdown */}

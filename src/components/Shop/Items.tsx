@@ -958,6 +958,19 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                                 equipped ? 'bg-purple-700 hover:bg-purple-800' : 'bg-indigo-600 hover:bg-indigo-700'
                               }
                               onClick={() => handleEquipItem(item.id)}
+                              onMouseEnter={(e) => {
+                                if (item.categoryId === 6) {
+                                  const rect = e.currentTarget.getBoundingClientRect()
+                                  const x = Math.min(rect.right + 10, window.innerWidth - 320)
+                                  const y = rect.top - 150
+                                  setAnimationTooltip({ show: true, item, x, y })
+                                }
+                              }}
+                              onMouseLeave={() => {
+                                if (item.categoryId === 6) {
+                                  setAnimationTooltip({ show: false, item: null, x: 0, y: 0 })
+                                }
+                              }}
                               disabled={equipped}
                             >
                               {equipped ? (
