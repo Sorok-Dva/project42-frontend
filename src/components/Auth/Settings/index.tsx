@@ -19,15 +19,22 @@ import ModHistory from './ModHistory'
 import Discord from './Discord'
 import Referral from './Referral'
 import AvatarPage from 'pages/AvatarCreator'
+import AvatarIntroPopup from 'components/Avatar/AvatarIntroPopup'
 
 const UserSettings : React.FC = () => {
   const { user } = useUser()
   const [activeTab, setActiveTab] = useState<string>('tab-badges')
+  const [showAvatarPopup, setShowAvatarPopup] = useState(false)
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const code = params.get('code')
     if (code) setActiveTab('tab-discord')
+    const avatarIntro = params.get('avatarIntro')
+    if (avatarIntro) {
+      setActiveTab('tab-avatar')
+      setShowAvatarPopup(true)
+    }
   }, [location.search])
 
   const openTabSection = (tabName : string) => {
@@ -208,6 +215,9 @@ const UserSettings : React.FC = () => {
           >
             <Discord />
           </motion.div>
+        ) }
+        { showAvatarPopup && (
+          <AvatarIntroPopup onClose={() => setShowAvatarPopup(false)} />
         ) }
       </motion.div>
     </div>
