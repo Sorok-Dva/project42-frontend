@@ -37,7 +37,7 @@ const RenderGameLine: React.FC<RenderGameLineProps> = ({ game, key, wasMdj = fal
           <img
             src={`/assets/images/miniatures/carte${game.idRole}_90_90.png`}
             alt="Carte"
-            className="block w-[15px] h-[15px] mt-[2px] mr-[2px] mb-[4px] ml-[4px] shadow-none rounded-none"
+            className="block w-[20px] h-[20px] mt-[2px] shadow-none rounded-none"
           />
         ) : !mdjLevel ? (
           <div className="mdj-resume" data-tooltip={tooltipName}></div>
@@ -69,11 +69,11 @@ const RenderGameLine: React.FC<RenderGameLineProps> = ({ game, key, wasMdj = fal
           }`}
         ></div>
 
-        <strong className="text-white text-sm w-[100px] m-0 whitespace-nowrap">
+        <strong className="text-white text-sm w-[70px] m-0 whitespace-nowrap">
           {game.type[0].toUpperCase() + game.type.substring(1)}
         </strong>
 
-        <span className="italic text-sm text-white w-[80px] text-center">
+        <span className="italic font-thin text-sm text-white w-[70px] text-center">
           {game.date}
         </span>
       </div>
@@ -100,11 +100,11 @@ const RenderGameLine: React.FC<RenderGameLineProps> = ({ game, key, wasMdj = fal
             <b className="text-[#668cff] text-right">MDJ</b>
           )
         ) : game.result === 'Victoire' ? (
-          <b className="text-[#5fce59] text-right">{game.result}</b>
+          <b className="text-[#5fce59] text-sm text-right">{game.result}</b>
         ) : game.result === 'Égalité' ? (
-          <b className="text-white text-right">{game.result}</b>
+          <b className="text-white text-sm text-right">{game.result}</b>
         ) : (
-          <b className="text-[#cc3434] text-right">{game.result}</b>
+          <b className="text-[#cc3434] text-sm text-right">{game.result}</b>
         )}
       </div>
       <Tooltip id={`${key}_${game.id}`} />
