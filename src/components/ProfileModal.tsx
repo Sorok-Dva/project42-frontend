@@ -377,48 +377,50 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                 {/* Recent Games and Guild Info */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 items items-center gap-4 mx-auto rounded-xl w-3/4">
                   <div className="bg-[#0e1735] rounded-[15px] block h-[124px] mr-[1vh] p-0">
-                    {user.playedGames === 0 && relation === 'me' ? (
-                      <p className="p-4">
-                        Tu viens seulement de débarquer dans la station Mir.
-                        <br />
-                        Rejoins vite les autres explorateurs en partie !
-                      </p>
-                    ) : user.playedGames === 0 ? (
-                      <p>
-                        <strong>{user.nickname}</strong> vient seulement de débarquer dans la station Mir.
-                        <br />
-                        {user.isMale ? 'Il' : 'Elle'} n'a pas encore joué de partie.
-                      </p>
-                    ) : (
-                      <>
-                        {/* Barre de répartition des types de parties */}
-                        <div className="flex h-[8px] w-full overflow-hidden rounded-t-[15px] mb-0">
-                          {user.stats
-                            .filter(s => s.type !== 'all')
-                            .map((stat: { type: number | 'all'; playedGames: number }) => {
-                              const flexValue = Math.round((stat.playedGames / user.playedGames) * 100)
-                              return (
-                                <div
-                                  key={stat.type}
-                                  className={`h-full type-${stat.type}`}
-                                  style={{ flex: flexValue }}
-                                ></div>
-                              )
-                            })}
-                        </div>
+                    <div className="text-center py-4">
+                      {user.playedGames === 0 && relation === 'me' ? (
+                        <p className="text-gray-400 text-sm">
+                          Tu viens seulement de débarquer dans la station Mir.
+                          <br />
+                          Rejoins vite les autres explorateurs en partie !
+                        </p>
+                      ) : user.playedGames === 0 ? (
+                        <p className="text-gray-400 text-sm">
+                          <strong>{user.nickname}</strong> vient seulement de débarquer dans la station Mir.
+                          <br />
+                          {user.isMale ? 'Il' : 'Elle'} n'a pas encore joué de partie.
+                        </p>
+                      ) : (
+                        <>
+                          {/* Barre de répartition des types de parties */}
+                          <div className="flex h-[8px] w-full overflow-hidden rounded-t-[15px] mb-0">
+                            {user.stats
+                              .filter(s => s.type !== 'all')
+                              .map((stat: { type: number | 'all'; playedGames: number }) => {
+                                const flexValue = Math.round((stat.playedGames / user.playedGames) * 100)
+                                return (
+                                  <div
+                                    key={stat.type}
+                                    className={`h-full type-${stat.type}`}
+                                    style={{ flex: flexValue }}
+                                  ></div>
+                                )
+                              })}
+                          </div>
 
-                        {/* Liste des dernières parties */}
-                        <div className="w-full min-h-[100px] mt-[2px] p-0 rounded-none [text-shadow:none]">
-                          <ul className="p-0 m-0">
-                            {user.summaryHistory.map((game) => (
-                              <li key={game.id} className="bg-transparent text-[12px] p-0 w-full m-0">
-                                <RenderGameLine game={game} key="fav" />
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </>
-                    )}
+                          {/* Liste des dernières parties */}
+                          <div className="w-full min-h-[100px] mt-[2px] p-0 rounded-none [text-shadow:none]">
+                            <ul className="p-0 m-0">
+                              {user.summaryHistory.map((game) => (
+                                <li key={game.id} className="bg-transparent text-[12px] p-0 w-full m-0">
+                                  <RenderGameLine game={game} key="fav" />
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   {/* Guild Info */}
