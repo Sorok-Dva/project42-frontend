@@ -52,7 +52,7 @@ const Button = ({ classes, children, onClick, badgeCount = 0, type }: BtnProps) 
           fontWeight: 'bold',
           lineHeight: 1,
           textAlign: 'center',
-          zIndex: 100,
+          zIndex: 9999,
         })
       }
     }

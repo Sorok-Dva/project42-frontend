@@ -8,12 +8,12 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Navigation } from 'swiper/modules'
 import { ChevronLeft, ChevronRight, Crown, Star, Users } from 'lucide-react'
 import axios from 'axios'
-import type { User } from 'components/ProfileModal'
+import type { UserProfile } from 'components/ProfileModal'
 import 'swiper/css'
 import 'swiper/css/navigation'
 
 const TopPlayer: React.FC = () => {
-  const [topPlayers, setTopPlayers] = useState<User[]>([])
+  const [topPlayers, setTopPlayers] = useState<UserProfile[]>([])
 
   useEffect(() => {
     async function retrieveTopPlayers() {

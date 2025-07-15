@@ -11,7 +11,8 @@ module.exports = {
   'extends': [
     'eslint:recommended',
     'plugin:react/recommended',
-    'plugin:@typescript-eslint/eslint-recommended'
+    'plugin:@typescript-eslint/eslint-recommended',
+    "plugin:@react-three/recommended"
   ],
   'globals': {
     'Atomics': 'readonly',
@@ -62,5 +63,13 @@ module.exports = {
       'error',
       'never'
     ]
-  }
+  },
+  'overrides': [
+    {
+      'files': ["**/*.tsx"],
+      'rules': {
+        'react/no-unknown-property': "off"
+      }
+    }
+  ]
 }

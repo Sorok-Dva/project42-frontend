@@ -1,6 +1,6 @@
 'use client'
 import type React from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Badge } from 'components/UI/Badge'
 import { Button } from 'components/UI/Button'
@@ -8,25 +8,25 @@ import { Card } from 'components/UI/Card'
 import axios from 'axios'
 import { useUser } from 'contexts/UserContext'
 import { useAuth } from 'contexts/AuthContext'
-import { Gift, ShoppingCart, Check, Bomb, Minus, Plus } from 'lucide-react'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from 'components/UI/Dialog'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from 'components/UI/Tooltip'
-import { Category, Item, ShopData, TagType, UserInventory } from 'types/shop'
-import { User } from 'types/user'
+  Gift,
+  ShoppingCart,
+  Check,
+  Bomb,
+  Minus,
+  Plus,
+  ChevronDown,
+  ChevronRight,
+  VenetianMask,
+  Loader,
+} from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from 'components/UI/Dialog'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'components/UI/Tooltip'
+import type { Category, Item, ShopData, TagType, UserInventory } from 'types/shop'
+import type { User } from 'types/user'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
+import { AvatarCanvas } from 'components/Avatar/Animated'
 
 const getIcon = (iconName: string) => {
   switch (iconName) {
@@ -45,6 +45,10 @@ const getIcon = (iconName: string) => {
     )
   case 'bomb':
     return <Bomb />
+  case 'mask':
+    return <VenetianMask />
+  case 'danse':
+    return <Loader />
   case 'zap':
     return (
       <svg
@@ -120,18 +124,46 @@ const getRarityColor = (rarity: string) => {
   }
 }
 
+// Mapping des types de skins vers des noms français et icônes
+const skinTypeMapping = {
+  outfit: { name: 'Tenues', icon: '👗' },
+  hair: { name: 'Cheveux', icon: '💇' },
+  bottom: { name: 'Pantalons', icon: '👖' },
+  footwear: { name: 'Chaussures', icon: '👟' },
+  top: { name: 'Hauts', icon: '👕' },
+  glasses: { name: 'Lunettes', icon: '🕶️' },
+  headwear: { name: 'Chapeaux', icon: '🎩' },
+  facewear: { name: 'Accessoires visage', icon: '😷' },
+  facemask: { name: 'Masques', icon: '🎭' },
+}
+
+const animationTypeMapping = {
+  idle: { name: 'Attente', icon: '🧍' },
+  dance: { name: 'Danse', icon: '💃' },
+  expression: { name: 'Expressions', icon: '😄' },
+  locomotion: { name: 'Mouvement', icon: '🏃' },
+}
+
+const ITEMS_PER_PAGE = 24
+
 const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
   const { token } = useAuth()
   const { user, setUser } = useUser()
   const premiumDate = user?.premium ? new Date(user.premium) : null
   const isPremium = premiumDate ? new Date().getTime() < premiumDate.getTime() : false
+
   const [loading, setLoading] = useState<boolean>(true)
   const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<TagType[]>([])
   const [items, setItems] = useState<Item[]>([])
   const [activeCategory, setActiveCategory] = useState<number>(1)
+  const [activeSkinType, setActiveSkinType] = useState<string>('all')
+  const [activeAnimationType, setActiveAnimationType] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('featured')
+  const [skinCategoriesExpanded, setSkinCategoriesExpanded] = useState(false)
+  const [animationCategoriesExpanded, setAnimationCategoriesExpanded] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const [userInventory, setUserInventory] = useState<UserInventory[]>([])
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
@@ -143,6 +175,19 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
   const [giftQuantity, setGiftQuantity] = useState(1)
 
   const [searchGiftResults, setSearchGiftResults] = useState<User[]>([])
+
+  const [animationTooltip, setAnimationTooltip] = useState<{
+    show: boolean
+    item: Item | null
+    x: number
+    y: number
+  }>({ show: false, item: null, x: 0, y: 0 })
+
+  const [isAnimationEventDialogOpen, setIsAnimationEventDialogOpen] = useState(false)
+  const [selectedAnimationEvent, setSelectedAnimationEvent] = useState<'idle' | 'gameStart' | 'gameWin' | 'gameLoose'>(
+    'idle',
+  )
+  const [pendingEquipItemId, setPendingEquipItemId] = useState<number | null>(null)
 
   useEffect(() => {
     async function retrieveShop() {
@@ -187,55 +232,142 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
     fetchSearchResults()
   }, [giftRecipient, token])
 
-  // Filter items by category and search query
-  const filteredItems = items
-    .filter((item) => item.categoryId === activeCategory)
-    .filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    .filter((item) => {
+  // Memoized helpers pour optimiser les performances
+  const availableSkinTypes = useMemo(() => {
+    return Array.from(
+      new Set(items.filter((i) => i.categoryId === 5 && i.avatarSkin?.type).map((i) => i.avatarSkin!.type)),
+    ).sort()
+  }, [items])
+
+  const availableAnimationTypes = useMemo(() => {
+    return Array.from(
+      new Set(items.filter((i) => i.categoryId === 6 && i.avatarAnimation?.type).map((i) => i.avatarAnimation!.type)),
+    ).sort()
+  }, [items])
+
+  const getSkinTypeCount = useCallback(
+    (type: string) => {
+      const filteredItems = items.filter(
+        (item) =>
+          item.categoryId === 5 &&
+          item.avatarSkin?.type === type &&
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+
       if (inventory) {
-        // Dans l'inventaire : afficher seulement les items possédés
-        return userInventory.find((ui) => ui.itemId === item.id)
+        // In inventory mode, count only owned items
+        return filteredItems.filter((item) => userInventory.find((ui) => ui.itemId === item.id)).length
       } else {
-        // Dans le shop : afficher tous les items sauf ceux possédés (mais pas les jetables)
-        const isOwned = userInventory.find((ui) => ui.itemId === item.id)
-        const isConsumable = item.categoryId === 4
-
-        // Si c'est jetable, toujours afficher
-        if (isConsumable) return true
-
-        // Sinon, afficher seulement si pas possédé
-        return !isOwned
+        // In shop mode, count all items
+        return filteredItems.length
       }
+    },
+    [items, searchQuery, inventory, userInventory],
+  )
+
+  const getAnimationTypeCount = useCallback(
+    (type: string) => {
+      const filteredItems = items.filter(
+        (item) =>
+          item.categoryId === 6 &&
+          item.avatarAnimation?.type === type &&
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+
+      if (inventory) {
+        // In inventory mode, count only owned items
+        return filteredItems.filter((item) => userInventory.find((ui) => ui.itemId === item.id)).length
+      } else {
+        // In shop mode, count all items
+        return filteredItems.length
+      }
+    },
+    [items, searchQuery, inventory, userInventory],
+  )
+
+  // Filtrage optimisé avec useMemo
+  const filteredItems = useMemo(() => {
+    return items
+      .filter((item) => item.categoryId === activeCategory)
+      .filter((item) => {
+        // Si on est dans la catégorie skins (5) et qu'un type spécifique est sélectionné
+        if (activeCategory === 5 && activeSkinType !== 'all') {
+          return item.avatarSkin?.type === activeSkinType
+        }
+        // Si on est dans la catégorie animations (6) et qu'un type spécifique est sélectionné
+        if (activeCategory === 6 && activeAnimationType !== 'all') {
+          return item.avatarAnimation?.type === activeAnimationType
+        }
+        return true
+      })
+      .filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      .filter((item) => {
+        if (inventory) {
+          // Dans l'inventaire : afficher seulement les items possédés
+          return userInventory.find((ui) => ui.itemId === item.id)
+        } else {
+          // Dans le shop : afficher tous les items sauf ceux possédés (mais pas les jetables)
+          const isOwned = userInventory.find((ui) => ui.itemId === item.id)
+          const isConsumable = item.categoryId === 4
+
+          // Si c'est jetable, toujours afficher
+          if (isConsumable) return true
+
+          // Sinon, afficher seulement si pas possédé
+          return !isOwned
+        }
+      })
+  }, [items, activeCategory, activeSkinType, activeAnimationType, searchQuery, inventory, userInventory])
+
+  // Tri optimisé avec useMemo
+  const sortedItems = useMemo(() => {
+    return [...filteredItems].sort((a, b) => {
+      if (sortBy === 'featured') {
+        return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0)
+      } else if (sortBy === 'new') {
+        return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)
+      } else if (sortBy === 'price-low') {
+        return (a.discountPrice || a.price) - (b.discountPrice || b.price)
+      } else if (sortBy === 'price-high') {
+        return (b.discountPrice || b.price) - (a.discountPrice || a.price)
+      }
+      return 0
     })
+  }, [filteredItems, sortBy])
 
-  // Sort items
-  const sortedItems = [...filteredItems].sort((a, b) => {
-    if (sortBy === 'featured') {
-      return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0)
-    } else if (sortBy === 'new') {
-      return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)
-    } else if (sortBy === 'price-low') {
-      return (a.discountPrice || a.price) - (b.discountPrice || b.price)
-    } else if (sortBy === 'price-high') {
-      return (b.discountPrice || b.price) - (a.discountPrice || a.price)
-    }
-    return 0
-  })
+  // Pagination
+  const totalPages = Math.ceil(sortedItems.length / ITEMS_PER_PAGE)
+  const paginatedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+    return sortedItems.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  }, [sortedItems, currentPage])
 
-  const userOwnsItem = (itemId: number) => {
-    return userInventory.some((item) => item.itemId === itemId)
-  }
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeCategory, activeSkinType, activeAnimationType, searchQuery, sortBy])
 
-  // Check if item is equipped
-  const isItemEquipped = (itemId: number) => {
-    return userInventory.some((item) => item.itemId === itemId && item.equipped)
-  }
+  const userOwnsItem = useCallback(
+    (itemId: number) => {
+      return userInventory.some((item) => item.itemId === itemId)
+    },
+    [userInventory],
+  )
 
-  // Get item quantity in inventory
-  const getItemQuantity = (itemId: number) => {
-    const inventoryItem = userInventory.find((item) => item.itemId === itemId)
-    return inventoryItem?.quantity || 0
-  }
+  const isItemEquipped = useCallback(
+    (itemId: number) => {
+      return userInventory.some((item) => item.itemId === itemId && item.equipped)
+    },
+    [userInventory],
+  )
+
+  const getItemQuantity = useCallback(
+    (itemId: number) => {
+      const inventoryItem = userInventory.find((item) => item.itemId === itemId)
+      return inventoryItem?.quantity || 0
+    },
+    [userInventory],
+  )
 
   // Handle purchase confirmation
   const handlePurchaseConfirm = async () => {
@@ -361,16 +493,22 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
     }
   }
 
-  // Handle equip item
-  const handleEquipItem = async (itemId: number) => {
+  const handleEquipItem = async (itemId: number, animationEvent?: 'idle' | 'gameStart' | 'gameWin' | 'gameLoose') => {
+    const item = items.find((i) => i.id === itemId)
+
+    // If it's an animation and no event is specified, open the event selection dialog
+    if (item?.categoryId === 6 && !animationEvent) {
+      setPendingEquipItemId(itemId)
+      setIsAnimationEventDialogOpen(true)
+      return
+    }
+
     try {
-      const response = await axios.post(
-        `/api/users/equip/${itemId}`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
+      const requestBody = item?.categoryId === 6 && animationEvent ? { animationEvent } : {}
+
+      const response = await axios.post(`/api/users/equip/${itemId}`, requestBody, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
       if (response.data.status === 'success') {
         // Update local inventory state
@@ -390,11 +528,22 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
             return item
           }),
         )
-        toast.info('Item équipé ! Vous avez équipé l\'item avec succès', ToastDefaultOptions)
+
+        const eventText = animationEvent ? ` pour l'événement ${animationEvent}` : ''
+        toast.info(`Item équipé ! Vous avez équipé l'item avec succès${eventText}`, ToastDefaultOptions)
       }
     } catch (error) {
       console.error(error)
       toast.error('Erreur: Une erreur est survenue lors de l\'équipement de l\'item', ToastDefaultOptions)
+    }
+  }
+
+  const handleAnimationEventConfirm = () => {
+    if (pendingEquipItemId) {
+      handleEquipItem(pendingEquipItemId, selectedAnimationEvent)
+      setIsAnimationEventDialogOpen(false)
+      setPendingEquipItemId(null)
+      setSelectedAnimationEvent('idle')
     }
   }
 
@@ -410,6 +559,27 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
     setIsGiftDialogOpen(true)
   }
 
+  // Handle category change
+  const handleCategoryChange = (categoryId: number) => {
+    setActiveCategory(categoryId)
+    setActiveSkinType('all')
+    setActiveAnimationType('all')
+
+    // Auto-étendre les sous-catégories pour skins et animations
+    if (categoryId === 5) {
+      setSkinCategoriesExpanded(true)
+      setAnimationCategoriesExpanded(false)
+    } else if (categoryId === 6) {
+      setAnimationCategoriesExpanded(true)
+      setSkinCategoriesExpanded(false)
+    } else {
+      setSkinCategoriesExpanded(false)
+      setAnimationCategoriesExpanded(false)
+    }
+
+    setCurrentPage(1)
+  }
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -418,19 +588,121 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-indigo-500/30 p-4 sticky top-4">
             <h3 className="text-lg font-semibold mb-4 text-indigo-300">Catégories</h3>
             <div className="space-y-2">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
-                  className={`w-full flex items-center p-3 rounded-md transition-all ${
-                    activeCategory === category.id
-                      ? 'bg-indigo-900/70 text-white shadow-lg shadow-indigo-500/20'
-                      : 'hover:bg-gray-700/50 text-gray-300'
-                  }`}
-                >
-                  <span className="mr-3">{getIcon(category.icon)}</span>
-                  <span>{category.name}</span>
-                </button>
+              {categories.map((cat) => (
+                <div key={cat.id}>
+                  <button
+                    onClick={() => handleCategoryChange(cat.id)}
+                    className={`w-full flex items-center p-3 rounded-md transition-all ${
+                      activeCategory === cat.id
+                        ? 'bg-indigo-900/70 text-white shadow-lg shadow-indigo-500/20'
+                        : 'hover:bg-gray-700/50 text-gray-300'
+                    }`}
+                  >
+                    <span className="mr-3">{getIcon(cat.icon)}</span>
+                    <span className="flex-1 text-left">{cat.name}</span>
+                    {/* Toggle subcategories */}
+                    {cat.id === 5 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSkinCategoriesExpanded((x) => !x)
+                        }}
+                        className="ml-2 p-1 hover:bg-gray-600/50 rounded"
+                      >
+                        {skinCategoriesExpanded ? <ChevronDown /> : <ChevronRight />}
+                      </button>
+                    )}
+                    {cat.id === 6 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setAnimationCategoriesExpanded((x) => !x)
+                        }}
+                        className="ml-2 p-1 hover:bg-gray-600/50 rounded"
+                      >
+                        {animationCategoriesExpanded ? <ChevronDown /> : <ChevronRight />}
+                      </button>
+                    )}
+                  </button>
+                  {/* Skins subcat */}
+                  {cat.id === 5 && activeCategory === 5 && skinCategoriesExpanded && (
+                    <div className="ml-4 mt-2 space-y-1">
+                      <button
+                        onClick={() => setActiveSkinType('all')}
+                        className={`w-full flex items-center justify-between p-2 rounded-md text-sm transition-all ${
+                          activeSkinType === 'all'
+                            ? 'bg-indigo-800/50 text-white'
+                            : 'hover:bg-gray-700/30 text-gray-400'
+                        }`}
+                      >
+                        <span>🎯 Tous les skins</span>
+                        <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">
+                          {inventory
+                            ? items.filter((i) => i.categoryId === 5 && userInventory.find((ui) => ui.itemId === i.id))
+                              .length
+                            : items.filter((i) => i.categoryId === 5).length}
+                        </span>
+                      </button>
+                      {availableSkinTypes.map((type) => (
+                        <button
+                          key={type}
+                          onClick={() => setActiveSkinType(type)}
+                          className={`w-full flex items-center justify-between p-2 rounded-md text-sm transition-all ${
+                            activeSkinType === type
+                              ? 'bg-indigo-800/50 text-white'
+                              : 'hover:bg-gray-700/30 text-gray-400'
+                          }`}
+                        >
+                          <span>
+                            {skinTypeMapping[type as keyof typeof skinTypeMapping]?.icon}{' '}
+                            {skinTypeMapping[type as keyof typeof skinTypeMapping]?.name || type}
+                          </span>
+                          <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">{getSkinTypeCount(type)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {/* Animations subcat */}
+                  {cat.id === 6 && activeCategory === 6 && animationCategoriesExpanded && (
+                    <div className="ml-4 mt-2 space-y-1">
+                      <button
+                        onClick={() => setActiveAnimationType('all')}
+                        className={`w-full flex items-center justify-between p-2 rounded-md text-sm transition-all ${
+                          activeAnimationType === 'all'
+                            ? 'bg-indigo-800/50 text-white'
+                            : 'hover:bg-gray-700/30 text-gray-400'
+                        }`}
+                      >
+                        <span>🎯 Toutes les animations</span>
+                        <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">
+                          {inventory
+                            ? items.filter((i) => i.categoryId === 6 && userInventory.find((ui) => ui.itemId === i.id))
+                              .length
+                            : items.filter((i) => i.categoryId === 6).length}
+                        </span>
+                      </button>
+                      {availableAnimationTypes.map((type) => (
+                        <button
+                          key={type}
+                          onClick={() => setActiveAnimationType(type)}
+                          className={`w-full flex items-center justify-between p-2 rounded-md text-sm transition-all ${
+                            activeAnimationType === type
+                              ? 'bg-indigo-800/50 text-white'
+                              : 'hover:bg-gray-700/30 text-gray-400'
+                          }`}
+                        >
+                          <span>
+                            {animationTypeMapping[type as keyof typeof animationTypeMapping]?.icon}{' '}
+                            {animationTypeMapping[type as keyof typeof animationTypeMapping]?.name || type}
+                          </span>
+                          <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">
+                            {getAnimationTypeCount(type)}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
 
@@ -493,17 +765,51 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
             </select>
           </div>
 
+          {/* Breadcrumb */}
+          {((activeCategory === 5 && activeSkinType !== 'all') ||
+            (activeCategory === 6 && activeAnimationType !== 'all')) && (
+            <div className="flex items-center space-x-2 text-sm text-gray-400">
+              <span>{activeCategory === 5 ? 'Skins' : 'Animations'}</span>
+              <span>›</span>
+              <span className="text-indigo-300">
+                {activeCategory === 5
+                  ? `${skinTypeMapping[activeSkinType as keyof typeof skinTypeMapping]?.icon} ${
+                    skinTypeMapping[activeSkinType as keyof typeof skinTypeMapping]?.name || activeSkinType
+                  }`
+                  : `${animationTypeMapping[activeAnimationType as keyof typeof animationTypeMapping]?.icon} ${
+                    animationTypeMapping[activeAnimationType as keyof typeof animationTypeMapping]?.name ||
+                    activeAnimationType
+                  }`}
+              </span>
+              <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">{sortedItems.length} items</span>
+            </div>
+          )}
+
           {activeCategory === 4 && !isPremium && (
             <div className="p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-center text-yellow-300">
               <p className="text-sm">
-            Les objets jetables sont à usage unique et réservés aux joueurs premium. Rendez-vous dans l'onglet Premium pour pouvoir les acheter.
+                Les objets jetables sont à usage unique et réservés aux joueurs premium. Rendez-vous dans l'onglet
+                Premium pour pouvoir les acheter.
               </p>
+            </div>
+          )}
+
+          {/* Pagination info */}
+          {sortedItems.length > ITEMS_PER_PAGE && (
+            <div className="flex items-center justify-between text-sm text-gray-400">
+              <span>
+                Affichage de {(currentPage - 1) * ITEMS_PER_PAGE + 1} à{' '}
+                {Math.min(currentPage * ITEMS_PER_PAGE, sortedItems.length)} sur {sortedItems.length} articles
+              </span>
+              <span>
+                Page {currentPage} sur {totalPages}
+              </span>
             </div>
           )}
 
           {/* Items grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sortedItems.map((item) => {
+            {paginatedItems.map((item) => {
               const itemPrice = item.discountPrice || item.price
               const userCanAfford = (user?.credits || 0) >= itemPrice
               const creditsNeeded = itemPrice - (user?.credits || 0)
@@ -512,6 +818,7 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
               const quantity = getItemQuantity(item.id)
               const isConsumable = item.categoryId === 4
               const premiumLocked = !isPremium && activeCategory === 4
+              const isAnimation = item.categoryId === 6
 
               return (
                 <motion.div
@@ -521,28 +828,99 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                   transition={{ duration: 0.3 }}
                 >
                   <Card className="overflow-hidden bg-gray-800/50 backdrop-blur-sm border border-indigo-500/30 hover:border-indigo-400/50 transition-all h-full flex flex-col">
-                    <div className="relative">
-                      <img src={item.image || '/placeholder.svg'} alt={item.name} className="w-full h-auto" />
-                      <div className="absolute top-2 left-2 flex flex-col gap-2">
-                        {item.isNew && <Badge className="bg-green-500 hover:bg-green-600">Nouveau</Badge>}
-                        {item.isFeatured && <Badge className="bg-blue-500 hover:bg-blue-600">Vedette</Badge>}
-                        {equipped && <Badge className="bg-purple-500 hover:bg-purple-600">Équipé</Badge>}
-                        {isConsumable && quantity > 0 && (
-                          <Badge className="bg-orange-500 hover:bg-orange-600">x{quantity}</Badge>
+                    {/* Image section - only for non-animations */}
+                    {!isAnimation && (
+                      <div className="relative">
+                        {item.image && item.image !== ' ' && (
+                          <img src={item.image || '/placeholder.svg'} alt={item.name} className="w-full h-auto" />
                         )}
+                        <div className="absolute top-2 left-2 flex flex-col gap-2">
+                          {item.isNew && <Badge className="bg-green-500 hover:bg-green-600">Nouveau</Badge>}
+                          {item.isFeatured && <Badge className="bg-blue-500 hover:bg-blue-600">Vedette</Badge>}
+                          {equipped && <Badge className="bg-purple-500 hover:bg-purple-600">Équipé</Badge>}
+                          {isConsumable && quantity > 0 && (
+                            <Badge className="bg-orange-500 hover:bg-orange-600">x{quantity}</Badge>
+                          )}
+                          {/* Badge pour le type de skin */}
+                          {item.categoryId === 5 && item.avatarSkin && (
+                            <Badge className="bg-cyan-500 hover:bg-cyan-600 text-xs">
+                              {skinTypeMapping[item.avatarSkin.type as keyof typeof skinTypeMapping]?.icon}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="absolute top-2 right-2">
+                          <Badge className={`${getRarityColor(item.rarity)}`}>
+                            {item.rarity === 'common' && 'Commun'}
+                            {item.rarity === 'rare' && 'Rare'}
+                            {item.rarity === 'epic' && 'Épique'}
+                            {item.rarity === 'legendary' && 'Légendaire'}
+                          </Badge>
+                        </div>
                       </div>
-                      <div className="absolute top-2 right-2">
-                        <Badge className={`${getRarityColor(item.rarity)}`}>
-                          {item.rarity === 'common' && 'Commun'}
-                          {item.rarity === 'rare' && 'Rare'}
-                          {item.rarity === 'epic' && 'Épique'}
-                          {item.rarity === 'legendary' && 'Légendaire'}
-                        </Badge>
-                      </div>
-                    </div>
+                    )}
+
                     <div className="p-4 flex-grow flex flex-col">
+                      {/* For animations, badges go at the top of content */}
+                      {isAnimation && (
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex flex-wrap gap-2">
+                            {item.isNew && <Badge className="bg-green-500 hover:bg-green-600">Nouveau</Badge>}
+                            {item.isFeatured && <Badge className="bg-blue-500 hover:bg-blue-600">Vedette</Badge>}
+                            {equipped && <Badge className="bg-purple-500 hover:bg-purple-600">Équipé</Badge>}
+                            {isConsumable && quantity > 0 && (
+                              <Badge className="bg-orange-500 hover:bg-orange-600">x{quantity}</Badge>
+                            )}
+                          </div>
+                          <Badge className={`${getRarityColor(item.rarity)}`}>
+                            {item.rarity === 'common' && 'Commun'}
+                            {item.rarity === 'rare' && 'Rare'}
+                            {item.rarity === 'epic' && 'Épique'}
+                            {item.rarity === 'legendary' && 'Légendaire'}
+                          </Badge>
+                        </div>
+                      )}
+
                       <h3 className="text-lg font-semibold mb-2">{item.name}</h3>
                       <p className="text-gray-400 text-sm mb-4 flex-grow">{item.description}</p>
+
+                      {/* Informations spécifiques aux skins */}
+                      {item.categoryId === 5 && item.avatarSkin && (
+                        <div className="mb-3 text-xs text-gray-500 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span>Type:</span>
+                            <span className="text-cyan-400">
+                              {skinTypeMapping[item.avatarSkin.type as keyof typeof skinTypeMapping]?.name ||
+                                item.avatarSkin.type}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span>Genre:</span>
+                            <span className="text-pink-400">
+                              {item.avatarSkin.gender === 'female' ? '👩 Féminin' : item.avatarSkin.gender === 'masculine' ? '👨 Masculin' : '🧙 Neutre'}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Informations spécifiques aux animations */}
+                      {item.categoryId === 6 && item.avatarAnimation && (
+                        <div className="mb-3 text-xs text-gray-500 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span>Type:</span>
+                            <span className="text-cyan-400">
+                              {animationTypeMapping[item.avatarAnimation.type as keyof typeof animationTypeMapping]
+                                ?.name || item.avatarAnimation.type}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span>Genre:</span>
+                            <span className="text-pink-400">
+                              {item.avatarAnimation.gender === 'female' ? '👩 Féminin' : '👨 Masculin'}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex items-center justify-between mt-auto">
                         {!inventory ? (
                           <div className="flex items-center">
@@ -580,6 +958,19 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                                 equipped ? 'bg-purple-700 hover:bg-purple-800' : 'bg-indigo-600 hover:bg-indigo-700'
                               }
                               onClick={() => handleEquipItem(item.id)}
+                              onMouseEnter={(e) => {
+                                if (item.categoryId === 6) {
+                                  const rect = e.currentTarget.getBoundingClientRect()
+                                  const x = Math.min(rect.right + 10, window.innerWidth - 320)
+                                  const y = rect.top - 150
+                                  setAnimationTooltip({ show: true, item, x, y })
+                                }
+                              }}
+                              onMouseLeave={() => {
+                                if (item.categoryId === 6) {
+                                  setAnimationTooltip({ show: false, item: null, x: 0, y: 0 })
+                                }
+                              }}
                               disabled={equipped}
                             >
                               {equipped ? (
@@ -601,6 +992,19 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                                         className="bg-indigo-600 hover:bg-indigo-700"
                                         disabled={!userCanAfford || premiumLocked}
                                         onClick={() => openPurchaseModal(item)}
+                                        onMouseEnter={(e) => {
+                                          if (item.categoryId === 6) {
+                                            const rect = e.currentTarget.getBoundingClientRect()
+                                            const x = Math.min(rect.right + 10, window.innerWidth - 320)
+                                            const y = rect.top - 150
+                                            setAnimationTooltip({ show: true, item, x, y })
+                                          }
+                                        }}
+                                        onMouseLeave={() => {
+                                          if (item.categoryId === 6) {
+                                            setAnimationTooltip({ show: false, item: null, x: 0, y: 0 })
+                                          }
+                                        }}
                                       >
                                         <ShoppingCart className="h-4 w-4 mr-1" />
                                         Acheter
@@ -611,12 +1015,13 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
                                     <TooltipContent>
                                       <p>Réservé aux Premium</p>
                                     </TooltipContent>
-                                  ) :
+                                  ) : (
                                     !userCanAfford && (
                                       <TooltipContent>
                                         <p>Il vous manque {creditsNeeded} crédits</p>
                                       </TooltipContent>
-                                    )}
+                                    )
+                                  )}
                                 </Tooltip>
                               </TooltipProvider>
                             )
@@ -661,6 +1066,60 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
               )
             })}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="border-indigo-500/30 hover:bg-gray-700/50"
+              >
+                Précédent
+              </Button>
+
+              {/* Page numbers */}
+              <div className="flex space-x-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum
+                  if (totalPages <= 5) {
+                    pageNum = i + 1
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i
+                  } else {
+                    pageNum = currentPage - 2 + i
+                  }
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? 'default' : 'outline'}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={
+                        currentPage === pageNum
+                          ? 'bg-indigo-600 hover:bg-indigo-700'
+                          : 'border-indigo-500/30 hover:bg-gray-700/50'
+                      }
+                    >
+                      {pageNum}
+                    </Button>
+                  )
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="border-indigo-500/30 hover:bg-gray-700/50"
+              >
+                Suivant
+              </Button>
+            </div>
+          )}
 
           {/* Empty state */}
           {sortedItems.length === 0 && (
@@ -908,6 +1367,123 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
               disabled={purchaseLoading || !giftRecipient}
             >
               {purchaseLoading ? 'Traitement...' : 'Envoyer le cadeau'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Animation Preview Tooltip */}
+      {animationTooltip.show && animationTooltip.item && (
+        <div
+          className="fixed z-[1000] bg-gray-800 border border-indigo-500/30 rounded-lg p-4 shadow-xl"
+          style={{
+            left: `${animationTooltip.x}px`,
+            top: `${animationTooltip.y}px`,
+            width: '250px',
+            height: '400px',
+          }}
+        >
+          <div className="w-full h-full rounded-lg overflow-hidden">
+            <AvatarCanvas
+              avatarUrl={`https://models.readyplayer.me/${user?.rpmAvatarId}.glb`}
+              animation={`${animationTooltip.item.avatarAnimation?.gender}/fbx/${animationTooltip.item.avatarAnimation?.type}/${animationTooltip.item.avatarAnimation?.key}`}
+              options={{ ctrlMinDist: 2, ctrlMaxDist: 5 }}
+            />
+          </div>
+          <div className="absolute bottom-2 left-2 right-2 bg-black/50 rounded px-2 py-1">
+            <p className="text-white text-xs font-medium">{animationTooltip.item.name}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Animation Event Selection Dialog */}
+      <Dialog open={isAnimationEventDialogOpen} onOpenChange={setIsAnimationEventDialogOpen}>
+        <DialogContent className="bg-gray-800 border border-indigo-500/30 text-white">
+          <DialogHeader>
+            <DialogTitle>Sélectionner l'événement</DialogTitle>
+            <DialogDescription className="text-gray-300">
+              Pour quel événement souhaitez-vous équiper cette animation ?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setSelectedAnimationEvent('idle')}
+                className={`p-3 rounded-lg border transition-all ${
+                  selectedAnimationEvent === 'idle'
+                    ? 'border-indigo-500 bg-indigo-500/20 text-white'
+                    : 'border-gray-600 bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                }`}
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-1">🧍</div>
+                  <div className="text-sm font-medium">Attente</div>
+                  <div className="text-xs text-gray-400">Animation par défaut</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setSelectedAnimationEvent('gameStart')}
+                className={`p-3 rounded-lg border transition-all ${
+                  selectedAnimationEvent === 'gameStart'
+                    ? 'border-indigo-500 bg-indigo-500/20 text-white'
+                    : 'border-gray-600 bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                }`}
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-1">🚀</div>
+                  <div className="text-sm font-medium">Début de partie</div>
+                  <div className="text-xs text-gray-400">Quand la partie commence</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setSelectedAnimationEvent('gameWin')}
+                className={`p-3 rounded-lg border transition-all ${
+                  selectedAnimationEvent === 'gameWin'
+                    ? 'border-indigo-500 bg-indigo-500/20 text-white'
+                    : 'border-gray-600 bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                }`}
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-1">🏆</div>
+                  <div className="text-sm font-medium">Victoire</div>
+                  <div className="text-xs text-gray-400">Quand vous gagnez</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setSelectedAnimationEvent('gameLoose')}
+                className={`p-3 rounded-lg border transition-all ${
+                  selectedAnimationEvent === 'gameLoose'
+                    ? 'border-indigo-500 bg-indigo-500/20 text-white'
+                    : 'border-gray-600 bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                }`}
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-1">😞</div>
+                  <div className="text-sm font-medium">Défaite</div>
+                  <div className="text-xs text-gray-400">Quand vous perdez</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAnimationEventDialogOpen(false)
+                setPendingEquipItemId(null)
+                setSelectedAnimationEvent('idle')
+              }}
+              className="border-indigo-500/30 hover:bg-gray-700/50"
+            >
+              Annuler
+            </Button>
+            <Button onClick={handleAnimationEventConfirm} className="bg-indigo-600 hover:bg-indigo-700">
+              Équiper pour cet événement
             </Button>
           </DialogFooter>
         </DialogContent>

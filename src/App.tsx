@@ -56,6 +56,7 @@ import { ToastContainer } from 'react-toastify'
 import Notifier from 'components/Notifier'
 import Leaderboard from 'pages/Leaderboard'
 import Cards from 'pages/Cards'
+import AvatarCreator from 'pages/AvatarCreator'
 import GamePage from 'pages/Game'
 import { SocketProvider } from 'contexts/SocketContext'
 import ModalProvider from 'contexts/ModalProvider'
@@ -73,6 +74,7 @@ import DailyRewardsPopup from 'components/DailyRewardPopup'
 import { WarningProvider } from 'contexts/WarningContext'
 import ReplayGame from 'pages/ReplayGame'
 import StalkList from 'pages/admin/users/StalkList'
+import { EventProvider } from 'components/EventSystem/EventProvider'
 
 const AppContent: React.FC = () => {
   const { serverMaintenance, loading: maintenanceLoading } = useMaintenance()
@@ -207,19 +209,21 @@ const App: React.FC = () => {
         <AuthProvider>
           <UserProvider>
             <SocketProvider>
-              <ModalProvider>
-                <Bootstrap>
-                  <DailyRewardsProvider>
-                    <WarningProvider>
-                      <GlobalClickListener />
-                      <Notifier />
-                      <AppContent />
-                      <ScrollToTop />
-                      <DailyRewardsPopup />
-                    </WarningProvider>
-                  </DailyRewardsProvider>
-                </Bootstrap>
-              </ModalProvider>
+              <EventProvider>
+                <ModalProvider>
+                  <Bootstrap>
+                    <DailyRewardsProvider>
+                      <WarningProvider>
+                        <GlobalClickListener />
+                        <Notifier />
+                        <AppContent />
+                        <ScrollToTop />
+                        <DailyRewardsPopup />
+                      </WarningProvider>
+                    </DailyRewardsProvider>
+                  </Bootstrap>
+                </ModalProvider>
+              </EventProvider>
             </SocketProvider>
           </UserProvider>
         </AuthProvider>

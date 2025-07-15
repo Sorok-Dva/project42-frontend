@@ -32,6 +32,11 @@ export const UserProvider : React.FC<{ children : ReactNode }> = ({ children }) 
   const navigate = useNavigate()
   const [stopRequest, setStopRequest] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [avatarRedirected, setAvatarRedirected] = useState<boolean>(() => {
+    const introShown = sessionStorage.getItem('avatarIntroShown') === 'true'
+    return introShown && Boolean(user?.rpmAvatarId && user?.rpmUserId)
+  })
+
   const { setServerError } = useError()
   const { setToken } = useAuth()
   const callApi = useApi()
@@ -84,6 +89,14 @@ export const UserProvider : React.FC<{ children : ReactNode }> = ({ children }) 
     localStorage.setItem('token', token)
     if (returnTomHome) navigateTo('/')
   }
+
+  useEffect(() => {
+    if (user && (!user.rpmUserId || !user.rpmAvatarId) && !avatarRedirected) {
+      sessionStorage.setItem('avatarIntroShown', 'true')
+      setAvatarRedirected(true)
+      navigate('/account/settings?avatarIntro=1')
+    }
+  }, [user, avatarRedirected, navigate])
 
   const isAdmin = user?.roleId === 1
 

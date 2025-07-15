@@ -8,6 +8,7 @@ import {
 } from '../services/gameService'
 import axios from 'axios'
 import { Player } from 'types/room'
+import { AvatarConfig } from 'components/Avatar/MultiScene'
 
 export interface Message {
   nickname: string
@@ -117,6 +118,7 @@ export const useGame = (
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [player, setPlayer] = useState<Player | null>(null)
   const [players, setPlayers] = useState<Player[]>([])
+  const [winnersAvatars, setWinnersAvatars] = useState<{ winMsg: string, avatars: AvatarConfig[]}>({ winMsg: '', avatars: [] })
   const [viewer, setViewer] = useState<Viewer | null>(null)
   const [viewers, setViewers] = useState<Viewer[]>([])
   const [creator, setCreator] = useState<Player | null>(null)
@@ -462,6 +464,10 @@ export const useGame = (
       window.location.replace(url.toString())
     })
 
+    socket.on('gameWinners', async ({ winners, winMsg }: { winners: AvatarConfig[], winMsg: string }) => {
+      setWinnersAvatars({ winMsg, avatars: winners })
+    })
+
     socket.on('error', (error: any) => {
       setMessages((prev) => [
         ...prev,
@@ -499,6 +505,7 @@ export const useGame = (
       socket.off('dead')
       socket.off('dissolve')
       socket.off('forceReload')
+      socket.off('gameWinners')
       socket.off('error')
     }
   }, [socket, gameId, user, player, viewer, hasJoined, isAuthorized, isNight, roomData.maxPlayers])
@@ -531,6 +538,8 @@ export const useGame = (
     isArchive,
     isInn,
     innList,
+    winnersAvatars,
+    setWinnersAvatars,
     setIsArchive,
     setSlots,
     setPlayer,

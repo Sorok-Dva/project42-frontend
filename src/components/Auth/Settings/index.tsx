@@ -9,6 +9,7 @@ import {
   SettingsIcon,
   Shield,
   Users,
+  VenetianMask,
 } from 'lucide-react'
 
 import Badges from './Badges'
@@ -17,15 +18,23 @@ import Settings from './Settings'
 import ModHistory from './ModHistory'
 import Discord from './Discord'
 import Referral from './Referral'
+import AvatarPage from 'pages/AvatarCreator'
+import AvatarIntroPopup from 'components/Avatar/AvatarIntroPopup'
 
 const UserSettings : React.FC = () => {
   const { user } = useUser()
   const [activeTab, setActiveTab] = useState<string>('tab-badges')
+  const [showAvatarPopup, setShowAvatarPopup] = useState(false)
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const code = params.get('code')
     if (code) setActiveTab('tab-discord')
+    const avatarIntro = params.get('avatarIntro')
+    if (avatarIntro) {
+      setActiveTab('tab-avatar')
+      setShowAvatarPopup(true)
+    }
   }, [location.search])
 
   const openTabSection = (tabName : string) => {
@@ -37,6 +46,11 @@ const UserSettings : React.FC = () => {
       id: 'tab-badges',
       label: 'Badges & Titre',
       icon: <Medal className="w-5 h-5"/>,
+    },
+    {
+      id: 'tab-avatar',
+      label: 'Mon avatar',
+      icon: <VenetianMask className="w-5 h-5"/>,
     },
     {
       id: 'tab-profile',
@@ -137,6 +151,17 @@ const UserSettings : React.FC = () => {
           </motion.div>
         ) }
 
+        { activeTab === 'tab-avatar' && (
+          <motion.div
+            initial={ { opacity: 0 } }
+            animate={ { opacity: 1 } }
+            transition={ { duration: 0.3 } }
+            className="space-y-6"
+          >
+            <AvatarPage />
+          </motion.div>
+        ) }
+
         { activeTab === 'tab-profile' && (
           <motion.div
             initial={ { opacity: 0 } }
@@ -190,6 +215,9 @@ const UserSettings : React.FC = () => {
           >
             <Discord />
           </motion.div>
+        ) }
+        { showAvatarPopup && (
+          <AvatarIntroPopup onClose={() => setShowAvatarPopup(false)} />
         ) }
       </motion.div>
     </div>
