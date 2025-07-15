@@ -240,7 +240,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
         onClick={handleOverlayClick}
       >
         <motion.div
-          className="border border-slate-600 rounded-2xl w-[80vh] max-h-[90vh] overflow-hidden"
+          className="border border-slate-600 rounded-2xl w-2/4 max-h-[90vh] overflow-hidden"
           style={{ backgroundColor: '#1f2b44' }}
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
