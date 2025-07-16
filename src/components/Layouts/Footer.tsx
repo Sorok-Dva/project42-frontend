@@ -200,7 +200,7 @@ const Footer = () => {
           <div className="row align-items-center">
             <div className="col-lg-4">
               <div className="copy-right">
-                <p>Copyright &copy; {currentYear} <b>Project 42</b>. Tout droits réservés</p>
+                <p>Copyright &copy; {currentYear} <b>Project 42</b>. Tous droits réservés.</p>
               </div>
             </div>
 
