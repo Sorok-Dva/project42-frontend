@@ -28,14 +28,14 @@ const GameRules: React.FC<GameRulesProps> = ({ gameType, hasVoice = false }) => 
       'Il est strictement <strong>interdit d\'insulter</strong> un autre joueur et d\'avoir une attitude malsaine. Toute forme d\'<strong>anti-jeu</strong> sera sanctionnée.',
       'Le dévoilement est <strong>interdit</strong> et <strong>sanctionné</strong> systématiquement. Il est aussi <strong>interdit</strong> de donner toute forme d\'indice sur son rôle.',
       'Tous les joueurs <strong>doivent</strong> participer au débat. Il n\'est pas autorisé d\'être <strong>AFK</strong>.',
-      'Le tireur d\'élite doit obligatoirement tirer.',
+      'Le Tireur d\'élite doit obligatoirement tirer.',
       'Jouer en partie sérieuse, c\'est accepter d\'être dans un état d\'esprit qui pourrait s\'apparenter à de la "compétition".'
     ],
     3: [
       // Carnage
       'Il est strictement <strong>interdit d\'insulter</strong> un autre joueur et d\'avoir une attitude malsaine. Toute forme d\'<strong>anti-jeu</strong> sera sanctionnée.',
       'La Bio-Ingénieure <strong>doit utiliser</strong> sa potion de mort la première nuit.',
-      'Le tireur d\'élite <strong>doit tirer</strong>.',
+      'Le Tireur d\'élite <strong>doit tirer</strong>.',
       'Les parties sont <strong>très courtes et <strong>intenses</strong>.',
       'Les phases sont <strong>accélérées</strong>, soyez réactifs.',
       'Le dévoilement de votre rôle est autorisé, mais vous êtes <strong>fortement incité</strong> à garder votre carte secrète.'
@@ -93,7 +93,7 @@ const GameRules: React.FC<GameRulesProps> = ({ gameType, hasVoice = false }) => 
   return (
     <div className="mb-4 p-3 bg-black/40 rounded-lg border border-blue-500/20">
       <p className="text-blue-200 text-sm mb-2">
-        <span className="font-bold text-white">Rappel :</span> vous êtes sur une partie{' '}
+        <span className="font-bold text-white">Rappel :</span> vous êtes dans une partie{' '}
         <span className={`inline-block w-3 h-3 rounded-full ${bulletColor} align-middle mx-1`}></span>{' '}
         <strong>{typeName}</strong>
       </p>

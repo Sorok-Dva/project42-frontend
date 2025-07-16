@@ -109,8 +109,7 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, guideRoomName, partnerNic
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-white font-semibold text-sm">Guide: {partnerNickname}</span>
-            <span className="text-purple-200 text-xs">({amIGuide ? 'Guidant' : 'Guidé'})</span>
+            <span className="text-white font-semibold text-sm">Guide : {partnerNickname}</span>
             {hasUnreadMessages && (
               <motion.div
                 className="w-2 h-2 bg-red-400 rounded-full"
