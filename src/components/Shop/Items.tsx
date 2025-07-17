@@ -1385,7 +1385,7 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
         >
           <div className="w-full h-full rounded-lg overflow-hidden">
             <AvatarCanvas
-              avatarUrl={`https://models.readyplayer.me/${user?.rpmAvatarId}.glb`}
+              avatarUrl={`https://models.readyplayer.me/${user?.rpmAvatarId}`}
               animation={`${animationTooltip.item.avatarAnimation?.gender}/fbx/${animationTooltip.item.avatarAnimation?.type}/${animationTooltip.item.avatarAnimation?.key}`}
               options={{ ctrlMinDist: 2, ctrlMaxDist: 5 }}
             />

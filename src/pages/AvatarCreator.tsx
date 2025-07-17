@@ -41,7 +41,7 @@ const editorConfig: AvatarCreatorConfig = {
 export default function AvatarPage() {
   const { user, setUser } = useUser()
   const { token } = useAuth()
-  const [avatarUrl, setAvatarUrl] = useState(user?.rpmAvatarId ? `https://models.readyplayer.me/${user.rpmAvatarId}.glb` : '')
+  const [avatarUrl, setAvatarUrl] = useState(user?.rpmAvatarId ? `https://models.readyplayer.me/${user.rpmAvatarId}` : '')
   const [avatarToken, setAvatarToken] = useState('')
   const [assets, setAssets] = useState<Asset[]>([])
   const [isPopupOpen, setIsPopupOpen] = useState(false)

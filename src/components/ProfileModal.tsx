@@ -279,7 +279,7 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
                     >
                       {user.rpmAvatarId ? (
                         <AvatarCanvas
-                          avatarUrl={`https://models.readyplayer.me/${user.rpmAvatarId}.glb`}
+                          avatarUrl={`https://models.readyplayer.me/${user.rpmAvatarId}`}
                           animation={user.avatarAnimation}
                           options={{
                             ctrlMinDist: 2,
