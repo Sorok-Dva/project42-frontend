@@ -7,12 +7,8 @@ import { usePermissions } from 'hooks/usePermissions'
 import {
   addBotToGame,
   startGame,
-  setPlayerReady,
-  updateMaxPlayers,
   updateRoomTimer,
-  updateRoomCards,
-  addFavoriteGame, leaveGame,
-  linkDiscordChannel,
+  addFavoriteGame, leaveGame
 } from 'services/gameService'
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
@@ -95,7 +91,6 @@ const GameControls: React.FC<GameControlsProps> = ({
   const [favoriteComment, setFavoriteComment] = useState<string>('')
   const [replayGameId, setReplayGameId] = useState<number | null>(null)
   const [isSavingComment, setIsSavingComment] = useState<boolean>(false)
-  const [discordChannelInput, setDiscordChannelInput] = useState('')
   const [voicePlayers, setVoicePlayers] = useState<number[]>([])
   const [spectatorsAreMuted, setSpectatorsAreMuted] = useState<boolean>(false)
   const [quickEndPhase, setQuickEndPhase] = useState<{ votes: number; required: number; hasVoted: boolean } | null>(null)
@@ -108,13 +103,10 @@ const GameControls: React.FC<GameControlsProps> = ({
     if (!isCreator || isArchive) return
     try {
       if (roomData.maxPlayers !== slots) {
-        const response = await updateMaxPlayers(slots, String(gameId), token)
-        if (response.status !== 200) {
-          setSlots(roomData.maxPlayers)
-        } else setRoomData({ ...roomData, maxPlayers: slots })
+        socket.emit('lobby:update_max_players', { roomId: gameId, maxPlayers: slots })
       }
 
-      await updateRoomCards(roomData.cards, String(gameId), token)
+      socket.emit('lobby:update_cards', { roomId: gameId, cards: roomData.cards })
 
       setIsEditCompositionOpen(false)
     } catch (e) {
@@ -148,7 +140,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   useEffect(() => {
-    if (!socket || !token) return
+    if (!socket || !token || !gameFinished) return
 
     const getFavorite = async () => {
       const response = await axios.post(`/api/games/favorite/${gameId}/get`, {}, {
@@ -307,10 +299,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const handleBeReady = async () => {
     if (!gameId || !player || !canBeReady || gameStarted || gameFinished) return
     try {
-      const response = await setPlayerReady(gameId, token)
-      if (response.status === 200) {
-        setPlayer({ ...player, ready: true })
-      }
+      socket.emit('lobby:ready', { roomId: gameId })
     } catch (error) {
       console.error('Erreur lors du set ready:', error)
     }
@@ -327,10 +316,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
     debounceRef.current = setTimeout(async () => {
       try {
-        const response = await updateMaxPlayers(slots - 1, gameId, token)
-        if (response.status !== 200) {
-          setSlots((prevSlots) => prevSlots + 1)
-        }
+        socket.emit('lobby:update_max_players', { roomId: gameId, maxPlayers: slots - 1 })
       } catch (error) {
         console.error('Erreur lors du set updateMaxPlayers:', error)
         setSlots((prevSlots) => prevSlots + 1)
@@ -350,10 +336,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
     debounceRef.current = setTimeout(async () => {
       try {
-        const response = await updateMaxPlayers(slots + 1, gameId, token)
-        if (response.status !== 200) {
-          setSlots((prevSlots) => prevSlots - 1)
-        }
+        socket.emit('lobby:update_max_players', { roomId: gameId, maxPlayers: slots + 1 })
       } catch (error) {
         console.error('Erreur lors du set updateMaxPlayers:', error)
         setSlots((prevSlots) => prevSlots - 1)

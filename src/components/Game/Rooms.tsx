@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useUser } from 'contexts/UserContext'
 import { useSocket } from 'contexts/SocketContext'
-import type { RoomCard, RoomData } from 'hooks/useGame'
+import type { RoomData } from 'hooks/useGame'
 import { useAuth } from 'contexts/AuthContext'
 import { leaveGame } from 'services/gameService'
 import { hasRole } from 'utils/rolify'
@@ -17,27 +17,6 @@ import {
   Lock,
 } from 'lucide-react'
 import { Tooltip } from 'react-tooltip'
-
-const generateCards = (cards: RoomCard[]) => {
-  return cards.map((c) => {
-    const amount =
-      c.quantity > 1 ? (
-        <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
-          <span>{c.quantity}</span>
-        </div>
-      ) : null
-    return (
-      <div key={c.id} className="inline-block relative">
-        <img
-          src={`/assets/images/miniatures/carte${c.id}_90_90.png`}
-          alt={`Carte ${c.id}`}
-          className="rounded-md"
-        />
-        {amount}
-      </div>
-    )
-  })
-}
 
 const RoomList = () => {
   const { user } = useUser()
@@ -54,7 +33,6 @@ const RoomList = () => {
   ) // Rooms reflexion en attente
   const [playerRoomId, setPlayerRoomId] = useState<number | null>(null) // Room actuelle du joueur
   const [showForm, setShowForm] = useState(false)
-  const [gameId, setGameId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     name: `Partie de ${user?.nickname}`,
     maxPlayers: 6,
@@ -70,8 +48,6 @@ const RoomList = () => {
   const [isGameTypesInfoExpanded, setIsGameTypesInfoExpanded] = useState(true)
   const premiumDate = user?.premium ? new Date(user.premium) : null
   const isPremium = premiumDate ? new Date().getTime() < premiumDate.getTime() : false
-
-  const channel = new BroadcastChannel('site-channel')
 
   useEffect(() => {
     setFormData((prev) => ({
@@ -180,20 +156,10 @@ const RoomList = () => {
           Authorization: `Bearer ${token}`,
         },
       })
-      setGameId(response.data.game.id)
       setPlayerRoomId(response.data.game.id)
       setInGame(true)
       setShowForm(false)
       fetchRooms()
-      await axios.post(
-        `/api/games/room/${response.data.game.id}/join`,
-        { creator: response.data.game.creator },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
       window.open(`/game/${response.data.game.id}`, '_blank')
     } catch (error: any) {
       if (error.response?.data?.error) {
@@ -239,7 +205,8 @@ const RoomList = () => {
         },
       )
       setPlayerRoomId(roomId)
-      window.open(`/game/${response.data.game.id}`, '_blank')
+      setInGame(true)
+      window.open(`/game/${response.data.roomId}`, '_blank')
       setInGame(true)
       fetchRooms()
     } catch (error: any) {

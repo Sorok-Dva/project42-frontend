@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { RoomCard } from 'hooks/useGame'
 
 /**
  * Récupère les détails d'une partie (gameDetails) (roomData + player courant)
@@ -10,39 +9,6 @@ export const fetchGameDetails = async (gameId: string, token?: string | null) =>
       Authorization: `Bearer ${token}`,
     },
   } : {})
-  return response.data
-}
-
-/**
- * Récupère la liste des joueurs
- */
-export const fetchPlayers = async (gameId: string, token: string | null) => {
-  const response = await axios.get(`/api/games/room/${gameId}/players`, token ? {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  } : {})
-  return response.data
-}
-
-/**
- * Récupère la liste des joueurs
- */
-export const fetchViewers = async (gameId: string) => {
-  const response = await axios.get(`/api/games/room/${gameId}/viewers`)
-  return response.data
-}
-
-/**
- * Récupère l'historique du chat
- */
-export const fetchChatMessages = async (gameId: string, token: string | null, pov?: number | null) => {
-  const response = await axios.get(
-    `/api/games/room/${gameId}/tchat${pov ? '?pov=' + pov : ''}`,
-    token ? {
-      headers: { Authorization: `Bearer ${token}` },
-    } : {}
-  )
   return response.data
 }
 
@@ -75,48 +41,6 @@ export const addBotToGame = async (gameId: string, token: string | null) => {
     }
   )
   return response.data
-}
-
-/**
- * Indique qu'un joueur est "ready"
- */
-export const setPlayerReady = async (gameId: string, token: string | null) => {
-  const response = await axios.post(
-    `/api/games/room/${gameId}/ready`,
-    {},
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  )
-  return response
-}
-
-/**
- * Ajuste le nombre de joueur pour la room
- */
-export const updateMaxPlayers = async (maxPlayers: number, gameId: string, token: string | null) => {
-  const response = await axios.put(
-    `/api/games/room/${gameId}/maxPlayers`,
-    { maxPlayers },
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  )
-  return response
-}
-
-/**
- * Modifie les cartes du salon
- */
-export const updateRoomCards = async (cards: RoomCard[], gameId: string, token: string | null) => {
-  const response = await axios.put(
-    `/api/games/room/${gameId}/cards`,
-    { cards },
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  )
-  return response
 }
 
 /**

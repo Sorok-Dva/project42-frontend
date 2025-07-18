@@ -238,10 +238,7 @@ const Chat: React.FC<ChatProps> = ({
         if ((isNight && isInn && gameStarted && !gameFinished) || (isNight && player?.card?.id === 23))
           channelToSend = 6
 
-        socket.emit('sendMessage', {
-          roomId: gameId,
-          playerId,
-          viewer,
+        socket.emit('chat:send_message', {
           content: trimmedMessage,
           channel: channelToSend,
         })
