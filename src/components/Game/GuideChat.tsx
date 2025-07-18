@@ -21,8 +21,6 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, guideRoomName, partnerNic
   const [isTerminated, setIsTerminated] = useState(false)
   const [isExpanded, setIsExpanded] = useState(true)
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false)
-  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
 
   const currentUserNickname = user?.nickname || 'Vous'
 
@@ -89,14 +87,6 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, guideRoomName, partnerNic
       drag
       dragMomentum={false}
       dragElastic={0.1}
-      dragConstraints={{
-        top: -20,
-        left: -window.innerWidth / 2,
-        right: window.innerWidth / 2 - 400,
-        bottom: window.innerHeight - 200,
-      }}
-      onDragStart={() => setIsDragging(true)}
-      onDragEnd={() => setIsDragging(false)}
       whileDrag={{ scale: 1.05, rotate: 2 }}
     >
       {/* En-tête du chat (toujours visible) */}

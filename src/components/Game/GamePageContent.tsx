@@ -227,7 +227,6 @@ const GamePage = () => {
     isArchive,
     isInn,
     innList,
-    setIsArchive,
     setSlots,
     setPlayer,
     handlePasswordSubmit,

@@ -27,7 +27,7 @@ const TransferLeadModal: FC<TransferLeadModalProps> = ({ roomId, creator, player
   const transferLead = async (player: string) => {
     try {
       if (!token) return
-      const response = await transferCreatorRights(String(roomId), player, token)
+      await transferCreatorRights(String(roomId), player, token)
       onClose()
     } catch (e) {
       if (axios.isAxiosError(error)) {

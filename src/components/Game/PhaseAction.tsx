@@ -42,7 +42,6 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
   const [deathElixirUsed, setDeathElixirUsed] = useState<boolean>(false)
   const [lifeElixirUsed, setLifeElixirUsed] = useState<boolean>(false)
   const [hint, setHint] = useState<string | null>(null)
-  const [selectHeight, setSelectHeight] = useState(0)
 
   // Add this check for Galactic Jester
   if (player.card?.id === 14 && player.canVote === false) {
@@ -149,7 +148,6 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
 
   const handleMouseDown = (e: React.MouseEvent<HTMLSelectElement>, targetCount: number) => {
     e.preventDefault()
-    const select = e.currentTarget
     const option = e.target as HTMLOptionElement
     const value = Number(option.value)
     if (selectedTargets.length + 1 > targetCount && !selectedTargets.includes(value)) {

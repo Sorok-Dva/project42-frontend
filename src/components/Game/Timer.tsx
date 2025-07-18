@@ -10,7 +10,6 @@ interface GameTimerProps {
 
 const GameTimer: React.FC<GameTimerProps> = ({ gameId, gameStarted, gameFinished }) => {
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
-  const [phase, setPhase] = useState<number | null>(null)
   const { socket } = useSocket()
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const lastSoundPlayed = useRef<number | null>(null)
@@ -58,14 +57,9 @@ const GameTimer: React.FC<GameTimerProps> = ({ gameId, gameStarted, gameFinished
       updateTimer(limitPhase)
     })
 
-    socket.on('phaseUpdated', ({ phase }) => {
-      setPhase(phase)
-    })
-
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
       socket.off('timerUpdated')
-      socket.off('phaseUpdated')
     }
   }, [socket, gameStarted, gameFinished])
 
