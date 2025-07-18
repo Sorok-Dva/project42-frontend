@@ -301,11 +301,11 @@ export const useGame = (
       }
     })
 
-    socket.on('lobby:enable_start', (canStart) => {
-      setCanStartGame(canStart)
+    socket.on('lobby:enable_start', () => {
+      setCanStartGame(true)
     })
 
-    socket.on('lobby:enable_ready_option', (canStart) => {
+    socket.on('lobby:enable_ready_option', () => {
       setCanStartGame(player?.ready ? false : players.filter((p) => p.ready).length === roomData.maxPlayers)
     })
 
