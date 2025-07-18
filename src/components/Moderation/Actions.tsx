@@ -41,7 +41,7 @@ const ModerationActions: React.FC<ModerationActionsProps> = ({ targetUser, compa
   const [isRemoveAvatarOpen, setIsRemoveAvatarOpen] = useState(false)
   const [isAddToStalkListOpen, setIsAddToStalkListOpen] = useState(false)
   const [isIpOpen, setIsIpOpen] = useState(false)
-  const [actionIsShown, setActionIsShown] = useState(false)
+  const actionIsShown = false
 
   const permissions = {
     antecedents: checkPermission('site', 'antecedents'),

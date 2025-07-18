@@ -12,21 +12,6 @@ const DailyRewardsPopup: React.FC = () => {
   // Déterminer le jour actuel (limité à 7)
   const currentDay = Math.min(currentStreak + (canClaimToday ? 1 : 0), 7)
 
-  // Animation pour les étoiles
-  const starVariants = {
-    initial: { scale: 0, rotate: -180 },
-    animate: (i: number) => ({
-      scale: 1,
-      rotate: 0,
-      transition: {
-        type: 'spring',
-        stiffness: 260,
-        damping: 20,
-        delay: 0.1 + i * 0.05,
-      },
-    }),
-  }
-
   // Animation pour les jours
   const dayVariants = {
     initial: { scale: 0.8, opacity: 0 },
@@ -133,7 +118,6 @@ const DailyRewardsPopup: React.FC = () => {
               {rewards.map((reward, index) => {
                 const isPast = index < currentStreak
                 const isCurrent = index === currentStreak && canClaimToday
-                const isFuture = index > currentStreak || (index === currentStreak && !canClaimToday)
 
                 return (
                   <motion.div

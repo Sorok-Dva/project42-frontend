@@ -30,7 +30,6 @@ const Settings : React.FC = () => {
   const [btnDisabled, setBtnDisabled] = useState(false)
   const [canChangeIn, setCanChangeIn] = useState<number | null>(null)
   const [nickname, setNickname] = useState('')
-  const [password, setPassword] = useState('')
 
   React.useEffect(() => {
     if (user && user.lastNicknameChange) {
@@ -376,7 +375,6 @@ const Settings : React.FC = () => {
               <input
                 type="password"
                 id="deletePassword"
-                onChange={ (e) => setPassword(e.target.value) }
                 className="w-full bg-black/40 border border-red-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
               />
             </div>

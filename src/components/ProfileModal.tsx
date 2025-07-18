@@ -188,12 +188,6 @@ const ProfileModal: FC<ProfileModalProps> = ({ nickname, onClose }) => {
     }
   }
 
-  const calculateWinRate = () => {
-    if (!user || user.playedGames === 0) return 0
-    const wins = user.summaryHistory.filter((game) => game.result === 'Victoire').length
-    return Math.round((wins / user.playedGames) * 100)
-  }
-
   const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) {
       onClose()

@@ -33,7 +33,6 @@ interface UserTransactionDetailsProps {
 
 export function UserTransactionDetails({ userId }: UserTransactionDetailsProps) {
   const { token } = useAuth()
-  const [loading, setLoading] = useState(true)
   const [userStats, setUserStats] = useState<UserTransactionStats | null>(null)
   const [transactions, setTransactions] = useState<CreditTransaction[]>([])
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | undefined>(undefined)
@@ -42,7 +41,6 @@ export function UserTransactionDetails({ userId }: UserTransactionDetailsProps) 
 
   useEffect(() => {
     const fetchUserStats = async () => {
-      setLoading(true)
       try {
         const params: Record<string, any> = {}
         if (dateRange?.from) params.from = dateRange.from.toISOString()
@@ -58,8 +56,6 @@ export function UserTransactionDetails({ userId }: UserTransactionDetailsProps) 
         setUserStats(response.data)
       } catch (error) {
         console.error('Error fetching user stats:', error)
-      } finally {
-        setLoading(false)
       }
     }
 

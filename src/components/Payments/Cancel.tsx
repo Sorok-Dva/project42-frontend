@@ -2,7 +2,7 @@
 
 import React, { useRef } from 'react'
 import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Button } from 'components/UI/Button'
 import { Card, CardContent } from 'components/UI/Card'
 import { Badge } from 'components/UI/Badge'
@@ -11,14 +11,10 @@ import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
 import axios from 'axios'
 import {
-  Check,
-  Gift,
   Crown,
   Coins,
   Calendar,
   ArrowRight,
-  Sparkles,
-  Cross,
 } from 'lucide-react'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { useLocation } from 'react-router-dom'
@@ -50,7 +46,6 @@ const PaymentCancel: React.FC = () => {
 
   if (!user) return
   const hasConfirmedRef = useRef(false)
-  const [isProcessing, setIsProcessing] = useState(true)
   const [purchasedPack, setPurchasedPack] = useState<CreditPack | null>(null)
   const [purchasedPlan, setPurchasedPlan] = useState<PremiumPlan | null>(null)
   const [animationStep, setAnimationStep] = useState(0)
@@ -66,7 +61,6 @@ const PaymentCancel: React.FC = () => {
 
   useEffect(() => {
     const cancelPayment = async () => {
-      setIsProcessing(true)
 
       if (provider === 'stripe' && sessionId) {
         await axios.post(
@@ -93,7 +87,7 @@ const PaymentCancel: React.FC = () => {
         setPurchasedPlan(response.data)
       }
 
-      setIsProcessing(false)
+      
 
       // Démarrer l'animation après un délai
       setTimeout(() => setAnimationStep(1), 1000)

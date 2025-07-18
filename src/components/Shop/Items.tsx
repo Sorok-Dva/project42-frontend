@@ -22,7 +22,7 @@ import {
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from 'components/UI/Dialog'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'components/UI/Tooltip'
-import type { Category, Item, ShopData, TagType, UserInventory } from 'types/shop'
+import type { Category, Item, ShopData, UserInventory } from 'types/shop'
 import type { User } from 'types/user'
 import { toast } from 'react-toastify'
 import { ToastDefaultOptions } from 'utils/toastOptions'
@@ -152,9 +152,7 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
   const premiumDate = user?.premium ? new Date(user.premium) : null
   const isPremium = premiumDate ? new Date().getTime() < premiumDate.getTime() : false
 
-  const [loading, setLoading] = useState<boolean>(true)
   const [categories, setCategories] = useState<Category[]>([])
-  const [tags, setTags] = useState<TagType[]>([])
   const [items, setItems] = useState<Item[]>([])
   const [activeCategory, setActiveCategory] = useState<number>(1)
   const [activeSkinType, setActiveSkinType] = useState<string>('all')
@@ -196,7 +194,6 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
 
         setCategories(response.data.categories)
         setItems(response.data.items.filter((i) => i.enable))
-        setTags(response.data.tags)
 
         // Fetch user inventory
         const inventoryResponse = await axios.get('/api/users/inventory', {
@@ -205,8 +202,6 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
         setUserInventory(inventoryResponse.data.inventory || [])
       } catch (e) {
         console.log(e)
-      } finally {
-        setLoading(false)
       }
     }
 
@@ -375,7 +370,7 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
 
     setPurchaseLoading(true)
     try {
-      const response = await axios.post(
+      await axios.post(
         '/api/shop/purchase',
         {
           itemId: selectedItem.id,
@@ -445,7 +440,7 @@ const ShopItems: React.FC<{ inventory: boolean }> = ({ inventory }) => {
 
     setPurchaseLoading(true)
     try {
-      const response = await axios.post(
+      await axios.post(
         '/api/shop/gift',
         {
           itemId: selectedItem.id,

@@ -8,7 +8,7 @@ import { Progress } from './UI/Progress'
 import { Gift } from 'lucide-react'
 
 const DailyRewardsStatus: React.FC = () => {
-  const { rewards, currentStreak, canClaimToday, claimReward, showPopup } = useDailyRewards()
+  const { rewards, currentStreak, canClaimToday, claimReward } = useDailyRewards()
 
   const canClaim = canClaimToday
 
@@ -49,8 +49,6 @@ const DailyRewardsStatus: React.FC = () => {
             {rewards.map((reward, idx) => {
               const isPast = idx < currentStreak
               const isCurrent = idx === currentStreak && canClaim
-              // futur = pas encore dispo
-              const isFuture = idx > currentStreak || (idx === currentStreak && !canClaim)
 
               return (
                 <div

@@ -21,7 +21,6 @@ const Profile : React.FC<{
   const premiumDate = user.premium ? new Date(user.premium) : null
 
   const isPremium = premiumDate ? new Date().getTime() < premiumDate.getTime() : false
-  const premiumExpiration = premiumDate
   const sexRectified = true
   const newSexe = 1
 
