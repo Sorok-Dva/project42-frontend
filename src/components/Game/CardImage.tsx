@@ -1,6 +1,16 @@
 import React from 'react'
 
 const CardImage = React.memo(function CardImage({ cardId, isArchive = false }: { cardId?: number, isArchive?: boolean}) {
+  if (!cardId) {
+    return (
+      <div id={`card_wrapper${isArchive ? '_archive' : ''}`} className="card_animation">
+        <div className="card_flipper card_animation">
+          <div className="loader"></div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div id={`card_wrapper${isArchive ? '_archive' : ''}`} className="card_animation">
       <div id="card_flipper" className="card_animation">
