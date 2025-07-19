@@ -340,7 +340,9 @@ export const useGame = (
     })
 
     socket.on('phase:change', (data) => {
-      setIsNight(data.newPhase.include('Nuit'))
+      if (data.newPhase) {
+        setIsNight(data.newPhase.toLowerCase().includes('nuit'))
+      }
 
       // Assuming you have a state for phase end time
       // setPhaseEndTime(data.endTime);
