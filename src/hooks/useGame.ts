@@ -331,14 +331,17 @@ export const useGame = (
     })
 
     socket.on('game:state_update', (data) => {
-      setPlayer(prevPlayer => ({ ...prevPlayer, ...data }))
-      setPlayers(data.players)
-      setAlienList(data.alienList || [])
-      setCoupleList(data.lovers || [])
+      const payload = Array.isArray(data) ? data[0] : data
+      console.log(payload, player, ({ ...player, ...payload.player }))
+      setPlayer(prevPlayer => ({ ...prevPlayer, ...payload.player }))
+      setPlayers(payload.players)
+      setAlienList(payload.alienList || [])
+      setCoupleList(payload.lovers || [])
     })
 
     socket.on('phase:change', (data) => {
-      setIsNight(data.newPhase === 'NIGHT')
+      setIsNight(data.newPhase.include('Nuit'))
+
       // Assuming you have a state for phase end time
       // setPhaseEndTime(data.endTime);
     })
@@ -367,8 +370,10 @@ export const useGame = (
 
     socket.on('game:end', (data) => {
       setGameFinished(true)
-      // Assuming you have a state to store game end data
-      // setGameEndData(data);
+    })
+
+    socket.on('game:dissolved', () => {
+      setGameError('Le salon a été détruit par la modération.')
     })
 
     socket.on('error', (error: any) => {
@@ -400,8 +405,9 @@ export const useGame = (
       socket.off('notification:private')
       socket.off('tchat:new_message')
       socket.off('game:end')
-      socket.off('error')
+      socket.off('game:dissolved')
       socket.off('room:joined_successfully')
+      socket.off('error')
     }
   }, [socket, gameId, user, player, viewer, hasJoined, isAuthorized, isNight, roomData.maxPlayers])
 

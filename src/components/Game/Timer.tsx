@@ -42,7 +42,7 @@ const GameTimer: React.FC<GameTimerProps> = ({ gameId, gameStarted, gameFinished
   }
 
   useEffect(() => {
-    socket.emit('getTimer', { roomId: gameId })
+    socket.emit('phase:getTimer', { roomId: gameId })
   }, [gameStarted])
 
   // Sons pour le compte à rebours
@@ -52,9 +52,9 @@ const GameTimer: React.FC<GameTimerProps> = ({ gameId, gameStarted, gameFinished
   useEffect(() => {
     if (!gameStarted || gameFinished) return
 
-    socket.on('timerUpdated', ({ limitPhase }) => {
-      if (!limitPhase) return
-      updateTimer(limitPhase)
+    socket.on('phase:timer', ({ endTime }) => {
+      if (!endTime) return
+      updateTimer(endTime)
     })
 
     return () => {

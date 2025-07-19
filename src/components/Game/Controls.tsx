@@ -448,8 +448,17 @@ const GameControls: React.FC<GameControlsProps> = ({
     setQuickEndPhase(prev => prev ? { ...prev, hasVoted: true } : prev)
   }
 
-  const cardId = player?.card?.id
-  const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} isArchive={isArchive} />, [cardId, isArchive])
+  const memoizedCardImage = useMemo(() => {
+    if (!player?.cardId) {
+      return (
+        <div className="h-32 flex items-center justify-center text-blue-300 text-sm italic">
+          Carte en cours de chargement...
+        </div>
+      )
+    }
+
+    return <CardImage cardId={player.cardId} isArchive={isArchive} />
+  }, [player?.card?.id, isArchive])
   const isInVoice = player ? voicePlayers.includes(player.playerId) : false
 
   // Enregistrer automatiquement le commentaire après 3 secondes d'inactivité
