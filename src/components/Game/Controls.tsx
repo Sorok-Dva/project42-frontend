@@ -882,7 +882,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
               {/* Carte du joueur */}
               <div className="flex justify-center mb-4 relative h-32">
-                <CardImage cardId={player.cardId} isArchive={isArchive} />
+                <CardImage cardId={player.cardId} card={player.card} isArchive={isArchive} />
               </div>
             </div>
 

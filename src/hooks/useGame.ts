@@ -13,6 +13,7 @@ export interface Message {
   playerId: number
   channel: number
   icon: string | null
+  sound: string | null
   isMeneur: boolean
   isPerso: boolean
   isMsgSite: boolean
@@ -225,13 +226,12 @@ export const useGame = (
         if (data.error) {
           setGameError(data.error)
         } else {
-          if (player) return
           const authorized = data.room.password ? localStorage.getItem(`game_auth_${gameId}`) === 'true' ?? false : true
-          console.log('isAuthroized', authorized)
           setIsAuthorized(authorized)
           setPasswordRequired(!!data.room.password)
           setRoomData(data.room)
-          setPlayer(data.player)
+          // On fusionne les données du joueur pour ne pas écraser la carte reçue par socket
+          setPlayer(prevPlayer => ({ ...prevPlayer, ...data.player }))
           setViewer(data.viewer)
           setCreator(data.creator)
           setGameStarted(data.room.status === 'in_progress')
@@ -246,8 +246,8 @@ export const useGame = (
 
             const playersData = data.room.players || []
             const allPlayersReady = playersData
-              .filter((player: Player) => player.playerId !== data.creator?.playerId)
-              .every((player: Player) => player.ready)
+              .filter((p: Player) => p.playerId !== data.creator?.playerId)
+              .every((p: Player) => p.ready)
 
             if (allPlayersReady && playersData.length === data.room.maxPlayers) {
               setCanStartGame(true)
@@ -272,89 +272,73 @@ export const useGame = (
    * Charge la liste des joueurs + messages de chat
    */
   useEffect(() => {
-    if (!socket || !gameId || isArchive) return
+    if (!socket || !gameId || isArchive || !isAuthorized) return
 
-    // 1) Rejoint la room si pas déjà fait
-    if (!hasJoined && isAuthorized) {
-      socket.emit('room:join', {
-        token,
-        roomId: gameId,
-      })
-
-      socket.on('room:joined_successfully', () => {
-        socket.emit('game:sync_state', {
-          gameId,
-        })
-      })
-
-      setHasJoined(true)
-    }
-
-    // 2) Réception d'événements
-    socket.on('lobby:state_update', (data) => {
+    const handleLobbyStateUpdate = (data: any) => {
       setRoomData(data.room)
       setPlayers(data.room.players)
       setViewers(data.room.viewers)
-
       if (!gameStarted) {
         setCanStartGame(data.room.players.length === data.room.maxPlayers)
-        setCanBeReady(player?.ready ? false : data.room.players.filter((p: { ready: boolean }) => p.ready).length < data.room.maxPlayers)
+        setCanBeReady(
+          (player?.ready ? false : data.room.players.filter((p: { ready: boolean }) => p.ready).length < data.room.maxPlayers)
+        )
       }
-    })
+    }
 
-    socket.on('lobby:enable_start', () => {
-      setCanStartGame(true)
-    })
+    const handleEnableStart = () => setCanStartGame(true)
+    const handleEnableReadyOption = () => {
+      setCanStartGame(
+        (player?.ready ? false : players.filter(p => p.ready).length === roomData.maxPlayers)
+      )
+    }
 
-    socket.on('lobby:enable_ready_option', () => {
-      setCanStartGame(player?.ready ? false : players.filter((p) => p.ready).length === roomData.maxPlayers)
-    })
-
-    socket.on('tchat:new_message', (message) => {
+    const handleNewMessage = (message: Message) => {
       if (message.channel === 2 && isNight) {
         socket.emit('shaman_listen', message)
       }
-      setMessages((prev) => [...prev, message])
+      setMessages(prev => [...prev, message])
       if (message.sound) {
         const audio = new Audio(`/assets/sounds/${message.sound}.mp3`)
         audio.play().catch(() => {})
       }
-      if (message.message.toLowerCase().includes(player?.nickname.toLowerCase())) {
+      if (player && message.message.toLowerCase().includes(player.nickname.toLowerCase())) {
         const audio = new Audio('/assets/sounds/sos.mp3')
         audio.play().catch(() => {})
       }
-    })
+    }
 
-    socket.on('game:started', () => {
+    const handleGameStarted = () => {
       setGameStarted(true)
       setIsNight(true)
       socket.emit('game:sync_state', { gameId })
-    })
+    }
 
-    socket.on('game:state_update', (data) => {
+    const handleGameStateUpdate = (data: any) => {
       const payload = Array.isArray(data) ? data[0] : data
-      setPlayer(prevPlayer => {
-        if (!prevPlayer) return payload.player
-        return { ...prevPlayer, ...payload.player }
-      })
-      setPlayers(payload.players)
+      setPlayer(prevPlayer => ({ ...prevPlayer, ...payload.player }))
+      if (payload.players) {
+        const mappedPlayers = payload.players.map((p: any) => ({
+          ...p,
+          playerId: p.id,
+          alive: p.isAlive,
+        }))
+        setPlayers(mappedPlayers)
+      }
       setAlienList(payload.alienList || [])
       setCoupleList(payload.lovers || [])
-    })
+    }
 
-    socket.on('phase:change', (data) => {
+    const handlePhaseChange = (data: any) => {
       if (data.newPhase) {
         setIsNight(data.newPhase.toLowerCase().includes('nuit'))
       }
+    }
 
-      // Assuming you have a state for phase end time
-      // setPhaseEndTime(data.endTime);
-    })
-
-    socket.on('player:update', (updatedPlayers) => {
+    const handlePlayerUpdate = (updatedPlayers: Player[]) => {
       setPlayers(prevPlayers => {
         const newPlayers = [...prevPlayers]
-        updatedPlayers.forEach((updatedPlayer: Player) => {
+        updatedPlayers.forEach(updatedPlayer => {
           const index = newPlayers.findIndex(p => p.id === updatedPlayer.id)
           if (index !== -1) {
             newPlayers[index] = { ...newPlayers[index], ...updatedPlayer }
@@ -362,32 +346,25 @@ export const useGame = (
         })
         return newPlayers
       })
-    })
+    }
 
-    socket.on('notification:private', (data) => {
-      // Assuming you have a toast notification system
-      // toast.info(data.message);
+    const handlePrivateNotification = (data: any) => {
       if (data.message.includes('Vous avez été expulsé')) {
         window.location.href = '/'
       }
       console.log('Private notification:', data.message)
-    })
+    }
 
-    socket.on('game:end', (data) => {
-      setGameFinished(true)
-    })
-
-    socket.on('game:dissolved', () => {
-      setGameError('Le salon a été détruit par la modération.')
-    })
-
-    socket.on('error', (error: any) => {
-      setMessages((prev) => [
+    const handleGameEnd = () => setGameFinished(true)
+    const handleGameDissolved = () => setGameError('Le salon a été détruit par la modération.')
+    const handleError = (error: any) => {
+      setMessages(prev => [
         ...prev,
         {
           nickname: 'Système',
           message: error.message,
           icon: error.icon,
+          sound: error.sound,
           playerId: -1,
           channel: 0,
           isPerso: true,
@@ -396,25 +373,45 @@ export const useGame = (
           createdAt: new Date(),
         },
       ])
-    })
-
-    // Permet de nettoyer les listeners au démontage
-    return () => {
-      socket.off('lobby:state_update')
-      socket.off('lobby:enable_start')
-      socket.off('lobby:enable_ready_option')
-      socket.off('game:started')
-      socket.off('game:state_update')
-      socket.off('phase:change')
-      socket.off('player:update')
-      socket.off('notification:private')
-      socket.off('tchat:new_message')
-      socket.off('game:end')
-      socket.off('game:dissolved')
-      socket.off('room:joined_successfully')
-      socket.off('error')
     }
-  }, [socket, gameId, user, player, viewer, hasJoined, isAuthorized, isNight, roomData.maxPlayers])
+
+    if (!hasJoined) {
+      socket.emit('room:join', { token, roomId: gameId })
+      socket.on('room:joined_successfully', () => {
+        socket.emit('game:sync_state', { gameId })
+      })
+      setHasJoined(true)
+    }
+
+    socket.on('lobby:state_update', handleLobbyStateUpdate)
+    socket.on('lobby:enable_start', handleEnableStart)
+    socket.on('lobby:enable_ready_option', handleEnableReadyOption)
+    socket.on('tchat:new_message', handleNewMessage)
+    socket.on('game:started', handleGameStarted)
+    socket.on('game:state_update', handleGameStateUpdate)
+    socket.on('phase:change', handlePhaseChange)
+    socket.on('player:update', handlePlayerUpdate)
+    socket.on('notification:private', handlePrivateNotification)
+    socket.on('game:end', handleGameEnd)
+    socket.on('game:dissolved', handleGameDissolved)
+    socket.on('error', handleError)
+
+    return () => {
+      socket.off('lobby:state_update', handleLobbyStateUpdate)
+      socket.off('lobby:enable_start', handleEnableStart)
+      socket.off('lobby:enable_ready_option', handleEnableReadyOption)
+      socket.off('tchat:new_message', handleNewMessage)
+      socket.off('game:started', handleGameStarted)
+      socket.off('game:state_update', handleGameStateUpdate)
+      socket.off('phase:change', handlePhaseChange)
+      socket.off('player:update', handlePlayerUpdate)
+      socket.off('notification:private', handlePrivateNotification)
+      socket.off('game:end', handleGameEnd)
+      socket.off('game:dissolved', handleGameDissolved)
+      socket.off('error', handleError)
+      socket.off('room:joined_successfully')
+    }
+  }, [socket, gameId, token, isAuthorized, hasJoined, isArchive, gameStarted, player, isNight, roomData.maxPlayers])
 
   return {
     roomData,
