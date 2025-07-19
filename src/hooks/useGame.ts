@@ -351,6 +351,22 @@ export const useGame = (
     const handlePrivateNotification = (data: any) => {
       if (data.message.includes('Vous avez été expulsé')) {
         window.location.href = '/'
+      } else {
+        setMessages(prev => [
+          ...prev,
+          {
+            nickname: 'Système',
+            message: data.message,
+            icon: data.icon,
+            sound: data.sound,
+            playerId: -1,
+            channel: 0,
+            isPerso: true,
+            isMeneur: false,
+            isMsgSite: false,
+            createdAt: new Date(),
+          },
+        ])
       }
       console.log('Private notification:', data.message)
     }
