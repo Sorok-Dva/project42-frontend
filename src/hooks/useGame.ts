@@ -333,8 +333,10 @@ export const useGame = (
 
     socket.on('game:state_update', (data) => {
       const payload = Array.isArray(data) ? data[0] : data
-      console.log(payload, player, ({ ...player, ...payload.player }))
-      setPlayer(prevPlayer => ({ ...prevPlayer, ...payload.player }))
+      setPlayer(prevPlayer => {
+        if (!prevPlayer) return payload.player
+        return { ...prevPlayer, ...payload.player }
+      })
       setPlayers(payload.players)
       setAlienList(payload.alienList || [])
       setCoupleList(payload.lovers || [])
