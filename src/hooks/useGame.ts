@@ -327,6 +327,7 @@ export const useGame = (
       }
       setAlienList(payload.alienList || [])
       setCoupleList(payload.lovers || [])
+      setIsNight(data.phase.startsWith('NIGHT'))
     }
 
     const handlePhaseChange = (data: any) => {
