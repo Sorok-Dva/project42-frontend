@@ -14,10 +14,7 @@ interface PhaseActionRequest {
     message: string
     channel?: string
   }
-  eligibleTargets: { id: number; nickname: string }[]
-  deathElixirUsed?: string | null
-  lifeElixirUsed?: string | null
-  alive?: boolean
+  targets: { id: number; nickname: string }[]
 }
 
 interface PhaseActionProps {
@@ -65,14 +62,14 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
 
     if (
       actionRequest &&
-      actionRequest.eligibleTargets.length > 0 &&
+      actionRequest.targets.length > 0 &&
       actionRequest.action.targetCount === 1
     ) {
-      const firstTargetId = actionRequest.eligibleTargets[0].id
+      const firstTargetId = actionRequest.targets[0].id
       setSelectedTargets([firstTargetId])
 
       // Mettre à jour également le nickname sélectionné
-      const selectedTarget = actionRequest.eligibleTargets.find(
+      const selectedTarget = actionRequest.targets.find(
         (target) => target.id === firstTargetId,
       )
       if (selectedTarget) {
@@ -84,7 +81,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
   useEffect(() => {
     if (!socket || !user || !player || !roomId) return
 
-    socket.on('phaseActionRequest', (data: PhaseActionRequest) => {
+    socket.on('game:action_required', (data: PhaseActionRequest) => {
       if (!data) {
         setActionRequest(null)
         return
@@ -93,11 +90,11 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
         data.action.card === player?.card?.id ||
         data.action.card === -1 ||
         (data.action.card === 2 && ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected)) ||
-        (data.action.card === 6 && (!data.alive || !player.alive))
+        (data.action.card === 6 && (!player.alive))
       ) {
         setActionRequest(data)
-        setDeathElixirUsed(data.deathElixirUsed !== null && data.deathElixirUsed !== undefined)
-        setLifeElixirUsed(data.lifeElixirUsed !== null && data.lifeElixirUsed !== undefined)
+        setDeathElixirUsed(false)
+        setLifeElixirUsed(false)
       }
     })
 
@@ -132,14 +129,14 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     // Construction de la chaîne des nicknames à partir des ids.
     setSelectedNicknames(
       selectedIds.map((id) => {
-        const selectedTarget = actionRequest?.eligibleTargets.find((target) => target.id === id)
+        const selectedTarget = actionRequest?.targets.find((target) => target.id === id)
         return selectedTarget ? selectedTarget.nickname : ''
       }),
     )
 
     // Pour la sélection unique, on peut mettre à jour selectedNickname si besoin
     if (selectedIds.length === 1) {
-      const selectedTarget = actionRequest?.eligibleTargets.find((target) => target.id === selectedIds[0])
+      const selectedTarget = actionRequest?.targets.find((target) => target.id === selectedIds[0])
       if (selectedTarget) {
         setSelectedNickname(selectedTarget.nickname)
       }
@@ -329,14 +326,14 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
                 ? { onMouseDown: (e: any) => handleMouseDown(e, actionRequest.action.targetCount) }
                 : {})}
               className="w-full bg-black/60 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-              size={Math.min(actionRequest.eligibleTargets.length, Math.max(5, Math.floor(window.innerHeight * 0.05)))}
+              size={Math.min(actionRequest.targets.length, Math.max(5, Math.floor(window.innerHeight * 0.05)))}
               style={{
                 height: 'auto',
                 maxHeight: 'min(40vh, 300px)',
                 overflow: 'auto'
               }}
             >
-              {actionRequest.eligibleTargets.map((target) => (
+              {actionRequest.targets.map((target) => (
                 <option key={target.id} value={target.id} className="p-2 hover:bg-blue-900/30">
                   {target.nickname}
                 </option>
