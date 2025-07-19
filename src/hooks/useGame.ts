@@ -225,6 +225,7 @@ export const useGame = (
         if (data.error) {
           setGameError(data.error)
         } else {
+          if (player) return
           const authorized = data.room.password ? localStorage.getItem(`game_auth_${gameId}`) === 'true' ?? false : true
           console.log('isAuthroized', authorized)
           setIsAuthorized(authorized)

@@ -40,7 +40,6 @@ interface GameControlsProps {
   gameStarted: boolean
   gameFinished: boolean
   setGameStarted: (gameStarted: boolean) => void
-  fetchGameDetails: () => void
   slots: number
   isArchive: boolean
   setSlots: React.Dispatch<React.SetStateAction<number>>
@@ -61,7 +60,6 @@ const GameControls: React.FC<GameControlsProps> = ({
   isCreator,
   roomData,
   gameId,
-  fetchGameDetails,
   canBeReady,
   canStartGame,
   creator,
@@ -73,10 +71,8 @@ const GameControls: React.FC<GameControlsProps> = ({
   setGameStarted,
   slots,
   setSlots,
-  setRoomData,
   isArchive,
   isInn,
-  setPlayer,
   activeGuideSession,
 }) => {
   const { token } = useAuth()
@@ -274,7 +270,6 @@ const GameControls: React.FC<GameControlsProps> = ({
     if (!gameId || gameStarted || gameFinished || !canStartGame || !token) return
     try {
       await startGame(gameId, token)
-      fetchGameDetails()
       setGameStarted(true)
     } catch (error) {
       alert(error)

@@ -552,23 +552,6 @@ const GamePage = () => {
   }, [players, viewer])
 
   /**
-   * Requête pour recharger certains détails du jeu (ex : titre, etc.)
-   * @todo check if this is used anymore
-   */
-  const handleFetchGameDetails = useCallback(async () => {
-    if (!gameId) return
-    try {
-      const data = await fetchGameDetails(gameId, token || undefined)
-      setRoomData(data.room)
-      if (data.player) setPlayer(data.player)
-      setGameStarted(data.room.status === 'in_progress')
-      setGameFinished(data.room.status === 'completed')
-    } catch (error) {
-      console.error('Erreur lors du fetchGameDetails: ', error)
-    }
-  }, [gameId])
-
-  /**
    * Gère l'effacement du chat côté front
    */
   const handleClearChat = () => {
@@ -1329,7 +1312,6 @@ const GamePage = () => {
                   <Controls
                     gameId={gameId}
                     roomData={roomData}
-                    fetchGameDetails={handleFetchGameDetails}
                     isCreator={isCreator}
                     creator={creator}
                     canBeReady={canBeReady}
