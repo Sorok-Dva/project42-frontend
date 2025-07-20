@@ -33,7 +33,7 @@ const PhaseActionCard20: React.FC<PhaseActionCard20Props> = ({
 
   const handleInfect = () => {
     if (!socket) return
-    socket.emit('phaseActionResponse', {
+    socket.emit('game:submit_action', {
       roomId,
       playerId: user!.id,
       actionCard: actionRequest.action.card,

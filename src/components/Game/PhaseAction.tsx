@@ -159,9 +159,9 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     if (!socket || !actionRequest) return
 
     const payload: any = {
-      roomId,
+      gameId: roomId,
       playerId: user!.id,
-      actionCard: actionRequest.action.card,
+      card: actionRequest.action.card,
     }
 
     // Gestion spécifique pour Cupidon (carte 7)
@@ -170,7 +170,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
         alert('Veuillez sélectionner exactement deux joueurs.')
         return
       }
-      socket.emit('phaseActionResponse', {
+      socket.emit('game:submit_action', {
         ...payload,
         targets: selectedTargets,
       })
@@ -180,7 +180,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
         alert('Veuillez sélectionner exactement deux joueurs ou moins.')
         return
       }
-      socket.emit('phaseActionResponse', {
+      socket.emit('game:submit_action', {
         ...payload,
         targets: selectedTargets,
       })
@@ -189,12 +189,12 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
         alert('Veuillez sélectionner exactement trois joueurs ou moins.')
         return
       }
-      socket.emit('phaseActionResponse', {
+      socket.emit('game:submit_action', {
         ...payload,
         targets: selectedTargets,
       })
     } else {
-      socket.emit('phaseActionResponse', {
+      socket.emit('game:submit_action', {
         ...payload,
         targetId: Number(selectedTargets[0]) ?? -1,
       })

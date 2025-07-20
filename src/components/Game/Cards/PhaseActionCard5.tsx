@@ -46,7 +46,7 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
 
   const handleDeathSubmit = () => {
     if (!socket || selectedDeathTarget === '' || deathElixirUsed) return
-    socket.emit('phaseActionResponse', {
+    socket.emit('game:submit_action', {
       roomId,
       playerId: user!.id,
       actionCard: actionRequest.action.card,
@@ -58,7 +58,7 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
 
   const handleLifeSubmit = () => {
     if (!socket || lifeElixirUsed || gameType === 3) return
-    socket.emit('phaseActionResponse', {
+    socket.emit('game:submit_action', {
       roomId,
       playerId: user!.id,
       actionCard: actionRequest.action.card,

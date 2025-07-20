@@ -34,6 +34,7 @@ import { ToastDefaultOptions } from 'utils/toastOptions'
 import DevCommandsPanel from 'components/Game/Tools/DevCommandsPanel'
 import ParameterCommandsPanel from 'components/Game/Tools/ParameterCommandsPanel'
 import { MultiAvatarCanvas } from 'components/Avatar/MultiScene'
+import PremiumPanel from './PremiumPanel'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -65,6 +66,9 @@ const GamePage = () => {
   const { token } = useAuth()
   const { socket } = useSocket()
 
+  const premiumDate = user?.premium ? new Date(user.premium) : null
+  const isPremium = premiumDate ? new Date().getTime() < premiumDate.getTime() : false
+
   const [guideRequestDetails, setGuideRequestDetails] = useState<{
     guideUserId: number;
     guideNickname: string;
@@ -80,6 +84,7 @@ const GamePage = () => {
   const [highlightedPlayers, setHighlightedPlayers] = useState<{ [nickname: string]: string }>({})
   const [showBugReportModal, setShowBugReportModal] = useState(false)
   const [thrownItems, setThrownItems] = useState<{ id: string; image: string }[]>([])
+  const [showPremiumPanel, setShowPremiumPanel] = useState(false)
 
   const removeThrownItem = (id: string) => {
     setThrownItems(prev => prev.filter(item => item.id !== id))
@@ -227,6 +232,7 @@ const GamePage = () => {
     isArchive,
     isInn,
     innList,
+    premiumPanelData,
     setSlots,
     setPlayer,
     handlePasswordSubmit,
@@ -1229,6 +1235,25 @@ const GamePage = () => {
                         />
                       </div>
                     )}
+                    {isPremium && player &&
+                      premiumPanelData && (
+                      <motion.button
+                        className={`px-3 py-1 ${showPremiumPanel ? 'bg-purple-900/60' : 'bg-black/40'} hover:bg-purple-900/60 text-purple-300 hover:text-white border border-purple-500/30 rounded-lg transition-all flex items-center gap-1`}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowPremiumPanel(!showPremiumPanel)}
+                        title="Panel Premium"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path
+                            fillRule="evenodd"
+                            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm2 2a1 1 0 000 2h.01a1 1 0 100-2H5zm3 0a1 1 0 000 2h3a1 1 0 100-2H8z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                          Panel Premium
+                      </motion.button>
+                    )}
                     <motion.button
                       className="px-3 py-1 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all flex items-center gap-1"
                       whileHover={{ scale: 1.05 }}
@@ -1481,6 +1506,32 @@ const GamePage = () => {
             <p className="mt-4 text-blue-300">Chargement de la partie...</p>
           </div>
         </div>
+      )}
+
+      {showPremiumPanel && premiumPanelData && (
+        <AnimatePresence>
+          <motion.div
+            className="fixed bottom-4 right-4 z-40 w-96 max-w-[calc(100vw-2rem)]"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          >
+            <div className="relative">
+              <PremiumPanel data={premiumPanelData} />
+              {/* Close button */}
+              <motion.button
+                onClick={() => setShowPremiumPanel(false)}
+                className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center text-xs shadow-lg"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                title="Fermer"
+              >
+                  ×
+              </motion.button>
+            </div>
+          </motion.div>
+        </AnimatePresence>
       )}
 
       {showBugReportModal && (

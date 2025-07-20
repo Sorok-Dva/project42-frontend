@@ -6,6 +6,7 @@ import {
 import axios from 'axios'
 import { Player } from 'types/room'
 import { AvatarConfig } from 'components/Avatar/MultiScene'
+import { PremiumPlayerStats } from 'types/premium'
 
 export interface Message {
   nickname: string
@@ -139,6 +140,7 @@ export const useGame = (
   const [isArchive, setIsArchive] = useState<boolean>(false)
   const [isInn, setIsInn] = useState<boolean>(false)
   const [innList, setInnList] = useState<string[]>([])
+  const [premiumPanelData, setPremiumPanelData] = useState<PremiumPlayerStats[]>([])
 
   /**
    * Asynchronously handles the submission of a password for game authentication.
@@ -321,7 +323,7 @@ export const useGame = (
         const mappedPlayers = payload.players.map((p: any) => ({
           ...p,
           playerId: p.id,
-          alive: p.isAlive,
+          alive: p.alive,
         }))
         setPlayers(mappedPlayers)
       }
@@ -392,6 +394,10 @@ export const useGame = (
       ])
     }
 
+    const handlePremiumPanelUpdate = (data: PremiumPlayerStats[]) => {
+      setPremiumPanelData(data)
+    }
+
     if (!hasJoined) {
       socket.emit('room:join', { token, roomId: gameId })
       socket.on('room:joined_successfully', () => {
@@ -412,6 +418,7 @@ export const useGame = (
     socket.on('game:end', handleGameEnd)
     socket.on('game:dissolved', handleGameDissolved)
     socket.on('error', handleError)
+    socket.on('game:premium_panel_update', handlePremiumPanelUpdate)
 
     return () => {
       socket.off('lobby:state_update', handleLobbyStateUpdate)
@@ -427,6 +434,7 @@ export const useGame = (
       socket.off('game:dissolved', handleGameDissolved)
       socket.off('error', handleError)
       socket.off('room:joined_successfully')
+      socket.off('game:premium_panel_update', handlePremiumPanelUpdate)
     }
   }, [socket, gameId, token, isAuthorized, hasJoined, isArchive, gameStarted, player, isNight, roomData.maxPlayers])
 
@@ -459,6 +467,7 @@ export const useGame = (
     isInn,
     innList,
     winnersAvatars,
+    premiumPanelData,
     setWinnersAvatars,
     setIsArchive,
     setSlots,
