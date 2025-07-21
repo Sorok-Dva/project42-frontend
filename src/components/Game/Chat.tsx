@@ -412,8 +412,8 @@ const Chat: React.FC<ChatProps> = ({
       <div className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/30 scrollbar-track-black/20 bg-black/70">
         {/* Règles du jeu */ }
 
-        <GameRule gameType={gameType} hasVoice={hasVoice} />
-        <hr />
+        {/*<GameRule gameType={gameType} hasVoice={hasVoice} />*/}
+        {/*<hr />*/}
 
         {/* Messages */ }
         <ChatMessages

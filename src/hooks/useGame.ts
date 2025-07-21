@@ -256,6 +256,10 @@ export const useGame = (
             } else {
               setCanStartGame(false)
             }
+
+            setCanBeReady(
+              (data.player?.ready ? false : playersData.filter((p: { ready: boolean }) => p.ready).length < data.room.maxPlayers)
+            )
           }
 
           if (data.room.status === 'completed'
@@ -283,7 +287,7 @@ export const useGame = (
       if (!gameStarted) {
         setCanStartGame(data.room.players.length === data.room.maxPlayers)
         setCanBeReady(
-          (player?.ready ? false : data.room.players.filter((p: { ready: boolean }) => p.ready).length < data.room.maxPlayers)
+          (data.player?.ready ? false : data.room.players.filter((p: { ready: boolean }) => p.ready).length < data.room.maxPlayers)
         )
       }
     }
