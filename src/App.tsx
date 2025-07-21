@@ -7,6 +7,7 @@ import 'styles/index.scss'
 import 'index.css'
 import 'styles/Toastify.css'
 import 'styles/Spinner.css'
+import 'styles/Modal.css'
 
 import React, { useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'

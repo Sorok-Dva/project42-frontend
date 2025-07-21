@@ -1236,7 +1236,7 @@ const GamePage = () => {
                       </div>
                     )}
                     {isPremium && player &&
-                      premiumPanelData && (
+                      premiumPanelData && gameStarted && !gameFinished && (
                       <motion.button
                         className={`px-3 py-1 ${showPremiumPanel ? 'bg-purple-900/60' : 'bg-black/40'} hover:bg-purple-900/60 text-purple-300 hover:text-white border border-purple-500/30 rounded-lg transition-all flex items-center gap-1`}
                         whileHover={{ scale: 1.05 }}

@@ -398,6 +398,10 @@ export const useGame = (
       setPremiumPanelData(data)
     }
 
+    const handlePlayerRenamed = (newNickname: string) => {
+      setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, nickname: newNickname } : null)
+    }
+
     if (!hasJoined) {
       socket.emit('room:join', { token, roomId: gameId })
       socket.on('room:joined_successfully', () => {
@@ -406,6 +410,7 @@ export const useGame = (
       setHasJoined(true)
     }
 
+    socket.on('player:renamed', handlePlayerRenamed)
     socket.on('lobby:state_update', handleLobbyStateUpdate)
     socket.on('lobby:enable_start', handleEnableStart)
     socket.on('lobby:enable_ready_option', handleEnableReadyOption)
@@ -421,6 +426,7 @@ export const useGame = (
     socket.on('game:premium_panel_update', handlePremiumPanelUpdate)
 
     return () => {
+      socket.off('player:renamed', handlePlayerRenamed)
       socket.off('lobby:state_update', handleLobbyStateUpdate)
       socket.off('lobby:enable_start', handleEnableStart)
       socket.off('lobby:enable_ready_option', handleEnableReadyOption)

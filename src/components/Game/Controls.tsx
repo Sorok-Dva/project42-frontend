@@ -7,7 +7,6 @@ import { usePermissions } from 'hooks/usePermissions'
 import {
   addBotToGame,
   startGame,
-  updateRoomTimer,
   addFavoriteGame, leaveGame
 } from 'services/gameService'
 import { useAuth } from 'contexts/AuthContext'
@@ -97,21 +96,13 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
   const closeEditComposition = async () => {
     if (!isCreator || isArchive) return
-    try {
-      if (roomData.maxPlayers !== slots) {
-        socket.emit('lobby:update_max_players', { roomId: gameId, maxPlayers: slots })
-      }
-
-      socket.emit('lobby:update_cards', { roomId: gameId, cards: roomData.cards })
-
-      setIsEditCompositionOpen(false)
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        alert(e.response?.data.error)
-      } else {
-        alert(e)
-      }
+    if (roomData.maxPlayers !== slots) {
+      socket.emit('lobby:update_max_players', { roomId: gameId, maxPlayers: slots })
     }
+
+    socket.emit('lobby:update_cards', { roomId: gameId, cards: roomData.cards })
+
+    setIsEditCompositionOpen(false)
   }
 
   const handleMuteSpectators = async () => {
@@ -347,15 +338,7 @@ const GameControls: React.FC<GameControlsProps> = ({
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
     debounceRef.current = setTimeout(async () => {
-      try {
-        const response = await updateRoomTimer(timer - 1, gameId, token)
-        if (response.status !== 200) {
-          setTimer((prevTimer) => prevTimer + 1)
-        }
-      } catch (error) {
-        console.error('Erreur lors du removeTimer:', error)
-        setTimer((prevTimer) => prevTimer + 1)
-      }
+      socket.emit('lobby:update_timer_limit', { roomId: gameId, timer: timer -1 })
     }, 750)
   }
 
@@ -367,15 +350,7 @@ const GameControls: React.FC<GameControlsProps> = ({
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
     debounceRef.current = setTimeout(async () => {
-      try {
-        const response = await updateRoomTimer(timer + 1, gameId, token)
-        if (response.status !== 200) {
-          setTimer((prevTimer) => prevTimer - 1)
-        }
-      } catch (error) {
-        console.error('Erreur lors du set addTimer:', error)
-        setTimer((prevTimer) => prevTimer - 1)
-      }
+      socket.emit('lobby:update_timer_limit', { roomId: gameId, timer: timer + 1 })
     }, 750)
   }
 

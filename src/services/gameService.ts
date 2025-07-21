@@ -44,20 +44,6 @@ export const addBotToGame = async (gameId: string, token: string | null) => {
 }
 
 /**
- * Ajuste le temps de débat la room
- */
-export const updateRoomTimer = async (timer: number, gameId: string, token: string | null) => {
-  const response = await axios.put(
-    `/api/games/room/${gameId}/timer`,
-    { timer },
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  )
-  return response
-}
-
-/**
  * Transfère les droits du créateur vers un autre joueur
  */
 export const transferCreatorRights = async (gameId: string, nickname: string, token: string) => {
