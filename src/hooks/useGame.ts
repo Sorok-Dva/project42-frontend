@@ -320,12 +320,7 @@ export const useGame = (
       const payload = Array.isArray(data) ? data[0] : data
       setPlayer(prevPlayer => ({ ...prevPlayer, ...payload.player }))
       if (payload.players) {
-        const mappedPlayers = payload.players.map((p: any) => ({
-          ...p,
-          playerId: p.id,
-          alive: p.alive,
-        }))
-        setPlayers(mappedPlayers)
+        setPlayers(payload.players)
       }
       setAlienList(payload.alienList || [])
       setCoupleList(payload.lovers || [])
