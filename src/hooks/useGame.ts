@@ -337,17 +337,8 @@ export const useGame = (
       }
     }
 
-    const handlePlayerUpdate = (updatedPlayers: Player[]) => {
-      setPlayers(prevPlayers => {
-        const newPlayers = [...prevPlayers]
-        updatedPlayers.forEach(updatedPlayer => {
-          const index = newPlayers.findIndex(p => p.id === updatedPlayer.id)
-          if (index !== -1) {
-            newPlayers[index] = { ...newPlayers[index], ...updatedPlayer }
-          }
-        })
-        return newPlayers
-      })
+    const handlePlayerUpdate = (updatedPlayer: Partial<Player>) => {
+      setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, ...updatedPlayer } : null)
     }
 
     const handlePrivateNotification = (data: any) => {
@@ -401,6 +392,10 @@ export const useGame = (
       setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, nickname: newNickname } : null)
     }
 
+    const handleCoupleListUpdate = (couple: { id: number; nickname: string}[]) => {
+      setCoupleList(couple.map(p => p.nickname) || [])
+    }
+
     if (!hasJoined) {
       socket.emit('room:join', { token, roomId: gameId })
       socket.on('room:joined_successfully', () => {
@@ -416,6 +411,7 @@ export const useGame = (
     socket.on('tchat:new_message', handleNewMessage)
     socket.on('game:started', handleGameStarted)
     socket.on('game:state_update', handleGameStateUpdate)
+    socket.on('game:couple_list', handleCoupleListUpdate)
     socket.on('phase:change', handlePhaseChange)
     socket.on('player:update', handlePlayerUpdate)
     socket.on('notification:private', handlePrivateNotification)
@@ -440,6 +436,7 @@ export const useGame = (
       socket.off('error', handleError)
       socket.off('room:joined_successfully')
       socket.off('game:premium_panel_update', handlePremiumPanelUpdate)
+      socket.off('game:couple_list', handleCoupleListUpdate)
     }
   }, [socket, gameId, token, isAuthorized, hasJoined, isArchive, gameStarted, player, isNight, roomData.maxPlayers])
 
