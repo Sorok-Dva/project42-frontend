@@ -299,7 +299,6 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     >
       <h3 className="text-lg font-bold text-white mb-2">{actionRequest.action.message}</h3>
 
-      {player.isInfected ? 'Infecté': 'non'}
       {hint && (
         <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 mb-3">
           <p className="text-blue-300" dangerouslySetInnerHTML={{ __html: hint }} />

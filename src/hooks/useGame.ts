@@ -232,6 +232,8 @@ export const useGame = (
           setIsAuthorized(authorized)
           setPasswordRequired(!!data.room.password)
           setRoomData(data.room)
+          // On fusionne les données du joueur pour ne pas écraser la carte reçue par socket
+          // setPlayer(prevPlayer => ({ ...prevPlayer, nickname: data.player?.nickname }))
           setViewer(data.viewer)
           setCreator(data.creator)
           setGameStarted(data.room.status === 'in_progress')
