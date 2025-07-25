@@ -232,8 +232,6 @@ export const useGame = (
           setIsAuthorized(authorized)
           setPasswordRequired(!!data.room.password)
           setRoomData(data.room)
-          // On fusionne les données du joueur pour ne pas écraser la carte reçue par socket
-          setPlayer(prevPlayer => ({ ...prevPlayer, ...data.player }))
           setViewer(data.viewer)
           setCreator(data.creator)
           setGameStarted(data.room.status === 'in_progress')
@@ -300,6 +298,7 @@ export const useGame = (
     }
 
     const handleNewMessage = (message: Message) => {
+      console.log('handle message', message, message.message, message.message.toLowerCase())
       if (message.channel === 2 && isNight) {
         socket.emit('shaman_listen', message)
       }
@@ -309,6 +308,7 @@ export const useGame = (
         audio.play().catch(() => {})
       }
       if (player && message.message.toLowerCase().includes(player.nickname.toLowerCase())) {
+        console.log('play audio' )
         const audio = new Audio('/assets/sounds/sos.mp3')
         audio.play().catch(() => {})
       }
@@ -322,6 +322,7 @@ export const useGame = (
 
     const handleGameStateUpdate = (data: any) => {
       const payload = Array.isArray(data) ? data[0] : data
+      console.log('set player game state update', { ...player, ...payload.player })
       setPlayer(prevPlayer => ({ ...prevPlayer, ...payload.player }))
       if (payload.players) {
         setPlayers(payload.players)

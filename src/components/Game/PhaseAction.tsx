@@ -13,6 +13,7 @@ interface PhaseActionRequest {
     targetCount: number
     message: string
     channel?: string
+    faction?: string
   }
   targets: { id: number; nickname: string }[]
 }
@@ -68,11 +69,13 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     if (!socket || !user || !player || !roomId) return
 
     socket.on('game:action_required', (data: PhaseActionRequest) => {
+      console.log('player.isInfected', player.isInfected, player)
       if (
         data.action.roleId === player?.card?.id ||
         data.action.roleId === -1 ||
         (data.action.roleId === 2 && ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected)) ||
-        (data.action.roleId === 6 && (!player.alive))
+        (data.action.roleId === 6 && (!player.alive)) ||
+        (data.action.faction === 'Alien' && player.isInfected)
       ) {
         setActionRequest(data)
         setDeathElixirUsed(false)
@@ -296,6 +299,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     >
       <h3 className="text-lg font-bold text-white mb-2">{actionRequest.action.message}</h3>
 
+      {player.isInfected ? 'Infecté': 'non'}
       {hint && (
         <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 mb-3">
           <p className="text-blue-300" dangerouslySetInnerHTML={{ __html: hint }} />
