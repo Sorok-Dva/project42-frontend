@@ -80,16 +80,20 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
       }
     })
 
-    socket.on('alienElimination', (victim) => {
+    socket.on('game:alien_victim', (victim) => {
       if (victim.id) {
         setAlienVictim({ nickname: victim.nickname, id: victim.id })
       } else setAlienVictim(null)
     })
 
+    socket.on('game:reset_action', (victim) => {
+      setActionRequest(null)
+    })
+
     return () => {
-      socket.off('phaseActionRequest')
-      socket.off('phaseEnded')
-      socket.off('alienElimination')
+      socket.off('game:action_required')
+      socket.off('game:reset_action')
+      socket.off('game:alien_victim')
     }
   }, [socket, user, player, roomId])
 
@@ -177,7 +181,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     }
 
     // Réinitialiser l'action pour certaines cartes
-    const resetAction = [3, 6, 7, 8, 15, 20].includes(actionRequest.action.roleId)
+    const resetAction = [3, 6, 7, 8, 9, 15, 20].includes(actionRequest.action.roleId)
     if (resetAction) setActionRequest(null)
 
     // Afficher des indications pour certaines cartes
@@ -249,6 +253,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     return (
       <PhaseActionCard20
         roomId={roomId}
+        player={player}
         actionRequest={actionRequest as any}
         alienVictim={alienVictim}
         setAlienVictim={setAlienVictim}

@@ -16,6 +16,7 @@ export interface Player {
   card?: { id: number; name: string; description: string; }
   canVote: boolean
   guide: string | null
+  hasUsedAbility: false,
 }
 
 export interface Card {

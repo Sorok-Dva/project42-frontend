@@ -579,6 +579,11 @@ const GamePage = () => {
           return
         }
 
+        if (gameFinished) {
+          setGameError('Vous avez bien quitté la partie. Vous pouvez fermer cet onglet.')
+          return
+        }
+
         const response = await leaveGame(token)
         console.log('leave response', response)
         if (response.message) {

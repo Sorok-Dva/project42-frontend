@@ -218,10 +218,9 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
             msg.channel === 3 &&
             cleanNickname !== 'Système' &&
             player &&
-            player.card?.id === 12 &&
-            isNight
+            player.card?.id === 12
           ) {
-            cleanNickname = '(Alien)'
+            cleanNickname = ' '
           }
           const escapedMessage = stripHTMLKeepImages(msg.message)
           const highlightColor = cleanNickname

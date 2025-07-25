@@ -151,9 +151,9 @@ const GameControls: React.FC<GameControlsProps> = ({
       new Audio('/assets/sounds/rewind.wav').play().catch(() => {})
     }
 
-    socket.on('gameReplayed', onReplayed)
+    socket.on('lobby:replayed', onReplayed)
     return () => {
-      socket.off('gameReplayed', ({ newGameId }) => setReplayGameId(newGameId))
+      socket.off('lobby:replayed', ({ newGameId }) => setReplayGameId(newGameId))
     }
   }, [socket])
 

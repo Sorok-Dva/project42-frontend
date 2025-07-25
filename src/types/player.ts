@@ -15,4 +15,5 @@ export interface Player {
   id?: string | number
   canVote: boolean
   guide: string | null
+  hasUsedAbility: false
 }

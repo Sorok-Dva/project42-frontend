@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import { useSocket } from 'contexts/SocketContext'
 import { useUser } from 'contexts/UserContext'
+import { motion } from 'framer-motion'
 
 interface PhaseActionRequestCard5 {
-  phase: number;
   action: {
-    card: number;
+    roleId: number;
     targetCount: number;
     message: string;
     channel?: string;
   };
-  eligibleTargets: { id: number; nickname: string }[];
+  targets: { id: number; nickname: string }[];
 }
 
 interface PhaseActionCard5Props {
@@ -47,11 +47,11 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
   const handleDeathSubmit = () => {
     if (!socket || selectedDeathTarget === '' || deathElixirUsed) return
     socket.emit('game:submit_action', {
-      roomId,
+      gameId: roomId,
       playerId: user!.id,
-      actionCard: actionRequest.action.card,
-      targets: [selectedDeathTarget],
-      type: 'death'
+      roleId: actionRequest.action.roleId,
+      targetId: selectedDeathTarget,
+      ability: 'alchemist_potions_death',
     })
     setDeathElixirUsed(true)
   }
@@ -59,11 +59,11 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
   const handleLifeSubmit = () => {
     if (!socket || lifeElixirUsed || gameType === 3) return
     socket.emit('game:submit_action', {
-      roomId,
+      gameId: roomId,
       playerId: user!.id,
-      actionCard: actionRequest.action.card,
-      targets: [alienVictim ? alienVictim.id : -1],
-      type: 'life'
+      roleId: actionRequest.action.roleId,
+      targetId: alienVictim ? alienVictim.id : -1,
+      ability: 'alchemist_potions_life',
     })
     setAlienVictim(null)
     setLifeElixirUsed(true)
@@ -79,34 +79,37 @@ const PhaseActionCard5: React.FC<PhaseActionCard5Props> = ({
           <h4 className="text-base font-medium text-blue-300 mb-2">Elixir de Mort :</h4>
           <div className="relative">
             <select
-              className="w-full bg-black/60 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none"
               value={selectedDeathTarget}
               onChange={handleDeathChange}
+              className="w-full bg-black/60 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              size={Math.min(actionRequest.targets.length, Math.max(5, Math.floor(window.innerHeight * 0.05)))}
+              style={{
+                height: 'auto',
+                maxHeight: 'min(40vh, 300px)',
+                overflow: 'auto'
+              }}
             >
-              <option value="" disabled>Sélectionnez une cible</option>
-              {actionRequest.eligibleTargets.map((target) => (
-                <option key={target.id} value={target.id}>
+              {actionRequest.targets.map((target) => (
+                <option key={target.id} value={target.id} className="p-2 hover:bg-blue-900/30">
                   {target.nickname}
                 </option>
               ))}
             </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
-            </div>
           </div>
-          <button
+
+          <motion.button
             className={`mt-3 px-4 py-2 rounded-lg transition-colors ${
               selectedDeathTarget === ''
                 ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
                 : 'bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white'
             }`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleDeathSubmit}
             disabled={selectedDeathTarget === ''}
           >
-            Utiliser Elixir de Mort
-          </button>
+            Empoisonner
+          </motion.button>
         </div>
       )}
 

@@ -364,7 +364,15 @@ export const useGame = (
       console.log('Private notification:', data.message)
     }
 
-    const handleGameEnd = () => setGameFinished(true)
+    const handleGameEnd = (data: any) => {
+      setGameFinished(true)
+      setWinnersAvatars({ winMsg: data.winMsg, avatars: data.winners })
+    }
+
+    const handleRequireSyncState = () => {
+      socket.emit('game:sync_state', { gameId })
+    }
+
     const handleGameDissolved = () => setGameError('Le salon a été détruit par la modération.')
     const handleError = (error: any) => {
       setMessages(prev => [
@@ -411,6 +419,7 @@ export const useGame = (
     socket.on('tchat:new_message', handleNewMessage)
     socket.on('game:started', handleGameStarted)
     socket.on('game:state_update', handleGameStateUpdate)
+    socket.on('game:require_sync_state', handleRequireSyncState)
     socket.on('game:couple_list', handleCoupleListUpdate)
     socket.on('phase:change', handlePhaseChange)
     socket.on('player:update', handlePlayerUpdate)
