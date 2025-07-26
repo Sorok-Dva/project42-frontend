@@ -69,7 +69,6 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     if (!socket || !user || !player || !roomId) return
 
     socket.on('game:action_required', (data: PhaseActionRequest) => {
-      console.log('player.isInfected', player.isInfected, player)
       if (
         data.action.roleId === player?.card?.id ||
         data.action.roleId === -1 ||

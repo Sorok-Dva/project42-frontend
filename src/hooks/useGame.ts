@@ -232,8 +232,10 @@ export const useGame = (
           setIsAuthorized(authorized)
           setPasswordRequired(!!data.room.password)
           setRoomData(data.room)
-          // On fusionne les données du joueur pour ne pas écraser la carte reçue par socket
-          // setPlayer(prevPlayer => ({ ...prevPlayer, nickname: data.player?.nickname }))
+          if (data.room.status !== 'in_progress') {
+            // On fusionne les données du joueur pour ne pas écraser la carte reçue par socket
+            setPlayer(prevPlayer => ({ ...prevPlayer, ...data.player }))
+          }
           setViewer(data.viewer)
           setCreator(data.creator)
           setGameStarted(data.room.status === 'in_progress')
@@ -300,7 +302,6 @@ export const useGame = (
     }
 
     const handleNewMessage = (message: Message) => {
-      console.log('handle message', message, message.message, message.message.toLowerCase())
       if (message.channel === 2 && isNight) {
         socket.emit('shaman_listen', message)
       }
@@ -330,6 +331,8 @@ export const useGame = (
         setPlayers(payload.players)
       }
       setAlienList(payload.alienList || [])
+      setSisterList(payload.sistersList || [])
+      setBrothersList(payload.brotherList || [])
       setCoupleList(payload.lovers || [])
       setIsNight(data.phase.startsWith('NIGHT'))
     }
@@ -440,7 +443,6 @@ export const useGame = (
       socket.off('tchat:new_message', handleNewMessage)
       socket.off('game:started', handleGameStarted)
       socket.off('game:state_update', handleGameStateUpdate)
-      socket.off('phase:change', handlePhaseChange)
       socket.off('player:update', handlePlayerUpdate)
       socket.off('notification:private', handlePrivateNotification)
       socket.off('game:end', handleGameEnd)

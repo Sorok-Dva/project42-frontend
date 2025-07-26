@@ -58,7 +58,6 @@ const GameTimer: React.FC<GameTimerProps> = ({ gameId, gameStarted, gameFinished
     })
 
     socket.on('phase:change', (payload) => {
-      console.log('phase:change')
       if (!payload.endTime) return
       updateTimer(payload.endTime)
     })
@@ -66,7 +65,6 @@ const GameTimer: React.FC<GameTimerProps> = ({ gameId, gameStarted, gameFinished
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
       socket.off('phase:timer')
-      socket.off('phase:change')
     }
   }, [socket, gameStarted, gameFinished])
 
