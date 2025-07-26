@@ -98,7 +98,7 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
         if (
           msg.channel === 3 &&
           player &&
-          ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected)
+          ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected || player.waywardFaction === 'Alien')
         )
           return true
         if (msg.channel === 2 && player && !player.alive) return true

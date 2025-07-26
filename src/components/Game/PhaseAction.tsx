@@ -72,7 +72,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
       if (
         data.action.roleId === player?.card?.id ||
         data.action.roleId === -1 ||
-        (data.action.roleId === 2 && ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected)) ||
+        (data.action.roleId === 2 && ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected || player.waywardFaction === 'Alien')) ||
         (data.action.roleId === 6 && (!player.alive)) ||
         (data.action.faction === 'Alien' && player.isInfected)
       ) {
