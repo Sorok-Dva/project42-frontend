@@ -232,7 +232,7 @@ export const useGame = (
           setIsAuthorized(authorized)
           setPasswordRequired(!!data.room.password)
           setRoomData(data.room)
-          if (data.room.status !== 'in_progress') {
+          if (data.room.status !== 'in_progress' && data.player) {
             // On fusionne les données du joueur pour ne pas écraser la carte reçue par socket
             setPlayer(prevPlayer => ({ ...prevPlayer, ...data.player }))
           }

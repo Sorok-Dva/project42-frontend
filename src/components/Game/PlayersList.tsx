@@ -527,6 +527,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
                 {/* Actions sur le joueur */}
                 <div className="flex items-center">
+
                   {canRequestGuide && !gameStarted && !gameFinished && !_player.guide && (
                     <button
                       onClick={() => {
@@ -535,11 +536,10 @@ const PlayersList: React.FC<PlayersListProps> = ({
                             alert('Vous avez déjà demandé à guider ce joueur')
                             return
                           }
-                          socket.emit('request_guide_player', {
+                          socket.emit('guide:request', {
                             targetPlayerId: Number(_player.id),
-                            roomId: gameId,
+                            gameId,
                           })
-                          console.log(`Requesting to guide player ${_player.nickname} (ID: ${_player.id}) in room ${gameId}`)
                           guideAskHistory.push(_player.nickname)
                           // Future: Add client-side feedback (e.g., disable button, toast)
                         } else {

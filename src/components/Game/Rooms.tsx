@@ -236,7 +236,7 @@ const RoomList = () => {
         },
       )
       setPlayerRoomId(roomId)
-      window.open(`/game/${response.data.game.id}`, '_blank')
+      window.open(`/game/${response.data.roomId}`, '_blank')
       setInGame(true)
       fetchRooms()
     } catch (error: any) {

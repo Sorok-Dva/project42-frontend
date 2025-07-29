@@ -76,7 +76,6 @@ const GamePage = () => {
   } | null>(null)
   const [showGuideRequestModal, setShowGuideRequestModal] = useState(false)
   const [activeGuideSession, setActiveGuideSession] = useState<{
-    guideRoomName: string;
     partnerNickname: string;
     amIGuide: boolean;
   } | null>(null)
@@ -422,12 +421,8 @@ const GamePage = () => {
     if (!socket || !gameId || !user) return
 
     const handleGuideRequestReceived = (data: { guideUserId: number; guideNickname: string; roomId: number }) => {
-      console.log('Guide request received by player:', data)
-      if (Number(data.roomId) === Number(gameId)) {
-        // This event is sent directly to the targeted player by the backend
-        setGuideRequestDetails(data)
-        setShowGuideRequestModal(true)
-      }
+      setGuideRequestDetails(data)
+      setShowGuideRequestModal(true)
     }
 
     const handleGuideRequestSent = (data: { message: string }) => {
@@ -442,11 +437,11 @@ const GamePage = () => {
       }
     }
 
-    const handleGuideRequestRejected = (data: { playerId?: number; playerNickname?: string; guideUserId?: number, roomId: number; reason: string }) => {
+    const handleGuideRequestRejected = (data: { playerId?: number; playerNickname?: string; guideUserId?: number, reason: string }) => {
       // This event can be for the guide (their request was rejected)
       // or for the player (the request they were considering is no longer valid, e.g. guide busy)
-      alert(`Système de guide: Demande rejetée ou invalide. Joueur: ${data.playerNickname || 'N/A'}. Raison: ${data.reason}`)
-      if (showGuideRequestModal && Number(data.roomId) === Number(gameId)) {
+      alert(`Système de guide: Demande rejetée ou invalide. Raison: ${data.reason}`)
+      if (showGuideRequestModal) {
         // If the currently open modal's guide matches the guide involved in rejection, close it.
         if (guideRequestDetails && data.guideUserId && data.guideUserId === guideRequestDetails.guideUserId) {
           setShowGuideRequestModal(false)
@@ -459,16 +454,14 @@ const GamePage = () => {
     }
 
     const handleGuideChannelEstablished = (data: {
-      guideRoomName: string;
       guideUserId: number;
       guideNickname: string;
       guidedPlayerId: number;
       guidedPlayerNickname: string;
-      roomId: number;
     }) => {
-      if (Number(data.roomId) === Number(gameId) && user && (user.id === data.guideUserId || user.id === data.guidedPlayerId)) {
+      console.log(user, data.guideUserId, data.guidedPlayerId, (user.id === data.guideUserId || user.id === data.guidedPlayerId))
+      if (user && (user.id === data.guideUserId || user.id === data.guidedPlayerId)) {
         setActiveGuideSession({
-          guideRoomName: data.guideRoomName,
           partnerNickname: user.id === data.guideUserId ? data.guidedPlayerNickname : data.guideNickname,
           amIGuide: user.id === data.guideUserId,
         })
@@ -479,7 +472,7 @@ const GamePage = () => {
     }
 
     const handleExternalGuideSessionTerminated = (data: { guideRoomName: string; reason: string; roomId: number }) => {
-      if (activeGuideSession && data.guideRoomName === activeGuideSession.guideRoomName) {
+      if (activeGuideSession) {
         alert(`Session de guide terminée: ${data.reason}`)
         setActiveGuideSession(null)
       }
@@ -493,20 +486,20 @@ const GamePage = () => {
       }
     }
 
-    socket.on('guide_request_received', handleGuideRequestReceived)
+    socket.on('guide:request_received', handleGuideRequestReceived)
     socket.on('guide_request_sent', handleGuideRequestSent)
     socket.on('guide_request_expired', handleGuideRequestExpired)
-    socket.on('guide_request_rejected', handleGuideRequestRejected)
-    socket.on('guide_channel_established', handleGuideChannelEstablished)
+    socket.on('guide:rejected', handleGuideRequestRejected)
+    socket.on('guide:established', handleGuideChannelEstablished)
     socket.on('guide_session_terminated', handleExternalGuideSessionTerminated)
     socket.on('error', handleBackendError)
 
     return () => {
-      socket.off('guide_request_received', handleGuideRequestReceived)
+      socket.off('guide:request_received', handleGuideRequestReceived)
       socket.off('guide_request_sent', handleGuideRequestSent)
       socket.off('guide_request_expired', handleGuideRequestExpired)
-      socket.off('guide_request_rejected', handleGuideRequestRejected)
-      socket.off('guide_channel_established', handleGuideChannelEstablished)
+      socket.off('guide:rejected', handleGuideRequestRejected)
+      socket.off('guide:established', handleGuideChannelEstablished)
       socket.off('guide_session_terminated', handleExternalGuideSessionTerminated)
       socket.off('error', handleBackendError)
     }
@@ -514,7 +507,7 @@ const GamePage = () => {
 
   const handleAcceptGuideRequest = () => {
     if (socket && guideRequestDetails) {
-      socket.emit('accept_guide_request', { guideUserId: guideRequestDetails.guideUserId, roomId: guideRequestDetails.roomId })
+      socket.emit('guide:accept', { guideUserId: guideRequestDetails.guideUserId, gameId: roomData.id })
     }
     setShowGuideRequestModal(false)
     setGuideRequestDetails(null)
@@ -522,7 +515,7 @@ const GamePage = () => {
 
   const handleRejectGuideRequest = () => {
     if (socket && guideRequestDetails) {
-      socket.emit('reject_guide_request', { guideUserId: guideRequestDetails.guideUserId, roomId: guideRequestDetails.roomId })
+      socket.emit('guide:rejected', { guideUserId: guideRequestDetails.guideUserId, gameId: roomData.id })
     }
     setShowGuideRequestModal(false)
     setGuideRequestDetails(null)
@@ -538,7 +531,6 @@ const GamePage = () => {
       if (!partner) return
       console.log('guideRoomName', `guide_${roomData.id}_${viewer.userId}_${partner.playerId}`)
       setActiveGuideSession({
-        guideRoomName: `guide_${roomData.id}_${viewer.userId}_${partner.playerId}`,
         partnerNickname: partner.nickname,
         amIGuide: true,
       })
@@ -550,7 +542,6 @@ const GamePage = () => {
       console.log('guideRoomName', `guide_${roomData.id}_${partner.userId}_${player.playerId}`)
 
       setActiveGuideSession({
-        guideRoomName: `guide_${roomData.id}_${partner.userId}_${player.playerId}`,
         partnerNickname: partner.user?.nickname,
         amIGuide: true,
       })
@@ -573,7 +564,7 @@ const GamePage = () => {
       try {
         if (viewer && !viewer.user) {
           if (activeGuideSession) {
-            socket.emit('terminate_guide_session', { guideRoomName: activeGuideSession.guideRoomName, roomId: gameId })
+            socket.emit('terminate_guide_session', { roomId: gameId })
           }
           window.location.href = '/'
           return
@@ -588,7 +579,7 @@ const GamePage = () => {
         console.log('leave response', response)
         if (response.message) {
           if (activeGuideSession) {
-            socket.emit('terminate_guide_session', { guideRoomName: activeGuideSession.guideRoomName, roomId: gameId })
+            socket.emit('terminate_guide_session', { roomId: gameId })
           }
           socket.emit('leaveRoom', {
             roomId: gameId,
@@ -1487,7 +1478,6 @@ const GamePage = () => {
           {activeGuideSession && user && (
             <GuideChat
               roomId={roomData.id}
-              guideRoomName={activeGuideSession.guideRoomName}
               partnerNickname={activeGuideSession.partnerNickname}
               amIGuide={activeGuideSession.amIGuide}
               onSessionTerminated={() => {

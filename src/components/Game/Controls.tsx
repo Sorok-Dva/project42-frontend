@@ -46,7 +46,6 @@ interface GameControlsProps {
   setPlayer: React.Dispatch<React.SetStateAction<Player | null>>
   isInn: boolean
   activeGuideSession: {
-    guideRoomName: string;
     partnerNickname: string;
     amIGuide: boolean;
   } | null
@@ -190,7 +189,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         const response = await leaveGame(token)
         if (response.message) {
           if (activeGuideSession) {
-            socket.emit('terminate_guide_session', { guideRoomName: activeGuideSession.guideRoomName, roomId: gameId })
+            socket.emit('terminate_guide_session', { roomId: gameId })
           }
           socket.emit('leaveRoom', {
             roomId: gameId,
@@ -376,7 +375,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         },
       )
       if (activeGuideSession) {
-        socket.emit('terminate_guide_session', { guideRoomName: activeGuideSession.guideRoomName, roomId: gameId })
+        socket.emit('terminate_guide_session', { roomId: gameId })
       }
       window.location.href = `/game/${response.data.game.id}`
     } catch (error) {

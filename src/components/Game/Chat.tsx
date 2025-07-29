@@ -228,7 +228,7 @@ const Chat: React.FC<ChatProps> = ({
         // Logique pour déterminer le canal de chat selon le rôle et l'état du jeu
         if (
           isNight &&
-          ([2, 9, 20, 21].includes(player?.card?.id || -1) || player?.isInfected) &&
+          ([2, 9, 20, 21].includes(player?.card?.id || -1) || player?.isInfected || player?.waywardFaction === 'Alien') &&
           gameStarted &&
           !gameFinished
         )

@@ -8,13 +8,12 @@ import { useUser } from 'contexts/UserContext'
 
 interface GuideChatProps {
   roomId: number
-  guideRoomName: string
   partnerNickname: string
   amIGuide: boolean
   onSessionTerminated: () => void
 }
 
-const GuideChat: React.FC<GuideChatProps> = ({ roomId, guideRoomName, partnerNickname, amIGuide, onSessionTerminated }) => {
+const GuideChat: React.FC<GuideChatProps> = ({ roomId, partnerNickname, amIGuide, onSessionTerminated }) => {
   const { socket } = useSocket()
   const { user } = useUser()
   const [newMessage, setNewMessage] = useState('')
@@ -28,12 +27,12 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, guideRoomName, partnerNic
     if (!socket) return
 
     const handleSessionTerminated = (data: { guideRoomName: string; reason: string; roomId: number }) => {
-      if (data.guideRoomName === guideRoomName) {
+      /* if (data.guideRoomName === guideRoomName) {
         setIsTerminated(true)
         if (onSessionTerminated) {
           onSessionTerminated()
         }
-      }
+      }*/
     }
 
     socket.on('guide_session_terminated', handleSessionTerminated)
@@ -41,14 +40,13 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, guideRoomName, partnerNic
     return () => {
       socket.off('guide_session_terminated', handleSessionTerminated)
     }
-  }, [socket, guideRoomName, onSessionTerminated, isExpanded, currentUserNickname])
+  }, [socket, onSessionTerminated, isExpanded, currentUserNickname])
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
     if (!socket || !newMessage.trim() || isTerminated) return
 
     socket.emit('send_guide_message', {
-      guideRoomName,
       message: newMessage.trim(),
       roomId,
     })
@@ -64,7 +62,7 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, guideRoomName, partnerNic
 
   const handleTerminateSession = () => {
     if (socket && confirm('Êtes-vous sûr de vouloir terminer cette session de guide ?')) {
-      socket.emit('terminate_guide_session', { guideRoomName, roomId })
+      socket.emit('terminate_guide_session', { roomId })
     }
   }
 
