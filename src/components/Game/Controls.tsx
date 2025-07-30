@@ -413,7 +413,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
   const handleVoteQuickEnd = () => {
     if (!socket || !gameId || !player?.alive) return
-    socket.emit('quickEndPhaseVote', { roomId: gameId, playerId: player.id })
+    socket.emit('vote:end_phase', { gameId, vote: true })
     setQuickEndPhase(prev => prev ? { ...prev, hasVoted: true } : prev)
   }
 
@@ -463,7 +463,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
     const clearQuickEnd = () => setQuickEndPhase(null)
 
-    socket.on('quickEndPhaseProposed', () => {
+    socket.on('vote:propose_end_phase', () => {
       setQuickEndPhase(prev => {
         if (prev === null) {
           return {
@@ -475,7 +475,8 @@ const GameControls: React.FC<GameControlsProps> = ({
         return prev
       })
     })
-    socket.on('quickEndPhaseUpdated', (data) => {
+
+    socket.on('vote:end_phase_update', (data) => {
       setQuickEndPhase(prev => {
         if (prev === null) {
           return {
@@ -491,12 +492,12 @@ const GameControls: React.FC<GameControlsProps> = ({
         }
       })
     })
-    socket.on('phaseEnded', clearQuickEnd)
+    socket.on('phase:change', clearQuickEnd)
 
     return () => {
-      socket.off('quickEndPhaseProposed')
-      socket.off('quickEndPhaseUpdated')
-      socket.off('phaseEnded', clearQuickEnd)
+      socket.off('vote:propose_end_phase')
+      socket.off('vote:end_phase_update')
+      socket.off('phase:change', clearQuickEnd)
     }
   }, [socket, players])
 
