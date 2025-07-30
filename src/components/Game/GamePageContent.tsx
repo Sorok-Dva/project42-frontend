@@ -423,14 +423,14 @@ const GamePage = () => {
       setThrownItems(prev => [...prev, { id: `${Date.now()}-${Math.random()}`, image: data.item }])
     }
 
-    socket.on('itemThrown', handleItemThrown)
+    socket.on('object:thrown', handleItemThrown)
 
     return () => {
       socket.offAny()
       socket.off('bipNotReadyPlayers')
       socket.off('music')
       socket.off('stopMusic')
-      socket.off('itemThrown', handleItemThrown)
+      socket.off('object:thrown', handleItemThrown)
     }
   }, [socket, player])
 

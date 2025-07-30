@@ -81,7 +81,7 @@ const PlayerActionMenu: React.FC<PlayerActionMenuProps> = ({
 
   const handleThrowItem = (itemId: number) => {
     if (socket) {
-      socket.emit('throwItem', { roomId: gameId, itemId, targetId: playerId })
+      socket.emit('player:throw_item', { gameId, itemId, targetId: playerId })
     }
     onClose()
   }
