@@ -85,6 +85,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const [favoriteComment, setFavoriteComment] = useState<string>('')
   const [replayGameId, setReplayGameId] = useState<number | null>(null)
   const [isSavingComment, setIsSavingComment] = useState<boolean>(false)
+  const [isLeaving, setIsLeaving] = useState<boolean>(false)
   const [voicePlayers, setVoicePlayers] = useState<number[]>([])
   const [spectatorsAreMuted, setSpectatorsAreMuted] = useState<boolean>(false)
   const [quickEndPhase, setQuickEndPhase] = useState<{ votes: number; required: number; hasVoted: boolean } | null>(null)
@@ -184,18 +185,14 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleJoinSpectate = async () => {
-    if (gameId && player && !gameStarted && !gameFinished) {
+    if (gameId && player && !gameStarted && !gameFinished && !isLeaving) {
+      setIsLeaving(true)
       try {
         const response = await leaveGame(token)
         if (response.message) {
           if (activeGuideSession) {
-            socket.emit('terminate_guide_session', { roomId: gameId })
+            socket.emit('guide:terminated', { roomId: gameId })
           }
-          socket.emit('leaveRoom', {
-            roomId: gameId,
-            player: player ? { id: user?.id, nickname: response?.nickname, realNickname: response?.realNickname } : null,
-            viewer,
-          })
           await axios.post(
             `/api/games/room/${gameId}/spectate`,
             {},
@@ -205,10 +202,12 @@ const GameControls: React.FC<GameControlsProps> = ({
               },
             },
           )
+          setIsLeaving(false)
+          window.location.href = `/game/${gameId}`
         }
-
-        window.location.href = `/game/${gameId}`
+        setIsLeaving(false)
       } catch (error: any) {
+        setIsLeaving(false)
         if (error.response?.data?.error) {
           toast.error(`Une erreur est survenue: ${error.response.data.error}`, ToastDefaultOptions)
         } else {
@@ -375,9 +374,9 @@ const GameControls: React.FC<GameControlsProps> = ({
         },
       )
       if (activeGuideSession) {
-        socket.emit('terminate_guide_session', { roomId: gameId })
+        socket.emit('guide:terminated', { roomId: gameId })
       }
-      window.location.href = `/game/${response.data.game.id}`
+      window.location.href = `/game/${response.data.roomId}`
     } catch (error) {
       console.error('Erreur lors du join room:', error)
     }

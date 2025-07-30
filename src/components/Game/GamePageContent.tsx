@@ -98,6 +98,7 @@ const GamePage = () => {
   const [disconnectionTime, setDisconnectionTime] = useState<Date | null>(null)
   const maxReconnectAttempts = 5
   const reconnectIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const isKilledByServer = useRef<boolean>(false)
 
   const [canvasReady, setCanvasReady] = useState(false)
 
@@ -273,24 +274,29 @@ const GamePage = () => {
     }
 
     const handleDisconnect = (reason: string) => {
-      console.log('Socket déconnecté:', reason)
-      setIsConnected(false)
-      setDisconnectionTime(new Date())
+      console.log('isKilledByServer', isKilledByServer)
+      if (!isKilledByServer.current) {
+        console.log('Socket déconnecté:', reason)
+        setIsConnected(false)
+        setDisconnectionTime(new Date())
 
-      // Ne pas afficher la modal si c'est une déconnexion volontaire
-      if (reason !== 'io client disconnect' && reason !== 'transport close') {
-        setShowDisconnectionModal(true)
-        wasDisconnectedRef.current = true
-        setReconnectAttempts(1)
-        setIsReconnecting(true)
+        // Ne pas afficher la modal si c'est une déconnexion volontaire
+        if (reason !== 'io client disconnect' && reason !== 'transport close') {
+          setShowDisconnectionModal(true)
+          wasDisconnectedRef.current = true
+          setReconnectAttempts(1)
+          setIsReconnecting(true)
+        }
       }
     }
 
     const handleConnectError = (error: Error) => {
-      console.error('Erreur de connexion socket:', error)
-      setIsConnected(false)
-      setShowDisconnectionModal(true)
-      wasDisconnectedRef.current = true
+      if (!isKilledByServer.current) {
+        console.error('Erreur de connexion socket:', error)
+        setIsConnected(false)
+        setShowDisconnectionModal(true)
+        wasDisconnectedRef.current = true
+      }
     }
 
     const handleReconnect = (attemptNumber: number) => {
@@ -299,6 +305,15 @@ const GamePage = () => {
       setShowDisconnectionModal(false)
       setReconnectAttempts(0)
       setIsReconnecting(false)
+    }
+
+    const handleKilledByServer = (reason?: string) => {
+      isKilledByServer.current = true
+      if (reason?.startsWith('kicked')) {
+        setGameError('Vous avez été kick de la partie.')
+      } else {
+        setGameError('Votre session de jeu à pris fin')
+      }
     }
 
     const handleReconnectError = (error: Error) => {
@@ -311,6 +326,7 @@ const GamePage = () => {
     }
 
     // Écouter les événements de connexion
+    socket.on('connection:killed_by_server', handleKilledByServer)
     socket.on('connect', handleConnect)
     socket.on('disconnect', handleDisconnect)
     socket.on('connect_error', handleConnectError)
@@ -321,6 +337,7 @@ const GamePage = () => {
     setIsConnected(socket.connected)
 
     return () => {
+      socket.off('connection:killed_by_server', handleKilledByServer)
       socket.off('connect', handleConnect)
       socket.off('disconnect', handleDisconnect)
       socket.off('connect_error', handleConnectError)
@@ -564,7 +581,7 @@ const GamePage = () => {
       try {
         if (viewer && !viewer.user) {
           if (activeGuideSession) {
-            socket.emit('terminate_guide_session', { roomId: gameId })
+            socket.emit('guide:terminated', { roomId: gameId })
           }
           window.location.href = '/'
           return
@@ -576,18 +593,10 @@ const GamePage = () => {
         }
 
         const response = await leaveGame(token)
-        console.log('leave response', response)
         if (response.message) {
           if (activeGuideSession) {
-            socket.emit('terminate_guide_session', { roomId: gameId })
+            socket.emit('guide:terminated', { roomId: gameId })
           }
-          socket.emit('leaveRoom', {
-            roomId: gameId,
-            player: player
-              ? { id: user?.id, nickname: response?.nickname, realNickname: response?.realNickname }
-              : null,
-            viewer,
-          })
         }
         localStorage.removeItem(`game_auth_${gameId}`)
         setGameError('Vous avez bien quitté la partie. Vous pouvez fermer cet onglet.')
@@ -1128,7 +1137,7 @@ const GamePage = () => {
                     </h1>
                     <div className="flex items-center gap-4 text-sm text-blue-300">
                       <p className="text-sm text-blue-300 flex items-center">
-                        {players.length}/{slots} joueurs • Options
+                        {players.length}/{slots} joueurs • {options.length === 0 && ' Aucune'} Options
                         <span className="flex gap-1 ml-1">
                           {roomData.discordChannelId && (
                             <>
@@ -1154,7 +1163,6 @@ const GamePage = () => {
                               <Tooltip id={`private_${roomData.id}`} content="Partie privée" />
                             </>
                           )}
-                          {options.length === 0 && ' Aucune'}
                         </span>
                         • {isNight ? 'Phase nocturne' : 'Phase diurne'}
                       </p>

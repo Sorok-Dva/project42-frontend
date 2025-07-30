@@ -263,17 +263,7 @@ const RoomList = () => {
     }
     try {
       const response = await leaveGame(token)
-      if (response.data.message) {
-        socket.emit('leaveRoom', {
-          roomId: playerRoomId,
-          player: user
-            ? {
-              id: user?.id,
-              nickname: response?.nickname,
-              realNickname: response?.realNickname,
-            }
-            : null,
-        })
+      if (response.message) {
         setPlayerRoomId(null)
         setInGame(false)
         localStorage.removeItem(`game_auth_${playerRoomId}`)

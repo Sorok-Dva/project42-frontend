@@ -5,27 +5,28 @@ import { motion } from 'framer-motion'
 import { Trophy, Crown, Skull } from 'lucide-react'
 
 interface GameResultPlayer {
-  id: string | number
+  id: number
   nickname: string
   realNickname?: string
   cardId: number
   cardName: string
   isInfected: boolean
   points: number
-  pointsMultiplier: number
   alive: boolean
   winner?: boolean
 }
 
-export interface GameResultsProps {
+interface GameResultsProps {
+  gameId: number
   players: GameResultPlayer[]
+  couple?: [number, number]
   gameType?: string
   winner?: string
   whiteFlag?: boolean
   pointsMultiplier: number
 }
 
-const GameResults: React.FC<GameResultsProps> = ({ players, whiteFlag, pointsMultiplier, gameType = 'Normal', winner }) => {
+const GameResults: React.FC<GameResultsProps> = ({ gameId, players, couple, whiteFlag, pointsMultiplier, gameType = 'Normal', winner }) => {
   // Trier les joueurs par points décroissants
   const sortedPlayers = [...players].sort((a, b) => b.points - a.points)
 
@@ -105,26 +106,48 @@ const GameResults: React.FC<GameResultsProps> = ({ players, whiteFlag, pointsMul
                 {/* Player Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-white truncate" data-profile={player.nickname}>{player.nickname}</span>
+                    <span className="font-semibold text-white truncate cursor-pointer sound-tick" data-profile={player.realNickname}>{player.nickname}</span>
                     {player.realNickname && player.realNickname !== player.nickname && (
                       <span className="text-xs text-gray-400 truncate">({player.realNickname})</span>
                     )}
                   </div>
-                  <div className="text-sm text-green-300">{player.cardName || 'Rôle inconnu'}</div>
-                  {player.isInfected && (
-                    <div className="text-sm text-green-300">{player.cardName || 'Rôle inconnu'}</div>
-
-                  )}
+                  <div className="text-sm text-green-300">
+                    {player.cardName || 'Rôle inconnu'}
+                    {couple && couple.includes(player.id) && (
+                      <span className="text-sm text-pink-500"> • 💞 Joueur en couple</span>
+                    )}
+                    {player.isInfected && (
+                      <span className="text-sm text-orange-400"> • 🦠 Joueur infecté</span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Points */}
                 <div className="flex-shrink-0 text-right">
-                  <div className={`font-bold text-lg ${getPointsColor(player.points)}`}>
-                    {getPointsIcon(player.points)}
-                    {player.points}
-                    {(pointsMultiplier > 1 && player.points > 0) ? `<b>x ${pointsMultiplier}</b>` : ''}
-                  </div>
-                  <div className="text-xs text-gray-400">points</div>
+                  {whiteFlag ? (
+                    <div className="text-center">
+                      <div className="text-sm text-gray-400 line-through">
+                        {getPointsIcon(player.points)}
+                        {player.points}
+                        {pointsMultiplier > 1 && player.points > 0 && (
+                          <span className="text-xs"> x{pointsMultiplier}</span>
+                        )}
+                      </div>
+                      <div className="text-xs text-orange-400 font-medium">Sans points</div>
+                      <div className="text-xs text-gray-500">Info seulement</div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className={`font-bold text-lg ${getPointsColor(player.points)}`}>
+                        {getPointsIcon(player.points)}
+                        {player.points}
+                        {pointsMultiplier > 1 && player.points > 0 && (
+                          <span className="text-xs"> x{pointsMultiplier}</span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-400">points</div>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ))}
@@ -166,21 +189,49 @@ const GameResults: React.FC<GameResultsProps> = ({ players, whiteFlag, pointsMul
                 {/* Player Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-white truncate">{player.nickname}</span>
+                    <span className="font-semibold text-white truncate cursor-pointer sound-tick" data-profile={player.realNickname}>{player.nickname}</span>
                     {player.realNickname && player.realNickname !== player.nickname && (
                       <span className="text-xs text-gray-400 truncate">({player.realNickname})</span>
                     )}
                   </div>
-                  <div className="text-sm text-gray-300">{player.cardName || 'Rôle inconnu'}</div>
+                  <div className="text-sm text-gray-300">
+                    {player.cardName || 'Rôle inconnu'}
+                    {couple && couple.includes(player.id) && (
+                      <span className="text-sm text-pink-500"> • 💞 Joueur en couple</span>
+                    )}
+                    {player.isInfected && (
+                      <span className="text-sm text-orange-400"> • 🦠 Joueur infecté</span>
+                    )}
+                  </div>
+
                 </div>
 
                 {/* Points */}
                 <div className="flex-shrink-0 text-right">
-                  <div className={`font-bold text-lg ${getPointsColor(player.points)}`}>
-                    {getPointsIcon(player.points)}
-                    {player.points}
-                  </div>
-                  <div className="text-xs text-gray-400">points</div>
+                  {whiteFlag ? (
+                    <div className="text-center">
+                      <div className="text-sm text-gray-400 line-through">
+                        {getPointsIcon(player.points)}
+                        {player.points}
+                        {pointsMultiplier > 1 && player.points > 0 && (
+                          <span className="text-xs"> x{pointsMultiplier}</span>
+                        )}
+                      </div>
+                      <div className="text-xs text-orange-400 font-medium">Sans points</div>
+                      <div className="text-xs text-gray-500">Info seulement</div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className={`font-bold text-lg ${getPointsColor(player.points)}`}>
+                        {getPointsIcon(player.points)}
+                        {player.points}
+                        {pointsMultiplier > 1 && player.points > 0 && (
+                          <span className="text-xs"> x{pointsMultiplier}</span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-400">points</div>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ))}
@@ -191,6 +242,10 @@ const GameResults: React.FC<GameResultsProps> = ({ players, whiteFlag, pointsMul
       {/* Footer */}
       <div className="mt-4 pt-3 border-t border-slate-600/30 text-center">
         <span className="text-xs text-gray-400">
+          Partie {gameId} ($gameType)
+          {whiteFlag && (
+            <span className="text-orange-400 ml-2">• Partie sans points (points affichés à titre informatif)</span>
+          )}
           • {players.length} joueur{players.length > 1 ? 's' : ''}
         </span>
       </div>
