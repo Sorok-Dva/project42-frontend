@@ -491,7 +491,7 @@ const GamePage = () => {
     socket.on('guide_request_expired', handleGuideRequestExpired)
     socket.on('guide:rejected', handleGuideRequestRejected)
     socket.on('guide:established', handleGuideChannelEstablished)
-    socket.on('guide_session_terminated', handleExternalGuideSessionTerminated)
+    socket.on('guide:terminated', handleExternalGuideSessionTerminated)
     socket.on('error', handleBackendError)
 
     return () => {
@@ -500,7 +500,7 @@ const GamePage = () => {
       socket.off('guide_request_expired', handleGuideRequestExpired)
       socket.off('guide:rejected', handleGuideRequestRejected)
       socket.off('guide:established', handleGuideChannelEstablished)
-      socket.off('guide_session_terminated', handleExternalGuideSessionTerminated)
+      socket.off('guide:terminated', handleExternalGuideSessionTerminated)
       socket.off('error', handleBackendError)
     }
   }, [socket, gameId, user, showGuideRequestModal, guideRequestDetails, activeGuideSession])

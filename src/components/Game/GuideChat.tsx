@@ -27,18 +27,16 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, partnerNickname, amIGuide
     if (!socket) return
 
     const handleSessionTerminated = (data: { guideRoomName: string; reason: string; roomId: number }) => {
-      /* if (data.guideRoomName === guideRoomName) {
-        setIsTerminated(true)
-        if (onSessionTerminated) {
-          onSessionTerminated()
-        }
-      }*/
+      setIsTerminated(true)
+      if (onSessionTerminated) {
+        onSessionTerminated()
+      }
     }
 
-    socket.on('guide_session_terminated', handleSessionTerminated)
+    socket.on('guide:terminated', handleSessionTerminated)
 
     return () => {
-      socket.off('guide_session_terminated', handleSessionTerminated)
+      socket.off('guide:terminated', handleSessionTerminated)
     }
   }, [socket, onSessionTerminated, isExpanded, currentUserNickname])
 
@@ -46,9 +44,9 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, partnerNickname, amIGuide
     e.preventDefault()
     if (!socket || !newMessage.trim() || isTerminated) return
 
-    socket.emit('send_guide_message', {
+    socket.emit('guide:message', {
       message: newMessage.trim(),
-      roomId,
+      gameId: roomId,
     })
     setNewMessage('')
   }
@@ -62,7 +60,7 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, partnerNickname, amIGuide
 
   const handleTerminateSession = () => {
     if (socket && confirm('Êtes-vous sûr de vouloir terminer cette session de guide ?')) {
-      socket.emit('terminate_guide_session', { roomId })
+      socket.emit('guide:terminated', { roomId })
     }
   }
 

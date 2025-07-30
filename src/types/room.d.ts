@@ -11,7 +11,7 @@ export interface Player {
   isBrother: boolean
   isCharmed: boolean
   isInfected: boolean
-  waywardFaction?: 'Alien' | 'Station'
+  faction?: 'Alien' | 'Station' | 'Solo'
   customVote?: number
   id?: string | number
   card?: { id: number; name: string; description: string; }
