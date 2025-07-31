@@ -263,10 +263,10 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
   const votePlayer = (_player: Player) => {
     if (!socket || !player?.alive || viewer) return
-    socket.emit('phaseActionResponse', {
-      roomId: gameId,
+    socket.emit('game:submit_action', {
+      gameId: gameId,
       playerId: user!.id,
-      actionCard: -1,
+      roleId: -1,
       targetId: lastVotedPlayer === _player.id ? -1 : Number(_player.id) ?? -1,
     })
     setLastVotedPlayer(lastVotedPlayer !== _player.id ? parseInt(_player.id as string ?? -1) : null)
