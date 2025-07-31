@@ -204,11 +204,7 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
     )
 
     return (
-      <Box
-        ref={containerRef}
-        sx={{ height: '100%', overflowY: 'auto', p: 1 }}
-        onScroll={handleScroll}
-      >
+      <div onScroll={handleScroll}>
         {/* Affichage des messages */}
         {filteredMessages.map((msg, index) => {
           try {
@@ -370,7 +366,7 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
             </Typography>
           )
         })}
-      </Box>
+      </div>
     )
   }
 )

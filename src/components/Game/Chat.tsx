@@ -7,6 +7,7 @@ import ChatMessages, { ChatMessagesHandle } from 'components/Game/ChatMessage'
 import GameRule from 'components/Game/Rules'
 import axios from 'axios'
 import { Player } from 'types/room'
+import { Box } from '@mui/material'
 
 interface ChatProps {
   gameId: string
@@ -410,25 +411,30 @@ const Chat: React.FC<ChatProps> = ({
 
       {/* Zone de messages */}
       <div className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/30 scrollbar-track-black/20 bg-black/70">
-        {/* Règles du jeu */ }
+        <Box
+          ref={containerRef}
+          sx={{ height: '100%', overflowY: 'auto', p: 1 }}
+        >
+          {/* Règles du jeu */ }
 
-        {/*<GameRule gameType={gameType} hasVoice={hasVoice} />*/}
-        {/*<hr />*/}
+          <GameRule gameType={gameType} hasVoice={hasVoice} />
+          <hr />
 
-        {/* Messages */ }
-        <ChatMessages
-          ref={chatMessagesRef}
-          messages={messages}
-          highlightedPlayers={highlightedPlayers}
-          player={player}
-          viewer={viewer}
-          isNight={isNight}
-          gameFinished={gameFinished}
-          gameStarted={gameStarted}
-          handleMentionClick={handleMentionClick}
-          isInn={isInn}
-          onUnreadChange={handleUnreadChange}
-        />
+          {/* Messages */ }
+          <ChatMessages
+            ref={chatMessagesRef}
+            messages={messages}
+            highlightedPlayers={highlightedPlayers}
+            player={player}
+            viewer={viewer}
+            isNight={isNight}
+            gameFinished={gameFinished}
+            gameStarted={gameStarted}
+            handleMentionClick={handleMentionClick}
+            isInn={isInn}
+            onUnreadChange={handleUnreadChange}
+          />
+        </Box>
       </div>
 
       {/* Zone de saisie */}
