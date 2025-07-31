@@ -8,21 +8,18 @@ import { useUser } from 'contexts/UserContext'
 
 interface GuideChatProps {
   roomId: number
-  guideRoomName: string
   partnerNickname: string
   amIGuide: boolean
   onSessionTerminated: () => void
 }
 
-const GuideChat: React.FC<GuideChatProps> = ({ roomId, guideRoomName, partnerNickname, amIGuide, onSessionTerminated }) => {
+const GuideChat: React.FC<GuideChatProps> = ({ roomId, partnerNickname, amIGuide, onSessionTerminated }) => {
   const { socket } = useSocket()
   const { user } = useUser()
   const [newMessage, setNewMessage] = useState('')
   const [isTerminated, setIsTerminated] = useState(false)
   const [isExpanded, setIsExpanded] = useState(true)
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false)
-  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
 
   const currentUserNickname = user?.nickname || 'Vous'
 
@@ -30,29 +27,26 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, guideRoomName, partnerNic
     if (!socket) return
 
     const handleSessionTerminated = (data: { guideRoomName: string; reason: string; roomId: number }) => {
-      if (data.guideRoomName === guideRoomName) {
-        setIsTerminated(true)
-        if (onSessionTerminated) {
-          onSessionTerminated()
-        }
+      setIsTerminated(true)
+      if (onSessionTerminated) {
+        onSessionTerminated()
       }
     }
 
-    socket.on('guide_session_terminated', handleSessionTerminated)
+    socket.on('guide:terminated', handleSessionTerminated)
 
     return () => {
-      socket.off('guide_session_terminated', handleSessionTerminated)
+      socket.off('guide:terminated', handleSessionTerminated)
     }
-  }, [socket, guideRoomName, onSessionTerminated, isExpanded, currentUserNickname])
+  }, [socket, onSessionTerminated, isExpanded, currentUserNickname])
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
     if (!socket || !newMessage.trim() || isTerminated) return
 
-    socket.emit('send_guide_message', {
-      guideRoomName,
+    socket.emit('guide:message', {
       message: newMessage.trim(),
-      roomId,
+      gameId: roomId,
     })
     setNewMessage('')
   }
@@ -66,7 +60,7 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, guideRoomName, partnerNic
 
   const handleTerminateSession = () => {
     if (socket && confirm('Êtes-vous sûr de vouloir terminer cette session de guide ?')) {
-      socket.emit('terminate_guide_session', { guideRoomName, roomId })
+      socket.emit('guide:terminated', { roomId })
     }
   }
 
@@ -89,14 +83,6 @@ const GuideChat: React.FC<GuideChatProps> = ({ roomId, guideRoomName, partnerNic
       drag
       dragMomentum={false}
       dragElastic={0.1}
-      dragConstraints={{
-        top: -20,
-        left: -window.innerWidth / 2,
-        right: window.innerWidth / 2 - 400,
-        bottom: window.innerHeight - 200,
-      }}
-      onDragStart={() => setIsDragging(true)}
-      onDragEnd={() => setIsDragging(false)}
       whileDrag={{ scale: 1.05, rotate: 2 }}
     >
       {/* En-tête du chat (toujours visible) */}

@@ -34,6 +34,7 @@ import { ToastDefaultOptions } from 'utils/toastOptions'
 import DevCommandsPanel from 'components/Game/Tools/DevCommandsPanel'
 import ParameterCommandsPanel from 'components/Game/Tools/ParameterCommandsPanel'
 import { MultiAvatarCanvas } from 'components/Avatar/MultiScene'
+import PremiumPanel from './PremiumPanel'
 
 export const GAME_TYPES: Record<number, string> = {
   0: 'Normal',
@@ -65,6 +66,9 @@ const GamePage = () => {
   const { token } = useAuth()
   const { socket } = useSocket()
 
+  const premiumDate = user?.premium ? new Date(user.premium) : null
+  const isPremium = premiumDate ? new Date().getTime() < premiumDate.getTime() : false
+
   const [guideRequestDetails, setGuideRequestDetails] = useState<{
     guideUserId: number;
     guideNickname: string;
@@ -72,7 +76,6 @@ const GamePage = () => {
   } | null>(null)
   const [showGuideRequestModal, setShowGuideRequestModal] = useState(false)
   const [activeGuideSession, setActiveGuideSession] = useState<{
-    guideRoomName: string;
     partnerNickname: string;
     amIGuide: boolean;
   } | null>(null)
@@ -80,6 +83,7 @@ const GamePage = () => {
   const [highlightedPlayers, setHighlightedPlayers] = useState<{ [nickname: string]: string }>({})
   const [showBugReportModal, setShowBugReportModal] = useState(false)
   const [thrownItems, setThrownItems] = useState<{ id: string; image: string }[]>([])
+  const [showPremiumPanel, setShowPremiumPanel] = useState(false)
 
   const removeThrownItem = (id: string) => {
     setThrownItems(prev => prev.filter(item => item.id !== id))
@@ -94,6 +98,7 @@ const GamePage = () => {
   const [disconnectionTime, setDisconnectionTime] = useState<Date | null>(null)
   const maxReconnectAttempts = 5
   const reconnectIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const isKilledByServer = useRef<boolean>(false)
 
   const [canvasReady, setCanvasReady] = useState(false)
 
@@ -227,7 +232,7 @@ const GamePage = () => {
     isArchive,
     isInn,
     innList,
-    setIsArchive,
+    premiumPanelData,
     setSlots,
     setPlayer,
     handlePasswordSubmit,
@@ -269,24 +274,29 @@ const GamePage = () => {
     }
 
     const handleDisconnect = (reason: string) => {
-      console.log('Socket déconnecté:', reason)
-      setIsConnected(false)
-      setDisconnectionTime(new Date())
+      console.log('isKilledByServer', isKilledByServer)
+      if (!isKilledByServer.current) {
+        console.log('Socket déconnecté:', reason)
+        setIsConnected(false)
+        setDisconnectionTime(new Date())
 
-      // Ne pas afficher la modal si c'est une déconnexion volontaire
-      if (reason !== 'io client disconnect' && reason !== 'transport close') {
-        setShowDisconnectionModal(true)
-        wasDisconnectedRef.current = true
-        setReconnectAttempts(1)
-        setIsReconnecting(true)
+        // Ne pas afficher la modal si c'est une déconnexion volontaire
+        if (reason !== 'io client disconnect' && reason !== 'transport close') {
+          setShowDisconnectionModal(true)
+          wasDisconnectedRef.current = true
+          setReconnectAttempts(1)
+          setIsReconnecting(true)
+        }
       }
     }
 
     const handleConnectError = (error: Error) => {
-      console.error('Erreur de connexion socket:', error)
-      setIsConnected(false)
-      setShowDisconnectionModal(true)
-      wasDisconnectedRef.current = true
+      if (!isKilledByServer.current) {
+        console.error('Erreur de connexion socket:', error)
+        setIsConnected(false)
+        setShowDisconnectionModal(true)
+        wasDisconnectedRef.current = true
+      }
     }
 
     const handleReconnect = (attemptNumber: number) => {
@@ -295,6 +305,15 @@ const GamePage = () => {
       setShowDisconnectionModal(false)
       setReconnectAttempts(0)
       setIsReconnecting(false)
+    }
+
+    const handleKilledByServer = (reason?: string) => {
+      isKilledByServer.current = true
+      if (reason?.startsWith('kicked')) {
+        setGameError('Vous avez été kick de la partie.')
+      } else {
+        setGameError('Votre session de jeu à pris fin')
+      }
     }
 
     const handleReconnectError = (error: Error) => {
@@ -307,6 +326,7 @@ const GamePage = () => {
     }
 
     // Écouter les événements de connexion
+    socket.on('connection:killed_by_server', handleKilledByServer)
     socket.on('connect', handleConnect)
     socket.on('disconnect', handleDisconnect)
     socket.on('connect_error', handleConnectError)
@@ -317,6 +337,7 @@ const GamePage = () => {
     setIsConnected(socket.connected)
 
     return () => {
+      socket.off('connection:killed_by_server', handleKilledByServer)
       socket.off('connect', handleConnect)
       socket.off('disconnect', handleDisconnect)
       socket.off('connect_error', handleConnectError)
@@ -337,7 +358,7 @@ const GamePage = () => {
       console.log(`Événement reçu : ${eventName}`, args)
     })
 
-    socket.on('bipNotReadyPlayers', () => {
+    socket.on('lobby:bip_not_ready_players', () => {
       // Afficher une notification uniquement si le joueur n'est pas prêt
       if (player && !player.ready && player.nickname !== creator?.nickname) {
         // Créer une notification sonore
@@ -402,14 +423,14 @@ const GamePage = () => {
       setThrownItems(prev => [...prev, { id: `${Date.now()}-${Math.random()}`, image: data.item }])
     }
 
-    socket.on('itemThrown', handleItemThrown)
+    socket.on('object:thrown', handleItemThrown)
 
     return () => {
       socket.offAny()
-      socket.off('bipNotReadyPlayers')
+      socket.off('lobby:bip_not_ready_players')
       socket.off('music')
       socket.off('stopMusic')
-      socket.off('itemThrown', handleItemThrown)
+      socket.off('object:thrown', handleItemThrown)
     }
   }, [socket, player])
 
@@ -417,12 +438,8 @@ const GamePage = () => {
     if (!socket || !gameId || !user) return
 
     const handleGuideRequestReceived = (data: { guideUserId: number; guideNickname: string; roomId: number }) => {
-      console.log('Guide request received by player:', data)
-      if (Number(data.roomId) === Number(gameId)) {
-        // This event is sent directly to the targeted player by the backend
-        setGuideRequestDetails(data)
-        setShowGuideRequestModal(true)
-      }
+      setGuideRequestDetails(data)
+      setShowGuideRequestModal(true)
     }
 
     const handleGuideRequestSent = (data: { message: string }) => {
@@ -437,11 +454,11 @@ const GamePage = () => {
       }
     }
 
-    const handleGuideRequestRejected = (data: { playerId?: number; playerNickname?: string; guideUserId?: number, roomId: number; reason: string }) => {
+    const handleGuideRequestRejected = (data: { playerId?: number; playerNickname?: string; guideUserId?: number, reason: string }) => {
       // This event can be for the guide (their request was rejected)
       // or for the player (the request they were considering is no longer valid, e.g. guide busy)
-      alert(`Système de guide: Demande rejetée ou invalide. Joueur: ${data.playerNickname || 'N/A'}. Raison: ${data.reason}`)
-      if (showGuideRequestModal && Number(data.roomId) === Number(gameId)) {
+      alert(`Système de guide: Demande rejetée ou invalide. Raison: ${data.reason}`)
+      if (showGuideRequestModal) {
         // If the currently open modal's guide matches the guide involved in rejection, close it.
         if (guideRequestDetails && data.guideUserId && data.guideUserId === guideRequestDetails.guideUserId) {
           setShowGuideRequestModal(false)
@@ -454,16 +471,14 @@ const GamePage = () => {
     }
 
     const handleGuideChannelEstablished = (data: {
-      guideRoomName: string;
       guideUserId: number;
       guideNickname: string;
       guidedPlayerId: number;
       guidedPlayerNickname: string;
-      roomId: number;
     }) => {
-      if (Number(data.roomId) === Number(gameId) && user && (user.id === data.guideUserId || user.id === data.guidedPlayerId)) {
+      console.log(user, data.guideUserId, data.guidedPlayerId, (user.id === data.guideUserId || user.id === data.guidedPlayerId))
+      if (user && (user.id === data.guideUserId || user.id === data.guidedPlayerId)) {
         setActiveGuideSession({
-          guideRoomName: data.guideRoomName,
           partnerNickname: user.id === data.guideUserId ? data.guidedPlayerNickname : data.guideNickname,
           amIGuide: user.id === data.guideUserId,
         })
@@ -474,7 +489,7 @@ const GamePage = () => {
     }
 
     const handleExternalGuideSessionTerminated = (data: { guideRoomName: string; reason: string; roomId: number }) => {
-      if (activeGuideSession && data.guideRoomName === activeGuideSession.guideRoomName) {
+      if (activeGuideSession) {
         alert(`Session de guide terminée: ${data.reason}`)
         setActiveGuideSession(null)
       }
@@ -488,28 +503,28 @@ const GamePage = () => {
       }
     }
 
-    socket.on('guide_request_received', handleGuideRequestReceived)
+    socket.on('guide:request_received', handleGuideRequestReceived)
     socket.on('guide_request_sent', handleGuideRequestSent)
     socket.on('guide_request_expired', handleGuideRequestExpired)
-    socket.on('guide_request_rejected', handleGuideRequestRejected)
-    socket.on('guide_channel_established', handleGuideChannelEstablished)
-    socket.on('guide_session_terminated', handleExternalGuideSessionTerminated)
+    socket.on('guide:rejected', handleGuideRequestRejected)
+    socket.on('guide:established', handleGuideChannelEstablished)
+    socket.on('guide:terminated', handleExternalGuideSessionTerminated)
     socket.on('error', handleBackendError)
 
     return () => {
-      socket.off('guide_request_received', handleGuideRequestReceived)
+      socket.off('guide:request_received', handleGuideRequestReceived)
       socket.off('guide_request_sent', handleGuideRequestSent)
       socket.off('guide_request_expired', handleGuideRequestExpired)
-      socket.off('guide_request_rejected', handleGuideRequestRejected)
-      socket.off('guide_channel_established', handleGuideChannelEstablished)
-      socket.off('guide_session_terminated', handleExternalGuideSessionTerminated)
+      socket.off('guide:rejected', handleGuideRequestRejected)
+      socket.off('guide:established', handleGuideChannelEstablished)
+      socket.off('guide:terminated', handleExternalGuideSessionTerminated)
       socket.off('error', handleBackendError)
     }
   }, [socket, gameId, user, showGuideRequestModal, guideRequestDetails, activeGuideSession])
 
   const handleAcceptGuideRequest = () => {
     if (socket && guideRequestDetails) {
-      socket.emit('accept_guide_request', { guideUserId: guideRequestDetails.guideUserId, roomId: guideRequestDetails.roomId })
+      socket.emit('guide:accept', { guideUserId: guideRequestDetails.guideUserId, gameId: roomData.id })
     }
     setShowGuideRequestModal(false)
     setGuideRequestDetails(null)
@@ -517,7 +532,7 @@ const GamePage = () => {
 
   const handleRejectGuideRequest = () => {
     if (socket && guideRequestDetails) {
-      socket.emit('reject_guide_request', { guideUserId: guideRequestDetails.guideUserId, roomId: guideRequestDetails.roomId })
+      socket.emit('guide:rejected', { guideUserId: guideRequestDetails.guideUserId, gameId: roomData.id })
     }
     setShowGuideRequestModal(false)
     setGuideRequestDetails(null)
@@ -533,7 +548,6 @@ const GamePage = () => {
       if (!partner) return
       console.log('guideRoomName', `guide_${roomData.id}_${viewer.userId}_${partner.playerId}`)
       setActiveGuideSession({
-        guideRoomName: `guide_${roomData.id}_${viewer.userId}_${partner.playerId}`,
         partnerNickname: partner.nickname,
         amIGuide: true,
       })
@@ -545,29 +559,11 @@ const GamePage = () => {
       console.log('guideRoomName', `guide_${roomData.id}_${partner.userId}_${player.playerId}`)
 
       setActiveGuideSession({
-        guideRoomName: `guide_${roomData.id}_${partner.userId}_${player.playerId}`,
         partnerNickname: partner.user?.nickname,
         amIGuide: true,
       })
     }
   }, [players, viewer])
-
-  /**
-   * Requête pour recharger certains détails du jeu (ex : titre, etc.)
-   * @todo check if this is used anymore
-   */
-  const handleFetchGameDetails = useCallback(async () => {
-    if (!gameId) return
-    try {
-      const data = await fetchGameDetails(gameId, token || undefined)
-      setRoomData(data.room)
-      if (data.player) setPlayer(data.player)
-      setGameStarted(data.room.status === 'in_progress')
-      setGameFinished(data.room.status === 'completed')
-    } catch (error) {
-      console.error('Erreur lors du fetchGameDetails: ', error)
-    }
-  }, [gameId])
 
   /**
    * Gère l'effacement du chat côté front
@@ -585,25 +581,22 @@ const GamePage = () => {
       try {
         if (viewer && !viewer.user) {
           if (activeGuideSession) {
-            socket.emit('terminate_guide_session', { guideRoomName: activeGuideSession.guideRoomName, roomId: gameId })
+            socket.emit('guide:terminated', { roomId: gameId })
           }
           window.location.href = '/'
           return
         }
 
+        if (gameFinished) {
+          setGameError('Vous avez bien quitté la partie. Vous pouvez fermer cet onglet.')
+          return
+        }
+
         const response = await leaveGame(token)
-        console.log('leave response', response)
         if (response.message) {
           if (activeGuideSession) {
-            socket.emit('terminate_guide_session', { guideRoomName: activeGuideSession.guideRoomName, roomId: gameId })
+            socket.emit('guide:terminated', { roomId: gameId })
           }
-          socket.emit('leaveRoom', {
-            roomId: gameId,
-            player: player
-              ? { id: user?.id, nickname: response?.nickname, realNickname: response?.realNickname }
-              : null,
-            viewer,
-          })
         }
         localStorage.removeItem(`game_auth_${gameId}`)
         setGameError('Vous avez bien quitté la partie. Vous pouvez fermer cet onglet.')
@@ -1144,7 +1137,7 @@ const GamePage = () => {
                     </h1>
                     <div className="flex items-center gap-4 text-sm text-blue-300">
                       <p className="text-sm text-blue-300 flex items-center">
-                        {players.length}/{slots} joueurs • Options
+                        {players.length}/{slots} joueurs • {options.length === 0 && ' Aucune'} Options
                         <span className="flex gap-1 ml-1">
                           {roomData.discordChannelId && (
                             <>
@@ -1170,7 +1163,6 @@ const GamePage = () => {
                               <Tooltip id={`private_${roomData.id}`} content="Partie privée" />
                             </>
                           )}
-                          {options.length === 0 && ' Aucune'}
                         </span>
                         • {isNight ? 'Phase nocturne' : 'Phase diurne'}
                       </p>
@@ -1246,6 +1238,25 @@ const GamePage = () => {
                           className="w-16 h-1 bg-blue-500/30 rounded-lg appearance-none cursor-pointer"
                         />
                       </div>
+                    )}
+                    {isPremium && player &&
+                      premiumPanelData && gameStarted && !gameFinished && (
+                      <motion.button
+                        className={`px-3 py-1 ${showPremiumPanel ? 'bg-purple-900/60' : 'bg-black/40'} hover:bg-purple-900/60 text-purple-300 hover:text-white border border-purple-500/30 rounded-lg transition-all flex items-center gap-1`}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowPremiumPanel(!showPremiumPanel)}
+                        title="Panel Premium"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path
+                            fillRule="evenodd"
+                            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm2 2a1 1 0 000 2h.01a1 1 0 100-2H5zm3 0a1 1 0 000 2h3a1 1 0 100-2H8z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                          Panel Premium
+                      </motion.button>
                     )}
                     <motion.button
                       className="px-3 py-1 bg-black/40 hover:bg-black/60 text-blue-300 hover:text-white border border-blue-500/30 rounded-lg transition-all flex items-center gap-1"
@@ -1330,7 +1341,6 @@ const GamePage = () => {
                   <Controls
                     gameId={gameId}
                     roomData={roomData}
-                    fetchGameDetails={handleFetchGameDetails}
                     isCreator={isCreator}
                     creator={creator}
                     canBeReady={canBeReady}
@@ -1476,7 +1486,6 @@ const GamePage = () => {
           {activeGuideSession && user && (
             <GuideChat
               roomId={roomData.id}
-              guideRoomName={activeGuideSession.guideRoomName}
               partnerNickname={activeGuideSession.partnerNickname}
               amIGuide={activeGuideSession.amIGuide}
               onSessionTerminated={() => {
@@ -1500,6 +1509,32 @@ const GamePage = () => {
             <p className="mt-4 text-blue-300">Chargement de la partie...</p>
           </div>
         </div>
+      )}
+
+      {showPremiumPanel && premiumPanelData && (
+        <AnimatePresence>
+          <motion.div
+            className="fixed bottom-4 right-4 z-40 w-96 max-w-[calc(100vw-2rem)]"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          >
+            <div className="relative">
+              <PremiumPanel data={premiumPanelData} />
+              {/* Close button */}
+              <motion.button
+                onClick={() => setShowPremiumPanel(false)}
+                className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center text-xs shadow-lg"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                title="Fermer"
+              >
+                  ×
+              </motion.button>
+            </div>
+          </motion.div>
+        </AnimatePresence>
       )}
 
       {showBugReportModal && (

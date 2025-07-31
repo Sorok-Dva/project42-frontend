@@ -247,7 +247,6 @@ const ReplayPage: React.FC = () => {
           <Controls
             gameId={gameId}
             roomData={roomData}
-            fetchGameDetails={() => null}
             isCreator={false}
             creator={creator!}
             canBeReady={false}

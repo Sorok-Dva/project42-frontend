@@ -13,18 +13,8 @@ interface LoadingScreenProps {
 const LoadingScreen: React.FC<LoadingScreenProps> = ({
   message = 'Initialisation du système...',
 }) => {
-  const [currentMessage, setCurrentMessage] = useState(message)
+  const [currentMessage] = useState(message)
   const controls = useAnimation()
-
-  const loadingMessages = [
-    'Initialisation du système...',
-    'Calibration des moteurs spatiaux...',
-    'Synchronisation des coordonnées galactiques...',
-    'Établissement des communications...',
-    'Chargement des données de navigation...',
-    'Activation des protocoles de sécurité...',
-    'Préparation du saut en hyperespace...',
-  ]
 
   return (
     <AnimatePresence>

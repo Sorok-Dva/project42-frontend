@@ -11,7 +11,6 @@ const CreateGame = () => {
   const isPremium = premiumDate ? new Date().getTime() < premiumDate.getTime() : false
   const [inGame, setInGame] = useState(false)
   const [showForm, setShowForm] = useState(false)
-  const [gameId, setGameId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     name: user?.nickname,
     maxPlayers: 6,
@@ -43,17 +42,7 @@ const CreateGame = () => {
             Authorization: `Bearer ${token}`,
           },
         })
-      setGameId(response.data.gameId)
       setInGame(true)
-      await axios.post(
-        `/api/games/room/${gameId}/join`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
       window.open(`/game/${response.data.game.id}`, '_blank')
     } catch (error: any) {
       if (error.response?.data?.error) {

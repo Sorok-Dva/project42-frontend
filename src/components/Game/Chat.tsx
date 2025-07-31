@@ -228,7 +228,7 @@ const Chat: React.FC<ChatProps> = ({
         // Logique pour déterminer le canal de chat selon le rôle et l'état du jeu
         if (
           isNight &&
-          ([2, 9, 20, 21].includes(player?.card?.id || -1) || player?.isInfected) &&
+          ([2, 9, 20, 21].includes(player?.card?.id || -1) || player?.isInfected || player?.faction === 'Alien') &&
           gameStarted &&
           !gameFinished
         )
@@ -238,10 +238,7 @@ const Chat: React.FC<ChatProps> = ({
         if ((isNight && isInn && gameStarted && !gameFinished) || (isNight && player?.card?.id === 23))
           channelToSend = 6
 
-        socket.emit('sendMessage', {
-          roomId: gameId,
-          playerId,
-          viewer,
+        socket.emit('chat:send_message', {
           content: trimmedMessage,
           channel: channelToSend,
         })
@@ -415,8 +412,8 @@ const Chat: React.FC<ChatProps> = ({
       <div className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/30 scrollbar-track-black/20 bg-black/70">
         {/* Règles du jeu */ }
 
-        <GameRule gameType={gameType} hasVoice={hasVoice} />
-        <hr />
+        {/*<GameRule gameType={gameType} hasVoice={hasVoice} />*/}
+        {/*<hr />*/}
 
         {/* Messages */ }
         <ChatMessages

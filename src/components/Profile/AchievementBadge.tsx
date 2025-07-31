@@ -1,8 +1,7 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React from 'react'
 import { motion } from 'framer-motion'
-import { createPortal } from 'react-dom'
 import clsx from 'clsx'
 
 interface Achievement {
@@ -23,11 +22,6 @@ interface AchievementBadgeProps {
 
 const AchievementBadge: React.FC<AchievementBadgeProps> = ({ achievement, isMemory, aKey }) => {
   const [showTooltip, setShowTooltip] = React.useState(false)
-  const [mounted, setMounted] = React.useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const getProgressPercentage = () => {
     if (achievement.unique || !achievement.total || !achievement.nextLevelTo) return 0

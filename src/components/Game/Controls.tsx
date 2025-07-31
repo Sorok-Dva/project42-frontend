@@ -7,12 +7,7 @@ import { usePermissions } from 'hooks/usePermissions'
 import {
   addBotToGame,
   startGame,
-  setPlayerReady,
-  updateMaxPlayers,
-  updateRoomTimer,
-  updateRoomCards,
-  addFavoriteGame, leaveGame,
-  linkDiscordChannel,
+  addFavoriteGame, leaveGame
 } from 'services/gameService'
 import { useAuth } from 'contexts/AuthContext'
 import { useUser } from 'contexts/UserContext'
@@ -44,7 +39,6 @@ interface GameControlsProps {
   gameStarted: boolean
   gameFinished: boolean
   setGameStarted: (gameStarted: boolean) => void
-  fetchGameDetails: () => void
   slots: number
   isArchive: boolean
   setSlots: React.Dispatch<React.SetStateAction<number>>
@@ -52,7 +46,6 @@ interface GameControlsProps {
   setPlayer: React.Dispatch<React.SetStateAction<Player | null>>
   isInn: boolean
   activeGuideSession: {
-    guideRoomName: string;
     partnerNickname: string;
     amIGuide: boolean;
   } | null
@@ -65,7 +58,6 @@ const GameControls: React.FC<GameControlsProps> = ({
   isCreator,
   roomData,
   gameId,
-  fetchGameDetails,
   canBeReady,
   canStartGame,
   creator,
@@ -77,10 +69,8 @@ const GameControls: React.FC<GameControlsProps> = ({
   setGameStarted,
   slots,
   setSlots,
-  setRoomData,
   isArchive,
   isInn,
-  setPlayer,
   activeGuideSession,
 }) => {
   const { token } = useAuth()
@@ -95,7 +85,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const [favoriteComment, setFavoriteComment] = useState<string>('')
   const [replayGameId, setReplayGameId] = useState<number | null>(null)
   const [isSavingComment, setIsSavingComment] = useState<boolean>(false)
-  const [discordChannelInput, setDiscordChannelInput] = useState('')
+  const [isLeaving, setIsLeaving] = useState<boolean>(false)
   const [voicePlayers, setVoicePlayers] = useState<number[]>([])
   const [spectatorsAreMuted, setSpectatorsAreMuted] = useState<boolean>(false)
   const [quickEndPhase, setQuickEndPhase] = useState<{ votes: number; required: number; hasVoted: boolean } | null>(null)
@@ -106,24 +96,13 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
   const closeEditComposition = async () => {
     if (!isCreator || isArchive) return
-    try {
-      if (roomData.maxPlayers !== slots) {
-        const response = await updateMaxPlayers(slots, String(gameId), token)
-        if (response.status !== 200) {
-          setSlots(roomData.maxPlayers)
-        } else setRoomData({ ...roomData, maxPlayers: slots })
-      }
-
-      await updateRoomCards(roomData.cards, String(gameId), token)
-
-      setIsEditCompositionOpen(false)
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        alert(e.response?.data.error)
-      } else {
-        alert(e)
-      }
+    if (roomData.maxPlayers !== slots) {
+      socket.emit('lobby:update_max_players', { roomId: gameId, maxPlayers: slots })
     }
+
+    socket.emit('lobby:update_cards', { roomId: gameId, cards: roomData.cards })
+
+    setIsEditCompositionOpen(false)
   }
 
   const handleMuteSpectators = async () => {
@@ -148,7 +127,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   useEffect(() => {
-    if (!socket || !token) return
+    if (!socket || !token || !gameFinished) return
 
     const getFavorite = async () => {
       const response = await axios.post(`/api/games/favorite/${gameId}/get`, {}, {
@@ -172,9 +151,9 @@ const GameControls: React.FC<GameControlsProps> = ({
       new Audio('/assets/sounds/rewind.wav').play().catch(() => {})
     }
 
-    socket.on('gameReplayed', onReplayed)
+    socket.on('lobby:replayed', onReplayed)
     return () => {
-      socket.off('gameReplayed', ({ newGameId }) => setReplayGameId(newGameId))
+      socket.off('lobby:replayed', ({ newGameId }) => setReplayGameId(newGameId))
     }
   }, [socket])
 
@@ -206,18 +185,14 @@ const GameControls: React.FC<GameControlsProps> = ({
   }
 
   const handleJoinSpectate = async () => {
-    if (gameId && player && !gameStarted && !gameFinished) {
+    if (gameId && player && !gameStarted && !gameFinished && !isLeaving) {
+      setIsLeaving(true)
       try {
         const response = await leaveGame(token)
         if (response.message) {
           if (activeGuideSession) {
-            socket.emit('terminate_guide_session', { guideRoomName: activeGuideSession.guideRoomName, roomId: gameId })
+            socket.emit('guide:terminated', { roomId: gameId })
           }
-          socket.emit('leaveRoom', {
-            roomId: gameId,
-            player: player ? { id: user?.id, nickname: response?.nickname, realNickname: response?.realNickname } : null,
-            viewer,
-          })
           await axios.post(
             `/api/games/room/${gameId}/spectate`,
             {},
@@ -227,10 +202,12 @@ const GameControls: React.FC<GameControlsProps> = ({
               },
             },
           )
+          setIsLeaving(false)
+          window.location.href = `/game/${gameId}`
         }
-
-        window.location.href = `/game/${gameId}`
+        setIsLeaving(false)
       } catch (error: any) {
+        setIsLeaving(false)
         if (error.response?.data?.error) {
           toast.error(`Une erreur est survenue: ${error.response.data.error}`, ToastDefaultOptions)
         } else {
@@ -282,7 +259,6 @@ const GameControls: React.FC<GameControlsProps> = ({
     if (!gameId || gameStarted || gameFinished || !canStartGame || !token) return
     try {
       await startGame(gameId, token)
-      fetchGameDetails()
       setGameStarted(true)
     } catch (error) {
       alert(error)
@@ -307,10 +283,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const handleBeReady = async () => {
     if (!gameId || !player || !canBeReady || gameStarted || gameFinished) return
     try {
-      const response = await setPlayerReady(gameId, token)
-      if (response.status === 200) {
-        setPlayer({ ...player, ready: true })
-      }
+      socket.emit('lobby:ready', { roomId: gameId })
     } catch (error) {
       console.error('Erreur lors du set ready:', error)
     }
@@ -327,10 +300,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
     debounceRef.current = setTimeout(async () => {
       try {
-        const response = await updateMaxPlayers(slots - 1, gameId, token)
-        if (response.status !== 200) {
-          setSlots((prevSlots) => prevSlots + 1)
-        }
+        socket.emit('lobby:update_max_players', { roomId: gameId, maxPlayers: slots - 1 })
       } catch (error) {
         console.error('Erreur lors du set updateMaxPlayers:', error)
         setSlots((prevSlots) => prevSlots + 1)
@@ -350,10 +320,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
     debounceRef.current = setTimeout(async () => {
       try {
-        const response = await updateMaxPlayers(slots + 1, gameId, token)
-        if (response.status !== 200) {
-          setSlots((prevSlots) => prevSlots - 1)
-        }
+        socket.emit('lobby:update_max_players', { roomId: gameId, maxPlayers: slots + 1 })
       } catch (error) {
         console.error('Erreur lors du set updateMaxPlayers:', error)
         setSlots((prevSlots) => prevSlots - 1)
@@ -369,15 +336,7 @@ const GameControls: React.FC<GameControlsProps> = ({
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
     debounceRef.current = setTimeout(async () => {
-      try {
-        const response = await updateRoomTimer(timer - 1, gameId, token)
-        if (response.status !== 200) {
-          setTimer((prevTimer) => prevTimer + 1)
-        }
-      } catch (error) {
-        console.error('Erreur lors du removeTimer:', error)
-        setTimer((prevTimer) => prevTimer + 1)
-      }
+      socket.emit('lobby:update_timer_limit', { roomId: gameId, timer: timer -1 })
     }, 750)
   }
 
@@ -389,15 +348,7 @@ const GameControls: React.FC<GameControlsProps> = ({
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
     debounceRef.current = setTimeout(async () => {
-      try {
-        const response = await updateRoomTimer(timer + 1, gameId, token)
-        if (response.status !== 200) {
-          setTimer((prevTimer) => prevTimer - 1)
-        }
-      } catch (error) {
-        console.error('Erreur lors du set addTimer:', error)
-        setTimer((prevTimer) => prevTimer - 1)
-      }
+      socket.emit('lobby:update_timer_limit', { roomId: gameId, timer: timer + 1 })
     }, 750)
   }
 
@@ -423,9 +374,9 @@ const GameControls: React.FC<GameControlsProps> = ({
         },
       )
       if (activeGuideSession) {
-        socket.emit('terminate_guide_session', { guideRoomName: activeGuideSession.guideRoomName, roomId: gameId })
+        socket.emit('guide:terminated', { roomId: gameId })
       }
-      window.location.href = `/game/${response.data.game.id}`
+      window.location.href = `/game/${response.data.roomId}`
     } catch (error) {
       console.error('Erreur lors du join room:', error)
     }
@@ -456,17 +407,15 @@ const GameControls: React.FC<GameControlsProps> = ({
   const handleBipNotReadyPlayers = () => {
     if (!socket || !gameId || gameStarted || gameFinished || !isCreator) return
 
-    socket.emit('bipNotReadyPlayers', gameId)
+    socket.emit('lobby:bip_not_ready_players', { gameId })
   }
 
   const handleVoteQuickEnd = () => {
     if (!socket || !gameId || !player?.alive) return
-    socket.emit('quickEndPhaseVote', { roomId: gameId, playerId: player.id })
+    socket.emit('vote:end_phase', { gameId, vote: true })
     setQuickEndPhase(prev => prev ? { ...prev, hasVoted: true } : prev)
   }
 
-  const cardId = player?.card?.id
-  const memoizedCardImage = useMemo(() => <CardImage cardId={cardId} isArchive={isArchive} />, [cardId, isArchive])
   const isInVoice = player ? voicePlayers.includes(player.playerId) : false
 
   // Enregistrer automatiquement le commentaire après 3 secondes d'inactivité
@@ -513,7 +462,7 @@ const GameControls: React.FC<GameControlsProps> = ({
 
     const clearQuickEnd = () => setQuickEndPhase(null)
 
-    socket.on('quickEndPhaseProposed', () => {
+    socket.on('vote:propose_end_phase', () => {
       setQuickEndPhase(prev => {
         if (prev === null) {
           return {
@@ -525,7 +474,8 @@ const GameControls: React.FC<GameControlsProps> = ({
         return prev
       })
     })
-    socket.on('quickEndPhaseUpdated', (data) => {
+
+    socket.on('vote:end_phase_update', (data) => {
       setQuickEndPhase(prev => {
         if (prev === null) {
           return {
@@ -541,12 +491,12 @@ const GameControls: React.FC<GameControlsProps> = ({
         }
       })
     })
-    socket.on('phaseEnded', clearQuickEnd)
+    socket.on('phase:change', clearQuickEnd)
 
     return () => {
-      socket.off('quickEndPhaseProposed')
-      socket.off('quickEndPhaseUpdated')
-      socket.off('phaseEnded', clearQuickEnd)
+      socket.off('vote:propose_end_phase')
+      socket.off('vote:end_phase_update')
+      socket.off('phase:change', clearQuickEnd)
     }
   }, [socket, players])
 
@@ -905,7 +855,9 @@ const GameControls: React.FC<GameControlsProps> = ({
               </p>
 
               {/* Carte du joueur */}
-              <div className="flex justify-center mb-4 relative h-32">{memoizedCardImage}</div>
+              <div className="flex justify-center mb-4 relative h-32">
+                <CardImage cardId={player.cardId} card={player.card} isArchive={isArchive} />
+              </div>
             </div>
 
             {/* Timer */}

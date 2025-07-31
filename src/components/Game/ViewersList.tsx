@@ -1,7 +1,6 @@
 import React from 'react'
 import { Viewer } from 'hooks/useGame'
 import { Player } from 'types/room'
-import { Badge } from 'reactstrap'
 import { Tooltip } from 'react-tooltip'
 
 interface ViewersListProps {

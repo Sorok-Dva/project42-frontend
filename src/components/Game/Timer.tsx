@@ -10,7 +10,6 @@ interface GameTimerProps {
 
 const GameTimer: React.FC<GameTimerProps> = ({ gameId, gameStarted, gameFinished }) => {
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
-  const [phase, setPhase] = useState<number | null>(null)
   const { socket } = useSocket()
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const lastSoundPlayed = useRef<number | null>(null)
@@ -43,7 +42,7 @@ const GameTimer: React.FC<GameTimerProps> = ({ gameId, gameStarted, gameFinished
   }
 
   useEffect(() => {
-    socket.emit('getTimer', { roomId: gameId })
+    socket.emit('phase:getTimer', { roomId: gameId })
   }, [gameStarted])
 
   // Sons pour le compte à rebours
@@ -53,19 +52,19 @@ const GameTimer: React.FC<GameTimerProps> = ({ gameId, gameStarted, gameFinished
   useEffect(() => {
     if (!gameStarted || gameFinished) return
 
-    socket.on('timerUpdated', ({ limitPhase }) => {
-      if (!limitPhase) return
-      updateTimer(limitPhase)
+    socket.on('phase:timer', ({ endTime }) => {
+      if (!endTime) return
+      updateTimer(endTime)
     })
 
-    socket.on('phaseUpdated', ({ phase }) => {
-      setPhase(phase)
+    socket.on('phase:change', (payload) => {
+      if (!payload.endTime) return
+      updateTimer(payload.endTime)
     })
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
-      socket.off('timerUpdated')
-      socket.off('phaseUpdated')
+      socket.off('phase:timer')
     }
   }, [socket, gameStarted, gameFinished])
 

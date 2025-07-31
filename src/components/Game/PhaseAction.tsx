@@ -9,15 +9,13 @@ import { Player } from 'types/room'
 interface PhaseActionRequest {
   phase: number
   action: {
-    card: number
+    roleId: number
     targetCount: number
     message: string
     channel?: string
+    faction?: string
   }
-  eligibleTargets: { id: number; nickname: string }[]
-  deathElixirUsed?: string | null
-  lifeElixirUsed?: string | null
-  alive?: boolean
+  targets: { id: number; nickname: string }[]
 }
 
 interface PhaseActionProps {
@@ -42,21 +40,6 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
   const [deathElixirUsed, setDeathElixirUsed] = useState<boolean>(false)
   const [lifeElixirUsed, setLifeElixirUsed] = useState<boolean>(false)
   const [hint, setHint] = useState<string | null>(null)
-  const [selectHeight, setSelectHeight] = useState(0)
-
-  // Add this check for Galactic Jester
-  if (player.card?.id === 14 && player.canVote === false) {
-    return (
-      <motion.div
-        className="bg-black/40 backdrop-blur-sm rounded-lg border border-yellow-500/30 p-4 mt-4 text-center"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <h3 className="text-lg font-bold text-yellow-300">Vous avez perdu votre pouvoir de vote.</h3>
-      </motion.div>
-    )
-  }
 
   useEffect(() => {
     // Réinitialise toujours la sélection lorsqu'une nouvelle action débute
@@ -66,14 +49,14 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
 
     if (
       actionRequest &&
-      actionRequest.eligibleTargets.length > 0 &&
+      actionRequest.targets.length > 0 &&
       actionRequest.action.targetCount === 1
     ) {
-      const firstTargetId = actionRequest.eligibleTargets[0].id
+      const firstTargetId = actionRequest.targets[0].id
       setSelectedTargets([firstTargetId])
 
       // Mettre à jour également le nickname sélectionné
-      const selectedTarget = actionRequest.eligibleTargets.find(
+      const selectedTarget = actionRequest.targets.find(
         (target) => target.id === firstTargetId,
       )
       if (selectedTarget) {
@@ -85,39 +68,34 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
   useEffect(() => {
     if (!socket || !user || !player || !roomId) return
 
-    socket.on('phaseActionRequest', (data: PhaseActionRequest) => {
-      if (!data) {
-        setActionRequest(null)
-        return
-      }
+    socket.on('game:action_required', (data: PhaseActionRequest) => {
       if (
-        data.action.card === player?.card?.id ||
-        data.action.card === -1 ||
-        (data.action.card === 2 && ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected)) ||
-        (data.action.card === 6 && (!data.alive || !player.alive))
+        data.action.roleId === player?.card?.id ||
+        data.action.roleId === -1 ||
+        (data.action.roleId === 2 && ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected || player.faction === 'Alien')) ||
+        (data.action.roleId === 6 && (!player.alive)) ||
+        (data.action.faction === 'Alien' && player.isInfected)
       ) {
         setActionRequest(data)
-        setDeathElixirUsed(data.deathElixirUsed !== null && data.deathElixirUsed !== undefined)
-        setLifeElixirUsed(data.lifeElixirUsed !== null && data.lifeElixirUsed !== undefined)
+        setDeathElixirUsed(false)
+        setLifeElixirUsed(false)
       }
     })
 
-    socket.on('phaseEnded', () => {
-      setActionRequest(null)
-      setHint(null)
-      setShowForm(true)
-    })
-
-    socket.on('alienElimination', (victim) => {
+    socket.on('game:alien_victim', (victim) => {
       if (victim.id) {
         setAlienVictim({ nickname: victim.nickname, id: victim.id })
       } else setAlienVictim(null)
     })
 
+    socket.on('game:reset_action', (victim) => {
+      setActionRequest(null)
+    })
+
     return () => {
-      socket.off('phaseActionRequest')
-      socket.off('phaseEnded')
-      socket.off('alienElimination')
+      socket.off('game:action_required')
+      socket.off('game:reset_action')
+      socket.off('game:alien_victim')
     }
   }, [socket, user, player, roomId])
 
@@ -133,14 +111,14 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     // Construction de la chaîne des nicknames à partir des ids.
     setSelectedNicknames(
       selectedIds.map((id) => {
-        const selectedTarget = actionRequest?.eligibleTargets.find((target) => target.id === id)
+        const selectedTarget = actionRequest?.targets.find((target) => target.id === id)
         return selectedTarget ? selectedTarget.nickname : ''
       }),
     )
 
     // Pour la sélection unique, on peut mettre à jour selectedNickname si besoin
     if (selectedIds.length === 1) {
-      const selectedTarget = actionRequest?.eligibleTargets.find((target) => target.id === selectedIds[0])
+      const selectedTarget = actionRequest?.targets.find((target) => target.id === selectedIds[0])
       if (selectedTarget) {
         setSelectedNickname(selectedTarget.nickname)
       }
@@ -149,7 +127,6 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
 
   const handleMouseDown = (e: React.MouseEvent<HTMLSelectElement>, targetCount: number) => {
     e.preventDefault()
-    const select = e.currentTarget
     const option = e.target as HTMLOptionElement
     const value = Number(option.value)
     if (selectedTargets.length + 1 > targetCount && !selectedTargets.includes(value)) {
@@ -164,60 +141,60 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     if (!socket || !actionRequest) return
 
     const payload: any = {
-      roomId,
+      gameId: roomId,
       playerId: user!.id,
-      actionCard: actionRequest.action.card,
+      roleId: actionRequest.action.roleId,
     }
 
     // Gestion spécifique pour Cupidon (carte 7)
-    if (actionRequest.action.card === 7) {
+    if (actionRequest.action.roleId === 7) {
       if (selectedTargets.length !== 2) {
         alert('Veuillez sélectionner exactement deux joueurs.')
         return
       }
-      socket.emit('phaseActionResponse', {
+      socket.emit('game:submit_action', {
         ...payload,
         targets: selectedTargets,
       })
-    } else if (actionRequest.action.card === 15 && selectedTargets) {
+    } else if (actionRequest.action.roleId === 15 && selectedTargets) {
       // Gestion pour le maitre des ondes
       if (selectedTargets.length > 2) {
         alert('Veuillez sélectionner exactement deux joueurs ou moins.')
         return
       }
-      socket.emit('phaseActionResponse', {
+      socket.emit('game:submit_action', {
         ...payload,
         targets: selectedTargets,
       })
-    } else if (actionRequest.action.card === 23) {
+    } else if (actionRequest.action.roleId === 23) {
       if (selectedTargets.length > 3) {
         alert('Veuillez sélectionner exactement trois joueurs ou moins.')
         return
       }
-      socket.emit('phaseActionResponse', {
+      socket.emit('game:submit_action', {
         ...payload,
         targets: selectedTargets,
       })
     } else {
-      socket.emit('phaseActionResponse', {
+      socket.emit('game:submit_action', {
         ...payload,
         targetId: Number(selectedTargets[0]) ?? -1,
       })
     }
 
     // Réinitialiser l'action pour certaines cartes
-    const resetAction = [3, 6, 7, 8, 15, 20].includes(actionRequest.action.card)
+    const resetAction = [3, 6, 7, 8, 9, 15, 20].includes(actionRequest.action.roleId)
     if (resetAction) setActionRequest(null)
 
     // Afficher des indications pour certaines cartes
-    if (actionRequest.action.card === 22 && selectedNickname) {
+    if (actionRequest.action.roleId === 22 && selectedNickname) {
       setHint(
         `Vous avez sélectionné <strong>${selectedNickname}</strong>. Vous pouvez maintenant lui envoyer un message via le tchat.`,
       )
       setShowForm(false)
     }
 
-    if (actionRequest.action.card === 23 && selectedNicknames.length > 0) {
+    if (actionRequest.action.roleId === 23 && selectedNicknames.length > 0) {
       setHint(
         `Vous avez invité <strong>${selectedNicknames.join(', ')}</strong>. Vous pouvez maintenant discuter entre vous via le tchat.`,
       )
@@ -242,9 +219,23 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     }
   }, [actionRequest])
 
+  // Display a message if the Galactic Jester has lost their vote
+  if (player.card?.id === 14 && player.canVote === false) {
+    return (
+      <motion.div
+        className="bg-black/40 backdrop-blur-sm rounded-lg border border-yellow-500/30 p-4 mt-4 text-center"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <h3 className="text-lg font-bold text-yellow-300">Vous avez perdu votre pouvoir de vote.</h3>
+      </motion.div>
+    )
+  }
+
   if (!actionRequest) return null
 
-  if (actionRequest && actionRequest.action.card === 5) {
+  if (actionRequest && actionRequest.action.roleId === 5) {
     return (
       <PhaseActionCard5
         roomId={roomId}
@@ -260,10 +251,11 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
     )
   }
 
-  if (actionRequest && actionRequest.action.card === 20) {
+  if (actionRequest && actionRequest.action.roleId === 20) {
     return (
       <PhaseActionCard20
         roomId={roomId}
+        player={player}
         actionRequest={actionRequest as any}
         alienVictim={alienVictim}
         setAlienVictim={setAlienVictim}
@@ -272,7 +264,7 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
   }
 
   // Gestion spéciale pour certaines cartes
-  if (actionRequest && (actionRequest.action.card === 5 || actionRequest.action.card === 20)) {
+  if (actionRequest && (actionRequest.action.roleId === 5 || actionRequest.action.roleId === 20)) {
     return (
       <motion.div
         className="bg-black/40 backdrop-blur-sm rounded-lg border border-blue-500/30 p-4 mt-4"
@@ -331,14 +323,14 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
                 ? { onMouseDown: (e: any) => handleMouseDown(e, actionRequest.action.targetCount) }
                 : {})}
               className="w-full bg-black/60 border border-blue-500/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-              size={Math.min(actionRequest.eligibleTargets.length, Math.max(5, Math.floor(window.innerHeight * 0.05)))}
+              size={Math.min(actionRequest.targets.length, Math.max(5, Math.floor(window.innerHeight * 0.05)))}
               style={{
                 height: 'auto',
                 maxHeight: 'min(40vh, 300px)',
                 overflow: 'auto'
               }}
             >
-              {actionRequest.eligibleTargets.map((target) => (
+              {actionRequest.targets.map((target) => (
                 <option key={target.id} value={target.id} className="p-2 hover:bg-blue-900/30">
                   {target.nickname}
                 </option>
@@ -347,11 +339,11 @@ const PhaseAction: React.FC<PhaseActionProps> = ({ player, roomId, isInn, gameTy
 
             {actionRequest.action.targetCount > 1 && (
               <div className="text-xs text-blue-300 mt-1">
-                {actionRequest.action.card === 7
+                {actionRequest.action.roleId === 7
                   ? 'Sélectionnez exactement 2 joueurs'
-                  : actionRequest.action.card === 15
+                  : actionRequest.action.roleId === 15
                     ? 'Sélectionnez jusqu\'à 2 joueurs'
-                    : actionRequest.action.card === 23
+                    : actionRequest.action.roleId === 23
                       ? 'Sélectionnez jusqu\'à 3 joueurs'
                       : `Sélectionnez jusqu'à ${actionRequest.action.targetCount} joueurs`}
               </div>

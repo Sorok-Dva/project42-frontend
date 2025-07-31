@@ -334,7 +334,6 @@ const PaymentConfirmationModal: React.FC<PaymentConfirmationModalProps> = ({
 
 const PremiumCredits: React.FC = () => {
   const { token } = useAuth()
-  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('premium')
   const [creditsPacks, setCreditsPacks] = useState<CreditPack[]>([])
   const [premiumPlans, setPremiumPlans] = useState<PremiumPlan[]>([])
@@ -426,8 +425,6 @@ const PremiumCredits: React.FC = () => {
         setTransactions(trResponse.data)
       } catch (e) {
         console.log(e)
-      } finally {
-        setLoading(false)
       }
     }
     retrieveShopOffers()

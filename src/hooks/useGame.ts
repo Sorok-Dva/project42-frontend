@@ -2,13 +2,11 @@ import { useEffect, useState } from 'react'
 import { Socket } from 'socket.io-client'
 import {
   fetchGameDetails,
-  fetchPlayers,
-  fetchChatMessages,
-  fetchViewers,
 } from '../services/gameService'
 import axios from 'axios'
 import { Player } from 'types/room'
 import { AvatarConfig } from 'components/Avatar/MultiScene'
+import { PremiumPlayerStats } from 'types/premium'
 
 export interface Message {
   nickname: string
@@ -16,6 +14,7 @@ export interface Message {
   playerId: number
   channel: number
   icon: string | null
+  sound: string | null
   isMeneur: boolean
   isPerso: boolean
   isMsgSite: boolean
@@ -141,6 +140,7 @@ export const useGame = (
   const [isArchive, setIsArchive] = useState<boolean>(false)
   const [isInn, setIsInn] = useState<boolean>(false)
   const [innList, setInnList] = useState<string[]>([])
+  const [premiumPanelData, setPremiumPanelData] = useState<PremiumPlayerStats[]>([])
 
   /**
    * Asynchronously handles the submission of a password for game authentication.
@@ -168,7 +168,6 @@ export const useGame = (
         localStorage.setItem(`game_auth_${gameId}`, 'true')
         setIsAuthorized(true)
         setPasswordRequired(false)
-        loadPlayersAndMessages(true)
       } else {
         setError('Mot de passe incorrect')
       }
@@ -205,36 +204,6 @@ export const useGame = (
    * Error Handling:
    * Logs any errors encountered during the fetching process to the console.
    */
-  const loadPlayersAndMessages = async (authorized?: boolean) => {
-    if (!gameId || !authorized) return
-    try {
-      const [playersData, viewersData, chatData] = await Promise.all([
-        fetchPlayers(gameId, token),
-        fetchViewers(gameId),
-        fetchChatMessages(gameId, token),
-      ])
-      setPlayers(playersData)
-      setViewers(viewersData)
-      setMessages(chatData)
-      setLoading(false)
-
-      const allPlayersReady = playersData
-        .filter((player: Player) => player.playerId !== creator?.playerId)
-        .every((player: Player) => player.ready)
-
-      if (allPlayersReady && playersData.length === roomData.maxPlayers) {
-        setCanStartGame(true)
-      } else {
-        setCanStartGame(false)
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement initial :', error)
-    }
-  }
-
-  /**
-   * Chargement initial des données de la room + player + creator
-   */
   useEffect(() => {
     /**
      * Asynchronously loads the room data for the specified game by fetching its details
@@ -263,14 +232,37 @@ export const useGame = (
           setIsAuthorized(authorized)
           setPasswordRequired(!!data.room.password)
           setRoomData(data.room)
-          setPlayer(data.player)
+          if (data.room.status !== 'in_progress' && data.player) {
+            // On fusionne les données du joueur pour ne pas écraser la carte reçue par socket
+            setPlayer(prevPlayer => ({ ...prevPlayer, ...data.player }))
+          }
           setViewer(data.viewer)
           setCreator(data.creator)
           setGameStarted(data.room.status === 'in_progress')
           setGameFinished(data.room.status === 'completed')
           setSlots(data.room.maxPlayers)
 
-          loadPlayersAndMessages(authorized)
+          if (authorized) {
+            setPlayers(data.room.players || [])
+            setViewers(data.room.viewers || [])
+            setMessages(data.room.tchat || [])
+            setLoading(false)
+
+            const playersData = data.room.players || []
+            const allPlayersReady = playersData
+              .filter((p: Player) => p.playerId !== data.creator?.playerId)
+              .every((p: Player) => p.ready)
+
+            if (allPlayersReady && playersData.length === data.room.maxPlayers) {
+              setCanStartGame(true)
+            } else {
+              setCanStartGame(false)
+            }
+
+            if (!data.player?.ready && playersData.length === data.room.maxPlayers) {
+              setCanBeReady(true)
+            }
+          }
 
           if (data.room.status === 'completed'
             && isDateMoreThan10MinutesOld(data.room.updatedAt)) {
@@ -288,193 +280,114 @@ export const useGame = (
    * Charge la liste des joueurs + messages de chat
    */
   useEffect(() => {
-    loadPlayersAndMessages(isAuthorized)
-  }, [gameId])
+    if (!socket || !gameId || isArchive || !isAuthorized) return
 
-  /**
-   * Gère les listeners socket
-   */
-  useEffect(() => {
-    if (!socket || !gameId || isArchive) return
-
-    // 1) Rejoint la room si pas déjà fait
-    if (!hasJoined && isAuthorized) {
-      socket.emit('joinRoom', {
-        roomId: gameId,
-        viewer,
-      })
-      setHasJoined(true)
+    const handleLobbyStateUpdate = (data: any) => {
+      setRoomData(data.room)
+      setPlayers(data.room.players)
+      setViewers(data.room.viewers)
+      if (!gameStarted) {
+        setCanStartGame(data.room.players.length === data.room.maxPlayers)
+        setCanBeReady(
+          (data.player?.ready ? false : data.room.players.length >= data.room.maxPlayers)
+        )
+      }
     }
 
-    // 2) Réception d'événements
-    socket.on('playerJoined', (data) => {
-      if (data.sound) {
-        const audio = new Audio(`/assets/sounds/${data.sound}.mp3`)
-        audio.volume = 0.5
-        audio.play().catch(() => {})
-      }
-      setMessages((prev) => [
-        ...prev,
-        {
-          nickname: 'Système',
-          message: data.message,
-          playerId: -1,
-          channel: 0,
-          icon: data.icon,
-          isMeneur: false,
-          isPerso: false,
-          isMsgSite: false,
-          createdAt: new Date(),
-        },
-      ])
-    })
+    const handleEnableStart = () => setCanStartGame(true)
+    const handleEnableReadyOption = () => {
+      setCanStartGame(
+        (player?.ready ? false : players.filter(p => p.ready).length === roomData.maxPlayers)
+      )
+    }
 
-    socket.on('updatePlayers', (updatedPlayers: Player[]) => {
-      setPlayers(updatedPlayers)
-      if (updatedPlayers.length >= roomData.maxPlayers) setCanBeReady(true)
-    })
-
-    socket.on('updateViewers', (updatedViewers: Viewer[]) => {
-      setViewers(updatedViewers)
-    })
-
-    socket.on('newMessage', (message) => {
+    const handleNewMessage = (message: Message) => {
       if (message.channel === 2 && isNight) {
         socket.emit('shaman_listen', message)
       }
-      setMessages((prev) => [...prev, message])
+      setMessages(prev => [...prev, message])
       if (message.sound) {
         const audio = new Audio(`/assets/sounds/${message.sound}.mp3`)
         audio.play().catch(() => {})
       }
-      if (message.message.toLowerCase().includes(player?.nickname.toLowerCase())) {
+      if (player && message.message.toLowerCase().includes(player.nickname.toLowerCase())) {
+        console.log('play audio' )
         const audio = new Audio('/assets/sounds/sos.mp3')
         audio.play().catch(() => {})
       }
-    })
+    }
 
-    socket.on('playerLeft', (player) => {
-      if (player === user.nickname) {
-        setGameError('Vous avez quitté la partie. Vous pouvez fermer cet onglet.')
-      }
-    })
-
-    socket.on('playerKicked', (data: { arg: string; sound: string }) => {
-      if (player?.nickname && data.arg === player.nickname) {
-        setGameError('Vous avez été expulsé de la partie.')
-      }
-      if (data.sound) {
-        const audio = new Audio(`/assets/sounds/${data.sound}.mp3`)
-        audio.volume = 0.5
-        audio.play().catch(() => {})
-      }
-    })
-
-    socket.on('enableReadyOption', (state: boolean) => {
-      setCanBeReady(state)
-    })
-
-    socket.on('enableStartGame', (state: boolean) => {
-      setCanStartGame(state)
-    })
-
-    socket.on('newCreator', (creatorData: Player) => {
-      setCreator(creatorData)
-    })
-
-    socket.on('nicknameChanged', (newNickname: string) => {
-      setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, nickname: newNickname } : null)
-    })
-
-    socket.on('nightStarted', (nightStarted: boolean) => {
-      setIsNight(nightStarted)
-    })
-
-    socket.on('gameStarted', async () => {
+    const handleGameStarted = () => {
       setGameStarted(true)
       setIsNight(true)
-      const data = await fetchGameDetails(gameId, token ?? null)
-      if (data.error) {
-        setGameError(data.error)
-      }
-      setRoomData(data.room)
-      setPlayer(data.player)
-      setViewer(data.viewer)
-      setCreator(data.creator)
-    })
+      socket.emit('game:sync_state', { gameId })
+    }
 
-    socket.on('gameFinished', (room: RoomData) => {
-      // @todo join viewers channel
+    const handleGameStateUpdate = (data: any) => {
+      const payload = Array.isArray(data) ? data[0] : data
+      console.log('set player game state update', { ...player, ...payload.player })
+      setPlayer(prevPlayer => ({ ...prevPlayer, ...payload.player }))
+      if (payload.players) {
+        setPlayers(payload.players)
+      }
+      setAlienList(payload.alienList || [])
+      setSisterList(payload.sistersList || [])
+      setBrothersList(payload.brotherList || [])
+      setCoupleList(payload.lovers || [])
+      setIsNight(data.phase.startsWith('NIGHT'))
+    }
+
+    const handlePhaseChange = (data: any) => {
+      if (data.newPhase) {
+        setIsNight(data.newPhase.toLowerCase().includes('nuit'))
+      }
+    }
+
+    const handlePlayerUpdate = (updatedPlayer: Partial<Player>) => {
+      setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, ...updatedPlayer } : null)
+    }
+
+    const handlePrivateNotification = (data: any) => {
+      if (data.message.includes('Vous avez été expulsé')) {
+        window.location.href = '/'
+      } else {
+        setMessages(prev => [
+          ...prev,
+          {
+            nickname: 'Système',
+            message: data.message,
+            icon: data.icon,
+            sound: data.sound,
+            playerId: -1,
+            channel: 0,
+            isPerso: true,
+            isMeneur: false,
+            isMsgSite: false,
+            createdAt: new Date(),
+          },
+        ])
+      }
+      console.log('Private notification:', data.message)
+    }
+
+    const handleGameEnd = (data: any) => {
       setGameFinished(true)
-      setIsNight(true)
-    })
+      setWinnersAvatars({ winMsg: data.winMsg, avatars: data.winners })
+    }
 
-    socket.on('updateMaxPlayers', (maxPlayers: number) => {
-      setSlots(maxPlayers)
-    })
+    const handleRequireSyncState = () => {
+      socket.emit('game:sync_state', { gameId })
+    }
 
-    socket.on('updateCards', (cards: RoomCard[]) => {
-      setRoomData(prevRoom => ({ ...prevRoom, cards }))
-    })
-
-    socket.on('alienList', (list: string[]) => {
-      setAlienList(list)
-    })
-
-    socket.on('sistersList', (list: string[]) => {
-      setSisterList(list)
-    })
-
-    socket.on('brothersList', (list: string[]) => {
-      setBrothersList(list)
-    })
-
-    socket.on('coupleList', (list: string[]) => {
-      setCoupleList(list)
-    })
-
-    socket.on('inn_list', (list: string[]) => {
-      if (list.includes(player?.nickname || 'Joueur introuvable')) {
-        setIsInn(true)
-        setInnList(list)
-      }
-    })
-
-    socket.on('dead', () => {
-      setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, alive: false } : null)
-    })
-
-    socket.on('infected', () => {
-      setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, isInfected: true } : null)
-    })
-
-    socket.on('dissolve', () => {
-      setGameError('Le salon a été détruit par la modération.')
-    })
-
-    socket.on('forceReload', async () => {
-      // Purge du cache (Cache API)
-      if ('caches' in window) {
-        const cacheNames = await caches.keys()
-        await Promise.all(cacheNames.map(name => caches.delete(name)))
-      }
-      // Rechargement forcé avec cache-bust
-      const url = new URL(window.location.href)
-      url.searchParams.set('_', Date.now().toString())
-      window.location.replace(url.toString())
-    })
-
-    socket.on('gameWinners', async ({ winners, winMsg }: { winners: AvatarConfig[], winMsg: string }) => {
-      setWinnersAvatars({ winMsg, avatars: winners })
-    })
-
-    socket.on('error', (error: any) => {
-      setMessages((prev) => [
+    const handleGameDissolved = () => setGameError('Le salon a été détruit par la modération.')
+    const handleError = (error: any) => {
+      setMessages(prev => [
         ...prev,
         {
           nickname: 'Système',
           message: error.message,
           icon: error.icon,
+          sound: error.sound,
           playerId: -1,
           channel: 0,
           isPerso: true,
@@ -483,32 +396,63 @@ export const useGame = (
           createdAt: new Date(),
         },
       ])
-    })
-
-    // Permet de nettoyer les listeners au démontage
-    return () => {
-      socket.off('playerJoined')
-      socket.off('updatePlayers')
-      socket.off('newMessage')
-      socket.off('playerLeft')
-      socket.off('playerKicked')
-      socket.off('enableReadyOption')
-      socket.off('enableStartGame')
-      socket.off('nightStarted')
-      socket.off('gameStarted')
-      socket.off('gameFinished')
-      socket.off('updateMaxPlayers')
-      socket.off('updateCards')
-      socket.off('alienList')
-      socket.off('coupleList')
-      socket.off('inn_list')
-      socket.off('dead')
-      socket.off('dissolve')
-      socket.off('forceReload')
-      socket.off('gameWinners')
-      socket.off('error')
     }
-  }, [socket, gameId, user, player, viewer, hasJoined, isAuthorized, isNight, roomData.maxPlayers])
+
+    const handlePremiumPanelUpdate = (data: PremiumPlayerStats[]) => {
+      setPremiumPanelData(data)
+    }
+
+    const handlePlayerRenamed = (newNickname: string) => {
+      setPlayer(prevPlayer => prevPlayer ? { ...prevPlayer, nickname: newNickname } : null)
+    }
+
+    const handleCoupleListUpdate = (couple: { id: number; nickname: string}[]) => {
+      setCoupleList(couple.map(p => p.nickname) || [])
+    }
+
+    if (!hasJoined) {
+      socket.emit('room:join', { token, roomId: gameId })
+      socket.on('room:joined_successfully', () => {
+        socket.emit('game:sync_state', { gameId })
+      })
+      setHasJoined(true)
+    }
+
+    socket.on('player:renamed', handlePlayerRenamed)
+    socket.on('lobby:state_update', handleLobbyStateUpdate)
+    socket.on('lobby:enable_start', handleEnableStart)
+    socket.on('lobby:enable_ready_option', handleEnableReadyOption)
+    socket.on('tchat:new_message', handleNewMessage)
+    socket.on('game:started', handleGameStarted)
+    socket.on('game:state_update', handleGameStateUpdate)
+    socket.on('game:require_sync_state', handleRequireSyncState)
+    socket.on('game:couple_list', handleCoupleListUpdate)
+    socket.on('phase:change', handlePhaseChange)
+    socket.on('player:update', handlePlayerUpdate)
+    socket.on('notification:private', handlePrivateNotification)
+    socket.on('game:end', handleGameEnd)
+    socket.on('game:dissolved', handleGameDissolved)
+    socket.on('error', handleError)
+    socket.on('game:premium_panel_update', handlePremiumPanelUpdate)
+
+    return () => {
+      socket.off('player:renamed', handlePlayerRenamed)
+      socket.off('lobby:state_update', handleLobbyStateUpdate)
+      socket.off('lobby:enable_start', handleEnableStart)
+      socket.off('lobby:enable_ready_option', handleEnableReadyOption)
+      socket.off('tchat:new_message', handleNewMessage)
+      socket.off('game:started', handleGameStarted)
+      socket.off('game:state_update', handleGameStateUpdate)
+      socket.off('player:update', handlePlayerUpdate)
+      socket.off('notification:private', handlePrivateNotification)
+      socket.off('game:end', handleGameEnd)
+      socket.off('game:dissolved', handleGameDissolved)
+      socket.off('error', handleError)
+      socket.off('room:joined_successfully')
+      socket.off('game:premium_panel_update', handlePremiumPanelUpdate)
+      socket.off('game:couple_list', handleCoupleListUpdate)
+    }
+  }, [socket, gameId, token, isAuthorized, hasJoined, isArchive, gameStarted, player, isNight, roomData.maxPlayers])
 
   return {
     roomData,
@@ -539,6 +483,7 @@ export const useGame = (
     isInn,
     innList,
     winnersAvatars,
+    premiumPanelData,
     setWinnersAvatars,
     setIsArchive,
     setSlots,

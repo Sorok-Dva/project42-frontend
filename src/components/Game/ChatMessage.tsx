@@ -11,6 +11,7 @@ import { Message, Viewer } from 'hooks/useGame'
 import { emotes } from 'components/Game/Chat'
 import { Player } from 'types/room'
 import DOMPurify from 'dompurify'
+import GameResults from 'components/Game/GameResults'
 
 function stripHTML(input: string) {
   const tempDiv = document.createElement('div')
@@ -98,7 +99,7 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
         if (
           msg.channel === 3 &&
           player &&
-          ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected)
+          ([2, 9, 20, 21].includes(player.card?.id || -1) || player.isInfected || player.faction === 'Alien')
         )
           return true
         if (msg.channel === 2 && player && !player.alive) return true
@@ -210,6 +211,24 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
       >
         {/* Affichage des messages */}
         {filteredMessages.map((msg, index) => {
+          try {
+            const parser = new DOMParser()
+            const doc = parser.parseFromString(msg.message, 'text/html')
+            const resultsNode = doc.querySelector('.game-results-data')
+
+            if (resultsNode && resultsNode.textContent) {
+              const parsedData = JSON.parse(resultsNode.textContent)
+              // Valider que les données ont la structure attendue
+              if (parsedData && Array.isArray(parsedData.players)) {
+                return <GameResults {...parsedData} />
+              }
+            }
+          } catch (error) {
+            // Ce n'est pas un message de résultats, ou le JSON est invalide.
+            // On ne fait rien, le message normal sera affiché.
+            console.error('Failed to parse game results data:', error)
+          }
+
           let cleanNickname = stripHTML(msg.nickname)
           if (msg.channel === 2 && player && player.card?.id === 10 && isNight) {
             cleanNickname = '(Anonyme)'
@@ -218,10 +237,9 @@ const ChatMessages = forwardRef<ChatMessagesHandle, ChatMessagesProps>(
             msg.channel === 3 &&
             cleanNickname !== 'Système' &&
             player &&
-            player.card?.id === 12 &&
-            isNight
+            player.card?.id === 12
           ) {
-            cleanNickname = '(Alien)'
+            cleanNickname = ' '
           }
           const escapedMessage = stripHTMLKeepImages(msg.message)
           const highlightColor = cleanNickname

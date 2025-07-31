@@ -17,9 +17,6 @@ import { useUser } from 'contexts/UserContext'
 import { Player } from 'types/player'
 import { Camera, GraduationCap, Mic, MicOff } from 'lucide-react'
 import { useGameContext } from 'contexts/GameContext'
-import {
-  fetchChatMessages,
-} from 'services/gameService'
 import KickPlayerModal from 'components/Game/KickPlayerModal'
 import PlayerContextMenu from 'components/Game/Tools/PlayerContextMenu'
 import PlayerActionMenu from 'components/Game/Tools/PlayerActionMenu'
@@ -148,12 +145,13 @@ const PlayersList: React.FC<PlayersListProps> = ({
     if (!isCreator || !socket || gameStarted || !playerToKick) return
 
     try {
-      socket.emit('kickPlayer', {
+      socket.emit('lobby:kick_player', {
         roomId: gameId,
-        nickname: playerToKick,
+        targetNickname: playerToKick,
         reason,
         isPermanent,
       })
+      setKickModalOpen(false)
     } catch (error) {
       console.error('Erreur lors du kick:', error)
     }
@@ -161,7 +159,6 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
   const {
     setPlayer,
-    setMessages,
   } = useGameContext()
 
   const guideAskHistory: string[] =[]
@@ -172,7 +169,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
   // Récupérer les suspicious cards depuis le localStorage au chargement
   useEffect(() => {
-    if (gameId && player) {
+    if (gameId && player && gameStarted && !gameFinished) {
       const retrieveRoomsCards = async () => {
         const { data } = await axios.get<CardsResponse>(`/api/games/room/${gameId}/cards`)
         const { gameCards, roomCards } = data
@@ -278,8 +275,8 @@ const PlayersList: React.FC<PlayersListProps> = ({
   const replayAsUser = async (_player: Player) => {
     if (!isReplay) return
     setPlayer(_player)
-    const chatData = await fetchChatMessages(gameId, null, _player.playerId)
-    setMessages(chatData)
+    // const chatData = await fetchChatMessages(gameId, null, _player.playerId)
+    // setMessages(chatData)
   }
 
   return (
@@ -530,6 +527,7 @@ const PlayersList: React.FC<PlayersListProps> = ({
 
                 {/* Actions sur le joueur */}
                 <div className="flex items-center">
+
                   {canRequestGuide && !gameStarted && !gameFinished && !_player.guide && (
                     <button
                       onClick={() => {
@@ -538,11 +536,10 @@ const PlayersList: React.FC<PlayersListProps> = ({
                             alert('Vous avez déjà demandé à guider ce joueur')
                             return
                           }
-                          socket.emit('request_guide_player', {
+                          socket.emit('guide:request', {
                             targetPlayerId: Number(_player.id),
-                            roomId: gameId,
+                            gameId,
                           })
-                          console.log(`Requesting to guide player ${_player.nickname} (ID: ${_player.id}) in room ${gameId}`)
                           guideAskHistory.push(_player.nickname)
                           // Future: Add client-side feedback (e.g., disable button, toast)
                         } else {

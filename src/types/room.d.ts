@@ -11,11 +11,13 @@ export interface Player {
   isBrother: boolean
   isCharmed: boolean
   isInfected: boolean
+  faction?: 'Alien' | 'Station' | 'Solo'
   customVote?: number
   id?: string | number
   card?: { id: number; name: string; description: string; }
   canVote: boolean
   guide: string | null
+  hasUsedAbility: false,
 }
 
 export interface Card {

@@ -18,7 +18,6 @@ import {
   Calendar,
   ArrowRight,
   Sparkles,
-  Cross,
 } from 'lucide-react'
 import { ToastDefaultOptions } from 'utils/toastOptions'
 import { useLocation } from 'react-router-dom'
