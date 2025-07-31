@@ -358,7 +358,7 @@ const GamePage = () => {
       console.log(`Événement reçu : ${eventName}`, args)
     })
 
-    socket.on('bipNotReadyPlayers', () => {
+    socket.on('lobby:bip_not_ready_players', () => {
       // Afficher une notification uniquement si le joueur n'est pas prêt
       if (player && !player.ready && player.nickname !== creator?.nickname) {
         // Créer une notification sonore
@@ -427,7 +427,7 @@ const GamePage = () => {
 
     return () => {
       socket.offAny()
-      socket.off('bipNotReadyPlayers')
+      socket.off('lobby:bip_not_ready_players')
       socket.off('music')
       socket.off('stopMusic')
       socket.off('object:thrown', handleItemThrown)

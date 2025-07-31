@@ -407,7 +407,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const handleBipNotReadyPlayers = () => {
     if (!socket || !gameId || gameStarted || gameFinished || !isCreator) return
 
-    socket.emit('bipNotReadyPlayers', gameId)
+    socket.emit('lobby:bip_not_ready_players', { gameId })
   }
 
   const handleVoteQuickEnd = () => {
