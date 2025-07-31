@@ -306,8 +306,8 @@ const PlayersList: React.FC<PlayersListProps> = ({
             // user from useUser() is the logged-in user.
             // viewer prop means this user is a spectator in this room.
             const isCurrentUserSpectator = !!(viewer && viewer.user && viewer.user.id === user?.id && !player)
-            const canRequestGuide = isCurrentUserSpectator && !gameStarted && typeof _player.id === 'number' && user?.id !== _player.id && !players.find(p => p.guide === viewer?.user?.nickname)
-
+            // const canRequestGuide = isCurrentUserSpectator && !gameStarted && typeof _player.id === 'number' && user?.id !== _player.id && !players.find(p => p.guide === viewer?.user?.nickname)
+            const canRequestGuide = false // @TODO TEMP DISABLE
             return (
               <div
                 key={index}
